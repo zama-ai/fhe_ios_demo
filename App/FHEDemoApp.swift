@@ -1,9 +1,4 @@
-//
-//  FHEDemoApp.swift
-//  FHEDemo
-//
-//  Created by Dimitri Dupuis-Latour on 16/09/2024.
-//
+// Copyright © 2024 Zama. All rights reserved.
 
 import SwiftUI
 

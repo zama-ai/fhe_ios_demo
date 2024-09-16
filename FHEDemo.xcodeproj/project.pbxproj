@@ -81,6 +81,7 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
+				ORGANIZATIONNAME = Zama;
 				TargetAttributes = {
 					32B258362C98693800538B23 = {
 						CreatedOnToolsVersion = 16.0;
