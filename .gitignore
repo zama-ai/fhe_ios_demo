@@ -47,3 +47,7 @@ fastlane/test_output
 
 # Thumbnails
 ._*
+Rust/my-rust-lib/Cargo.lock
+Rust/my-rust-lib/target
+Rust/my-rust-lib/MyRustLib.xcframework
+Rust/my-rust-lib/libs
