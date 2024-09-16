@@ -1,0 +1,4 @@
+module MyRustLib {
+  header "myRustLib.h"
+  export *
+}
