@@ -20,22 +20,28 @@ Implement a bridge iOS app, which simulate a new FHE app store which runs on enc
 - [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
-- [Minimize Rust binary size] https://github.com/johnthagen/min-sized-rust
-- [Using imported C APIs in Swift] https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis
+- [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
+- [Using imported C APIs in Swift](https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis)
 
 
 # Compile TFHE-rs for use in Swift.
 
 ## Compile for both iOS and iOS sim targets
-`RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios
-`RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios-sim
+```shell
+RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios
+RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios-sim
+```
 
 ## Grab generated headers (.h)
-`cp $(TFHE_RS_PATH)/target/release/tfhe.h $(OUTPUT)/include/tfhe.h`
-`cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/deps/tfhe-c-api-dynamic-buffer.h $(OUTPUT)/include/tfhe-c-api-dynamic-buffer.h`
+```shell
+cp $(TFHE_RS_PATH)/target/release/tfhe.h $(OUTPUT)/include/tfhe.h
+cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/deps/tfhe-c-api-dynamic-buffer.h $(OUTPUT)/include/tfhe-c-api-dynamic-buffer.h
+```
 
 ## Create a Module Map
-`touch $(OUTPUT)/include/module.modulemap`
+```shell
+touch $(OUTPUT)/include/module.modulemap
+```
 
 ```swift
 module TFHE {
@@ -47,10 +53,14 @@ module TFHE {
 
 ## Grab static libs (.a)
 The ios simulator one needs to be FAT, even if it contains one slice. An x86-64 slice can be added to it:
-`lipo -create -output $(OUTPUT)/libtfhe-ios-sim.a $(TFHE_RS_PATH)/target/aarch64-apple-ios-sim/release/libtfhe.a`
+```shell
+lipo -create -output $(OUTPUT)/libtfhe-ios-sim.a $(TFHE_RS_PATH)/target/aarch64-apple-ios-sim/release/libtfhe.a
+```
 
 The ios device one can be copied as is:
-`cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/libtfhe.a $(OUTPUT)/libtfhe-ios.a`
+```shell
+cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/libtfhe.a $(OUTPUT)/libtfhe-ios.a
+```
 
 ## Package all that in a .xcframework
 ```shell
