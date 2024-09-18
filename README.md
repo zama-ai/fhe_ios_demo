@@ -9,47 +9,55 @@ Implement a bridge iOS app, which simulate a new FHE app store which runs on enc
 - iOS 18 SDK (additional download, from Xcode)
 
 ## Rust
-- Rust via [rustup](https://rustup.rs) (currently rust 1.81.0)
+- Latest release: `curl https://sh.rustup.rs -sSf | sh` (currently rust 1.81.0)
 - Extra Rust architectures (iOS devices & iOS simulators running on Apple Silicon Macs):
     `rustup target add aarch64-apple-ios aarch64-apple-ios-sim`
 - Cbindgen to easily generate C bindings: `cargo install --force cbindgen`
+- `rustup toolchain install nightly`
+- `rustup component add rust-src --toolchain nightly-aarch64-apple-darwin`
 
-# Resources
+# Useful Links
 - [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
+- [Minimize Rust binary size] https://github.com/johnthagen/min-sized-rust
+- [Using imported C APIs in Swift] https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis
 
 
-# Compile a Rust Library to use from Swift
-## Create Lib
-`cargo new --lib my-rust-lib`
+# Compile TFHE-rs for use in Swift.
 
-## Annotate functions
-```
-#[no_mangle]
-pub extern fn my_function(a: i32, b: i32) -> i32 {
-```
+## Compile for both iOS and iOS sim targets
+`RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios
+`RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios-sim
 
-## Cargo file: static lib
-```
-[lib]
-crate-type = ["staticlib"]
-```
+## Grab generated headers (.h)
+`cp $(TFHE_RS_PATH)/target/release/tfhe.h $(OUTPUT)/include/tfhe.h`
+`cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/deps/tfhe-c-api-dynamic-buffer.h $(OUTPUT)/include/tfhe-c-api-dynamic-buffer.h`
 
-## Generate modulemap
-```
-// File module.modulemap
-module MyModule {
-    header "../MyModuleSDK/MyModule.h"    
-    export *
+## Create a Module Map
+`touch $(OUTPUT)/include/module.modulemap`
+
+```swift
+module TFHE {
+  header "tfhe.h"
+  header "tfhe-c-api-dynamic-buffer.h"
+  export *
 }
 ```
 
-## Generate headers
-`make headers`
+## Grab static libs (.a)
+The ios simulator one needs to be FAT, even if it contains one slice. An x86-64 slice can be added to it:
+`lipo -create -output $(OUTPUT)/libtfhe-ios-sim.a $(TFHE_RS_PATH)/target/aarch64-apple-ios-sim/release/libtfhe.a`
 
-## Compile Rust for iOS
-`make ios`
+The ios device one can be copied as is:
+`cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/libtfhe.a $(OUTPUT)/libtfhe-ios.a`
 
-## Generate xcframework to use in Xcode 
-`make xcode`
+## Package all that in a .xcframework
+```shell
+xcodebuild -create-xcframework \
+    -library $(OUTPUT)/libtfhe-ios.a \
+    -headers $(OUTPUT)/include/ \
+    -library $(OUTPUT)/libtfhe-ios-sim.a \
+    -headers $(OUTPUT)/include/ \
+    -output $(OUTPUT)/TFHE.xcframework
+```

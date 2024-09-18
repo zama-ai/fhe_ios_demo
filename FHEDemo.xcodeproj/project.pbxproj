@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		320927A62C98800A0011F52E /* MyRustLib.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 320927A22C987FA50011F52E /* MyRustLib.xcframework */; };
-		320927A72C98800A0011F52E /* MyRustLib.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 320927A22C987FA50011F52E /* MyRustLib.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
+		3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -18,7 +18,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				320927A72C98800A0011F52E /* MyRustLib.xcframework in Embed Frameworks */,
+				3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -26,38 +26,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		320927692C987FA50011F52E /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
-		3209276A2C987FA50011F52E /* myRustLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myRustLib.h; sourceTree = "<group>"; };
-		3209276C2C987FA50011F52E /* libmy_rust_lib-ios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libmy_rust_lib-ios.a"; sourceTree = "<group>"; };
-		3209276D2C987FA50011F52E /* libmy_rust_lib-ios-sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libmy_rust_lib-ios-sim.a"; sourceTree = "<group>"; };
-		3209276F2C987FA50011F52E /* lib.rs */ = {isa = PBXFileReference; lastKnownFileType = text; path = lib.rs; sourceTree = "<group>"; };
-		320927712C987FA50011F52E /* dep-lib-my_rust_lib */ = {isa = PBXFileReference; lastKnownFileType = file; path = "dep-lib-my_rust_lib"; sourceTree = "<group>"; };
-		320927722C987FA50011F52E /* invoked.timestamp */ = {isa = PBXFileReference; lastKnownFileType = text; path = invoked.timestamp; sourceTree = "<group>"; };
-		320927732C987FA50011F52E /* lib-my_rust_lib */ = {isa = PBXFileReference; lastKnownFileType = text; path = "lib-my_rust_lib"; sourceTree = "<group>"; };
-		320927742C987FA50011F52E /* lib-my_rust_lib.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "lib-my_rust_lib.json"; sourceTree = "<group>"; };
-		320927782C987FA50011F52E /* libmy_rust_lib-d022f8035f86180b.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libmy_rust_lib-d022f8035f86180b.a"; sourceTree = "<group>"; };
-		320927792C987FA50011F52E /* my_rust_lib-d022f8035f86180b.d */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.dtrace; path = "my_rust_lib-d022f8035f86180b.d"; sourceTree = "<group>"; };
-		3209277D2C987FA50011F52E /* .cargo-lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".cargo-lock"; sourceTree = "<group>"; };
-		3209277E2C987FA50011F52E /* libmy_rust_lib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmy_rust_lib.a; sourceTree = "<group>"; };
-		3209277F2C987FA50011F52E /* libmy_rust_lib.d */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.dtrace; path = libmy_rust_lib.d; sourceTree = "<group>"; };
-		320927812C987FA50011F52E /* CACHEDIR.TAG */ = {isa = PBXFileReference; lastKnownFileType = text; path = CACHEDIR.TAG; sourceTree = "<group>"; };
-		320927832C987FA50011F52E /* dep-lib-my_rust_lib */ = {isa = PBXFileReference; lastKnownFileType = file; path = "dep-lib-my_rust_lib"; sourceTree = "<group>"; };
-		320927842C987FA50011F52E /* invoked.timestamp */ = {isa = PBXFileReference; lastKnownFileType = text; path = invoked.timestamp; sourceTree = "<group>"; };
-		320927852C987FA50011F52E /* lib-my_rust_lib */ = {isa = PBXFileReference; lastKnownFileType = text; path = "lib-my_rust_lib"; sourceTree = "<group>"; };
-		320927862C987FA50011F52E /* lib-my_rust_lib.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "lib-my_rust_lib.json"; sourceTree = "<group>"; };
-		3209278A2C987FA50011F52E /* libmy_rust_lib-609b3595cd1bf9ca.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libmy_rust_lib-609b3595cd1bf9ca.a"; sourceTree = "<group>"; };
-		3209278B2C987FA50011F52E /* my_rust_lib-609b3595cd1bf9ca.d */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.dtrace; path = "my_rust_lib-609b3595cd1bf9ca.d"; sourceTree = "<group>"; };
-		3209278F2C987FA50011F52E /* .cargo-lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".cargo-lock"; sourceTree = "<group>"; };
-		320927902C987FA50011F52E /* libmy_rust_lib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmy_rust_lib.a; sourceTree = "<group>"; };
-		320927912C987FA50011F52E /* libmy_rust_lib.d */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.dtrace; path = libmy_rust_lib.d; sourceTree = "<group>"; };
-		320927932C987FA50011F52E /* CACHEDIR.TAG */ = {isa = PBXFileReference; lastKnownFileType = text; path = CACHEDIR.TAG; sourceTree = "<group>"; };
-		3209279A2C987FA50011F52E /* .cargo-lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".cargo-lock"; sourceTree = "<group>"; };
-		3209279C2C987FA50011F52E /* .rustc_info.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = .rustc_info.json; sourceTree = "<group>"; };
-		3209279D2C987FA50011F52E /* CACHEDIR.TAG */ = {isa = PBXFileReference; lastKnownFileType = text; path = CACHEDIR.TAG; sourceTree = "<group>"; };
-		3209279F2C987FA50011F52E /* Cargo.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cargo.lock; sourceTree = "<group>"; };
-		320927A02C987FA50011F52E /* Cargo.toml */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cargo.toml; sourceTree = "<group>"; };
-		320927A12C987FA50011F52E /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		320927A22C987FA50011F52E /* MyRustLib.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = MyRustLib.xcframework; sourceTree = "<group>"; };
+		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
 		32B258372C98693800538B23 /* FHE Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -75,271 +44,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				320927A62C98800A0011F52E /* MyRustLib.xcframework in Frameworks */,
+				3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		3209276B2C987FA50011F52E /* include */ = {
+		3250B3C72C9B2C8B009B48C3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				320927692C987FA50011F52E /* module.modulemap */,
-				3209276A2C987FA50011F52E /* myRustLib.h */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		3209276E2C987FA50011F52E /* libs */ = {
-			isa = PBXGroup;
-			children = (
-				3209276C2C987FA50011F52E /* libmy_rust_lib-ios.a */,
-				3209276D2C987FA50011F52E /* libmy_rust_lib-ios-sim.a */,
-			);
-			path = libs;
-			sourceTree = "<group>";
-		};
-		320927702C987FA50011F52E /* src */ = {
-			isa = PBXGroup;
-			children = (
-				3209276F2C987FA50011F52E /* lib.rs */,
-			);
-			path = src;
-			sourceTree = "<group>";
-		};
-		320927752C987FA50011F52E /* my-rust-lib-d022f8035f86180b */ = {
-			isa = PBXGroup;
-			children = (
-				320927712C987FA50011F52E /* dep-lib-my_rust_lib */,
-				320927722C987FA50011F52E /* invoked.timestamp */,
-				320927732C987FA50011F52E /* lib-my_rust_lib */,
-				320927742C987FA50011F52E /* lib-my_rust_lib.json */,
-			);
-			path = "my-rust-lib-d022f8035f86180b";
-			sourceTree = "<group>";
-		};
-		320927762C987FA50011F52E /* .fingerprint */ = {
-			isa = PBXGroup;
-			children = (
-				320927752C987FA50011F52E /* my-rust-lib-d022f8035f86180b */,
-			);
-			path = .fingerprint;
-			sourceTree = "<group>";
-		};
-		320927772C987FA50011F52E /* build */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = build;
-			sourceTree = "<group>";
-		};
-		3209277A2C987FA50011F52E /* deps */ = {
-			isa = PBXGroup;
-			children = (
-				320927782C987FA50011F52E /* libmy_rust_lib-d022f8035f86180b.a */,
-				320927792C987FA50011F52E /* my_rust_lib-d022f8035f86180b.d */,
-			);
-			path = deps;
-			sourceTree = "<group>";
-		};
-		3209277B2C987FA50011F52E /* examples */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = examples;
-			sourceTree = "<group>";
-		};
-		3209277C2C987FA50011F52E /* incremental */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = incremental;
-			sourceTree = "<group>";
-		};
-		320927802C987FA50011F52E /* release */ = {
-			isa = PBXGroup;
-			children = (
-				320927762C987FA50011F52E /* .fingerprint */,
-				320927772C987FA50011F52E /* build */,
-				3209277A2C987FA50011F52E /* deps */,
-				3209277B2C987FA50011F52E /* examples */,
-				3209277C2C987FA50011F52E /* incremental */,
-				3209277D2C987FA50011F52E /* .cargo-lock */,
-				3209277E2C987FA50011F52E /* libmy_rust_lib.a */,
-				3209277F2C987FA50011F52E /* libmy_rust_lib.d */,
-			);
-			path = release;
-			sourceTree = "<group>";
-		};
-		320927822C987FA50011F52E /* aarch64-apple-ios */ = {
-			isa = PBXGroup;
-			children = (
-				320927802C987FA50011F52E /* release */,
-				320927812C987FA50011F52E /* CACHEDIR.TAG */,
-			);
-			path = "aarch64-apple-ios";
-			sourceTree = "<group>";
-		};
-		320927872C987FA50011F52E /* my-rust-lib-609b3595cd1bf9ca */ = {
-			isa = PBXGroup;
-			children = (
-				320927832C987FA50011F52E /* dep-lib-my_rust_lib */,
-				320927842C987FA50011F52E /* invoked.timestamp */,
-				320927852C987FA50011F52E /* lib-my_rust_lib */,
-				320927862C987FA50011F52E /* lib-my_rust_lib.json */,
-			);
-			path = "my-rust-lib-609b3595cd1bf9ca";
-			sourceTree = "<group>";
-		};
-		320927882C987FA50011F52E /* .fingerprint */ = {
-			isa = PBXGroup;
-			children = (
-				320927872C987FA50011F52E /* my-rust-lib-609b3595cd1bf9ca */,
-			);
-			path = .fingerprint;
-			sourceTree = "<group>";
-		};
-		320927892C987FA50011F52E /* build */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = build;
-			sourceTree = "<group>";
-		};
-		3209278C2C987FA50011F52E /* deps */ = {
-			isa = PBXGroup;
-			children = (
-				3209278A2C987FA50011F52E /* libmy_rust_lib-609b3595cd1bf9ca.a */,
-				3209278B2C987FA50011F52E /* my_rust_lib-609b3595cd1bf9ca.d */,
-			);
-			path = deps;
-			sourceTree = "<group>";
-		};
-		3209278D2C987FA50011F52E /* examples */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = examples;
-			sourceTree = "<group>";
-		};
-		3209278E2C987FA50011F52E /* incremental */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = incremental;
-			sourceTree = "<group>";
-		};
-		320927922C987FA50011F52E /* release */ = {
-			isa = PBXGroup;
-			children = (
-				320927882C987FA50011F52E /* .fingerprint */,
-				320927892C987FA50011F52E /* build */,
-				3209278C2C987FA50011F52E /* deps */,
-				3209278D2C987FA50011F52E /* examples */,
-				3209278E2C987FA50011F52E /* incremental */,
-				3209278F2C987FA50011F52E /* .cargo-lock */,
-				320927902C987FA50011F52E /* libmy_rust_lib.a */,
-				320927912C987FA50011F52E /* libmy_rust_lib.d */,
-			);
-			path = release;
-			sourceTree = "<group>";
-		};
-		320927942C987FA50011F52E /* aarch64-apple-ios-sim */ = {
-			isa = PBXGroup;
-			children = (
-				320927922C987FA50011F52E /* release */,
-				320927932C987FA50011F52E /* CACHEDIR.TAG */,
-			);
-			path = "aarch64-apple-ios-sim";
-			sourceTree = "<group>";
-		};
-		320927952C987FA50011F52E /* .fingerprint */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = .fingerprint;
-			sourceTree = "<group>";
-		};
-		320927962C987FA50011F52E /* build */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = build;
-			sourceTree = "<group>";
-		};
-		320927972C987FA50011F52E /* deps */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = deps;
-			sourceTree = "<group>";
-		};
-		320927982C987FA50011F52E /* examples */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = examples;
-			sourceTree = "<group>";
-		};
-		320927992C987FA50011F52E /* incremental */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = incremental;
-			sourceTree = "<group>";
-		};
-		3209279B2C987FA50011F52E /* release */ = {
-			isa = PBXGroup;
-			children = (
-				320927952C987FA50011F52E /* .fingerprint */,
-				320927962C987FA50011F52E /* build */,
-				320927972C987FA50011F52E /* deps */,
-				320927982C987FA50011F52E /* examples */,
-				320927992C987FA50011F52E /* incremental */,
-				3209279A2C987FA50011F52E /* .cargo-lock */,
-			);
-			path = release;
-			sourceTree = "<group>";
-		};
-		3209279E2C987FA50011F52E /* target */ = {
-			isa = PBXGroup;
-			children = (
-				320927822C987FA50011F52E /* aarch64-apple-ios */,
-				320927942C987FA50011F52E /* aarch64-apple-ios-sim */,
-				3209279B2C987FA50011F52E /* release */,
-				3209279C2C987FA50011F52E /* .rustc_info.json */,
-				3209279D2C987FA50011F52E /* CACHEDIR.TAG */,
-			);
-			path = target;
-			sourceTree = "<group>";
-		};
-		320927A32C987FA50011F52E /* my-rust-lib */ = {
-			isa = PBXGroup;
-			children = (
-				3209276B2C987FA50011F52E /* include */,
-				3209276E2C987FA50011F52E /* libs */,
-				320927702C987FA50011F52E /* src */,
-				3209279E2C987FA50011F52E /* target */,
-				3209279F2C987FA50011F52E /* Cargo.lock */,
-				320927A02C987FA50011F52E /* Cargo.toml */,
-				320927A12C987FA50011F52E /* Makefile */,
-				320927A22C987FA50011F52E /* MyRustLib.xcframework */,
-			);
-			path = "my-rust-lib";
-			sourceTree = "<group>";
-		};
-		320927A42C987FA50011F52E /* Rust */ = {
-			isa = PBXGroup;
-			children = (
-				320927A32C987FA50011F52E /* my-rust-lib */,
-			);
-			path = Rust;
-			sourceTree = "<group>";
-		};
-		320927A52C98800A0011F52E /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
+				3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -349,8 +64,7 @@
 			children = (
 				32B258512C9869A700538B23 /* README.md */,
 				32B258392C98693800538B23 /* App */,
-				320927A42C987FA50011F52E /* Rust */,
-				320927A52C98800A0011F52E /* Frameworks */,
+				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
 				32B258382C98693800538B23 /* Products */,
 			);
 			sourceTree = "<group>";

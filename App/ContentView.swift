@@ -1,7 +1,6 @@
 // Copyright © 2024 Zama. All rights reserved.
 
 import SwiftUI
-import MyRustLib
 
 struct ContentView: View {
     @State private var result = "?"
@@ -20,8 +19,8 @@ struct ContentView: View {
                         Text(result)
                     }
             }
-            Button("Run Rust") {
-                result = String("\(magicAdd(42, 42))")
+            Button("Run Demo") {
+                FHEEngine().runDemo()
             }.buttonStyle(.bordered)
             
         }
