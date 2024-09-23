@@ -12,32 +12,44 @@ struct HealthView: View {
     @State private var selectedSamples: [Int]?
     @State private var encryptedSamples: [Int]?
     @StateObject var viewModel = HealthViewModel.shared
-    
+    @State private var ouput: Int?
+
     var body: some View {
         Text("My Health History")
             .font(.largeTitle)
 
-        Button("FHE Encrypt") {
-            FHEEngine.shared.encryptArray([44])
-        }
-        .buttonStyle(.bordered).tint(.yellow)
-
-        Button("Allow access to HealthKit") {
-            showHealthKitPermissions = true
-        }
-        .buttonStyle(.bordered).tint(.yellow)
-        .healthDataAccessRequest(store: viewModel.healthStore,
-                                 readTypes: viewModel.permissions,
-                                 trigger: showHealthKitPermissions) { result in
-            switch result {
-            case .success(let success):
-                print("success", success)
-                viewModel.fetchHealthData()
+        VStack {
+            HStack {
+                Button("Write input (10)") {
+                    FHEEngine.shared.writeSharedValue(10, key: .input)
+                }
                 
-            case .failure(let failure):
-                print("failure", failure)
+                Button("Read output") {
+                    ouput = FHEEngine.shared.readSharedValue(key: .output)
+                }
+                Text(ouput.map({ "\($0)" }) ?? "nil")
             }
+            
+            Button("FHE Encrypt Int 44") {
+                FHEEngine.shared.encryptInt(44)
+            }
+            
+            Button("Allow access to HealthKit") {
+                showHealthKitPermissions = true
+            }.healthDataAccessRequest(store: viewModel.healthStore,
+                                      readTypes: viewModel.permissions,
+                                      trigger: showHealthKitPermissions) { result in
+                 switch result {
+                 case .success(let success):
+                     print("success", success)
+                     viewModel.fetchHealthData()
+                     
+                 case .failure(let failure):
+                     print("failure", failure)
+                 }
+             }
         }
+        .buttonStyle(.bordered).tint(.yellow)
         
         List {
             Section("Personal info") {
@@ -61,7 +73,6 @@ struct HealthView: View {
                     Button("FHE Encrypt") {
                         print("encrypted")
                     }
-                    .buttonStyle(.bordered).tint(.yellow)
                     .padding(6)
                     .disabled(selectedSamples == nil || selectedSamples?.isEmpty != false)
                 }
@@ -75,6 +86,7 @@ struct HealthView: View {
         }
         .listRowSpacing(4)
         .listSectionSpacing(0)
+        .buttonStyle(.bordered).tint(.yellow)
     }
     
     private func sourceCode(_ code: String) -> some View {

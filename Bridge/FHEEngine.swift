@@ -3,6 +3,25 @@
 import Foundation
 import TFHE
 
+extension FHEEngine {
+    static private let sharedAppGroup = "group.com.dimdl.shared"
+    private var defaults: UserDefaults? {
+        UserDefaults(suiteName: Self.sharedAppGroup)
+    }
+    
+    enum Key: String {
+        case input, output
+    }
+    
+    func writeSharedValue(_ value: Int?, key: Key) {
+        defaults?.setValue(value, forKey: key.rawValue)
+    }
+    
+    func readSharedValue(key: Key) -> Int? {
+        defaults?.value(forKey: key.rawValue) as? Int
+    }
+}
+
 final class FHEEngine {
     static let shared = FHEEngine()
     private init() {}
@@ -10,7 +29,7 @@ final class FHEEngine {
     var client_key: OpaquePointer? // ClientKey
     var server_key: OpaquePointer? // ServerKey
     var public_key: OpaquePointer? // CompactPublicKey
-
+    
     func ensureClientServerKeysExist() {
         if client_key == nil || server_key == nil {
             generateClientServerKeys()
@@ -53,12 +72,32 @@ final class FHEEngine {
         
         var ok: Int32
         let start = Date()
-        var result: OpaquePointer? // FheUint16
+        var encrypted: OpaquePointer? // FheUint16
+        var buffer = DynamicBuffer(pointer: nil, length: 0, destructor: nil)
 
         ok = fhe_uint16_try_encrypt_with_client_key_u16(integer,
                                                         client_key,
-                                                        &result)
+                                                        &encrypted)
         assert(ok == 0)
+        
+
+        ok = fhe_uint16_serialize(encrypted, &buffer)
+        assert(ok == 0)
+
+        if ok == 0, let pointer = buffer.pointer {
+            // Read the serialized data into a Swift Data object
+            let data = Data(bytes: pointer, count: buffer.length)
+            print("Serialized data: \(data) \(data.count.formatted(.byteCount(style: .file)))")
+            
+            // Optionally, free memory using the destructor (if provided)
+            if let destructor = buffer.destructor {
+                let freeResult = destructor(pointer, buffer.length)
+                if freeResult != 0 {
+                    print("Failed to free memory")
+                }
+            }
+        }
+        
         print(#function, "executed in \(Date().timeIntervalSince(start))s")
     }
 

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
 		3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3275F5B42CA1658B001E7377 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
+		3275F5B52CA1658B001E7377 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,24 +25,61 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3275F5B62CA1658B001E7377 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				3275F5B52CA1658B001E7377 /* TFHE.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		320B88E92C9C64CB0076A5AC /* FHEDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FHEDemo.entitlements; sourceTree = "<group>"; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
-		32B258372C98693800538B23 /* FHE Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3275F5A42CA16515001E7377 /* FHE Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32B258372C98693800538B23 /* FHE Bridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Bridge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3275F5B32CA16562001E7377 /* Exceptions for "Bridge" folder in "Server" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FHEEngine.swift,
+			);
+			target = 3275F5A32CA16515001E7377 /* Server */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		32B258392C98693800538B23 /* App */ = {
+		3275F5A52CA16515001E7377 /* Server */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = App;
+			path = Server;
+			sourceTree = "<group>";
+		};
+		32B258392C98693800538B23 /* Bridge */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3275F5B32CA16562001E7377 /* Exceptions for "Bridge" folder in "Server" target */,
+			);
+			path = Bridge;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3275F5A12CA16515001E7377 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3275F5B42CA1658B001E7377 /* TFHE.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		32B258342C98693800538B23 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -63,9 +102,9 @@
 		32B2582E2C98693800538B23 = {
 			isa = PBXGroup;
 			children = (
-				320B88E92C9C64CB0076A5AC /* FHEDemo.entitlements */,
 				32B258512C9869A700538B23 /* README.md */,
-				32B258392C98693800538B23 /* App */,
+				32B258392C98693800538B23 /* Bridge */,
+				3275F5A52CA16515001E7377 /* Server */,
 				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
 				32B258382C98693800538B23 /* Products */,
 			);
@@ -74,7 +113,8 @@
 		32B258382C98693800538B23 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32B258372C98693800538B23 /* FHE Demo.app */,
+				32B258372C98693800538B23 /* FHE Bridge.app */,
+				3275F5A42CA16515001E7377 /* FHE Server.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -82,9 +122,32 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		32B258362C98693800538B23 /* FHEDemo */ = {
+		3275F5A32CA16515001E7377 /* Server */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "FHEDemo" */;
+			buildConfigurationList = 3275F5B12CA16516001E7377 /* Build configuration list for PBXNativeTarget "Server" */;
+			buildPhases = (
+				3275F5A02CA16515001E7377 /* Sources */,
+				3275F5A12CA16515001E7377 /* Frameworks */,
+				3275F5A22CA16515001E7377 /* Resources */,
+				3275F5B62CA1658B001E7377 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3275F5A52CA16515001E7377 /* Server */,
+			);
+			name = Server;
+			packageProductDependencies = (
+			);
+			productName = FHEServer;
+			productReference = 3275F5A42CA16515001E7377 /* FHE Server.app */;
+			productType = "com.apple.product-type.application";
+		};
+		32B258362C98693800538B23 /* Bridge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "Bridge" */;
 			buildPhases = (
 				32B258332C98693800538B23 /* Sources */,
 				32B258342C98693800538B23 /* Frameworks */,
@@ -96,13 +159,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				32B258392C98693800538B23 /* App */,
+				32B258392C98693800538B23 /* Bridge */,
 			);
-			name = FHEDemo;
+			name = Bridge;
 			packageProductDependencies = (
 			);
 			productName = FHEDemo;
-			productReference = 32B258372C98693800538B23 /* FHE Demo.app */;
+			productReference = 32B258372C98693800538B23 /* FHE Bridge.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -116,6 +179,9 @@
 				LastUpgradeCheck = 1600;
 				ORGANIZATIONNAME = Zama;
 				TargetAttributes = {
+					3275F5A32CA16515001E7377 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					32B258362C98693800538B23 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -135,12 +201,20 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32B258362C98693800538B23 /* FHEDemo */,
+				32B258362C98693800538B23 /* Bridge */,
+				3275F5A32CA16515001E7377 /* Server */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3275F5A22CA16515001E7377 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		32B258352C98693800538B23 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -151,6 +225,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3275F5A02CA16515001E7377 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		32B258332C98693800538B23 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -161,6 +242,66 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		3275F5AF2CA16516001E7377 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Server/Server.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEServer;
+				PRODUCT_NAME = "FHE Server";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3275F5B02CA16516001E7377 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Server/Server.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEServer;
+				PRODUCT_NAME = "FHE Server";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		32B258432C98693900538B23 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -285,10 +426,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FHEDemo.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Bridge/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"App/Preview Content\"";
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -305,7 +445,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDemo;
-				PRODUCT_NAME = "FHE Demo";
+				PRODUCT_NAME = "FHE Bridge";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -317,10 +457,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FHEDemo.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Bridge/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"App/Preview Content\"";
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -337,7 +476,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDemo;
-				PRODUCT_NAME = "FHE Demo";
+				PRODUCT_NAME = "FHE Bridge";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -347,6 +486,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3275F5B12CA16516001E7377 /* Build configuration list for PBXNativeTarget "Server" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3275F5AF2CA16516001E7377 /* Debug */,
+				3275F5B02CA16516001E7377 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		32B258322C98693800538B23 /* Build configuration list for PBXProject "FHEDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -356,7 +504,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "FHEDemo" */ = {
+		32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "Bridge" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32B258462C98693900538B23 /* Debug */,
