@@ -3,18 +3,36 @@
 Implement a bridge iOS app, which simulate a new FHE app store which runs on encrypted data
 
 # Installation Steps
-## Apple
+## Apple Tools
 - macOS 15 Sequoia
 - Xcode 16 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
-- iOS 18 SDK (additional download, from Xcode)
+- iOS 18 SDK (additional download from Xcode)
 
 ## Rust
-- Latest release: `curl https://sh.rustup.rs -sSf | sh` (currently rust 1.81.0)
-- Extra Rust architectures (iOS devices & iOS simulators running on Apple Silicon Macs):
-    `rustup target add aarch64-apple-ios aarch64-apple-ios-sim`
-- Cbindgen to easily generate C bindings: `cargo install --force cbindgen`
-- `rustup toolchain install nightly`
-- `rustup component add rust-src --toolchain nightly-aarch64-apple-darwin`
+- Install latest Rust release (currently 1.81.0)
+```shell
+    curl https://sh.rustup.rs -sSf | sh
+``` 
+
+- Install extra target architectures (iOS devices & iOS simulators running on Apple Silicon Macs):
+```shell
+    rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+- (Optional) Install Cbindgen to manually generate C bindings:
+```shell
+cargo install --force cbindgen
+```
+
+- Install nightly Rust toolchain (TFHE-rs requirement)
+```shell
+rustup toolchain install nightly
+```
+
+- Install Rust source so as to cross compile std lib (TFHE-rs requirement)
+```shell
+rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
+```
 
 # Useful Links
 - [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
@@ -52,7 +70,7 @@ module TFHE {
 ```
 
 ## Grab static libs (.a)
-The ios simulator one needs to be FAT, even if it contains one slice. An x86-64 slice can be added to it:
+The ios simulator one needs to be FAT, even if it contains one slice. (You can also add an x86-64 slice later on)
 ```shell
 lipo -create -output $(OUTPUT)/libtfhe-ios-sim.a $(TFHE_RS_PATH)/target/aarch64-apple-ios-sim/release/libtfhe.a
 ```
