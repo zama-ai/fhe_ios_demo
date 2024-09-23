@@ -4,7 +4,7 @@ Implement a bridge iOS app and a user app. The user app uses our new FHE enclave
 
 # Installation Steps
 ## Apple Tools
-- macOS 15 Sequoia
+- macOS 15 Sequoia (or 14 Sonoma, whatever runs Xcode 16)
 - Xcode 16 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
 - iOS 18 SDK (additional download from Xcode)
 
@@ -36,6 +36,7 @@ rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 
 # Useful Links
 - [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
+- [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
 - [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
@@ -43,6 +44,11 @@ rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 
 
 # Compile TFHE-rs for use in Swift.
+
+## Get TFHE-rs (currently 0.7.3)
+```shell
+git clone --branch tfhe-rs-0.7.3 https://github.com/zama-ai/tfhe-rs.git
+```
 
 ## Compile for both iOS and iOS sim targets
 ```shell
