@@ -7,66 +7,107 @@ import HealthKitUI
 typealias UnitValue = (amount: String, unit: String?)
 
 struct HealthView: View {
-    @State private var showHealthKitPermissions = false
-    @State private var selection: String?
+    @State private var selectedRow: String?
     @State private var selectedSamples: [Int]?
     @State private var encryptedSamples: [Int]?
+    @State private var showHealthKitPermissions = false
     @StateObject var viewModel = HealthViewModel.shared
-    @State private var ouput: Int?
-
+    @Environment(\.scenePhase) var scenePhase
+    @State private var clearInput: Int?
+    @State private var clearOutput: Int?
+    @FocusState private var inputIsFocused: Bool
+    
     var body: some View {
         Text("My Health History")
             .font(.largeTitle)
+        
+        Button("Read HealthKit") {
+            showHealthKitPermissions = true
+        }.healthDataAccessRequest(store: viewModel.healthStore,
+                                  readTypes: viewModel.permissions,
+                                  trigger: showHealthKitPermissions) { result in
+            switch result {
+            case .success(let success):
+                print("success", success)
+                viewModel.fetchHealthData()
+                
+            case .failure(let failure):
+                print("failure", failure)
+            }
+        }
 
-        VStack {
-            HStack {
-                Button("Write input (10)") {
-                    FHEEngine.shared.writeSharedValue(10, key: .input)
+        GroupBox {
+            VStack(spacing: 16) {
+                LabeledContent("Input (clear)") {
+                    TextField("Enter Digit", text: .init(get: {
+                        clearInput.map({ "\($0)" }) ?? ""
+                    }, set: { text in
+                        clearInput = Int(text)
+                    }))
+                    .keyboardType(.numberPad)
+                    .frame(maxWidth: .infinity)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.trailing)
+                    .focused($inputIsFocused)
                 }
                 
-                Button("Read output") {
-                    ouput = FHEEngine.shared.readSharedValue(key: .output)
+                LabeledContent("Output (clear)") {
+                    Text(clearOutput.map({ "\($0)" }) ?? "nil")
                 }
-                Text(ouput.map({ "\($0)" }) ?? "nil")
-            }
-            
-            Button("FHE Encrypt Int 44") {
-                FHEEngine.shared.encryptInt(44)
-            }
-            
-            Button("Allow access to HealthKit") {
-                showHealthKitPermissions = true
-            }.healthDataAccessRequest(store: viewModel.healthStore,
-                                      readTypes: viewModel.permissions,
-                                      trigger: showHealthKitPermissions) { result in
-                 switch result {
-                 case .success(let success):
-                     print("success", success)
-                     viewModel.fetchHealthData()
-                     
-                 case .failure(let failure):
-                     print("failure", failure)
-                 }
-             }
+                
+                Button("Encrypt & Upload") {
+                    inputIsFocused = false
+                    if let clearInput {
+                        let data = FHEEngine.shared.encryptInt(UInt16(clearInput))
+                        FHEEngine.shared.writeSharedData(data, key: .input)
+                    }
+                }        .buttonStyle(.bordered)
+                
+            }.frame(width: 250)
         }
-        .buttonStyle(.bordered).tint(.yellow)
-        
+        .padding()
+
         List {
             Section("Personal info") {
                 infoRow
             }
+            
             Section("Select data to encrypt") {
                 row("Weight", unit: "kg", icon: "figure", color: .purple, values: viewModel.data.bodyMass)
                 row("Heart rate", unit: "BPM", icon: "heart.fill", color: .pink, values: viewModel.data.heartRate)
                 row("Sleep", unit: "h", icon: "bed.double.fill", color: .mint, values: viewModel.data.sleep)
                 row("Energy Burned", unit: "kcal", icon: "flame.fill", color: .orange, values: viewModel.data.energyBurned)
-//                row("Exercice", unit: "min", icon: "flame.fill", color: .orange, values: viewModel.data.exercice)
+                //                row("Exercice", unit: "min", icon: "flame.fill", color: .orange, values: viewModel.data.exercice)
             }
             
+            encryptionSection
+        }
+        .listRowSpacing(4)
+        .buttonStyle(.bordered).tint(.yellow)
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active: reloadFromDisk()
+            case _: break
+            }
+        }
+    }
+    
+    func reloadFromDisk() {
+        guard FHEEngine.shared.client_key != nil else { return }
+        if let result = FHEEngine.shared.readSharedData(key: .output) {
+            let data = FHEEngine.shared.decryptInt(data: result)
+            clearOutput = data
+        } else {
+            print("No server output to read from")
+        }
+    }
+
+    @ViewBuilder
+    private var encryptionSection: some View {
+        if let selectedSamples {
             Section("Encryption") {
                 GroupBox("Clear") {
-                    let text = selectedSamples.map({ "\($0)" }) ?? "-"
-                    sourceCode(text)
+                    sourceCode("\(selectedSamples)")
                 }
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .overlay(alignment: .topTrailing) {
@@ -74,7 +115,7 @@ struct HealthView: View {
                         print("encrypted")
                     }
                     .padding(6)
-                    .disabled(selectedSamples == nil || selectedSamples?.isEmpty != false)
+                    .disabled(selectedSamples.isEmpty != false)
                 }
                 
                 GroupBox("Encrypted") {
@@ -83,10 +124,9 @@ struct HealthView: View {
                 }
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             }
+        } else {
+            EmptyView()
         }
-        .listRowSpacing(4)
-        .listSectionSpacing(0)
-        .buttonStyle(.bordered).tint(.yellow)
     }
     
     private func sourceCode(_ code: String) -> some View {
@@ -138,16 +178,16 @@ struct HealthView: View {
                 unitDisplay(UnitValue(amount: text, unit: unit))
             }
             Spacer()
-            chart(values: values, selected: selection == title)
+            chart(values: values, selected: selectedRow == title)
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            selection = title
+            selectedRow = title
             selectedSamples = values
         }
         .listRowBackground(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(selection == title ? Color.yellow : Color.secondary.opacity(0.5), lineWidth: 2)
+                .strokeBorder(selectedRow == title ? Color.yellow : Color.secondary.opacity(0.5), lineWidth: 2)
         )
     }
     

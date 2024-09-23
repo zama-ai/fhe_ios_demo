@@ -3,8 +3,9 @@
 import SwiftUI
 
 struct ServerView: View {
-    @State private var input: Int?
-    @State private var output: Int?
+    @State private var serverKey: String?
+    @State private var input: Data?
+    @State private var output: Data?
     @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
@@ -17,23 +18,30 @@ struct ServerView: View {
                 .font(.system(size: 50))
             
             VStack {
-                LabeledContent("Input", value: input.map({ "\($0)" }) ?? "nil")
-                LabeledContent("Output", value: output.map({ "\($0)" }) ?? "nil")
-            }.frame(width: 100)
+                LabeledContent("ServerKey", value: serverKey ?? "nil")
+                LabeledContent("Input", value: formatData(input))
+                LabeledContent("Output", value: formatData(output))
+            }.frame(width: 200)
             
             Button("Increment") {
-                if let input = FHEEngine.shared.readSharedValue(key: .input) {
-                    FHEEngine.shared.writeSharedValue(input + 42, key: .output)
+                if let input = FHEEngine.shared.readSharedData(key: .input) {
+                    
+                    // Easy: no transform, just copy input
+                    // FHEEngine.shared.writeSharedData(input, key: .output)
+                    
+                    // Actually compute. output = input + 10
+                    let computed = FHEEngine.shared.fheComputeOnEncryptedData(input: input)
+                    FHEEngine.shared.writeSharedData(computed, key: .output)
+                    
                     reloadFromDisk()
                 } else {
                     print("no input found")
                 }
-                //FHEEngine.shared.encryptInt(44)
             }.tint(.yellow)
             
             Button("Reset disk", role: .destructive) {
-                FHEEngine.shared.writeSharedValue(nil, key: .input)
-                FHEEngine.shared.writeSharedValue(nil, key: .output)
+                FHEEngine.shared.writeSharedData(nil, key: .input)
+                FHEEngine.shared.writeSharedData(nil, key: .output)
                 reloadFromDisk()
             }
             
@@ -48,9 +56,23 @@ struct ServerView: View {
         }
     }
     
+    func formatData(_ data: Data?) -> String {
+        data.map({
+            "\($0.count.formatted(.byteCount(style: .file)))"
+        }) ?? "nil"
+    }
+    
     func reloadFromDisk() {
-        input = FHEEngine.shared.readSharedValue(key: .input)
-        output = FHEEngine.shared.readSharedValue(key: .output)
+        FHEEngine.shared.loadServerKey { size in
+            if let size {
+                serverKey = size.formatted(.byteCount(style: .file))
+            } else {
+                serverKey = "nil"
+            }
+        }
+        
+        input = FHEEngine.shared.readSharedData(key: .input)
+        output = FHEEngine.shared.readSharedData(key: .output)
     }
 }
 
