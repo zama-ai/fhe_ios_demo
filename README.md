@@ -1,6 +1,6 @@
-#  Welcome to FHE AppStore Demo  
+#  Welcome to FHE iOS Enclave Demo  
 
-Implement a bridge iOS app, which simulate a new FHE app store which runs on encrypted data
+Implement a bridge iOS app and a user app. The user app uses our new FHE enclave principle, ie can only manipulate encrypted data. The bridge app generates the private keys and decrypt the final results the user app want the user to see, without returning clear results to the user app.
 
 # Installation Steps
 ## Apple Tools
