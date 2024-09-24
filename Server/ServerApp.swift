@@ -29,7 +29,7 @@ struct ServerView: View {
                     // Easy: no transform, just copy input
                     // FHEEngine.shared.writeSharedData(input, key: .output)
                     
-                    // Actually compute. output = input + 10
+                    // Actually compute. output = input + 42
                     let computed = FHEEngine.shared.fheComputeOnEncryptedData(input: input)
                     FHEEngine.shared.writeSharedData(computed, key: .output)
                     

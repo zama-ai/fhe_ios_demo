@@ -2,6 +2,14 @@
 
 Implement a bridge iOS app and a user app. The user app uses our new FHE enclave principle, ie can only manipulate encrypted data. The bridge app generates the private keys and decrypt the final results the user app want the user to see, without returning clear results to the user app.
 
+# Useful Links
+- [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
+- [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
+- [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
+- [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
+- [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
+- [Using imported C APIs in Swift](https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis)
+
 # Installation Steps
 ## Apple Tools
 - macOS 15 Sequoia (or 14 Sonoma, whatever runs Xcode 16)
@@ -19,11 +27,6 @@ Implement a bridge iOS app and a user app. The user app uses our new FHE enclave
     rustup target add aarch64-apple-ios aarch64-apple-ios-sim
 ```
 
-- (Optional) Install Cbindgen to manually generate C bindings:
-```shell
-cargo install --force cbindgen
-```
-
 - Install nightly Rust toolchain (TFHE-rs requirement)
 ```shell
 rustup toolchain install nightly
@@ -34,15 +37,6 @@ rustup toolchain install nightly
 rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 ```
 
-# Useful Links
-- [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
-- [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
-- [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
-- [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
-- [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
-- [Using imported C APIs in Swift](https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis)
-
-
 # Compile TFHE-rs for use in Swift.
 
 ## Get TFHE-rs (currently 0.7.3)
@@ -52,8 +46,8 @@ git clone --branch tfhe-rs-0.7.3 https://github.com/zama-ai/tfhe-rs.git
 
 ## Compile for both iOS and iOS sim targets
 ```shell
-RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios
-RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe` --target aarch64-apple-ios-sim
+RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe --target aarch64-apple-ios
+RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe --target aarch64-apple-ios-sim
 ```
 
 ## Grab generated headers (.h)
