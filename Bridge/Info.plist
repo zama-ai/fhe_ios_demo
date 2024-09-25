@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>com.zama.fhe.encrypted</string> <!-- Your custom UTI -->
+            <key>UTTypeDescription</key>
+            <string>Zama FHE Encrypted File Type</string> <!-- Description of the file type -->
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>fheencrypted</string> <!-- File extension -->
+                </array>
+                <key>public.mime-type</key>
+                <string>application/x-fheencrypted</string> <!-- MIME type -->
+            </dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.data</string> <!-- This specifies it conforms to generic data. You can also specify public.text, public.image, etc. -->
+            </array>
+        </dict>
+    </array>
+	<key>QLSupportedContentTypes</key>
+	<array>
+		<string>com.zama.fhe.encrypted</string>
+	</array>
+</dict>
+</plist>
