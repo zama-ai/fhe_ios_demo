@@ -5,7 +5,8 @@ import TFHE
 
 extension FHEEngine {
     static private let sharedAppGroup = "group.com.dimdl.shared"
-
+    static private let expectedServerKeyFileName = "serverKey.uncompressed"
+    
     private var defaults: UserDefaults? {
         UserDefaults(suiteName: Self.sharedAppGroup)
     }
@@ -23,7 +24,7 @@ extension FHEEngine {
         defaults?.value(forKey: key.rawValue) as? Data
     }
     
-    func writeServerKey(_ data: Data?, completion: @escaping (Result<Void, Error>) -> Void) {
+    func writeToDisk(_ data: Data?, fileName: String, completion: @escaping (Result<URL, Error>) -> Void) {
         // ServerKey ≈ 120MB
         // CompressedServerKey ≈ 20MB
         // UserDefaults limit at 4MB
@@ -32,13 +33,13 @@ extension FHEEngine {
             return
         }
         
-        let fileURL = sharedFolder.appendingPathComponent("serverKey.uncompressed")
+        let fileURL = sharedFolder.appendingPathComponent(fileName)
 
         DispatchQueue.global(qos: .background).async {
             do {
                 try data?.write(to: fileURL, options: .atomic)
                 DispatchQueue.main.async {
-                    completion(.success(()))
+                    completion(.success(fileURL))
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -47,13 +48,13 @@ extension FHEEngine {
             }
         }
     }
-
-    func readServerKey(completion: @escaping (Result<Data, Error>) -> Void) {
+    
+    func readFile(named: String, completion: @escaping (Result<Data, Error>) -> Void) {
         guard let sharedFolder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Self.sharedAppGroup) else {
             return
         }
         
-        let fileURL = sharedFolder.appendingPathComponent("serverKey.uncompressed")
+        let fileURL = sharedFolder.appendingPathComponent(named)
 
         DispatchQueue.global(qos: .background).async {
             do {
@@ -120,9 +121,9 @@ final class FHEEngine {
         assert(ok == 0)
         
         if let serverData = dynamicBufferToData(buffer: buffer) {
-            self.writeServerKey(serverData) { result in
+            self.writeToDisk(serverData, fileName: Self.expectedServerKeyFileName) { result in
                 switch result {
-                case .success: print("Server key written to disk")
+                case .success(let path): print("Server key written to disk at \(path.absoluteString)")
                 case .failure(let error): print("ERROR: Server key NOT written to disk \(error)")
                 }
             }
@@ -132,7 +133,7 @@ final class FHEEngine {
     }
     
     func loadServerKey(completion: @escaping (Int?) -> Void) {
-        readServerKey() { [weak self] result in
+        readFile(named: Self.expectedServerKeyFileName) { [weak self] result in
             switch result {
             case .failure(let error):
                 print("Server key missing \(error)")

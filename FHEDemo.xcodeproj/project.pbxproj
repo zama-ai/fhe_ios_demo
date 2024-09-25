@@ -43,6 +43,7 @@
 		3275F5A42CA16515001E7377 /* FHE Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258372C98693800538B23 /* FHE Bridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Bridge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		32F029DA2CA37007009B522D /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -52,6 +53,13 @@
 				FHEEngine.swift,
 			);
 			target = 3275F5A32CA16515001E7377 /* Server */;
+		};
+		32F029D42CA36BF0009B522D /* Exceptions for "Bridge" folder in "Bridge" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 32B258362C98693800538B23 /* Bridge */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -64,6 +72,7 @@
 		32B258392C98693800538B23 /* Bridge */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				32F029D42CA36BF0009B522D /* Exceptions for "Bridge" folder in "Bridge" target */,
 				3275F5B32CA16562001E7377 /* Exceptions for "Bridge" folder in "Server" target */,
 			);
 			path = Bridge;
@@ -95,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */,
+				32F029DA2CA37007009B522D /* QuickLook.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -432,6 +442,7 @@
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bridge/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Allow read access so that we can encrypt your Health data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -463,6 +474,7 @@
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bridge/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Allow read access so that we can encrypt your Health data.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

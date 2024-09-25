@@ -20,65 +20,65 @@ Implement a bridge iOS app and a user app. The user app uses our new FHE enclave
 
 ## Having TFHE libraries for iOS and mac simulator
 
-There are two ways to have those libraries:
-- the first one is the easiest: ask someone who already build the libraries to send them to you; we don't store them in GitHub since they are about 340M, but clearly not everyone need to build them
+There are two ways to obtain those libraries:
+- the first one is the easiest: ask someone who has already built the libraries to send them to you; we don't store them in GitHub since they are about 340 MB, but clearly not everyone needs to build them
 - the second one is needed at least for new TFHE-rs versions, or when one can't receive binaries made from others
 
 ### Getting libraries from others
 
-One just need to save TFHE.xcframework in the root directory: below, there are
-- Info.plist
-- ios-arm64
-- ios-arm64-simulator
+Simply save `TFHE.xcframework in the root directory. Inside this framework, there should be:
+- `Info.plist`
+- `ios-arm64`
+- `ios-arm64-simulator`
 
 ### Building libraries
 
-There are several steps here:
-- installing Rust
-- compiling TFHE-rs
+There are several steps involved:
+- Installing Rust
+- Compiling TFHE-rs
 
 #### Installing Rust
 
-- Install latest Rust release (currently 1.81.0)
+- Install latest Rust release (currently 1.81.0):
 ```shell
     curl https://sh.rustup.rs -sSf | sh
 ``` 
 
-- Install extra target architectures (iOS devices & iOS simulators running on Apple Silicon Macs):
+- Install extra target architectures (for iOS devices & iOS simulators running on Apple Silicon Macs):
 ```shell
     rustup target add aarch64-apple-ios aarch64-apple-ios-sim
 ```
 
-- Install nightly Rust toolchain (TFHE-rs requirement)
+- Install nightly Rust toolchain (a TFHE-rs requirement):
 ```shell
 rustup toolchain install nightly
 ```
 
-- Install Rust source so as to cross compile std lib (TFHE-rs requirement)
+- Install Rust source so as to cross compile `std` lib (a TFHE-rs requirement):
 ```shell
 rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 ```
 
 #### Compiling TFHE-rs for use in Swift.
 
-##### Get TFHE-rs (currently 0.7.3)
+##### Get TFHE-rs (currently 0.7.3):
 ```shell
 git clone --branch tfhe-rs-0.7.3 https://github.com/zama-ai/tfhe-rs.git
 ```
 
-##### Compile for both iOS and iOS sim targets
+##### Compile for both iOS and iOS simulator targets:
 ```shell
 RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe --target aarch64-apple-ios
 RUSTFLAGS="" cargo +nightly build -Zbuild-std --release --features=aarch64-unix,high-level-c-api -p tfhe --target aarch64-apple-ios-sim
 ```
 
-##### Grab generated headers (.h)
+##### Grab generated headers (.h):
 ```shell
 cp $(TFHE_RS_PATH)/target/release/tfhe.h $(OUTPUT)/include/tfhe.h
 cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/deps/tfhe-c-api-dynamic-buffer.h $(OUTPUT)/include/tfhe-c-api-dynamic-buffer.h
 ```
 
-##### Create a Module Map
+##### Create a Module Map:
 ```shell
 touch $(OUTPUT)/include/module.modulemap
 ```
@@ -91,18 +91,18 @@ module TFHE {
 }
 ```
 
-##### Grab static libs (.a)
-The ios simulator one needs to be FAT, even if it contains one slice. (You can also add an x86-64 slice later on)
+##### Grab Static Librairies (.a):
+The iOS simulator library needs to be FAT, even if it contains one slice (you can also add an x86-64 slice later on):
 ```shell
 lipo -create -output $(OUTPUT)/libtfhe-ios-sim.a $(TFHE_RS_PATH)/target/aarch64-apple-ios-sim/release/libtfhe.a
 ```
 
-The ios device one can be copied as is:
+The ios device library can be copied as is:
 ```shell
 cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/libtfhe.a $(OUTPUT)/libtfhe-ios.a
 ```
 
-##### Package all that in a .xcframework
+##### Package everything into an .xcframework:
 ```shell
 xcodebuild -create-xcframework \
     -library $(OUTPUT)/libtfhe-ios.a \
@@ -114,8 +114,8 @@ xcodebuild -create-xcframework \
 
 ##### Save
 
-Finally, move the directory TFHE.xcframework in the root directory of the iOS project: below, there are
-- Info.plist
-- ios-arm64
-- ios-arm64-simulator
+Finally, move the `TFHE.xcframework` directory into the root directory of the iOS project. Inside this directory, there should be:
+- `Info.plist`
+- `ios-arm64`
+- `ios-arm64-simulator`
 
