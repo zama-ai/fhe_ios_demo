@@ -41,10 +41,10 @@ struct FilePreview: UIViewControllerRepresentable {
 }
 
 #Preview {
-    let url = Bundle.main.url(forResource: "debug-image", withExtension: "png")!
+    let url = Bundle.main.bundleURL
     Group {
-        FilePreview(url: url, showTools: false)
         FilePreview(url: url, showTools: true)
+        FilePreview(url: url, showTools: false)
     }
     .border(.secondary)
     .padding()

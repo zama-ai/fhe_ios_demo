@@ -5,8 +5,9 @@ import TFHE
 
 extension FHEEngine {
     static private let sharedAppGroup = "group.com.dimdl.shared"
+    static private let expectedClientKeyFileName = "clientKey.uncompressed"
     static private let expectedServerKeyFileName = "serverKey.uncompressed"
-    
+
     private var defaults: UserDefaults? {
         UserDefaults(suiteName: Self.sharedAppGroup)
     }
@@ -49,7 +50,7 @@ extension FHEEngine {
         }
     }
     
-    func readFile(named: String, completion: @escaping (Result<Data, Error>) -> Void) {
+    static func readFile(named: String, completion: @escaping (Result<Data, Error>) -> Void) {
         guard let sharedFolder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Self.sharedAppGroup) else {
             return
         }
@@ -73,7 +74,13 @@ extension FHEEngine {
 
 final class FHEEngine {
     static let shared = FHEEngine()
-    private init() {}
+    private init() {
+        print("FHEEngine INIT")
+        FHEEngine.loadClientKey { [weak self] in
+            self?.client_key = $0
+            print("FHEEngine ClientKey loaded")
+        }
+    }
     
     var client_key: OpaquePointer? // ClientKey
     private var server_key: OpaquePointer? // ServerKey
@@ -105,9 +112,34 @@ final class FHEEngine {
         ok = generate_keys(config, &client_key, &server_key)
         assert(ok == 0)
         
+        persistClientKey()
         persistServerKey()
     }
     
+    func persistClientKey() {
+        guard let client_key else {
+            print("Client key missing")
+            return
+        }
+        
+        var ok: Int32
+        var buffer = DynamicBuffer(pointer: nil, length: 0, destructor: nil)
+        // TODO: Optimization: use CompressedServerKey (compressed_server_key_new, compressed_server_key_decompress)
+        ok = client_key_serialize(client_key, &buffer)
+        assert(ok == 0)
+        
+        if let clientData = Self.dynamicBufferToData(buffer: buffer) {
+            self.writeToDisk(clientData, fileName: Self.expectedClientKeyFileName) { result in
+                switch result {
+                case .success(let path): print("Client key written to disk at \(path.absoluteString)")
+                case .failure(let error): print("ERROR: Client key NOT written to disk \(error)")
+                }
+            }
+        } else {
+            print("Failed to write client_key as Data")
+        }
+    }
+
     func persistServerKey() {
         guard let server_key else {
             print("Server key missing")
@@ -120,7 +152,7 @@ final class FHEEngine {
         ok = server_key_serialize(server_key, &buffer)
         assert(ok == 0)
         
-        if let serverData = dynamicBufferToData(buffer: buffer) {
+        if let serverData = Self.dynamicBufferToData(buffer: buffer) {
             self.writeToDisk(serverData, fileName: Self.expectedServerKeyFileName) { result in
                 switch result {
                 case .success(let path): print("Server key written to disk at \(path.absoluteString)")
@@ -132,20 +164,38 @@ final class FHEEngine {
         }
     }
     
+    static func loadClientKey(completion: @escaping (OpaquePointer?) -> Void) {
+        readFile(named: Self.expectedClientKeyFileName) { result in
+            switch result {
+            case .failure(let error):
+                print("Client key missing \(error)")
+                completion(nil)
+                
+            case .success(let clientData):
+                var ok: Int32
+                let buffer = dataToDynamicBuffer(data: clientData)
+                let bufferView = DynamicBufferView(pointer: buffer.pointer, length: buffer.length)
+                var clientKey: OpaquePointer?  // ClientKey
+
+                ok = client_key_deserialize(bufferView, &clientKey)
+                assert(ok == 0)
+                
+                completion(clientKey)
+                print("Client Key loaded")
+            }
+        }
+    }
+
     func loadServerKey(completion: @escaping (Int?) -> Void) {
-        readFile(named: Self.expectedServerKeyFileName) { [weak self] result in
+        Self.readFile(named: Self.expectedServerKeyFileName) { result in
             switch result {
             case .failure(let error):
                 print("Server key missing \(error)")
                 completion(nil)
                 
             case .success(let serverData):
-                guard let self else {
-                    print("Weak self nil, returning")
-                    return
-                }
                 var ok: Int32
-                let buffer = dataToDynamicBuffer(data: serverData)
+                let buffer = Self.dataToDynamicBuffer(data: serverData)
                 let bufferView = DynamicBufferView(pointer: buffer.pointer, length: buffer.length)
                 var serverKey: OpaquePointer?  // ServerKey
 
@@ -190,12 +240,12 @@ final class FHEEngine {
         ok = fhe_uint16_serialize(encrypted, &buffer)
         assert(ok == 0)
         
-        let data = dynamicBufferToData(buffer: buffer)
+        let data = Self.dynamicBufferToData(buffer: buffer)
         return data
     }
     
     func fheComputeOnEncryptedData(input: Data) -> Data? {
-        let inputBuffer = dataToDynamicBuffer(data: input)
+        let inputBuffer = Self.dataToDynamicBuffer(data: input)
         let bufferView = DynamicBufferView(pointer: inputBuffer.pointer, length: inputBuffer.length)
         var encryptedInput: OpaquePointer?  // FheUint16
         var encryptedOutput: OpaquePointer? // FheUint16
@@ -214,12 +264,12 @@ final class FHEEngine {
         ok = fhe_uint16_serialize(encryptedOutput, &outputBuffer)
         assert(ok == 0)
         
-        let outputData = dynamicBufferToData(buffer: outputBuffer)
+        let outputData = Self.dynamicBufferToData(buffer: outputBuffer)
         return outputData
     }
     
     func decryptInt(data: Data) -> Int {
-        let buffer = dataToDynamicBuffer(data: data)
+        let buffer = Self.dataToDynamicBuffer(data: data)
         let bufferView = DynamicBufferView(pointer: buffer.pointer, length: buffer.length)
         var encryptedResult: OpaquePointer?
         var clearResult: UInt16 = 0
@@ -237,7 +287,7 @@ final class FHEEngine {
         return Int(clearResult)
     }
     
-    func dataToDynamicBuffer(data: Data) -> DynamicBuffer {
+    static func dataToDynamicBuffer(data: Data) -> DynamicBuffer {
         // Allocate memory for the buffer pointer and copy data into it
         let length = data.count
         let pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: length)
@@ -253,7 +303,7 @@ final class FHEEngine {
         return buffer
     }
     
-    func dynamicBufferToData(buffer: DynamicBuffer) -> Data? {
+    static func dynamicBufferToData(buffer: DynamicBuffer) -> Data? {
         guard let pointer = buffer.pointer else {
             return nil
         }
