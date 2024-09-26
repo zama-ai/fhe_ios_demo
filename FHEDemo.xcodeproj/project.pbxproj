@@ -7,11 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32F029DA2CA37007009B522D /* QuickLook.framework */; };
+		324F8E2A2CA43B2100F0BB11 /* QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
+		324F8E3E2CA47BF900F0BB11 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
 		3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3275F5B42CA1658B001E7377 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
 		3275F5B52CA1658B001E7377 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		324F8E282CA43B2100F0BB11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 32B2582F2C98693800538B23 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 324F8E1C2CA43B2100F0BB11;
+			remoteInfo = QuickLookExtension;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		320927A82C98800A0011F52E /* Embed Frameworks */ = {
@@ -21,6 +35,28 @@
 			dstSubfolderSpec = 10;
 			files = (
 				3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		324F8E2F2CA43B2100F0BB11 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				324F8E2A2CA43B2100F0BB11 /* QuickLookExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		324F8E3F2CA47BF900F0BB11 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				324F8E3E2CA47BF900F0BB11 /* TFHE.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -39,6 +75,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		324F8E1D2CA43B2100F0BB11 /* QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuickLookExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
 		3275F5A42CA16515001E7377 /* FHE Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258372C98693800538B23 /* FHE Bridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Bridge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,6 +84,28 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
+		};
+		324F8E352CA44B1B00F0BB11 /* Exceptions for "QuickLookExtension" folder in "Server" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PrivateDataRing.swift,
+				PrivateViews.swift,
+			);
+			target = 3275F5A32CA16515001E7377 /* Server */;
+		};
+		324F8E3B2CA47BB200F0BB11 /* Exceptions for "Bridge" folder in "QuickLookExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FHEEngine.swift,
+			);
+			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
+		};
 		3275F5B32CA16562001E7377 /* Exceptions for "Bridge" folder in "Server" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -64,6 +123,15 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				324F8E352CA44B1B00F0BB11 /* Exceptions for "QuickLookExtension" folder in "Server" target */,
+				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */,
+			);
+			path = QuickLookExtension;
+			sourceTree = "<group>";
+		};
 		3275F5A52CA16515001E7377 /* Server */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Server;
@@ -74,6 +142,7 @@
 			exceptions = (
 				32F029D42CA36BF0009B522D /* Exceptions for "Bridge" folder in "Bridge" target */,
 				3275F5B32CA16562001E7377 /* Exceptions for "Bridge" folder in "Server" target */,
+				324F8E3B2CA47BB200F0BB11 /* Exceptions for "Bridge" folder in "QuickLookExtension" target */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -81,6 +150,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		324F8E1A2CA43B2100F0BB11 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */,
+				324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3275F5A12CA16515001E7377 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +193,7 @@
 				32B258512C9869A700538B23 /* README.md */,
 				32B258392C98693800538B23 /* Bridge */,
 				3275F5A52CA16515001E7377 /* Server */,
+				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
 				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
 				32B258382C98693800538B23 /* Products */,
 			);
@@ -125,6 +204,7 @@
 			children = (
 				32B258372C98693800538B23 /* FHE Bridge.app */,
 				3275F5A42CA16515001E7377 /* FHE Server.app */,
+				324F8E1D2CA43B2100F0BB11 /* QuickLookExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,6 +212,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "QuickLookExtension" */;
+			buildPhases = (
+				324F8E192CA43B2100F0BB11 /* Sources */,
+				324F8E1A2CA43B2100F0BB11 /* Frameworks */,
+				324F8E1B2CA43B2100F0BB11 /* Resources */,
+				324F8E3F2CA47BF900F0BB11 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
+			);
+			name = QuickLookExtension;
+			packageProductDependencies = (
+			);
+			productName = QuickLookExtension;
+			productReference = 324F8E1D2CA43B2100F0BB11 /* QuickLookExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		3275F5A32CA16515001E7377 /* Server */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3275F5B12CA16516001E7377 /* Build configuration list for PBXNativeTarget "Server" */;
@@ -163,10 +266,12 @@
 				32B258342C98693800538B23 /* Frameworks */,
 				32B258352C98693800538B23 /* Resources */,
 				320927A82C98800A0011F52E /* Embed Frameworks */,
+				324F8E2F2CA43B2100F0BB11 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				324F8E292CA43B2100F0BB11 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				32B258392C98693800538B23 /* Bridge */,
@@ -189,6 +294,9 @@
 				LastUpgradeCheck = 1600;
 				ORGANIZATIONNAME = Zama;
 				TargetAttributes = {
+					324F8E1C2CA43B2100F0BB11 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					3275F5A32CA16515001E7377 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -213,11 +321,19 @@
 			targets = (
 				32B258362C98693800538B23 /* Bridge */,
 				3275F5A32CA16515001E7377 /* Server */,
+				324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		324F8E1B2CA43B2100F0BB11 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3275F5A22CA16515001E7377 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -235,6 +351,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		324F8E192CA43B2100F0BB11 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3275F5A02CA16515001E7377 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -251,7 +374,67 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		324F8E292CA43B2100F0BB11 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
+			targetProxy = 324F8E282CA43B2100F0BB11 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		324F8E2C2CA43B2100F0BB11 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/QuickLookExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QuickLookExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuickLookExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Zama. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDemo.QuickLookExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		324F8E2D2CA43B2100F0BB11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/QuickLookExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QuickLookExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuickLookExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Zama. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDemo.QuickLookExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		3275F5AF2CA16516001E7377 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -498,6 +681,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "QuickLookExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				324F8E2C2CA43B2100F0BB11 /* Debug */,
+				324F8E2D2CA43B2100F0BB11 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3275F5B12CA16516001E7377 /* Build configuration list for PBXNativeTarget "Server" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

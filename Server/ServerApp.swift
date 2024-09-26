@@ -1,7 +1,6 @@
 // Copyright © 2024 Zama. All rights reserved.
 
 import SwiftUI
-import QuickLook
 
 struct ServerView: View {
     @State private var serverKey: String?
@@ -9,7 +8,6 @@ struct ServerView: View {
     @State private var output: Data?
     @State private var isComputing: Bool = false
     @State private var outputURL: URL?
-    @State private var sheetPreviewURL: URL?
     @State private var inlinePreviewURL: URL?
     @State private var screenshot: UIImage?
 
@@ -43,29 +41,27 @@ struct ServerView: View {
                 .frame(width: 250)
                 .padding(.leading, 32)
                 
-                Button("Compute", action: compute)
-                                
                 HStack {
-                    Button("Show Sheet", action: showSheetResult)
-                        .quickLookPreview($sheetPreviewURL)
+                    Button("Compute", action: compute)
                     
-                    Button("Show Inline", action: showInlineResult)
-                }
-                .disabled(outputURL == nil)
-                
-                Button("Screenshot", systemImage: "camera.viewfinder") {
-                    if let image = takeScreenshot() {
-                        self.screenshot = image
-                    } else {
-                        print("screenshot is nil")
+                    Button("Show Result", action: showResultInline)
+                        .disabled(outputURL == nil)
+                    
+                    Button {
+                        if let image = takeScreenshot() {
+                            self.screenshot = image
+                        } else {
+                            print("screenshot is nil")
+                        }
+                    } label: {
+                        Image(systemName: "eyes")
                     }
                 }
 
                 if let inlinePreviewURL {
                     GroupBox("Clear Result") {
                         FilePreview(url: inlinePreviewURL, showTools: false)
-                            .frame(minWidth: 200, minHeight: 200)
-                            .border(.yellow)
+                            .frame(minWidth: 200, minHeight: 150)
                     }.padding()
                 }
                 
@@ -74,8 +70,9 @@ struct ServerView: View {
                         Image(uiImage: screenshot)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .border(.yellow)
-                            .background(.black)
+                            .border(.white, width: 8)
+                            .rotationEffect(.degrees(-1.5))
+                            .shadow(radius: 5)
                     }.padding()
                 }
             }
@@ -100,11 +97,7 @@ struct ServerView: View {
         reloadFromDisk()
     }
 
-    func showSheetResult() {
-        sheetPreviewURL = outputURL
-    }
-    
-    func showInlineResult() {
+    func showResultInline() {
         inlinePreviewURL = outputURL
     }
 
@@ -123,7 +116,6 @@ struct ServerView: View {
                         switch result {
                         case .success(let url):
                             print(".fheencrypted saved. open \(url.absoluteString)")
-//                            let url = Bundle.main.url(forResource: "debug-image", withExtension: "png")!
                             outputURL = url
                             
                         case .failure(let error):
