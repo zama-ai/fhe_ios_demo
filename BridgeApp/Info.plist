@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>QLSupportedContentTypes</key>
+	<array>
+		<string>com.zama.fhe.encrypted</string>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Zama FHE Encrypted File Type</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.zama.fhe.encrypted</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>fheencrypted</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/x-fheencrypted</string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

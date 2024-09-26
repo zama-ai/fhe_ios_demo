@@ -3,7 +3,7 @@
 import SwiftUI
 
 @main
-struct FHEDemoApp: App {
+struct BridgeApp: App {
     var body: some Scene {
         WindowGroup {
             HealthView()

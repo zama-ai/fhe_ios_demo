@@ -15,7 +15,7 @@ struct ServerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 30) {
+            VStack(spacing: 20) {
                 Text("FHE Server App")
                     .font(.largeTitle)
                 

@@ -9,9 +9,9 @@
 			<key>QLIsDataBasedPreview</key>
 			<false/>
 			<key>QLSupportedContentTypes</key>
-            <array>
-                <string>com.zama.fhe.encrypted</string>
-            </array>
+			<array>
+				<string>com.zama.fhe.encrypted</string>
+			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>
 		</dict>
