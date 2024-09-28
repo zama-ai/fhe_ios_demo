@@ -50,3 +50,8 @@ fastlane/test_output
 
 # Other
 TFHE.xcframework
+
+# Server
+Server/url.txt
+Server/.venv
+Server/.venv/**
