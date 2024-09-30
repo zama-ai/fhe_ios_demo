@@ -5,7 +5,9 @@ import SwiftUI
 struct AnalysisView: View {
     @State private var isAnimatingTitle = false
     @StateObject private var viewModel: ViewModel
-    
+    @State private var screenshot: UIImage?
+    @Environment(\.scenePhase) var scenePhase
+
     init() {
         self._viewModel = StateObject(wrappedValue: ViewModel.empty)
     }
@@ -23,6 +25,28 @@ struct AnalysisView: View {
         }
         .tint(.pink)
         .buttonStyle(.bordered)
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                Task {
+                    await reloadFromDisk()
+                }
+            case _: break
+            }
+        }
+        .overlay {
+            if let screenshot {
+                GroupBox("Screenshot") {
+                    Image(uiImage: screenshot)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .padding()
+                        .border(.white, width: 8)
+                        .rotationEffect(.degrees(-1.5))
+                        .shadow(radius: 5)
+                }.padding()
+            }
+        }
     }
     
     @ViewBuilder
@@ -71,9 +95,20 @@ struct AnalysisView: View {
                 importRow("Heart rate", "heart.fill", color: .secondary, data: imported.heartRateHistory)
             }
             
-            AsyncButton("Compute Analysis") {
-                await computeAnalysis()
-            }
+            AsyncButton("Upload for Analysis") {
+                await upload()
+            }.frame(maxWidth: .infinity)
+                .overlay(alignment: .trailing) {
+                    Button {
+                        if let image = takeScreenshot() {
+                            self.screenshot = image
+                        } else {
+                            print("screenshot is nil")
+                        }
+                    } label: {
+                        Image(systemName: "eyes")
+                    }
+                }
             
         } else {
             VStack {
@@ -136,19 +171,28 @@ struct AnalysisView: View {
     @ViewBuilder
     private var computedView: some View {
         if let computed = viewModel.computed {
-            PrivateText(data: computed.lifeExpectancy)
+            VStack {
+                importRow("Prediction", "wand.and.sparkles", color: .yellow, data: computed.lifeExpectancy)
+                if let url = FHEEngine.shared.expectedResultURL {
+                    PrivateText(url: url)
+                }
+            }
         }
     }
     
     // MARK: - ACTIONS -
     private func importData() async {
         try? await Task.sleep(for: .seconds(1))
-        viewModel.imported = ViewModel.fake.imported
+        viewModel.readInput()
     }
 
-    private func computeAnalysis() async {
+    private func upload() async {
         try? await Task.sleep(for: .seconds(1))
-        viewModel.computed = ViewModel.fake.computed
+    }
+    
+    private func reloadFromDisk() async {
+        try? await Task.sleep(for: .seconds(0.5))
+        viewModel.readOutput()
     }
 
     private func reset() {
