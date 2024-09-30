@@ -18,14 +18,20 @@ FIXME:
 python3.10 -m venv .venv
 source .venv/bin/activate
 ```
+(use `python3` instead of `python3.10` if you don't have 3.10 installed')
 
-1. Clean docker
+2. Instal Docker 
+```
+https://docs.docker.com/desktop/install/mac-install/
+```
+
+3. Clean docker
 
 ```
 docker rm -f $(docker ps -a -q)
 ```
 
-1. Run the server
+4. Run the server
 
 ```
 python deploy_to_docker.py
@@ -51,13 +57,18 @@ python3.10 -m venv .venvclient
 source .venvclient/bin/activate
 pip install -r client_requirements.txt
 ```
+(use `python3` instead of `python3.10` if you don't have 3.10 installed')
 
-1. Run the client
+2. Run the client
 
 ```
 URL="http://localhost:8888" python client.py
 ```
 
-## On the client side within the iOS application
+## On the client side with Swift
 
-(to be done with Dimitri)
+2. Run the swift script
+
+```shell
+swift client.swift
+```
