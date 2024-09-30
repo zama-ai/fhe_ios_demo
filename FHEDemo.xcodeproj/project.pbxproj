@@ -168,6 +168,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		320CFB212CAAC47500528366 /* Server */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Server;
+			sourceTree = "<group>";
+		};
 		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -266,6 +271,7 @@
 				32B258512C9869A700538B23 /* README.md */,
 				320CF76A2CAAA2CB00528366 /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
+				320CFB212CAAC47500528366 /* Server */,
 				32C9CC422CA566DC00AEDA32 /* ServerApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
 				32C9CC212CA565A100AEDA32 /* ClientApp */,
