@@ -88,6 +88,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		320CF7682CAAA2CB00528366 /* Presentation.key */ = {isa = PBXFileReference; lastKnownFileType = file; path = Presentation.key; sourceTree = "<group>"; };
+		320CF7692CAAA2CB00528366 /* Presentation.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Presentation.pdf; sourceTree = "<group>"; };
 		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
 		3275F5A42CA16515001E7377 /* FHE Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -240,6 +242,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		320CF76A2CAAA2CB00528366 /* Docs */ = {
+			isa = PBXGroup;
+			children = (
+				320CF7682CAAA2CB00528366 /* Presentation.key */,
+				320CF7692CAAA2CB00528366 /* Presentation.pdf */,
+			);
+			path = Docs;
+			sourceTree = "<group>";
+		};
 		3250B3C72C9B2C8B009B48C3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -253,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				32B258512C9869A700538B23 /* README.md */,
+				320CF76A2CAAA2CB00528366 /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
 				32C9CC422CA566DC00AEDA32 /* ServerApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
