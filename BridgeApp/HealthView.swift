@@ -12,18 +12,17 @@ struct HealthView: View {
     @State private var encryptedSamples: [Int]?
     @State private var showHealthKitPermissions = false
     @StateObject var viewModel = HealthViewModel.shared
-    @Environment(\.scenePhase) var scenePhase
-    @State private var clearInput: Int?
-    @State private var clearOutput: Int?
-    @FocusState private var inputIsFocused: Bool
     
     var body: some View {
         Text("My Health History")
             .font(.largeTitle)
         
-        Button("Read HealthKit") {
+        AsyncButton("Read HealthKit") {
+            try? await Task.sleep(for: .seconds(0.5))
             showHealthKitPermissions = true
-        }.healthDataAccessRequest(store: viewModel.healthStore,
+        }
+        .buttonStyle(.bordered)
+        .healthDataAccessRequest(store: viewModel.healthStore,
                                   readTypes: viewModel.permissions,
                                   trigger: showHealthKitPermissions) { result in
             switch result {
@@ -35,38 +34,16 @@ struct HealthView: View {
                 print("failure", failure)
             }
         }
-
-        GroupBox {
-            VStack(spacing: 16) {
-                LabeledContent("Input (clear)") {
-                    TextField("Enter Digit", text: .init(get: {
-                        clearInput.map({ "\($0)" }) ?? ""
-                    }, set: { text in
-                        clearInput = Int(text)
-                    }))
-                    .keyboardType(.numberPad)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.trailing)
-                    .focused($inputIsFocused)
-                }
                 
-                LabeledContent("Output (clear)") {
-                    Text(clearOutput.map({ "\($0)" }) ?? "nil")
-                }
-                
-                Button("Encrypt & Upload") {
-                    inputIsFocused = false
-                    if let clearInput {
-                        let data = FHEEngine.shared.encryptInt(UInt16(clearInput))
-                        FHEEngine.shared.writeSharedData(data, key: .input)
-                    }
-                }        .buttonStyle(.bordered)
-                
-            }.frame(width: 250)
+        AsyncButton("Encrypt Health Information") {
+            try? await Task.sleep(for: .seconds(0.5))
+            
+            let clearInput = 42
+            let data = FHEEngine.shared.encryptInt(UInt16(clearInput))
+            FHEEngine.shared.writeSharedData(data, key: .input)
         }
-        .padding()
-
+        .buttonStyle(.bordered)
+                
         List {
             Section("Personal info") {
                 infoRow
@@ -77,31 +54,15 @@ struct HealthView: View {
                 row("Heart rate", unit: "BPM", icon: "heart.fill", color: .pink, values: viewModel.data.heartRate)
                 row("Sleep", unit: "h", icon: "bed.double.fill", color: .mint, values: viewModel.data.sleep)
                 row("Energy Burned", unit: "kcal", icon: "flame.fill", color: .orange, values: viewModel.data.energyBurned)
-                //                row("Exercice", unit: "min", icon: "flame.fill", color: .orange, values: viewModel.data.exercice)
+                row("Exercice", unit: "min", icon: "flame.fill", color: .orange, values: viewModel.data.exercice)
             }
             
             encryptionSection
         }
         .listRowSpacing(4)
         .buttonStyle(.bordered).tint(.yellow)
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .active: reloadFromDisk()
-            case _: break
-            }
-        }
     }
-    
-    func reloadFromDisk() {
-        guard FHEEngine.shared.client_key != nil else { return }
-        if let result = FHEEngine.shared.readSharedData(key: .output) {
-            let data = FHEEngine.shared.decryptInt(data: result)
-            clearOutput = data
-        } else {
-            print("No server output to read from")
-        }
-    }
-
+        
     @ViewBuilder
     private var encryptionSection: some View {
         if let selectedSamples {
@@ -211,9 +172,6 @@ struct HealthView: View {
             }
         }
         
-//        .chartYScale(domain: -1 + (values.min() ?? 0)...(values.max() ?? 1) + 1)
-//        .chartXScale(domain: -1...values.count)
-//        .clipped()
         .foregroundStyle(selected ? .yellow : .secondary.opacity(0.5))
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)

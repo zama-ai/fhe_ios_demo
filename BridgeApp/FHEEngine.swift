@@ -25,6 +25,12 @@ extension FHEEngine {
         defaults?.value(forKey: key.rawValue) as? Data
     }
     
+    var expectedResultURL: URL? {
+        let sharedFolder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Self.sharedAppGroup)
+        let fileURL = sharedFolder?.appendingPathComponent("computationResult.fheencrypted")
+        return fileURL
+    }
+    
     func writeToDisk(_ data: Data?, fileName: String, completion: @escaping (Result<URL, Error>) -> Void) {
         // ServerKey ≈ 120MB
         // CompressedServerKey ≈ 20MB

@@ -31,7 +31,7 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
 
     func preparePreviewOfFile(at url: URL) async throws {
         let result = try await readClearResult(at: url)
-        viewModel.text = "Value is \(result)"
+        viewModel.text = "Prediction is \(result)%"
     }
 }
 

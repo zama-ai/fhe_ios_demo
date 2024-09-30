@@ -7,9 +7,9 @@ typealias FHEEncryptedInt16 = Data
 typealias FHEEncryptedArrayInt16 = Data
 
 struct PrivateText: View {
-    let data: FHEEncryptedInt16
+    let url: URL // FHEEncryptedInt16
     var body: some View {
-        FilePreview(url: Bundle.main.bundleURL,
+        FilePreview(url: url, //Bundle.main.bundleURL,
                     showTools: false)
         .frame(maxHeight: 150)
         .border(.secondary)
