@@ -119,3 +119,6 @@ Finally, move the `TFHE.xcframework` directory into the root directory of the iO
 - `ios-arm64`
 - `ios-arm64-simulator`
 
+
+# Running the Server
+Follow steps in Server/README.md

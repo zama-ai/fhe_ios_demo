@@ -1,0 +1,12 @@
+
+
+curl \
+  -X POST http://localhost:8888/add_key \
+  -F "key=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.serverKey" \
+
+
+curl \
+  -X POST http://localhost:8888/compute \
+  -F "uid=1234" \
+  -F "input=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.input.fheencrypted" \
+  -o output.fheencrypted

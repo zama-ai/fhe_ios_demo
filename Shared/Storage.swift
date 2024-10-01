@@ -6,10 +6,10 @@ final class Storage {
     enum File: String {
         case clientKey = "clientKey"
         case serverKey = "serverKey"
-        case serverKeyCompressed = "serverKey.compressed"
+        case serverKeyUncompressed = "serverKey.uncompressed"
         
-        case encryptedInput
-        case encryptedOutput = "result.fheencrypted"
+        case encryptedInput  = "input.fheencrypted"
+        case encryptedOutput = "output.fheencrypted"
     }
     
     private init() {

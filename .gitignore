@@ -56,4 +56,5 @@ Server/url.txt
 Server/.venv
 Server/.venv/**
 Server/.venvclient
-
+Server/rust_folder/Cargo.lock
+Server/rust_folder/target
