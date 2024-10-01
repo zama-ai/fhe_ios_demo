@@ -8,26 +8,23 @@ typealias FHEEncryptedArrayInt16 = Data
 
 struct PrivateText: View {
     let url: URL // FHEEncryptedInt16
+    
     var body: some View {
-        FilePreview(url: url, //Bundle.main.bundleURL,
-                    showTools: false)
-        .frame(maxHeight: 150)
-        .border(.secondary)
+        FilePreview(url: url)
+            .frame(maxHeight: 150)
+            .border(.secondary)
+            .background(.red)
     }
 }
 
 struct FilePreview: UIViewControllerRepresentable {
     let url: URL
-    let showTools: Bool
 
     func makeUIViewController(context: Context) -> UIViewController {
-        let viewController = QLPreviewController()
-        viewController.dataSource = context.coordinator
-        if showTools {
-            return UINavigationController(rootViewController: viewController)
-        } else {
-            return viewController
-        }
+        let vc = QLPreviewController()
+        vc.view.backgroundColor = .clear
+        vc.dataSource = context.coordinator
+        return vc
     }
 
     func updateUIViewController(_: UIViewController, context _: Context) { }
@@ -54,11 +51,7 @@ struct FilePreview: UIViewControllerRepresentable {
 }
 
 #Preview {
-    let url = Bundle.main.bundleURL
-    Group {
-        FilePreview(url: url, showTools: true)
-        FilePreview(url: url, showTools: false)
-    }
+    FilePreview(url: Bundle.main.bundleURL)
     .border(.secondary)
     .padding()
 }

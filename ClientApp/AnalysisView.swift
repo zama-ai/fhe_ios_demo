@@ -173,9 +173,8 @@ struct AnalysisView: View {
         if let computed = viewModel.computed {
             VStack {
                 importRow("Prediction", "wand.and.sparkles", color: .yellow, data: computed.lifeExpectancy)
-                if let url = FHEEngine.shared.expectedResultURL {
-                    PrivateText(url: url)
-                }
+                let url = Storage.url(for: .encryptedOutput)
+                PrivateText(url: url)
             }
         }
     }
@@ -183,7 +182,15 @@ struct AnalysisView: View {
     // MARK: - ACTIONS -
     private func importData() async {
         try? await Task.sleep(for: .seconds(1))
-        viewModel.readInput()
+        if let encryptedData = try? await Storage.read(.encryptedInput) {
+            viewModel.imported = .init(age: encryptedData,
+                                       sex: encryptedData,
+                                       bloodType: encryptedData,
+                                       weightHistory: encryptedData,
+                                       sleepHistory: encryptedData,
+                                       heartRateHistory: encryptedData
+            )
+        }
     }
 
     private func upload() async {
@@ -192,7 +199,13 @@ struct AnalysisView: View {
     
     private func reloadFromDisk() async {
         try? await Task.sleep(for: .seconds(0.5))
-        viewModel.readOutput()
+        
+        if let computed = try? await Storage.read(.encryptedOutput) {
+            viewModel.computed = .init(lifeExpectancy: computed,
+                                       heartStat: .init(min: computed,
+                                                        max: computed,
+                                                        average: computed))
+        }
     }
 
     private func reset() {

@@ -56,7 +56,7 @@ func launchFHEComputation(uid: String, encryptedInput: Data) async throws -> Str
     }
 }
 
-// MARK: - Networking Helpers -
+// MARK: - Helpers -
 
 func sendRequest(_ request: URLRequest, session: URLSession = .shared) async throws -> Data {
     let (data, response) = try await session.data(for: request)
