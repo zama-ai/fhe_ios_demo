@@ -2,6 +2,26 @@ FROM zamafhe/concrete-ml:latest
 WORKDIR /project
 COPY server_requirements.txt server_requirements.txt
 COPY server.py server.py
+
+# DL Rust
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential \
+    curl
+RUN apt-get update
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Compile files
+WORKDIR /rust_folder
+COPY /rust_folder/Cargo.toml ./Cargo.toml
+COPY /rust_folder/Cargo.lock ./Cargo.lock
+COPY /rust_folder/src/main.rs ./src/main.rs
+
+RUN cargo build --profile devo
+RUN cp ./target/devo/rust_binary /project/rust_binary
+
+WORKDIR /project
 RUN python -m pip install -r ./server_requirements.txt
 EXPOSE 5000
 ENTRYPOINT python server.py

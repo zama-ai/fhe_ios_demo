@@ -51,7 +51,7 @@ struct HealthView: View {
             try await ck.writeToDisk()
             try await sk.writeToDisk()
             
-            let data = try FHEUInt16(encrypting: 41, clientKey: ck).toData()
+            let data = try FHEUInt16(encrypting: 22, clientKey: ck).toData()
             try await Storage.write(.encryptedInput, data: data)
         }
         .buttonStyle(.bordered)

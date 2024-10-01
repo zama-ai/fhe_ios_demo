@@ -4,7 +4,7 @@ import Foundation
 import TFHE
 
 final class ServerKey: Persistable {
-    static let fileName: Storage.File = .serverKey
+    static let fileName: Storage.File = .serverKeyUncompressed
     var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {

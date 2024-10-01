@@ -12,17 +12,16 @@ from pathlib import Path
 from typing import Dict
 
 import uvicorn
-from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi import FastAPI, UploadFile, Form
 from fastapi.responses import FileResponse, StreamingResponse
 
 if __name__ == "__main__":
     app = FastAPI(debug=False)
 
-    FILE_FOLDER = Path(__file__).parent
+    FILES_FOLDER = Path(__file__).parent / "uploaded_files"
+    FILES_FOLDER.mkdir(exist_ok=True)  # Ensure the directory exists
 
     PORT = os.environ.get("PORT", "5000")
-
-    KEYS: Dict[str, bytes] = {}
 
     @app.post("/add_key")
     async def add_key(key: UploadFile):
@@ -37,11 +36,16 @@ if __name__ == "__main__":
         """
         uid = str(uuid.uuid4())
 
-        KEYS[uid] = await key.read()
+        # Write uploaded ServerKey to disk
+        file_content = await key.read()
+        file_path = FILES_FOLDER / f"{uid}.serverKey"
+        with open(file_path, "wb") as f:
+            f.write(file_content)
+    
         return {"uid": uid}
 
     @app.post("/compute")
-    async def compute(model_input: UploadFile, uid: str = Form()):
+    async def compute(input: UploadFile, uid: str = Form()):
         """Compute the circuit over encrypted input.
 
         Arguments:
@@ -52,15 +56,23 @@ if __name__ == "__main__":
             StreamingResponse: the result of the circuit
         """
 
-        # Using the evaluation key from the client
-        key = KEYS[uid]
+        # Write uploaded input to disk
+        file_content = await input.read()
+        file_path = FILES_FOLDER / f"{uid}.input.fheencrypted"
+        with open(file_path, "wb") as f:
+            f.write(file_content)
 
-        # FIXME: do real computations, by replacing the commandline by the Rust compiled binary
-        commandline = 'ls'
+        commandline = f'./rust_binary {uid}'
         stream = os.popen(commandline)
         output_from_commandline = stream.read()
+        print(output_from_commandline)
+        
+        file_path = FILES_FOLDER / f"{uid}.output.fheencrypted"
 
-        encrypted_results = f"{output_from_commandline}".encode('UTF-8')
+        with open(file_path, "rb") as f:
+            data = f.read()
+            
+        encrypted_results = data
 
         return StreamingResponse(
             io.BytesIO(encrypted_results),

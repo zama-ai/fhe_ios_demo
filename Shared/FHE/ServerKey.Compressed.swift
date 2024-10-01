@@ -1,15 +1,10 @@
 // Copyright © 2024 Zama. All rights reserved.
 
-/* From tfhe.h:
- int compressed_server_key_new(const struct ClientKey *client_key,
-                               struct CompressedServerKey **result_server_key);
- */
-
 import Foundation
 import TFHE
 
 final class CompressedServerKey: Persistable {
-    static let fileName: Storage.File = .serverKeyCompressed
+    static let fileName: Storage.File = .serverKey
     private var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {

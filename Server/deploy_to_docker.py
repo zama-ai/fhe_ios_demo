@@ -54,8 +54,18 @@ def build_docker_image(image_name: str):
     cwd = os.getcwd()
     with TemporaryDirectory() as directory:
         temp_dir = Path(directory)
-
-        files = ["server.py", "server_requirements.txt"]
+        
+        os.mkdir(str(temp_dir) + "/rust_folder")
+        os.mkdir(str(temp_dir) + "/rust_folder/src")
+        
+        files = [
+            "server.py",
+            "server_requirements.txt",
+            "rust_folder/Cargo.toml",
+            "rust_folder/Cargo.lock",
+            "rust_folder/src/main.rs"
+        ]
+        
         # Copy files
         for file_name in files:
             source = path_of_script / file_name
@@ -69,7 +79,6 @@ def build_docker_image(image_name: str):
         )
         subprocess.check_output(command, shell=True)
     os.chdir(cwd)
-
 
 def main(image_name: str):
     """Deploy function.
