@@ -30,29 +30,15 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
     }
 
     func preparePreviewOfFile(at url: URL) async throws {
-        let result = try await readClearResult(at: url)
-        viewModel.text = "Prediction is \(result)%"
-    }
-}
-
-import TFHE
-extension PreviewWrapperVC {
-    private func readClearResult(at url: URL) async throws -> Int {
-        let _ = FHEEngine.shared
-        try? await Task.sleep(for: .seconds(0.5)) // Hack to wait for client_key loading
-
-        return try await withCheckedThrowingContinuation { continuation in
-            FHEEngine.readFile(named: url.lastPathComponent) { result in
-                switch result {
-                case .success(let data):
-                    let clearOutput = FHEEngine.shared.decryptInt(data: data)
-                    continuation.resume(returning: clearOutput)
-                    
-                case .failure(let error):
-                    print("No crypted file to read from, \(error)")
-                    continuation.resume(throwing: error)
-                }
-            }
+        guard let data = try await Storage.read(url),
+              let ck = try await ClientKey.readFromDisk() else {
+            print("QL: cannot read CK nor file at \(url)")
+            throw NSError(domain: "app", code: 42, userInfo: [:])
         }
+        
+        //try? await Task.sleep(for: .seconds(0.5)) // Hack to wait for client_key loading
+        let encrypted = try FHEUInt16(fromData: data)
+        let clearText = try encrypted.decrypt(clientKey: ck)
+        viewModel.text = "Prediction is \(clearText)%"
     }
 }

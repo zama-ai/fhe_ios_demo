@@ -36,11 +36,23 @@ struct HealthView: View {
         }
                 
         AsyncButton("Encrypt Health Information") {
-            try? await Task.sleep(for: .seconds(0.5))
+            let ck: ClientKey = try await {
+                let saved = try? await ClientKey.readFromDisk()
+                let new = try ClientKey.generate()
+                return saved ?? new
+            }()
             
-            let clearInput = 42
-            let data = FHEEngine.shared.encryptInt(UInt16(clearInput))
-            FHEEngine.shared.writeSharedData(data, key: .input)
+            let sk: CompressedServerKey = try await {
+                let saved = try? await CompressedServerKey.readFromDisk()
+                let new = try CompressedServerKey(clientKey: ck)
+                return saved ?? new
+            }()
+            
+            try await ck.writeToDisk()
+            try await sk.writeToDisk()
+            
+            let data = try FHEUInt16(encrypting: 41, clientKey: ck).toData()
+            try await Storage.write(.encryptedInput, data: data)
         }
         .buttonStyle(.bordered)
                 

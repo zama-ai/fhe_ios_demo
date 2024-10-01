@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		320CF75E2CAA161500528366 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
 		320CF75F2CAA161500528366 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32F029DA2CA37007009B522D /* QuickLook.framework */; };
 		324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -88,8 +87,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		320CF7682CAAA2CB00528366 /* Presentation.key */ = {isa = PBXFileReference; lastKnownFileType = file; path = Presentation.key; sourceTree = "<group>"; };
-		320CF7692CAAA2CB00528366 /* Presentation.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Presentation.pdf; sourceTree = "<group>"; };
 		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
 		3275F5A42CA16515001E7377 /* FHE Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,10 +97,46 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		320CF75D2CAA157400528366 /* Exceptions for "BridgeApp" folder in "Client" target */ = {
+		320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				FHEEngine.swift,
+				AsyncButton.swift,
+				"Data+Ext.swift",
+				FHE/ClientKey.swift,
+				FHE/FHEResult.swift,
+				FHE/FHEUInt16.swift,
+				FHE/Helpers.swift,
+				FHE/Persistable.swift,
+				FHE/ServerKey.Compressed.swift,
+				FHE/ServerKey.swift,
+				FHE/Test.swift,
+				Storage.swift,
+			);
+			target = 32B258362C98693800538B23 /* Bridge */;
+		};
+		320C391C2CAAEEA200528366 /* Exceptions for "Shared" folder in "Server" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AsyncButton.swift,
+				"Data+Ext.swift",
+				FHE/ClientKey.swift,
+				FHE/FHEResult.swift,
+				FHE/FHEUInt16.swift,
+				FHE/Helpers.swift,
+				FHE/Persistable.swift,
+				FHE/ServerKey.Compressed.swift,
+				FHE/ServerKey.swift,
+				FHE/Test.swift,
+				Storage.swift,
+			);
+			target = 3275F5A32CA16515001E7377 /* Server */;
+		};
+		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AsyncButton.swift,
+				"Data+Ext.swift",
+				Storage.swift,
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
 		};
@@ -115,19 +148,21 @@
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
 		};
-		320CF7672CAA8A8200528366 /* Exceptions for "ClientApp" folder in "Bridge" target */ = {
+		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Helpers/AsyncButton.swift,
+				"Data+Ext.swift",
+				FHE/ClientKey.swift,
+				FHE/FHEResult.swift,
+				FHE/FHEUInt16.swift,
+				FHE/Helpers.swift,
+				FHE/Persistable.swift,
+				FHE/ServerKey.Compressed.swift,
+				FHE/ServerKey.swift,
+				FHE/Test.swift,
+				Storage.swift,
 			);
-			target = 32B258362C98693800538B23 /* Bridge */;
-		};
-		320CF76C2CAAA3D400528366 /* Exceptions for "ClientApp" folder in "Server" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Helpers/AsyncButton.swift,
-			);
-			target = 3275F5A32CA16515001E7377 /* Server */;
+			target = 324F8E1C2CA43B2100F0BB11 /* QLExtension */;
 		};
 		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -144,13 +179,6 @@
 			);
 			target = 3275F5A32CA16515001E7377 /* Server */;
 		};
-		32C9CC4D2CA567A600AEDA32 /* Exceptions for "BridgeApp" folder in "Server" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				FHEEngine.swift,
-			);
-			target = 3275F5A32CA16515001E7377 /* Server */;
-		};
 		32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -158,16 +186,25 @@
 			);
 			target = 32B258362C98693800538B23 /* Bridge */;
 		};
-		32C9CC502CA5681F00AEDA32 /* Exceptions for "BridgeApp" folder in "QLExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				FHEEngine.swift,
-			);
-			target = 324F8E1C2CA43B2100F0BB11 /* QLExtension */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		32079E3B2CAC3941004EC06A /* Docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Docs;
+			sourceTree = "<group>";
+		};
+		320C391A2CAAEE2900528366 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */,
+				320C391C2CAAEEA200528366 /* Exceptions for "Shared" folder in "Server" target */,
+				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QLExtension" target */,
+				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		320CFB212CAAC47500528366 /* Server */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Server;
@@ -185,10 +222,6 @@
 		};
 		32C9CC212CA565A100AEDA32 /* ClientApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				320CF7672CAA8A8200528366 /* Exceptions for "ClientApp" folder in "Bridge" target */,
-				320CF76C2CAAA3D400528366 /* Exceptions for "ClientApp" folder in "Server" target */,
-			);
 			path = ClientApp;
 			sourceTree = "<group>";
 		};
@@ -196,9 +229,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */,
-				32C9CC4D2CA567A600AEDA32 /* Exceptions for "BridgeApp" folder in "Server" target */,
-				32C9CC502CA5681F00AEDA32 /* Exceptions for "BridgeApp" folder in "QLExtension" target */,
-				320CF75D2CAA157400528366 /* Exceptions for "BridgeApp" folder in "Client" target */,
 			);
 			path = BridgeApp;
 			sourceTree = "<group>";
@@ -240,22 +270,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				320CF75E2CAA161500528366 /* TFHE.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		320CF76A2CAAA2CB00528366 /* Docs */ = {
-			isa = PBXGroup;
-			children = (
-				320CF7682CAAA2CB00528366 /* Presentation.key */,
-				320CF7692CAAA2CB00528366 /* Presentation.pdf */,
-			);
-			path = Docs;
-			sourceTree = "<group>";
-		};
 		3250B3C72C9B2C8B009B48C3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -269,12 +289,13 @@
 			isa = PBXGroup;
 			children = (
 				32B258512C9869A700538B23 /* README.md */,
-				320CF76A2CAAA2CB00528366 /* Docs */,
+				32079E3B2CAC3941004EC06A /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
 				320CFB212CAAC47500528366 /* Server */,
 				32C9CC422CA566DC00AEDA32 /* ServerApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
 				32C9CC212CA565A100AEDA32 /* ClientApp */,
+				320C391A2CAAEE2900528366 /* Shared */,
 				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
 				32B258382C98693800538B23 /* Products */,
 			);

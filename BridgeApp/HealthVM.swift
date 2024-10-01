@@ -34,6 +34,7 @@ final class HealthViewModel: ObservableObject {
         HKQuantityType(.bodyMass),
         HKQuantityType(.restingHeartRate),
         HKCategoryType(.sleepAnalysis),
+        HKQuantityType(.oxygenSaturation),
         HKQuantityType(.activeEnergyBurned),
         HKQuantityType(.appleExerciseTime),
     ]
@@ -42,6 +43,7 @@ final class HealthViewModel: ObservableObject {
         HKQuantityType(.bodyMass),
         HKQuantityType(.restingHeartRate),
         HKCategoryType(.sleepAnalysis),
+        HKQuantityType(.oxygenSaturation),
         HKQuantityType(.activeEnergyBurned),
         HKQuantityType(.appleExerciseTime),
     ]
@@ -54,6 +56,7 @@ final class HealthViewModel: ObservableObject {
             
             async let heartRate = await getDiscreteSampleMeasuments(type: HKQuantityType(.restingHeartRate),
                                                                     unit: HKUnit.count().unitDivided(by: .minute()))
+
             getSamples()
             
             let result = await HealthData(sex: info.sex,
@@ -154,6 +157,7 @@ final class HealthViewModel: ObservableObject {
         let sampleTypes = [
             HKQuantityType(.bodyMass),          // HKDiscreteQuantitySample
             HKQuantityType(.restingHeartRate),         // HKDiscreteQuantitySample
+            HKQuantityType(.oxygenSaturation),
             HKCategoryType(.sleepAnalysis),     // HKCategorySample
             HKQuantityType(.activeEnergyBurned),// HKCumulativeQuantitySample
             HKQuantityType(.appleExerciseTime)  // HKCumulativeQuantitySample
@@ -200,11 +204,15 @@ final class HealthViewModel: ObservableObject {
             let rounded = Int(double.rounded())
             print("heartRate: ", sample.startDate.formatted(), heartRate.quantity, double, rounded)
             
+        case let oxygen as HKDiscreteQuantitySample where sample.sampleType == HKQuantityType(.oxygenSaturation):
+            let double = oxygen.quantity.doubleValue(for: .percent())
+            print("oxygen:\t", sample.startDate.formatted(), "\t", double)
+
         case let sleep as HKCategorySample where sample.sampleType == HKCategoryType(.sleepAnalysis):
             let duration = sleep.endDate.timeIntervalSince(sample.startDate)
-            let type = sleep.value
-            print("sleep \(sample.startDate.formatted()) \(duration.formatted()) \(type)")
-            
+            let value = sleep.value
+            print("sleep:\t\(sample.startDate.formatted())\t\(duration)\t\(value)")
+
         case let energyBurned as HKCumulativeQuantitySample where sample.sampleType == HKQuantityType(.activeEnergyBurned):
             let double = energyBurned.quantity.doubleValue(for: .smallCalorie())
             let rounded = Int(double.rounded())
