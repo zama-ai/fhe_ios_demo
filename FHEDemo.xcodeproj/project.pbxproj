@@ -102,14 +102,15 @@
 			membershipExceptions = (
 				AsyncButton.swift,
 				"Data+Ext.swift",
-				FHE/ClientKey.swift,
 				FHE/FHEResult.swift,
 				FHE/FHEUInt16.swift,
+				FHE/FHEUInt16Array.swift,
 				FHE/Helpers.swift,
+				FHE/Keys/ClientKey.swift,
+				FHE/Keys/PublicKeyCompact.swift,
+				FHE/Keys/ServerKey.swift,
+				FHE/Keys/ServerKeyCompressed.swift,
 				FHE/Persistable.swift,
-				FHE/ServerKey.Compressed.swift,
-				FHE/ServerKey.swift,
-				FHE/Test.swift,
 				Storage.swift,
 			);
 			target = 32B258362C98693800538B23 /* Bridge */;
@@ -119,14 +120,20 @@
 			membershipExceptions = (
 				AsyncButton.swift,
 				"Data+Ext.swift",
-				FHE/ClientKey.swift,
 				FHE/FHEResult.swift,
 				FHE/FHEUInt16.swift,
+				FHE/FHEUInt16Array.swift,
 				FHE/Helpers.swift,
+				FHE/Keys/ClientKey.swift,
+				FHE/Keys/PublicKeyCompact.swift,
+				FHE/Keys/ServerKey.swift,
+				FHE/Keys/ServerKeyCompressed.swift,
 				FHE/Persistable.swift,
-				FHE/ServerKey.Compressed.swift,
-				FHE/ServerKey.swift,
-				FHE/Test.swift,
+				"FHE/ServerOnly/FHEUInt16+ServerOnly.swift",
+				"FHE/ServerOnly/FHEUInt16Array+ServerOnly.swift",
+				"FHE/ServerOnly/ServerKey+ServerOnly.swift",
+				"FHE/ServerOnly/ServerKeyCompressed+ServerOnly.swift",
+				FHE/ServerOnly/Test.swift,
 				Storage.swift,
 			);
 			target = 3275F5A32CA16515001E7377 /* Server */;
@@ -152,14 +159,15 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Data+Ext.swift",
-				FHE/ClientKey.swift,
 				FHE/FHEResult.swift,
 				FHE/FHEUInt16.swift,
+				FHE/FHEUInt16Array.swift,
 				FHE/Helpers.swift,
+				FHE/Keys/ClientKey.swift,
+				FHE/Keys/PublicKeyCompact.swift,
+				FHE/Keys/ServerKey.swift,
+				FHE/Keys/ServerKeyCompressed.swift,
 				FHE/Persistable.swift,
-				FHE/ServerKey.Compressed.swift,
-				FHE/ServerKey.swift,
-				FHE/Test.swift,
 				Storage.swift,
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QLExtension */;

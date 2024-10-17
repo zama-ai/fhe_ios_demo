@@ -4,7 +4,7 @@ import SwiftUI
 
 struct ServerView: View {
     @State private var sk: ServerKey?
-    @State private var csk: CompressedServerKey?
+    @State private var csk: ServerKeyCompressed?
     @State private var input: FHEUInt16?
     
     @Environment(\.scenePhase) var scenePhase
@@ -13,6 +13,13 @@ struct ServerView: View {
         VStack(spacing: 20) {
             Text("FHE Server App")
                 .font(.largeTitle)
+                .task {
+                    do {
+                        try await fheTest()
+                    } catch {
+                        print(error)
+                    }
+                }
             
             Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")
                 .foregroundStyle(.yellow)
@@ -43,7 +50,7 @@ struct ServerView: View {
     func reloadFromDisk() {
         Task { @MainActor in
             self.sk = try? await ServerKey.readFromDisk()
-            self.csk = try? await CompressedServerKey.readFromDisk()
+            self.csk = try? await ServerKeyCompressed.readFromDisk()
             try self.csk?.setServerKey()
             
             self.input = try? await FHEUInt16.readFromDisk()

@@ -182,7 +182,7 @@ struct AnalysisView: View {
     // MARK: - ACTIONS -
     private func importData() async {
         try? await Task.sleep(for: .seconds(1))
-        if let encryptedData = try? await Storage.read(.encryptedInput) {
+        if let encryptedData = try? await Storage.read(.encryptedIntInput) {
             viewModel.imported = .init(age: encryptedData,
                                        sex: encryptedData,
                                        bloodType: encryptedData,
