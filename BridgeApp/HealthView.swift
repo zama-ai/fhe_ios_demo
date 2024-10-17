@@ -23,15 +23,20 @@ struct HealthView: View {
         }
         .buttonStyle(.bordered)
         .healthDataAccessRequest(store: viewModel.healthStore,
-                                  readTypes: viewModel.permissions,
-                                  trigger: showHealthKitPermissions) { result in
+                                 readTypes: viewModel.sampleTypes,
+                                 trigger: showHealthKitPermissions) { result in
             switch result {
-            case .success(let success):
-                print("success", success)
+            case .success:
                 viewModel.fetchHealthData()
                 
             case .failure(let failure):
                 print("failure", failure)
+            }
+        }.onAppear {
+            Task {
+                if try await viewModel.isAllowed() {
+                    viewModel.fetchHealthData()
+                }
             }
         }
                 
@@ -42,9 +47,9 @@ struct HealthView: View {
                 return saved ?? new
             }()
             
-            let sk: CompressedServerKey = try await {
-                let saved = try? await CompressedServerKey.readFromDisk()
-                let new = try CompressedServerKey(clientKey: ck)
+            let sk: ServerKeyCompressed = try await {
+                let saved = try? await ServerKeyCompressed.readFromDisk()
+                let new = try ServerKeyCompressed(clientKey: ck)
                 return saved ?? new
             }()
             
@@ -52,21 +57,14 @@ struct HealthView: View {
             try await sk.writeToDisk()
             
             let data = try FHEUInt16(encrypting: 22, clientKey: ck).toData()
-            try await Storage.write(.encryptedInput, data: data)
+            try await Storage.write(.encryptedIntInput, data: data)
         }
         .buttonStyle(.bordered)
                 
         List {
-            Section("Personal info") {
-                infoRow
-            }
-            
             Section("Select data to encrypt") {
                 row("Weight", unit: "kg", icon: "figure", color: .purple, values: viewModel.data.bodyMass)
-                row("Heart rate", unit: "BPM", icon: "heart.fill", color: .pink, values: viewModel.data.heartRate)
                 row("Sleep", unit: "h", icon: "bed.double.fill", color: .mint, values: viewModel.data.sleep)
-                row("Energy Burned", unit: "kcal", icon: "flame.fill", color: .orange, values: viewModel.data.energyBurned)
-                row("Exercice", unit: "min", icon: "flame.fill", color: .orange, values: viewModel.data.exercice)
             }
             
             encryptionSection
@@ -111,33 +109,6 @@ struct HealthView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.black)
             .clipShape(RoundedRectangle(cornerRadius: 4))
-    }
-    
-    private var infoRow: some View {
-        HStack(spacing: 4) {
-            infoCell("Sex", value: viewModel.data.sex ?? "-")
-            infoCell("Age", value: viewModel.data.age.map({ "\($0) yo" }) ?? "-")
-            infoCell("Blood", value: viewModel.data.blood ?? "-")
-            infoCell("Wheelchair", value: viewModel.data.wheelChair.map({ $0 ? "Yes" : "No" })  ?? "-")
-        }
-        .padding(4)
-        .listRowBackground(EmptyView())
-        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-    }
-    
-    private func infoCell(_ title: String, value: String) -> some View {
-        VStack {
-            Text(title)
-                .textCase(.uppercase)
-                .foregroundStyle(.secondary)
-                .font(.system(size: 11).bold())
-            Text(value).font(.body)
-        }
-        .padding(4)
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity)
-        .background(.quaternary)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     
     private func row(_ title: String, unit: String, icon: String, color: Color, values: [Int] = []) -> some View {

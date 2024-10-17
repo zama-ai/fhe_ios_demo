@@ -3,8 +3,16 @@
 import Foundation
 import TFHE
 
+/*
+ UInt2.max: 3
+ UInt4.max: 15
+ UInt8.max: 255
+ UInt16.max: 65,535
+ UInt64.max: 4,294,967,295
+ */
+
 final class FHEUInt16: Persistable {
-    static let fileName: Storage.File = .encryptedInput
+    static let fileName: Storage.File = .encryptedIntInput
     var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {
@@ -14,7 +22,7 @@ final class FHEUInt16: Persistable {
     deinit {
         fhe_uint16_destroy(pointer)
     }
-
+    
     // MARK: to/from Data
     func toData() throws -> Data {
         var buffer = DynamicBuffer(pointer: nil, length: 0, destructor: nil)
@@ -26,29 +34,22 @@ final class FHEUInt16: Persistable {
         let buffer = input.toDynamicBuffer()
         let bufferView = DynamicBufferView(pointer: buffer.pointer, length: buffer.length)
         var result: OpaquePointer?
-
+        
         try wrap { fhe_uint16_deserialize(bufferView, &result) }
         
         self.init(pointer: result)
     }
-        
+    
     // MARK: - ENCRYPTION -
     func decrypt(clientKey: ClientKey) throws -> Int {
         var result: UInt16 = 0
         try wrap { fhe_uint16_decrypt(pointer, clientKey.pointer, &result) }
         return Int(result)
     }
-
+    
     init(encrypting integer: Int, clientKey: ClientKey) throws {
         try wrap { fhe_uint16_try_encrypt_with_client_key_u16(UInt16(integer), clientKey.pointer, &pointer) }
-    }
-    
-    // MARK: - COMPUTE (needs ServerKey) -
-    func addScalar(int: Int) throws -> FHEUInt16 {
-        var resultPointer: OpaquePointer?
-        try wrap { fhe_uint16_scalar_add(pointer, UInt16(int), &resultPointer) }
-        return FHEUInt16(pointer: resultPointer)
-    }
+    }    
 }
 
 extension FHEUInt16: Codable {

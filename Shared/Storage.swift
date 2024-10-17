@@ -5,10 +5,12 @@ import Foundation
 final class Storage {
     enum File: String {
         case clientKey = "clientKey"
-        case serverKey = "serverKey"
+        case publicKey = "publicKeyCompact"
+        case serverKey = "serverKeyCompressed"
         case serverKeyUncompressed = "serverKey.uncompressed"
-        
-        case encryptedInput  = "input.fheencrypted"
+
+        case encryptedIntInput  = "inputInt.fheencrypted"
+        case encryptedListInput  = "inputList.fheencrypted"
         case encryptedOutput = "output.fheencrypted"
     }
     

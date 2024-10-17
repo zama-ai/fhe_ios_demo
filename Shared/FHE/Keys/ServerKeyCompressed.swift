@@ -3,18 +3,18 @@
 import Foundation
 import TFHE
 
-final class CompressedServerKey: Persistable {
+final class ServerKeyCompressed: Persistable {
     static let fileName: Storage.File = .serverKey
-    private var pointer: OpaquePointer? = nil
+    var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {
         self.pointer = pointer
     }
 
     convenience init(clientKey: ClientKey) throws {
-        var compressedKeyPointer: OpaquePointer? // CompressedServerKey
-        try wrap { compressed_server_key_new(clientKey.pointer, &compressedKeyPointer) }
-        self.init(pointer: compressedKeyPointer)
+        var pointer: OpaquePointer? // ServerKeyCompressed
+        try wrap { compressed_server_key_new(clientKey.pointer, &pointer) }
+        self.init(pointer: pointer)
     }
 
     deinit {
@@ -35,17 +35,5 @@ final class CompressedServerKey: Persistable {
         try wrap { compressed_server_key_deserialize(bufferView, &result) }
         
         self.init(pointer: result)
-    }
-
-    // MARK: - SERVER -
-    func setServerKey() throws {
-        let decompressed = try decompress()
-        set_server_key(decompressed.pointer)
-    }
-    
-    private func decompress() throws -> ServerKey {
-        var serverKeyPointer: OpaquePointer? // ServerKey
-        try wrap { compressed_server_key_decompress(pointer, &serverKeyPointer) }
-        return ServerKey(pointer: serverKeyPointer)
     }
 }
