@@ -5,6 +5,7 @@ import QuickLook
 
 struct SecureDisplay: View {
     let url: URL
+    let showURL: Bool
     
     var body: some View {
         VStack {
@@ -12,8 +13,11 @@ struct SecureDisplay: View {
                 .frame(maxHeight: 150)
                 .border(.secondary)
                 .background(.red)
-            Text(url.lastPathComponent)
-                .font(.caption)
+            
+            if showURL {
+                Text(url.lastPathComponent)
+                    .font(.caption)
+            }
         }
     }
 }
@@ -52,7 +56,7 @@ struct FilePreview: UIViewControllerRepresentable {
 }
 
 #Preview {
-    SecureDisplay(url: Bundle.main.bundleURL)
+    SecureDisplay(url: Bundle.main.bundleURL, showURL: true)
         .border(.secondary)
         .padding()
 }

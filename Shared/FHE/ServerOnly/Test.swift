@@ -20,9 +20,9 @@ func fheTest() async throws {
     let sk = try ServerKeyCompressed(clientKey: ck)
     let inputInt = try FHEUInt16(encrypting: 42, clientKey: ck)
     
-    let array = [18, 22, 3, 4, 5, 6, 7, 8]
-    let coeff = precisionCoeff(for: 1)
-    let bigArray = array.map { $0 * coeff }
+    let array: [Double] = [72, 71, 69, 71, 70, 73, 65.3]
+    let coeff: Int = precisionCoeff(for: 1)
+    let bigArray = array.map { Int($0 * Double(coeff)) }
     let inputArray = try FHEUInt16Array(encrypting: bigArray, publicKey: pk)
     
     try await ck.writeToDisk()
@@ -31,6 +31,7 @@ func fheTest() async throws {
     try await inputInt.writeToDisk()
     try await inputArray.writeToDisk()
 
+    let time = Date()
     guard let ck2 = try await ClientKey.readFromDisk(),
           let sk2 = try await ServerKeyCompressed.readFromDisk(),
           let _ = try await PublicKeyCompact.readFromDisk(),
@@ -44,6 +45,7 @@ func fheTest() async throws {
     try sk2.setServerKey()
     let resultInt = try inputInt2.addScalar(int: 42)
     let stats = try inputArray2.stats()
+    let time2 = Date()
     
     try await resultInt.writeToDisk()
     // End Server
@@ -59,9 +61,9 @@ func fheTest() async throws {
     let max = try stats.max.decrypt(clientKey: ck) / coeff
     let rawAvg = try stats.avg.decrypt(clientKey: ck)
     let avg = Double(rawAvg) / Double(coeff)
-    print()
 
-    print("Results are: int: \(int), min: \(min), max: \(max), avg: \(avg)")
+    print("Results are: int: \(int), min: \(min), max: \(max), avg: \(avg)\n()")
+    print("Time taken: \(time2.timeIntervalSince(time)) seconds")
 }
 
 // 0 => 1

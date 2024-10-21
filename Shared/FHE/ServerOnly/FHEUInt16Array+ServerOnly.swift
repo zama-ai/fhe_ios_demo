@@ -13,7 +13,7 @@ extension FHEUInt16Array {
     
     func stats() throws -> (min: FHEUInt16, max: FHEUInt16, avg: FHEUInt16) {
         let items = try readItems()
-        assert(items.count != 0, "empty array, cannot find min/max")
+        assert(items.count != 0, "empty array, cannot find min/max/avg")
         var min: FHEUInt16 = items[0]
         var max: FHEUInt16 = items[0]
         var sum: FHEUInt16 = items[0]
@@ -25,7 +25,7 @@ extension FHEUInt16Array {
         }
         
         let avg = try sum.divScalar(int: items.count)
-        return(min, max, avg)
+        return (min, max, avg)
     }
     
     private func expandItems() throws -> [FHEUInt16] {
