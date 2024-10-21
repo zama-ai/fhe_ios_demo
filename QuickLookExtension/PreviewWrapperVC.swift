@@ -39,6 +39,6 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
         //try? await Task.sleep(for: .seconds(0.5)) // Hack to wait for client_key loading
         let encrypted = try FHEUInt16(fromData: data)
         let clearText = try encrypted.decrypt(clientKey: ck)
-        viewModel.text = "Prediction is \(clearText)%"
+        viewModel.text = "\(clearText)"
     }
 }

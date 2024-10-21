@@ -12,7 +12,7 @@ import TFHE
  */
 
 final class FHEUInt16: Persistable {
-    static let fileName: Storage.File = .encryptedIntInput
+    static let fileName: Storage.File = .encryptedInputInt
     var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {

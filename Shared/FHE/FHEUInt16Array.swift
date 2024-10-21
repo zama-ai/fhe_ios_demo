@@ -4,7 +4,7 @@ import Foundation
 import TFHE
 
 final class FHEUInt16Array: Persistable {
-    static let fileName: Storage.File = .encryptedListInput
+    static let fileName: Storage.File = .encryptedInputList
     var pointer: OpaquePointer? = nil
     var cachedItems: [FHEUInt16] = []
 

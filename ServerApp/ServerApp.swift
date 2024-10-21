@@ -64,7 +64,7 @@ struct ServerView: View {
     func computePredictions() async throws {
         guard let input else { return }
         let computed = try input.addScalar(int: 10)
-        try await Storage.write(.encryptedOutput, data: computed.toData())
+//        try await Storage.write(.encryptedOutput, data: computed.toData())
         reloadFromDisk()
     }
 }
