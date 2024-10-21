@@ -33,7 +33,7 @@ final class BridgeViewModel: ObservableObject {
     ]
     
     func loadFromDisk() async throws {
-        encryptedWeight = try await Storage.read(.encryptedInputList)
+        encryptedWeight = try await Storage.read(.weightList)
     }
     
     func isAllowed() async throws -> Bool {
@@ -104,50 +104,49 @@ final class BridgeViewModel: ObservableObject {
 extension BridgeViewModel {
     func encryptWeight() async throws {
         try await ensureKeysExist()
-        
-        let int = try FHEUInt16(encrypting: 24, clientKey: ck!)
-        try? await int.writeToDisk()
-        
+                
         if let pk {
             let biggerInts = clearData.weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)
-            try await array.writeToDisk()
+            let file = try FHERenderable(.uint16Array, data: array.toData)
+            
+            try await Storage.write(.weightList, data: file.toData())
             encryptedWeight = try array.toData()
         }
     }
 
     func deleteWeight() async throws {
-        try await FHEUInt16Array.deleteFromDisk()
+        try await Storage.deleteFromDisk(.weightList)
         encryptedWeight = nil
     }
 
     private func ensureKeysExist() async throws {
         if ck == nil {
-            if let saved = try? await ClientKey.readFromDisk() {
+            if let saved = try? await ClientKey.readFromDisk(.clientKey) {
                 ck = saved
             } else {
                 let new = try ClientKey.generate()
-                try await new.writeToDisk()
+                try await new.writeToDisk(.clientKey)
                 ck = new
             }
         }
         
         if pk == nil, let ck {
-            if let saved = try? await PublicKeyCompact.readFromDisk() {
+            if let saved = try? await PublicKeyCompact.readFromDisk(.publicKey) {
                 pk = saved
             } else {
                 let new = try PublicKeyCompact(clientKey: ck)
-                try await new.writeToDisk()
+                try await new.writeToDisk(.publicKey)
                 pk = new
             }
         }
         
         if sk == nil, let ck {
-            if let saved = try? await ServerKeyCompressed.readFromDisk() {
+            if let saved = try? await ServerKeyCompressed.readFromDisk(.serverKey) {
                 sk = saved
             } else {
                 let new = try ServerKeyCompressed(clientKey: ck)
-                try await new.writeToDisk()
+                try await new.writeToDisk(.serverKey)
                 sk = new
             }
         }

@@ -4,7 +4,7 @@ import Foundation
 import TFHE
 
 final class PublicKeyCompact: Persistable {
-    static let fileName: Storage.File = .publicKey
+    let fileName: Storage.File = .publicKey
     var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {

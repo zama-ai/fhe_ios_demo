@@ -9,7 +9,7 @@ extension ClientView {
         @Published var encryptedSleep: Data?
 
         func loadFromDisk() async throws {
-            encryptedWeight = try await Storage.read(.encryptedInputList)
+            encryptedWeight = try await Storage.read(.weightList)
         }
         
         func upload() async throws {
@@ -17,16 +17,21 @@ extension ClientView {
                 throw NetworkingError.message("Server key missing")
             }
             
-            guard let array = try await Storage.read(.encryptedInputList) else {
+            guard let array = try await Storage.read(.ageIn) else {
                 throw NetworkingError.message("Encrypted list missing")
             }
 
             let userID = try await Network.shared.uploadServerKey(serverKey)
             let stats = try await Network.shared.getStats(uid: userID, encryptedArray: array)
             
-            try await Storage.write(.encryptedOutputMin, data: stats.min)
-            try await Storage.write(.encryptedOutputMax, data: stats.max)
-            try await Storage.write(.encryptedOutputAvg, data: stats.avg)
+            let min = try FHERenderable(.uint16, data: { stats.min })
+            try await min.writeToDisk(.weightMin)
+
+            let max = try FHERenderable(.uint16, data: { stats.max })
+            try await max.writeToDisk(.weightMax)
+
+            let avg = try FHERenderable(.uint16, data: { stats.avg })
+            try await avg.writeToDisk(.weightAvg)
         }
     }
 }
