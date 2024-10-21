@@ -78,4 +78,48 @@ if __name__ == "__main__":
             io.BytesIO(encrypted_results),
         )
 
+    @app.post("/stats")
+    async def stats(input: UploadFile, uid: str = Form()):
+        """Get stats (min/max/avg) over encrypted input (array of int).
+
+        Arguments:
+            model_input (UploadFile): input array
+            uid (str): uid of the public key to use
+
+        Returns:
+            StreamingResponse: the result of the circuit
+        """
+
+        # Write uploaded input to disk
+        file_content = await input.read()
+        file_path = FILES_FOLDER / f"{uid}.inputList.fheencrypted"
+        with open(file_path, "wb") as f:
+            f.write(file_content)
+
+        commandline = f'./rust_array_stats {uid}'
+        stream = os.popen(commandline)
+        output_from_commandline = stream.read()
+        print(output_from_commandline)
+
+        avg_path = FILES_FOLDER / f"{uid}.outputAvg.fheencrypted"
+        min_path = FILES_FOLDER / f"{uid}.outputMin.fheencrypted"
+        max_path = FILES_FOLDER / f"{uid}.outputMax.fheencrypted"
+
+        with open(avg_path, "rb") as f:
+            avg = f.read()
+            
+        with open(min_path, "rb") as f:
+            min = f.read()
+        
+        with open(max_path, "rb") as f:
+            max = f.read()
+        
+        response_data = {
+            "min": min,
+            "max": max,
+            "avg": avg
+        }
+
+        return JSONResponse(content=response_data)
+
     uvicorn.run(app, host="0.0.0.0", port=int(PORT))

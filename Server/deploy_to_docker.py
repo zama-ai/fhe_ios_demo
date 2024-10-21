@@ -57,13 +57,19 @@ def build_docker_image(image_name: str):
         
         os.mkdir(str(temp_dir) + "/rust_folder")
         os.mkdir(str(temp_dir) + "/rust_folder/src")
-        
+
+        os.mkdir(str(temp_dir) + "/rust_array_stats")
+        os.mkdir(str(temp_dir) + "/rust_array_stats/src")
+
         files = [
             "server.py",
             "server_requirements.txt",
             "rust_folder/Cargo.toml",
             "rust_folder/Cargo.lock",
-            "rust_folder/src/main.rs"
+            "rust_folder/src/main.rs",
+            "rust_array_stats/Cargo.toml",
+            "rust_array_stats/Cargo.lock",
+            "rust_array_stats/src/main.rs"
         ]
         
         # Copy files

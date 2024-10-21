@@ -10,3 +10,9 @@ curl \
   -F "uid=1234" \
   -F "input=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.input.fheencrypted" \
   -o output.fheencrypted
+
+curl \
+  -X POST http://localhost:8888/stats \
+  -F "uid=4f3525e2-176c-4d3c-bb30-e87ec61fdd7f" \
+  -F "input=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.inputList.fheencrypted" \
+  -o output.fheencrypted

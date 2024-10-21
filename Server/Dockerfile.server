@@ -21,6 +21,14 @@ COPY /rust_folder/src/main.rs ./src/main.rs
 RUN cargo build --profile devo
 RUN cp ./target/devo/rust_binary /project/rust_binary
 
+WORKDIR /rust_array_stats
+COPY /rust_array_stats/Cargo.toml ./Cargo.toml
+COPY /rust_array_stats/Cargo.lock ./Cargo.lock
+COPY /rust_array_stats/src/main.rs ./src/main.rs
+
+RUN cargo build --profile devo
+RUN cp ./target/devo/rust_array_stats /project/rust_array_stats
+
 WORKDIR /project
 RUN python -m pip install -r ./server_requirements.txt
 EXPOSE 5000
