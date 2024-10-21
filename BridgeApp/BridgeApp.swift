@@ -6,7 +6,7 @@ import SwiftUI
 struct BridgeApp: App {
     var body: some Scene {
         WindowGroup {
-            HealthView()
+            BridgeView()
         }
     }
 }

@@ -3,17 +3,18 @@
 import SwiftUI
 import QuickLook
 
-typealias FHEEncryptedInt16 = Data
-typealias FHEEncryptedArrayInt16 = Data
-
-struct PrivateText: View {
-    let url: URL // FHEEncryptedInt16
+struct SecureDisplay: View {
+    let url: URL
     
     var body: some View {
-        FilePreview(url: url)
-            .frame(maxHeight: 150)
-            .border(.secondary)
-            .background(.red)
+        VStack {
+            FilePreview(url: url)
+                .frame(maxHeight: 150)
+                .border(.secondary)
+                .background(.red)
+            Text(url.lastPathComponent)
+                .font(.caption)
+        }
     }
 }
 
@@ -51,7 +52,7 @@ struct FilePreview: UIViewControllerRepresentable {
 }
 
 #Preview {
-    FilePreview(url: Bundle.main.bundleURL)
-    .border(.secondary)
-    .padding()
+    SecureDisplay(url: Bundle.main.bundleURL)
+        .border(.secondary)
+        .padding()
 }

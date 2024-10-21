@@ -9,9 +9,12 @@ final class Storage {
         case serverKey = "serverKeyCompressed"
         case serverKeyUncompressed = "serverKey.uncompressed"
 
-        case encryptedIntInput  = "inputInt.fheencrypted"
-        case encryptedListInput  = "inputList.fheencrypted"
-        case encryptedOutput = "output.fheencrypted"
+        case encryptedInputInt  = "inputInt.fheencrypted"
+        case encryptedInputList  = "inputList.fheencrypted"
+        
+        case encryptedOutputMin = "outputMin.fheencrypted"
+        case encryptedOutputMax = "outputMax.fheencrypted"
+        case encryptedOutputAvg = "outputAvg.fheencrypted"
     }
     
     private init() {
