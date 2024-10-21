@@ -9,7 +9,7 @@ extension ClientView {
         @Published var encryptedSleep: Data?
 
         func loadFromDisk() async throws {
-            encryptedWeight = Data()//try await Storage.read(.encryptedInputList)
+            encryptedWeight = try await Storage.read(.encryptedInputList)
         }
         
         func upload() async throws {

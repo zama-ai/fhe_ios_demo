@@ -66,7 +66,7 @@ struct ClientView: View {
         VStack {
             Group {
                 if let data = viewModel.encryptedWeight {
-                    encryptedFileRow("weight.fheencrypted", data: data)
+                    encryptedFileRow("inputList.fheencrypted", data: data)
                     uploadButton
                     secureDisplay
                 } else {
@@ -103,7 +103,7 @@ struct ClientView: View {
     
     @ViewBuilder
     private var secureDisplay: some View {
-        SecureDisplay(url: Storage.url(for: .encryptedInputList))
+        SecureDisplay(url: Storage.url(for: .encryptedInputList), showURL: true)
             .frame(height: 120)
 
         HStack {
@@ -116,7 +116,7 @@ struct ClientView: View {
     
     func secureCell(_ title: String, file: Storage.File) -> some View {
         VStack {
-            SecureDisplay(url: Storage.url(for: file))
+            SecureDisplay(url: Storage.url(for: file), showURL: false)
             Text(title)
         }
     }

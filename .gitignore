@@ -58,3 +58,5 @@ Server/.venv/**
 Server/.venvclient
 Server/rust_folder/Cargo.lock
 Server/rust_folder/target
+Server/rust_array_stats/target
+Server/rust_array_stats/Cargo.lock

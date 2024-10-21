@@ -4,7 +4,7 @@ use std::fs;
 use std::io::Cursor;
 use std::env;
 
-// Run: ./rust_binary 1234
+// Usage: ./rust_binary 1234
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 

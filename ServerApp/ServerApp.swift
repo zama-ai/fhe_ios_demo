@@ -77,7 +77,9 @@ struct ServerView: View {
 struct ServerApp: App {
     var body: some Scene {
         WindowGroup {
-            ServerView()
+            EmptyView().task {
+                try? await fheTest()
+            }
         }
     }
 }
