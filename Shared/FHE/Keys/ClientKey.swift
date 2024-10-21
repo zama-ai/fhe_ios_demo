@@ -4,7 +4,7 @@ import Foundation
 import TFHE
 
 final class ClientKey: Persistable {
-    static let fileName: Storage.File = .clientKey
+    let fileName: Storage.File = .clientKey
     var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {

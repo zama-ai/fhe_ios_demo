@@ -17,17 +17,14 @@ struct ClientView: View {
         }
         .tint(.pink)
         .buttonStyle(.bordered)
-        //        .onChange(of: scenePhase) { _, newPhase in
-        //            switch newPhase {
-        //            case .active:
-        //                Task {
-        //                    try await viewModel.loadFromDisk()
-        //                }
-        //            case _: break
-        //            }
-        //        }
-        .task {
-            try? await viewModel.loadFromDisk()
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                Task {
+                    try await viewModel.loadFromDisk()
+                }
+            case _: break
+            }
         }
         .overlay {
             if let screenshot {
@@ -66,7 +63,7 @@ struct ClientView: View {
         VStack {
             Group {
                 if let data = viewModel.encryptedWeight {
-                    encryptedFileRow("inputList.fheencrypted", data: data)
+                    encryptedFileRow("\(Storage.File.weightList.rawValue)", data: data)
                     uploadButton
                     secureDisplay
                 } else {
@@ -103,131 +100,23 @@ struct ClientView: View {
     
     @ViewBuilder
     private var secureDisplay: some View {
-        SecureDisplay(url: Storage.url(for: .encryptedInputList), showURL: true)
-            .frame(height: 120)
+        secureItem("Weight History", file: .weightList)
 
         HStack {
-            secureCell("Avg", file: .encryptedOutputAvg)
-            secureCell("Min", file: .encryptedOutputMin)
-            secureCell("Max", file: .encryptedOutputMax)
+            secureItem("Avg", file: .weightAvg)
+            secureItem("Min", file: .weightMin)
+            secureItem("Max", file: .weightMax)
         }
         .frame(height: 100)
     }
     
-    func secureCell(_ title: String, file: Storage.File) -> some View {
+    func secureItem(_ title: String, file: Storage.File) -> some View {
         VStack {
-            SecureDisplay(url: Storage.url(for: file), showURL: false)
+            SecureDisplay(url: Storage.url(for: file))
             Text(title)
         }
     }
 }
-
-//    @ViewBuilder
-//    private var importedView: some View {
-//        if let imported = viewModel.imported {
-//            GroupBox {
-//                importRow("Weight", "figure", color: .purple, data: imported.weightHistory)
-//                importRow("Sleep", "bed.double.fill", color: .secondary, data: imported.sleepHistory)
-//            }
-//
-//            AsyncButton("Upload for Analysis") {
-//                await upload()
-//            }.frame(maxWidth: .infinity)
-//                .overlay(alignment: .trailing) {
-//                    Button {
-//                        if let image = takeScreenshot() {
-//                            self.screenshot = image
-//                        } else {
-//                            print("screenshot is nil")
-//                        }
-//                    } label: {
-//                        Image(systemName: "eyes")
-//                    }
-//                }
-//
-//        } else {
-//            VStack {
-//                Image(systemName: "heart.text.clipboard")
-//                    .symbolRenderingMode(.multicolor)
-//                    .font(.system(size: 50))
-//
-//                VStack {
-//                    Text("No Health Record")
-//                        .font(.system(size: 22, weight: .bold))
-//
-//                    Text("Import your Health Info to get **insights**.\nData will be **encrypted** and always stays **private**.\nThis app **cannot read** your Health Info.")
-//                        .font(.footnote)
-//                        .foregroundStyle(.secondary)
-//                        .multilineTextAlignment(.center)
-//                }
-//                .padding(.top, 16)
-//                .padding(.bottom, 24)
-//
-//                AsyncButton("Import Health Info") {
-//                    await importData()
-//                }.padding(.bottom, 8)
-//
-//            }.padding(.top, 24)
-//        }
-//    }
-//
-//    private func importRow(_ title: String, _ icon: String, color: Color, data: Data?) -> some View {
-//        LabeledContent {
-//            HStack(spacing: 8) {
-//                if let data {
-//                    Text(data.formattedSize)
-//                        .frame(width: 70)
-//                    Text(data.snippet(first: 10))
-//                        .lineLimit(1)
-//                        .truncationMode(.tail) // Add "..." at the end
-//                        .font(.system(size: 14))
-//                        .foregroundStyle(.green.opacity(0.7))
-//                        .monospaced()
-//                        .padding(2)
-//                        .background {
-//                            RoundedRectangle(cornerRadius: 4)
-//                                .fill(.black)
-//                        }
-//                } else {
-//                    Text("Not specified").foregroundStyle(.tertiary)
-//                }
-//            }
-//            .frame(width: 180, alignment: .leading)
-//        } label: {
-//            HStack {
-//                Image(systemName: icon)
-//                    .symbolRenderingMode(.multicolor)
-//                    .foregroundStyle(color)
-//                Text(title)
-//            }
-//        }
-//    }
-//
-//    @ViewBuilder
-//    private var computedView: some View {
-//        if let computed = viewModel.computed {
-//            VStack {
-//                importRow("Prediction", "wand.and.sparkles", color: .yellow, data: computed.lifeExpectancy)
-//                let url = Storage.url(for: .encryptedOutput)
-//                PrivateText(url: url)
-//            }
-//        }
-//    }
-//
-//    // MARK: - ACTIONS -
-//    private func importData() async {
-//        if let encryptedData = try? await Storage.read(.encryptedIntInput) {
-//            viewModel.imported = .init(weightHistory: encryptedData,
-//                                       sleepHistory: encryptedData)
-//        }
-//    }
-//
-//    private func upload() async {}
-//
-//    private func reset() {
-//        viewModel.imported = nil
-//        viewModel.computed = nil
-//    }
 
 #Preview {
     ClientView()

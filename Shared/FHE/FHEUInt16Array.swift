@@ -4,7 +4,6 @@ import Foundation
 import TFHE
 
 final class FHEUInt16Array: Persistable {
-    static let fileName: Storage.File = .encryptedInputList
     var pointer: OpaquePointer? = nil
     var cachedItems: [FHEUInt16] = []
 
@@ -50,5 +49,52 @@ final class FHEUInt16Array: Persistable {
         try wrap { compact_ciphertext_list_builder_destroy(builder) }
 
         self.init(pointer: compact_list)
+    }
+    
+    func decrypt(clientKey: ClientKey) throws -> [Int] {
+        try readItems().map {
+            try $0.decrypt(clientKey: clientKey)
+        }
+    }
+
+    func readItems() throws -> [FHEUInt16] {
+        if cachedItems.isEmpty {
+            self.cachedItems = try expandItems()
+        }
+        return cachedItems
+    }
+
+    private func expandItems() throws -> [FHEUInt16] {
+        var expander: OpaquePointer? // CompactCiphertextListExpander
+
+        try wrap {
+            compact_ciphertext_list_expand(pointer, &expander)
+        }
+        
+        var length: Int = 0
+        try wrap {
+            compact_ciphertext_list_expander_len(expander, &length)
+        }
+
+        var array: [FHEUInt16] = []
+        for int in 0..<length {
+            var pointer: OpaquePointer? // FheUint16
+            try wrap {
+                // Ensure slot has correct type
+                var type: FheTypes = Type_FheBool
+                let ok = compact_ciphertext_list_expander_get_kind_of(expander, 0, &type);
+                assert(type == Type_FheUint16);
+                return ok
+            }
+
+            try wrap {
+                compact_ciphertext_list_expander_get_fhe_uint16(expander, int, &pointer)
+            }
+            array.append(FHEUInt16(pointer: pointer))
+        }
+        
+        compact_ciphertext_list_expander_destroy(expander)
+        
+        return array
     }
 }

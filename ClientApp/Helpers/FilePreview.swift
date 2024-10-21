@@ -5,20 +5,10 @@ import QuickLook
 
 struct SecureDisplay: View {
     let url: URL
-    let showURL: Bool
     
     var body: some View {
-        VStack {
-            FilePreview(url: url)
-                .frame(maxHeight: 150)
-                .border(.secondary)
-                .background(.red)
-            
-            if showURL {
-                Text(url.lastPathComponent)
-                    .font(.caption)
-            }
-        }
+        FilePreview(url: url)
+            .frame(maxHeight: 150)
     }
 }
 
@@ -27,12 +17,12 @@ struct FilePreview: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIViewController {
         let vc = QLPreviewController()
-        vc.view.backgroundColor = .clear
         vc.dataSource = context.coordinator
         return vc
     }
 
-    func updateUIViewController(_: UIViewController, context _: Context) { }
+    func updateUIViewController(_ vc: UIViewController, context _: Context) {
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -56,7 +46,7 @@ struct FilePreview: UIViewControllerRepresentable {
 }
 
 #Preview {
-    SecureDisplay(url: Bundle.main.bundleURL, showURL: true)
+    SecureDisplay(url: Bundle.main.bundleURL)
         .border(.secondary)
         .padding()
 }

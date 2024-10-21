@@ -3,18 +3,18 @@
 import Foundation
 
 final class Storage {
-    enum File: String {
+    enum File: String, CaseIterable {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-        case serverKeyUncompressed = "serverKey.uncompressed"
 
-        case encryptedInputInt  = "inputInt.fheencrypted"
-        case encryptedInputList  = "inputList.fheencrypted"
-        
-        case encryptedOutputMin = "outputMin.fheencrypted"
-        case encryptedOutputMax = "outputMax.fheencrypted"
-        case encryptedOutputAvg = "outputAvg.fheencrypted"
+        case ageIn  = "ageIn.fheencrypted"
+        case ageOut  = "ageOut.fheencrypted"
+
+        case weightList  = "weightList.fheencrypted"
+        case weightMin = "weightMin.fheencrypted"
+        case weightMax = "weightMax.fheencrypted"
+        case weightAvg = "weightAvg.fheencrypted"
     }
     
     private init() {
@@ -33,6 +33,9 @@ final class Storage {
         try await singleton.write(at: url, data: data)
     }
 
+    static func deleteFromDisk(_ file: Storage.File) async throws {
+        try await Storage.write(file, data: nil)
+    }
     
     /// Returns nil if file missing
     static func read(_ file: File) async throws -> Data? {

@@ -3,37 +3,23 @@
 import SwiftUI
 
 struct ServerView: View {
-    @State private var sk: ServerKey?
-    @State private var csk: ServerKeyCompressed?
+    @State private var sk: ServerKeyCompressed?
     @State private var input: FHEUInt16?
     
     @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("FHE Server App")
-                .font(.largeTitle)
-                .task {
-                    do {
-                        try await fheTest()
-                    } catch {
-                        print(error)
-                    }
-                }
-            
-            Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")
-                .foregroundStyle(.yellow)
-                .font(.system(size: 50))
-            
+            header
+                        
             VStack(spacing: 8) {
                 LabeledContent("ServerKey", value: formatData(sk))
-                LabeledContent("Compressed ServerKey", value: formatData(csk))
                 LabeledContent("Encrypted Input", value: formatData(input))
             }
             .frame(width: 250)
             .padding(.leading, 32)
             
-            AsyncButton("Compute Predictions", action: computePredictions)
+            AsyncButton("Compute", action: serverTest)
                 .buttonStyle(.bordered)
                         
             Spacer()
@@ -47,25 +33,33 @@ struct ServerView: View {
         }
     }
     
+    @ViewBuilder
+    private var header: some View {
+        VStack {
+            Text("\(Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.icloud.fill")) Server")
+                .bold()
+                .font(.largeTitle)
+                .foregroundColor(.yellow)
+            
+            Text("Where FHE compute occurs")
+                .bold()
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 24)
+    }
+
     func reloadFromDisk() {
         Task { @MainActor in
-            self.sk = try? await ServerKey.readFromDisk()
-            self.csk = try? await ServerKeyCompressed.readFromDisk()
-            try self.csk?.setServerKey()
+            self.sk = try? await ServerKeyCompressed.readFromDisk(.serverKey)
+            try self.sk?.setServerKey()
             
-            self.input = try? await FHEUInt16.readFromDisk()
+            self.input = try? await FHEUInt16.readFromDisk(.ageIn)
         }
     }
 
     func formatData(_ item: Persistable?) -> String {
         (try? item?.toData())?.formattedSize ?? "nil"
-    }
-
-    func computePredictions() async throws {
-        guard let input else { return }
-        let computed = try input.addScalar(int: 10)
-//        try await Storage.write(.encryptedOutput, data: computed.toData())
-        reloadFromDisk()
     }
 }
 
@@ -77,9 +71,7 @@ struct ServerView: View {
 struct ServerApp: App {
     var body: some Scene {
         WindowGroup {
-            EmptyView().task {
-                try? await fheTest()
-            }
+            ServerView()
         }
     }
 }

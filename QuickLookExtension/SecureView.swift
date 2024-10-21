@@ -2,27 +2,42 @@
 
 import SwiftUI
 
-extension PrivateTextView {
-    final class ViewModel: ObservableObject {
-        @Published var text: String
-        
-        init(text: String = "This Data is Private") {
-            self.text = text
-        }
-    }
-}
-
-struct PrivateTextView: View {
+struct SecureView: View {
     @ObservedObject var viewModel = ViewModel()
     
     var body: some View {
-        Text(viewModel.text)
-            .privateDataRing()
+        switch viewModel.data {
+        case .int(let int):
+            SecureTextView(value: int)
+            
+        case .array(let array):
+            SecureChartView(values: array, kind: .lines)
+            
+        case .none:
+            Color.red
+        }
+    }
+    
+    enum Kind {
+        case int(Int)
+        case array([Int])
+    }
+    
+    final class ViewModel: ObservableObject {
+        @Published var data: Kind?
+    }
+}
+
+struct SecureTextView: View {
+    let value: Int
+    
+    var body: some View {
+        Text("\(value)")
     }
 }
 
 import Charts
-struct PrivateChartView: View {
+struct SecureChartView: View {
     enum Kind { case lines, bars}
     let values: [Int]
     let kind: Kind
@@ -48,18 +63,18 @@ struct PrivateChartView: View {
                 }
             }
         }
-        
-        .frame(height: 100)
+        .chartXAxis(.hidden)
         .padding(4) // Chart draws some elements outside of its view
         .privateDataRing()
+        .background(.clear)
     }
 }
 
-#Preview {
-    {
-        return PrivateTextView(viewModel: .init())
-    }()
-    
-    PrivateChartView(values: [6, 8, 7, 6, 6, 8, 7, 6, 9, 7], kind: .lines)
-    PrivateChartView(values: [6, 8, 7, 6, 6, 8, 7, 6, 9, 7], kind: .bars)
-}
+//#Preview {
+//    {
+//        return PrivateTextView(viewModel: .init())
+//    }()
+//    
+//    PrivateChartView(values: [6, 8, 7, 6, 6, 8, 7, 6, 9, 7], kind: .lines)
+//    PrivateChartView(values: [6, 8, 7, 6, 6, 8, 7, 6, 9, 7], kind: .bars)
+//}
