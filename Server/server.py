@@ -13,7 +13,7 @@ from typing import Dict
 
 import uvicorn
 from fastapi import FastAPI, UploadFile, Form
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 
 if __name__ == "__main__":
     app = FastAPI(debug=False)

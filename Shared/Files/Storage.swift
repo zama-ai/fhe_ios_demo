@@ -8,6 +8,9 @@ final class Storage {
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
 
+        case rawInt  = "1234.inputInt.fheencrypted"
+        case rawArray  = "1234.inputList.fheencrypted"
+
         case ageIn  = "ageIn.fheencrypted"
         case ageOut  = "ageOut.fheencrypted"
 
