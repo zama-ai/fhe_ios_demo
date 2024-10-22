@@ -1,35 +1,46 @@
-FROM zamafhe/concrete-ml:latest
-WORKDIR /project
-COPY server_requirements.txt server_requirements.txt
-COPY server.py server.py
+# Stage 1: Build Rust binaries
+FROM rust:1.76 AS builder
 
-# DL Rust
-RUN apt-get update
-RUN apt-get install -y \
-    build-essential \
-    curl --fix-missing
-RUN apt-get update
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Compile files
+# Build rust_folder binary
 WORKDIR /rust_folder
-COPY /rust_folder/Cargo.toml ./Cargo.toml
-COPY /rust_folder/Cargo.lock ./Cargo.lock
-COPY /rust_folder/src/main.rs ./src/main.rs
+COPY rust_folder/Cargo.toml ./
+RUN mkdir src && touch src/lib.rs && cargo build --release
+COPY rust_folder/src ./src
+RUN cargo build --release
 
-RUN cargo build --profile devo
-RUN cp ./target/devo/rust_binary /project/rust_binary
-
+# Build rust_array_stats binary
 WORKDIR /rust_array_stats
-COPY /rust_array_stats/Cargo.toml ./Cargo.toml
-COPY /rust_array_stats/Cargo.lock ./Cargo.lock
-COPY /rust_array_stats/src/main.rs ./src/main.rs
+COPY rust_array_stats/Cargo.toml ./
+RUN mkdir src && touch src/lib.rs && cargo build --release
+COPY rust_array_stats/src ./src
+RUN cargo build --release
 
-RUN cargo build --profile devo
-RUN cp ./target/devo/rust_array_stats /project/rust_array_stats
+# Stage 2: Final image
+FROM ubuntu:22.04
 
+# Set environment variables to prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+ && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /project
-RUN python -m pip install -r ./server_requirements.txt
+
+# Copy and install Python dependencies
+COPY server_requirements.txt ./
+RUN pip3 install --no-cache-dir -r server_requirements.txt
+
+# Copy Rust binaries from the builder stage
+COPY --from=builder /rust_folder/target/release/rust_binary ./rust_binary
+COPY --from=builder /rust_array_stats/target/release/rust_array_stats ./rust_array_stats
+
+# Copy Python server file
+COPY server.py ./
+
+# Expose port and set entrypoint
 EXPOSE 5000
-ENTRYPOINT python server.py
+ENTRYPOINT ["python3", "server.py"]
