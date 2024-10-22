@@ -6,6 +6,7 @@ Routes:
 """
 
 import io
+import base64
 import os
 import uuid
 from pathlib import Path
@@ -115,9 +116,9 @@ if __name__ == "__main__":
             max = f.read()
         
         response_data = {
-            "min": min,
-            "max": max,
-            "avg": avg
+            "min": base64.b64encode(min).decode('utf-8'),
+            "max": base64.b64encode(max).decode('utf-8'),
+            "avg": base64.b64encode(avg).decode('utf-8')
         }
 
         return JSONResponse(content=response_data)

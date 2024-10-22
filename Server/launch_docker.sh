@@ -19,7 +19,7 @@ if [ $? -eq 0 ]; then
     
     # Run the Docker container
     echo "Running Docker container..."
-    docker run -p 5000:5000 $IMAGE_NAME
+    docker run -p 8888:5000 $IMAGE_NAME
 else
     echo "Error: Docker image build failed."
     exit 1
