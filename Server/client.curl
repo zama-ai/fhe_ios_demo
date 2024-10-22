@@ -1,18 +1,18 @@
+#!/bin/bash
 
+# Add key and store the returned UID
+RESPONSE=$(curl -v -X POST http://localhost:8888/add_key \
+  -F "key=@client_files/serverKeyCompressed")
 
+echo "Add key response: $RESPONSE"
+
+EXTRACTED_UID=$(echo "$RESPONSE" | jq -r '.uid')
+
+echo "Received UID: $EXTRACTED_UID"
+
+# Stats using the received UID
 curl \
-  -X POST http://localhost:8888/add_key \
-  -F "key=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.serverKey" \
-
-
-curl \
-  -X POST http://localhost:8888/compute \
-  -F "uid=1234" \
-  -F "input=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.input.fheencrypted" \
-  -o output.fheencrypted
-
-curl \
-  -X POST http://localhost:8888/stats \
-  -F "uid=4f3525e2-176c-4d3c-bb30-e87ec61fdd7f" \
-  -F "input=@/Users/dim/Developer/Zama/fhe_appstore_on_ios/Server/samples/1234.inputList.fheencrypted" \
-  -o output.fheencrypted
+  -X POST http://localhost:8888/weight_stats \
+  -F "uid=$EXTRACTED_UID" \
+  -F "input=@client_files/1234.inputList.fheencrypted" \
+  -o client_files/stats_output.fheencrypted

@@ -1,46 +1,46 @@
 # Stage 1: Build Rust binaries
 FROM rust:1.76 AS builder
 
-# Build rust_folder binary
-WORKDIR /rust_folder
-COPY rust_folder/Cargo.toml ./
-RUN mkdir src && touch src/lib.rs && cargo build --release
-COPY rust_folder/src ./src
-RUN cargo build --release
+# Set working directory
+WORKDIR /build
 
-# Build rust_array_stats binary
-WORKDIR /rust_array_stats
-COPY rust_array_stats/Cargo.toml ./
-RUN mkdir src && touch src/lib.rs && cargo build --release
-COPY rust_array_stats/src ./src
-RUN cargo build --release
+# Copy the build script
+COPY build_tasks.sh .
+
+# Copy all task source files
+COPY tasks/ tasks/
+
+# Run the build script
+RUN ./build_tasks.sh
 
 # Stage 2: Final image
-FROM ubuntu:22.04
+FROM python:3.9-slim
 
 # Set environment variables to prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
- && rm -rf /var/lib/apt/lists/*
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /project
 
 # Copy and install Python dependencies
 COPY server_requirements.txt ./
-RUN pip3 install --no-cache-dir -r server_requirements.txt
+RUN pip install --no-cache-dir -r server_requirements.txt
 
 # Copy Rust binaries from the builder stage
-COPY --from=builder /rust_folder/target/release/rust_binary ./rust_binary
-COPY --from=builder /rust_array_stats/target/release/rust_array_stats ./rust_array_stats
+COPY --from=builder /build/bin/* ./
 
-# Copy Python server file
+# Make binaries executable
+RUN chmod +x ./*
+
+# Copy the configuration file and Python server file (copied after heavy steps)
+COPY tasks.yaml ./
 COPY server.py ./
 
 # Expose port and set entrypoint
 EXPOSE 5000
-ENTRYPOINT ["python3", "server.py"]
+ENTRYPOINT ["python", "server.py"]

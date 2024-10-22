@@ -1,0 +1,1 @@
+{"detail":"Error executing weight_stats: thread 'main' panicked at src/main.rs:92:42:\ncalled `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"}
