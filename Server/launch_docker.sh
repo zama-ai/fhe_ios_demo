@@ -45,7 +45,7 @@ fi
 
 # Run the Docker container in detached mode
 echo "Running Docker container..."
-docker run -d -p 8888:5000 --name ${IMAGE_NAME}_container $IMAGE_NAME
+docker run -d -p 80:5000 --name ${IMAGE_NAME}_container $IMAGE_NAME
 
 # Optional: Display container logs
 echo "Container is running in detached mode. To view logs, use:"
