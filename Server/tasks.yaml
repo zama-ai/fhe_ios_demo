@@ -2,8 +2,8 @@ tasks:
   add_42:
     binary: add_42
     output_files:
-      - filename: "{uid}.output.fheencrypted"
-        response_type: stream
+      - filename: "{uid}.output.add_42.fheencrypted"
+    response_type: stream
   weight_stats:
     binary: weight_stats
     output_files:
@@ -17,14 +17,8 @@ tasks:
         key: max
         response_type: base64
     response_type: json
-  # sleep_quality:
-  #   binary: sleep_quality
-  #   output_files:
-  #     - filename: "{uid}.output.fheencrypted"
-  #       response_type: stream
-  # new_task:
-  #   binary: new_task_binary
-  #   input_filename: "{uid}.input.fheencrypted"
-  #   output_files:
-  #     - filename: "{uid}.new_output.fheencrypted"
-  #       response_type: stream
+  sleep_quality:
+    binary: sleep_quality
+    output_files:
+      - filename: "{uid}.output.sleep_quality.fheencrypted"
+    response_type: stream
