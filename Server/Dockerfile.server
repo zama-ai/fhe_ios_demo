@@ -1,27 +1,46 @@
-FROM zamafhe/concrete-ml:latest
+# Stage 1: Build Rust binaries
+FROM rust:1.76 AS builder
+
+# Set working directory
+WORKDIR /build
+
+# Copy the build script
+COPY build_tasks.sh .
+
+# Copy all task source files
+COPY tasks/ tasks/
+
+# Run the build script
+RUN ./build_tasks.sh
+
+# Stage 2: Final image
+FROM python:3.9-slim
+
+# Set environment variables to prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /project
-COPY server_requirements.txt server_requirements.txt
-COPY server.py server.py
 
-# DL Rust
-RUN apt-get update
-RUN apt-get install -y \
-    build-essential \
-    curl
-RUN apt-get update
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Copy and install Python dependencies
+COPY server_requirements.txt ./
+RUN pip install --no-cache-dir -r server_requirements.txt
 
-# Compile files
-WORKDIR /rust_folder
-COPY /rust_folder/Cargo.toml ./Cargo.toml
-COPY /rust_folder/Cargo.lock ./Cargo.lock
-COPY /rust_folder/src/main.rs ./src/main.rs
+# Copy Rust binaries from the builder stage
+COPY --from=builder /build/bin/* ./
 
-RUN cargo build --profile devo
-RUN cp ./target/devo/rust_binary /project/rust_binary
+# Make binaries executable
+RUN chmod +x ./*
 
-WORKDIR /project
-RUN python -m pip install -r ./server_requirements.txt
+# Copy the configuration file and Python server file (copied after heavy steps)
+COPY tasks.yaml ./
+COPY server.py ./
+
+# Expose port and set entrypoint
 EXPOSE 5000
-ENTRYPOINT python server.py
+ENTRYPOINT ["python", "server.py"]

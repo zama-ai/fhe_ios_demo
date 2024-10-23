@@ -18,8 +18,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("CLI Args: {}", uid);
 
     let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
-    let input_path = format!("/project/uploaded_files/{}.input.fheencrypted", uid);
-    let output_path = format!("/project/uploaded_files/{}.output.fheencrypted", uid);
+    let input_path = format!("/project/uploaded_files/{}.add_42.input.fheencrypted", uid);
+    let output_path = format!("/project/uploaded_files/{}.add_42.output.fheencrypted", uid);
     println!(
         "Paths:\n\
         \tsk: {}\n\

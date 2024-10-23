@@ -1,5 +1,0 @@
-grequests
-requests
-tqdm
-numpy
-scikit-learn

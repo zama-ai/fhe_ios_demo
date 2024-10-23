@@ -60,3 +60,7 @@ Server/rust_folder/Cargo.lock
 Server/rust_folder/target
 Server/rust_array_stats/target
 Server/rust_array_stats/Cargo.lock
+Server/client_files/*
+Server/uploaded_files/*.serverKey
+Server/tasks/add_42/target
+Server/tasks/weight_stats/target

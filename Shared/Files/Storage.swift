@@ -7,7 +7,6 @@ final class Storage {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-        
         case ageIn = "ageIn.fheencrypted"
         case ageOut = "ageOut.fheencrypted"
         
