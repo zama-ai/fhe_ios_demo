@@ -3,13 +3,8 @@
 import HealthKit
 
 struct HealthData {
-//    struct SleepSample {
-//        let start: Date
-//        let end: Date
-//        let value: Int
-//    }
     let weight: [Double] // Kg
-    let sleep: [Int] // Sleep level (1-5)
+    let sleep: [Sleep.Night]
     
     static let empty = HealthData(weight: [], sleep: [])
 }
@@ -34,6 +29,7 @@ final class BridgeViewModel: ObservableObject {
     
     func loadFromDisk() async throws {
         encryptedWeight = try await Storage.read(.weightList)
+        encryptedSleep = try await Storage.read(.sleepList)
     }
     
     func isAllowed() async throws -> Bool {
@@ -44,7 +40,7 @@ final class BridgeViewModel: ObservableObject {
     func fetchHealthData() {
         Task {
             async let weightSamples = await getSamples(type: HKQuantityType(.bodyMass), last: 10)
-            async let sleepSamples = await getSamples(type: HKCategoryType(.sleepAnalysis), last: 20) 
+            async let sleepSamples = await getSamples(type: HKCategoryType(.sleepAnalysis), last: 150)
             
             guard let weight = await weightSamples as? [HKDiscreteQuantitySample],
                   let sleep = await sleepSamples as? [HKCategorySample] else {
@@ -58,7 +54,7 @@ final class BridgeViewModel: ObservableObject {
 
             Task { @MainActor in
                 clearData = HealthData(weight: weight.map { $0.quantity.doubleValue(for: .gramUnit(with: .kilo)) },
-                                       sleep: sleep.map { $0.value })
+                                       sleep: []) // sleep.map { $0.value })
             }
         }
     }
@@ -102,14 +98,27 @@ final class BridgeViewModel: ObservableObject {
 
 // MARK: - ENCRYPTION -
 extension BridgeViewModel {
-    func encryptWeight() async throws {
+    func encryptSleep() async throws {
         try await ensureKeysExist()
         
-        if let ck {
-            let enc = try FHEUInt16(encrypting: 42, clientKey: ck)
-            try await enc.writeToDisk(.ageIn)
-        }
+        let example: [[Int]] = [[0, 0, 210], [0, 240, 570], [2, 0, 30], [5, 30, 60], [3, 60, 90], [4, 90, 120], [3, 120, 150], [5, 150, 180], [2, 180, 240], [3, 240, 300], [5, 300, 330], [4, 330, 390], [2, 390, 420], [5, 420, 450], [4, 450, 510], [3, 510, 540], [5, 540, 570]]
         
+        if let pk {
+            let list = try CompactCiphertextList(encrypting: example, publicKey: pk)
+            let listData = try list.toData()
+            try await Storage.write(.sleepList, data: listData)
+            encryptedSleep = listData
+        }
+    }
+    
+    func deleteSleep() async throws {
+        try await Storage.deleteFromDisk(.sleepList)
+        encryptedSleep = nil
+    }
+
+    func encryptWeight() async throws {
+        try await ensureKeysExist()
+                
         if let pk {
             let biggerInts = clearData.weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)

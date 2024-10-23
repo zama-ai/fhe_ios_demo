@@ -55,6 +55,9 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
             let encrypted = try FHEUInt16Array(fromData: data)
             let clearArray = try encrypted.decrypt(clientKey: ck).map { Double($0) / 10.0 }
             viewModel.data = .array(clearArray)
+            
+        case .cipherTextList:
+            assertionFailure("Not representable yet")
         }
     }
 }

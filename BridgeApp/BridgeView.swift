@@ -11,23 +11,50 @@ struct BridgeView: View {
     var body: some View {
         header
         
-        importButton
-        
+        HStack {
+            importButton
+            openAppButton
+        }
+        .buttonStyle(.bordered)
+        .tint(.accentColor)
+        .padding(.top, 8)
+        .padding(.bottom, -8)
+
         List {
             VStack {
-                chartRow("Weight", icon: "figure", color: .purple, values: viewModel.clearData.weight.map { Int($0) })
-                sourceCode("kg", viewModel.clearData.weight)
-                encryptedFileRow("weight.fheencrypted",
+                HStack {
+                    chartRow("Sleep", icon: "bed.double.fill", color: .mint, values: [])
+                    Picker("", selection: .constant(1)) {
+                        Text("\(Sleep.Night.fake.date.formatted(.dateTime.weekday().day().month()))").tag(1)
+                        Text("Yesterday").tag(2)
+                    }
+                }
+                
+                Divider()
+                SleepChartView(samples: Sleep.Night.fake.samples)
+                encryptedFileRow(Storage.File.sleepList.rawValue,
+                                 data: viewModel.encryptedSleep,
+                                 encrypt: viewModel.encryptSleep,
+                                 delete: viewModel.deleteSleep)
+                //sourceCode(viewModel.clearData.sleep)
+            }
+            
+            VStack {
+                HStack {
+                    chartRow("Weight", icon: "figure", color: .purple, values: [])
+                    Text("\(viewModel.clearData.weight.last?.formatted(.number.precision(.fractionLength(1))) ?? "-") kg")
+                        .foregroundStyle(.secondary)
+                        .font(.title3)
+                        .padding()
+                }
+                Divider().frame(maxWidth: .infinity)
+                chart(values: viewModel.clearData.weight.map { Int($0) })
+                encryptedFileRow(Storage.File.weightList.rawValue,
                                  data: viewModel.encryptedWeight,
                                  encrypt: viewModel.encryptWeight,
                                  delete: viewModel.deleteWeight
                 )
-            }
-            
-            VStack {
-                chartRow("Sleep", icon: "bed.double.fill", color: .mint, values: viewModel.clearData.sleep)
-                sourceCode("sleep level", viewModel.clearData.sleep)
-                encryptedFileRow("sleep.fheencrypted", data: nil, encrypt: {}, delete: {})
+                //sourceCode(viewModel.clearData.weight)
             }
         }
         .listRowSpacing(20)
@@ -50,8 +77,10 @@ struct BridgeView: View {
                 Spacer()
                 AsyncButton(action: delete) {
                     Image(systemName: "trash")
-                }.tint(.red)
+                }
+                .tint(.red)
             }
+            .font(.callout)
             .padding(.vertical, 8)
         } else {
             AsyncButton(action: encrypt) {
@@ -76,19 +105,15 @@ struct BridgeView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 24)
     }
     
     private var importButton: some View {
         AsyncButton(action: {
             showHealthKitSheet = true
         }, label: {
-            Label("Import Health Information", systemImage: "heart.text.clipboard")
+            Label("Import Health Info", systemImage: "heart.text.clipboard")
                 .symbolRenderingMode(.multicolor)
-                .font(.subheadline)
         })
-        .buttonStyle(.bordered)
-        .tint(.accentColor)
         .healthDataAccessRequest(store: viewModel.healthStore,
                                  readTypes: viewModel.sampleTypes,
                                  trigger: showHealthKitSheet) { result in
@@ -110,42 +135,58 @@ struct BridgeView: View {
         }
     }
     
+    private var openAppButton: some View {
+        Button(action:{ }) {
+            Link("Open Client App", destination: URL(string: "clientapp://")!)
+        }
+    }
+    
     @ViewBuilder
     private func chartRow(_ title: String, icon: String, color: Color, values: [Int]) -> some View {
         HStack {
-                Text("\(Image(systemName: icon)) \(title)")
-                    .foregroundStyle(color)
-                    .symbolRenderingMode(.multicolor)
-                    .font(.title2)
+            Text("\(Image(systemName: icon)) \(title)")
+                .foregroundStyle(color)
+                .symbolRenderingMode(.multicolor)
+                .font(.title2)
             Spacer()
-            chart(values: values)
+            if !values.isEmpty {
+                chart(values: values)
+            }
         }
-        Divider()
+        .frame(height: 50)
     }
     
+    @ViewBuilder
     private func chart(values: [Int]) -> some View {
+        var items = {
+            var values = values
+            values.insert(0, at: 0)
+            values.append(0)
+            return values
+        }()
+        
         Chart {
-            ForEach(Array(values.enumerated()), id: \.offset) { index, value in
+            ForEach(Array(items.enumerated()), id: \.offset) { index, value in
                 BarMark(
                     x: .value("Index", index),
                     y: .value("Value", value)
                 )
             }
         }
-        .foregroundStyle(.secondary.opacity(0.5))
+        .foregroundStyle(.tint)
         .chartXAxis(.hidden)
-        .chartYAxis(.hidden)
-        .frame(width: 150, height: 50, alignment: .leading)
+        .frame(height: 70, alignment: .leading)
+        .padding()
     }
     
-    private func sourceCode(_ prefix: String, _ values: [Double]) -> some View {
-        sourceCode("[\(values.map{ $0.formatted(.number.precision(.fractionLength(1))) }.joined(separator: " "))](\(prefix))")
+    private func sourceCode(_ values: [Double]) -> some View {
+        sourceCode("[\(values.map{ $0.formatted(.number.precision(.fractionLength(1))) }.joined(separator: " "))]")
     }
-
-    private func sourceCode(_ prefix: String, _ values: [Int]) -> some View {
-        sourceCode("[\(values.map{ "\($0)" }.joined(separator: " "))](\(prefix))")
+    
+    private func sourceCode(_ values: [Int]) -> some View {
+        sourceCode("[\(values.map{ "\($0)" }.joined(separator: " "))]")
     }
-
+    
     private func sourceCode(_ code: String) -> some View {
         Text(code)
             .monospaced()
