@@ -7,17 +7,25 @@ final class Storage {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-
-        case rawInt  = "1234.inputInt.fheencrypted"
-        case rawArray  = "1234.inputList.fheencrypted"
-
-        case ageIn  = "ageIn.fheencrypted"
-        case ageOut  = "ageOut.fheencrypted"
-
-        case weightList  = "weightList.fheencrypted"
+        case ageIn = "ageIn.fheencrypted"
+        case ageOut = "ageOut.fheencrypted"
+        
+        case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
         case weightMax = "weightMax.fheencrypted"
         case weightAvg = "weightAvg.fheencrypted"
+        
+        var renderingType: RenderingType? {
+            switch self {
+            case .clientKey, .publicKey, .serverKey: nil
+            case .ageIn, .ageOut, .weightMin, .weightMax, .weightAvg: .int
+            case .weightList: .array
+            }
+        }
+        
+        enum RenderingType {
+            case int, array
+        }
     }
     
     private init() {

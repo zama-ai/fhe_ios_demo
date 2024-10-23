@@ -19,8 +19,8 @@ struct SecureView: View {
     }
     
     enum Kind {
-        case int(Int)
-        case array([Int])
+        case int(Double)
+        case array([Double])
     }
     
     final class ViewModel: ObservableObject {
@@ -29,17 +29,18 @@ struct SecureView: View {
 }
 
 struct SecureTextView: View {
-    let value: Int
+    let value: Double
     
     var body: some View {
-        Text("\(value)")
+        Text("\(value.formatted(.number.precision(.fractionLength(1))))")
+            .privateDataRing()
     }
 }
 
 import Charts
 struct SecureChartView: View {
     enum Kind { case lines, bars}
-    let values: [Int]
+    let values: [Double]
     let kind: Kind
     
     var body: some View {

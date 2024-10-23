@@ -39,16 +39,21 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey or file at \(url)!"])
         }
         
-        let file = try FHERenderable(fromData: data)
-        switch file.type {
-            case .uint16:
-            let encrypted = try FHEUInt16(fromData: file.data)
+        let fileName = url.lastPathComponent
+        guard let fileType = Storage.File(rawValue: fileName)?.renderingType else {
+            throw NSError(domain: "App", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown file type at \(url)!"])
+        }
+        
+        switch fileType {
+        case .int:
+            let encrypted = try FHEUInt16(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
-            viewModel.data = .int(clearInt)
+            let res: Double = Double(clearInt) / 10.0
+            viewModel.data = .int(res)
             
-            case .uint16Array:
-            let encrypted = try FHEUInt16Array(fromData: file.data)
-            let clearArray = try encrypted.decrypt(clientKey: ck)
+        case .array:
+            let encrypted = try FHEUInt16Array(fromData: data)
+            let clearArray = try encrypted.decrypt(clientKey: ck).map { Double($0) / 10.0 }
             viewModel.data = .array(clearArray)
         }
     }
