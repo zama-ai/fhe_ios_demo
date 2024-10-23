@@ -108,7 +108,6 @@
 				FHE/Keys/ClientKey.swift,
 				FHE/Keys/PublicKeyCompact.swift,
 				FHE/Keys/ServerKeyCompressed.swift,
-				Files/FHERenderable.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
 			);
@@ -129,7 +128,6 @@
 				"FHE/ServerOnly/FHEUInt16Array+Server.swift",
 				"FHE/ServerOnly/ServerKey+Server.swift",
 				FHE/ServerOnly/ServerTest.swift,
-				Files/FHERenderable.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
 			);
@@ -140,7 +138,6 @@
 			membershipExceptions = (
 				AsyncButton.swift,
 				"Data+Ext.swift",
-				Files/FHERenderable.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
 			);
@@ -164,7 +161,6 @@
 				FHE/Keys/ClientKey.swift,
 				FHE/Keys/PublicKeyCompact.swift,
 				FHE/Keys/ServerKeyCompressed.swift,
-				Files/FHERenderable.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
 			);
@@ -185,6 +181,13 @@
 			);
 			target = 3275F5A32CA16515001E7377 /* Server */;
 		};
+		32B1F8E62CC8F48500CE12F9 /* Exceptions for "ClientApp" folder in "Client" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
+		};
 		32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -204,9 +207,9 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */,
+				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */,
 				320C391C2CAAEEA200528366 /* Exceptions for "Shared" folder in "Server" target */,
 				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QLExtension" target */,
-				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -219,15 +222,18 @@
 		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				320CF7622CAA1C0C00528366 /* Exceptions for "QuickLookExtension" folder in "Client" target */,
 				324F8E352CA44B1B00F0BB11 /* Exceptions for "QuickLookExtension" folder in "Server" target */,
 				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QLExtension" target */,
-				320CF7622CAA1C0C00528366 /* Exceptions for "QuickLookExtension" folder in "Client" target */,
 			);
 			path = QuickLookExtension;
 			sourceTree = "<group>";
 		};
 		32C9CC212CA565A100AEDA32 /* ClientApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				32B1F8E62CC8F48500CE12F9 /* Exceptions for "ClientApp" folder in "Client" target */,
+			);
 			path = ClientApp;
 			sourceTree = "<group>";
 		};
@@ -455,9 +461,9 @@
 			projectRoot = "";
 			targets = (
 				32B258362C98693800538B23 /* Bridge */,
+				32C9CC1F2CA565A100AEDA32 /* Client */,
 				3275F5A32CA16515001E7377 /* Server */,
 				324F8E1C2CA43B2100F0BB11 /* QLExtension */,
-				32C9CC1F2CA565A100AEDA32 /* Client */,
 			);
 		};
 /* End PBXProject section */
@@ -839,6 +845,7 @@
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClientApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -869,6 +876,7 @@
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClientApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -59,6 +59,7 @@ struct ClientView: View {
         .padding(.top, 24)
     }
     
+    @ViewBuilder
     private var list: some View {
         VStack {
             Group {
@@ -67,7 +68,14 @@ struct ClientView: View {
                     uploadButton
                     secureDisplay
                 } else {
-                    ContentUnavailableView("No encrypted info found on disk", systemImage: "doc.questionmark")
+                    ContentUnavailableView {
+                        Label("No encrypted health records", systemImage: "heart.text.clipboard")
+                            .symbolRenderingMode(.multicolor)
+                    } description: {
+                        Text("Generate encrypted health records\nusing Bridge App.")
+                    } actions: {
+                        Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
+                    }
                 }
             }
             .padding(8)
@@ -100,19 +108,25 @@ struct ClientView: View {
     
     @ViewBuilder
     private var secureDisplay: some View {
-        secureItem("Weight History", file: .weightList)
+        secureItem("Weight History", file: .weightList, data: viewModel.encryptedWeight)
 
         HStack {
-            secureItem("Avg", file: .weightAvg)
-            secureItem("Min", file: .weightMin)
-            secureItem("Max", file: .weightMax)
+            secureItem("Avg", file: .weightAvg, data: viewModel.encryptedAvg)
+            secureItem("Min", file: .weightMin, data: viewModel.encryptedMin)
+            secureItem("Max", file: .weightMax, data: viewModel.encryptedMax)
         }
-        .frame(height: 100)
     }
     
-    func secureItem(_ title: String, file: Storage.File) -> some View {
+    func secureItem(_ title: String, file: Storage.File, data: Data?) -> some View {
         VStack {
-            SecureDisplay(url: Storage.url(for: file))
+            if data != nil {
+                SecureDisplay(url: Storage.url(for: file))
+            } else {
+                Image(systemName: "questionmark")
+                    .frame(maxWidth: .infinity, maxHeight: 150)
+                    .background(.black)
+                    .cornerRadius(12)
+            }
             Text(title)
         }
     }

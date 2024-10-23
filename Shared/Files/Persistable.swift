@@ -7,10 +7,6 @@ protocol Persistable {
     init(fromData input: Data) throws
 }
 
-//protocol Persistable: Serializable {
-//    var fileName: Storage.File { get }
-//}
-
 extension Persistable {
     func writeToDisk(_ file: Storage.File) async throws {
         let data = try self.toData()
@@ -25,13 +21,3 @@ extension Persistable {
         }
     }
 }
-
-//extension Persistable where Self: Serializable {
-//    func writeToDisk() async throws {
-//        try await writeToDisk(fileName)
-//    }
-//    
-//    func deleteFromDisk() async throws {
-//        try await Storage.deleteFromDisk(fileName)
-//    }
-//}

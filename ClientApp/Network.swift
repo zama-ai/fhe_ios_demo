@@ -3,10 +3,16 @@
 import Foundation
 
 final class Network {
+    struct StatsResponse: Codable {
+        let min: Data
+        let max: Data
+        let avg: Data
+    }
+    
     static let shared = Network()
     private init() {}
 
-    private let rootURL = URL(string: "http://localhost:8888")!
+    private let rootURL = URL(string: "http://54.155.5.123")!
     
     // Returns: UID string
     func uploadServerKey(_ sk: Data) async throws -> String {
@@ -26,23 +32,18 @@ final class Network {
     // Returns: compute result
     func getStats(uid: String, encryptedArray: Data) async throws -> (min: Data, max: Data, avg: Data) {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
-                                                       path: "/compute",
+                                                       path: "/weight_stats",
                                                        json: ["uid": uid],
-                                                       file: ("model_input", encryptedArray)))
+                                                       file: ("input", encryptedArray)))
         
-        if let json = try JSONSerialization.jsonObject(with: res, options: []) as? [String: Any],
-           let min = json["min"] as? Data,
-           let max = json["max"] as? Data,
-           let avg = json["avg"] as? Data {
-            return (min, max, avg)
-        } else {
-            throw NetworkingError.resultParsingFailed
-        }
+        let obj = try JSONDecoder().decode(StatsResponse.self, from: res)
+        return (obj.min, obj.max, obj.avg)
     }
 
     
     // MARK: - Helpers -
     private func sendRequest(_ request: URLRequest, session: URLSession = .shared) async throws -> Data {
+        print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") 🔄 (\(request.url?.absoluteString ?? "-"))")
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse else {
             throw NetworkingError.nonHTTPResponse
@@ -52,6 +53,7 @@ final class Network {
             throw NetworkingError.invalidHTTPCode(code: response.statusCode)
         }
 
+        print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") ✅")
         return data
     }
 }

@@ -6,10 +6,16 @@ extension ClientView {
     @MainActor
     final class ViewModel: ObservableObject {
         @Published var encryptedWeight: Data?
+        @Published var encryptedMin: Data?
+        @Published var encryptedMax: Data?
+        @Published var encryptedAvg: Data?
         @Published var encryptedSleep: Data?
 
         func loadFromDisk() async throws {
             encryptedWeight = try await Storage.read(.weightList)
+            encryptedMin = try await Storage.read(.weightMin)
+            encryptedMax = try await Storage.read(.weightMax)
+            encryptedAvg = try await Storage.read(.weightAvg)
         }
         
         func upload() async throws {
@@ -17,21 +23,20 @@ extension ClientView {
                 throw NetworkingError.message("Server key missing")
             }
             
-            guard let array = try await Storage.read(.ageIn) else {
+            guard let array = try await Storage.read(.weightList) else {
                 throw NetworkingError.message("Encrypted list missing")
             }
 
             let userID = try await Network.shared.uploadServerKey(serverKey)
             let stats = try await Network.shared.getStats(uid: userID, encryptedArray: array)
             
-            let min = try FHERenderable(.uint16, data: { stats.min })
-            try await min.writeToDisk(.weightMin)
-
-            let max = try FHERenderable(.uint16, data: { stats.max })
-            try await max.writeToDisk(.weightMax)
-
-            let avg = try FHERenderable(.uint16, data: { stats.avg })
-            try await avg.writeToDisk(.weightAvg)
+            try await Storage.write(.weightMin, data: stats.min)
+            try await Storage.write(.weightMax, data: stats.max)
+            try await Storage.write(.weightAvg, data: stats.avg)
+            
+            encryptedMin = stats.min
+            encryptedMax = stats.max
+            encryptedAvg = stats.avg
         }
     }
 }
