@@ -14,17 +14,20 @@ final class Storage {
         case weightMin = "weightMin.fheencrypted"
         case weightMax = "weightMax.fheencrypted"
         case weightAvg = "weightAvg.fheencrypted"
-        
+
+        case sleepList = "sleepList.fheencrypted"
+
         var renderingType: RenderingType? {
             switch self {
             case .clientKey, .publicKey, .serverKey: nil
             case .ageIn, .ageOut, .weightMin, .weightMax, .weightAvg: .int
             case .weightList: .array
+            case .sleepList: .cipherTextList
             }
         }
         
         enum RenderingType {
-            case int, array
+            case int, array, cipherTextList
         }
     }
     

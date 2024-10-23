@@ -56,7 +56,6 @@ struct ClientView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .padding(.top, 24)
     }
     
     @ViewBuilder

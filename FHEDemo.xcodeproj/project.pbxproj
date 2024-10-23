@@ -102,6 +102,7 @@
 			membershipExceptions = (
 				AsyncButton.swift,
 				"Data+Ext.swift",
+				FHE/CompactCiphertextList.swift,
 				FHE/FHEHelpers.swift,
 				FHE/FHEUInt4.swift,
 				FHE/FHEUInt10.swift,
