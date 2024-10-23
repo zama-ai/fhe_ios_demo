@@ -89,8 +89,9 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
         Returns:
             StreamingResponse or JSONResponse: Result of the task.
         """
-        # Input filename is {uid}.{task}.input.fheencrypted
-        input_filename = f"{uid}.{task_name}.input.fheencrypted"
+        # Use input_filename from task_config if specified, otherwise default
+        input_filename_template = task_config.get('input_filename', "{uid}.{task}.input.fheencrypted")
+        input_filename = input_filename_template.format(uid=uid, task=task_name)
         input_file_path = FILES_FOLDER / input_filename
         print(f"Input file path: {input_file_path}")
         # Save the input file
