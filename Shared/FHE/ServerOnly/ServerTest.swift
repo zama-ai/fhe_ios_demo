@@ -22,53 +22,36 @@ func serverTest() async throws {
     try await pk.writeToDisk(.publicKey)
     try await sk.writeToDisk(.serverKey)
 
-    let age = try FHERenderable(.uint16, data: inputInt.toData)
-    try await Storage.write(.weightList, data: age.toData())
-
-    let weights = try FHERenderable(.uint16Array, data: inputArray.toData)
-    try await Storage.write(.weightList, data: weights.toData())
-
+    try await inputInt.writeToDisk(.ageIn)
+    try await inputArray.writeToDisk(.weightList)
+    
     let time = Date()
     guard let ck2 = try await ClientKey.readFromDisk(.clientKey),
           let sk2 = try await ServerKeyCompressed.readFromDisk(.serverKey),
           let _ = try await PublicKeyCompact.readFromDisk(.publicKey),
-          let inputAgeFile2 = try await Storage.read(.ageIn),
-          let inputWeightFile2 = try await Storage.read(.weightList) else {
+          let inputInt2 = try await FHEUInt16.readFromDisk(.ageIn),
+          let inputArray2 = try await FHEUInt16Array.readFromDisk(.weightList) else {
         assert(true, "Data not on disk")
         return
     }
     
     // On Server
-    let age2: FHEUInt16 = try {
-        let data = try FHERenderable(fromData: inputAgeFile2).data
-        let int = try FHEUInt16(fromData: data)
-        return int
-    }()
-    
-    let weights2: FHEUInt16Array = try {
-        let data = try FHERenderable(fromData: inputAgeFile2).data
-        let int = try FHEUInt16Array(fromData: data)
-        return int
-    }()
-    
     try sk2.setServerKey()
-    let resultInt = try age2.addScalar(int: 10)
-    let stats = try weights2.stats()
+    let resultInt = try inputInt2.addScalar(int: 10)
+    let resultStats = try inputArray2.stats()
     let time2 = Date()
     
     try await resultInt.writeToDisk(.ageOut)
+    try await resultStats.min.writeToDisk(.weightMin)
+    try await resultStats.max.writeToDisk(.weightMax)
+    try await resultStats.avg.writeToDisk(.weightAvg)
     // End Server
     
-
-    guard let resultInt2 = try await FHEUInt16.readFromDisk(.ageOut) else {
-        assert(true, "Result not on disk")
-        return
-    }
     
-    let int = try resultInt2.decrypt(clientKey: ck2)
-    let min = try stats.min.decrypt(clientKey: ck) / coeff
-    let max = try stats.max.decrypt(clientKey: ck) / coeff
-    let rawAvg = try stats.avg.decrypt(clientKey: ck)
+    let int = try resultInt.decrypt(clientKey: ck2)
+    let min = try resultStats.min.decrypt(clientKey: ck) / coeff
+    let max = try resultStats.max.decrypt(clientKey: ck) / coeff
+    let rawAvg = try resultStats.avg.decrypt(clientKey: ck)
     let avg = Double(rawAvg) / Double(coeff)
 
     print("Results are: int: \(int), min: \(min), max: \(max), avg: \(avg)")

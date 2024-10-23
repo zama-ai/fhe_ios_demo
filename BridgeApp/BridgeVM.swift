@@ -104,14 +104,19 @@ final class BridgeViewModel: ObservableObject {
 extension BridgeViewModel {
     func encryptWeight() async throws {
         try await ensureKeysExist()
-                
+        
+        if let ck {
+            let enc = try FHEUInt16(encrypting: 42, clientKey: ck)
+            try await enc.writeToDisk(.ageIn)
+        }
+        
         if let pk {
             let biggerInts = clearData.weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)
-            let file = try FHERenderable(.uint16Array, data: array.toData)
+            let arrayData = try array.toData()
             
-            try await Storage.write(.weightList, data: file.toData())
-            encryptedWeight = try array.toData()
+            try await Storage.write(.weightList, data: arrayData)
+            encryptedWeight = arrayData
         }
     }
 
