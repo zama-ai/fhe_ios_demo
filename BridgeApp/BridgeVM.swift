@@ -114,7 +114,6 @@ extension BridgeViewModel {
             let biggerInts = clearData.weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)
             let arrayData = try array.toData()
-            
             try await Storage.write(.weightList, data: arrayData)
             encryptedWeight = arrayData
         }

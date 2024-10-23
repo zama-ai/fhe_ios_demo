@@ -19,10 +19,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("CLI Args: {}", uid);
 
     let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
-    let input_path = format!("/project/uploaded_files/{}.inputList.fheencrypted", uid);
-    let output_avg_path = format!("/project/uploaded_files/{}.outputAvg.fheencrypted", uid);
-    let output_min_path = format!("/project/uploaded_files/{}.outputMin.fheencrypted", uid);
-    let output_max_path = format!("/project/uploaded_files/{}.outputMax.fheencrypted", uid);
+    let input_path = format!("/project/uploaded_files/{}.weight_stats.input.fheencrypted", uid);
+    let output_avg_path = format!("/project/uploaded_files/{}.outputAvg.weight_stats.fheencrypted", uid);
+    let output_min_path = format!("/project/uploaded_files/{}.outputMin.weight_stats.fheencrypted", uid);
+    let output_max_path = format!("/project/uploaded_files/{}.outputMax.weight_stats.fheencrypted", uid);
     
     println!(
         "Paths:\n\

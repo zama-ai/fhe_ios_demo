@@ -30,7 +30,7 @@ docker rm -f $(docker ps -a -q)
 4. Run the server
 
 ```
-python deploy_to_docker.py
+./launch_docker.sh
 ```
 
 You should see:
