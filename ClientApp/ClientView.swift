@@ -63,9 +63,8 @@ struct ClientView: View {
         VStack {
             Group {
                 if let data = viewModel.encryptedWeight {
-                    encryptedFileRow("\(Storage.File.weightList.rawValue)", data: data)
-                    uploadButton
-                    secureDisplay
+                    secureItem("Weight History", file: .weightList, data: viewModel.encryptedWeight)
+                    resultsRow
                 } else {
                     ContentUnavailableView {
                         Label("No encrypted health records", systemImage: "heart.text.clipboard")
@@ -98,21 +97,23 @@ struct ClientView: View {
     
     private var uploadButton: some View {
         AsyncButton(action: viewModel.upload) {
-            Text("Upload")
-                .frame(width: 150, alignment: .center)
+            Text("Upload for Analysis")
+                .frame(alignment: .center)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
     }
     
     @ViewBuilder
-    private var secureDisplay: some View {
-        secureItem("Weight History", file: .weightList, data: viewModel.encryptedWeight)
-
-        HStack {
-            secureItem("Avg", file: .weightAvg, data: viewModel.encryptedAvg)
-            secureItem("Min", file: .weightMin, data: viewModel.encryptedMin)
-            secureItem("Max", file: .weightMax, data: viewModel.encryptedMax)
+    private var resultsRow: some View {
+        if let a = viewModel.encryptedAvg, let b = viewModel.encryptedMin, let c = viewModel.encryptedMax {
+            HStack {
+                secureItem("Avg", file: .weightAvg, data: a)
+                secureItem("Min", file: .weightMin, data: b)
+                secureItem("Max", file: .weightMax, data: c)
+            }
+        } else {
+            uploadButton
         }
     }
     
