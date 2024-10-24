@@ -14,7 +14,7 @@ final class Network {
 
     private let rootURL = URL(string: "http://54.155.5.123")!
     
-    // Returns: UID string
+    /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
     func uploadServerKey(_ sk: Data) async throws -> String {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
                                                        path: "/add_key",
@@ -29,15 +29,25 @@ final class Network {
         }
     }
     
-    // Returns: compute result
-    func getStats(uid: String, encryptedArray: Data) async throws -> (min: Data, max: Data, avg: Data) {
+    /// - Returns: FheUint16 min, max and avg of the list of weights. Clear values have to be divided by 10.
+    func getWeightStats(uid: String, encryptedWeights: Data) async throws -> (min: Data, max: Data, avg: Data) {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
                                                        path: "/weight_stats",
                                                        json: ["uid": uid],
-                                                       file: ("input", encryptedArray)))
+                                                       file: ("input", encryptedWeights)))
         
         let obj = try JSONDecoder().decode(StatsResponse.self, from: res)
         return (obj.min, obj.max, obj.avg)
+    }
+
+    /// - Returns: FheUint8 score between 1 and 5. 1 is best, 5 is bad.
+    func getSleepQuality(uid: String, encryptedSleeps: Data) async throws -> Data {
+        let res = try await sendRequest(.multipartPOST(root: rootURL,
+                                                       path: "/sleep_quality",
+                                                       json: ["uid": uid],
+                                                       file: ("input", encryptedSleeps)))
+        
+        return res
     }
 
     

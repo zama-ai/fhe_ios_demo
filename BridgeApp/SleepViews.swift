@@ -3,6 +3,10 @@
 import SwiftUI
 import Charts
 
+#Preview {
+    SleepChartView(samples: Sleep.Night.fake.samples)
+}
+
 struct SleepChartView: View {
     let samples: [Sleep.Sample]
     
@@ -25,10 +29,15 @@ struct SleepChartView: View {
         .chartYScale(domain: Sleep.Level.displayOrder.map(\.name))
         .chartXScale(domain: 0...maxSampleEnd)
         .chartXAxis {
-            AxisMarks(values: Array(stride(from: 0, through: maxSampleEnd, by: 60))) { value in
+            AxisMarks(values: Array(stride(from: 0, through: maxSampleEnd, by: 120))) { value in
                 AxisGridLine()
                 AxisTick()
-                AxisValueLabel()
+                AxisValueLabel() {
+                    if let intValue = value.as(Int.self) {
+                        let hours = Double(intValue / 60)
+                        Text("\(hours.formatted(.number.precision(.integerLength(2)))):00")
+                      }
+                }
             }
         }
         .chartLegend(.hidden)
@@ -36,11 +45,7 @@ struct SleepChartView: View {
         .padding()
     }
     
-    var maxSampleEnd: Int {
+    private var maxSampleEnd: Int {
         samples.map { $0.end }.max() ?? 0
-    }
-}
-
-#Preview {
-    SleepChartView(samples: Sleep.Night.fake.samples)
+    }    
 }
