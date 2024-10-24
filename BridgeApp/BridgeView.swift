@@ -6,11 +6,21 @@ import HealthKitUI
 
 struct BridgeView: View {
     @State private var showHealthKitSheet = false
+    @State private var selectedNight: Date?
     @StateObject var viewModel = BridgeViewModel.shared
     
     var body: some View {
         header
-        
+                
+        if viewModel.clearData.weight.isEmpty && viewModel.clearData.sleep.isEmpty {
+            noContent
+        } else {
+            topRow
+            someContent
+        }
+    }
+    
+    var topRow: some View {
         HStack {
             importButton
             openAppButton
@@ -19,29 +29,41 @@ struct BridgeView: View {
         .tint(.accentColor)
         .padding(.top, 8)
         .padding(.bottom, -8)
+    }
 
+    var someContent: some View {
         List {
-            VStack {
-                HStack {
-                    chartRow("Sleep", icon: "bed.double.fill", color: .mint, values: [])
-                    Picker("", selection: .constant(1)) {
-                        Text("\(Sleep.Night.fake.date.formatted(.dateTime.weekday().day().month()))").tag(1)
-                        Text("Yesterday").tag(2)
+            let nights = viewModel.clearData.sleep
+            if !nights.isEmpty {
+                VStack {
+                    HStack {
+                        sectionHeader("Sleep", icon: "bed.double.fill", color: .mint)
+                        Spacer()
+                        Picker("", selection: $selectedNight) {
+                            ForEach(nights, id: \.date) { night in
+                                Text("\(night.date.formatted(.dateTime.weekday().day().month()))").tag(night.date)
+                            }
+                        }
                     }
+                    .onChange(of: viewModel.clearData.sleep) { oldValue, newValue in
+                        selectedNight = newValue.last?.date
+                    }
+                    
+                    Divider()
+                    
+                    SleepChartView(samples: nights.last!.samples)
+                    
+                    encryptedFileRow(Storage.File.sleepList.rawValue,
+                                     data: viewModel.encryptedSleep,
+                                     encrypt: viewModel.encryptSleep,
+                                     delete: viewModel.deleteSleep)
                 }
-                
-                Divider()
-                SleepChartView(samples: Sleep.Night.fake.samples)
-                encryptedFileRow(Storage.File.sleepList.rawValue,
-                                 data: viewModel.encryptedSleep,
-                                 encrypt: viewModel.encryptSleep,
-                                 delete: viewModel.deleteSleep)
-                //sourceCode(viewModel.clearData.sleep)
             }
             
             VStack {
                 HStack {
-                    chartRow("Weight", icon: "figure", color: .purple, values: [])
+                    sectionHeader("Weight", icon: "figure", color: .purple)
+                    Spacer()
                     Text("\(viewModel.clearData.weight.last?.formatted(.number.precision(.fractionLength(1))) ?? "-") kg")
                         .foregroundStyle(.secondary)
                         .font(.title3)
@@ -54,7 +76,6 @@ struct BridgeView: View {
                                  encrypt: viewModel.encryptWeight,
                                  delete: viewModel.deleteWeight
                 )
-                //sourceCode(viewModel.clearData.weight)
             }
         }
         .listRowSpacing(20)
@@ -64,6 +85,21 @@ struct BridgeView: View {
         }
     }
     
+    var noContent: some View {
+        List {
+            ContentUnavailableView {
+                Label("No Health Records", systemImage: "heart.text.clipboard")
+                    .symbolRenderingMode(.multicolor)
+            } description: {
+                Text("Give the app permission to access Sleep and Weight to perform analysis on your data.")
+            } actions: {
+                importButton
+                    .buttonStyle(.bordered)
+                    .tint(.accentColor)
+            }
+        }
+    }
+
     @ViewBuilder
     private func encryptedFileRow(_ title: String,
                                   data: Data?,
@@ -111,8 +147,12 @@ struct BridgeView: View {
         AsyncButton(action: {
             showHealthKitSheet = true
         }, label: {
-            Label("Import Health Info", systemImage: "heart.text.clipboard")
-                .symbolRenderingMode(.multicolor)
+            HStack {
+                Image(systemName: "heart.text.clipboard")
+                    .symbolRenderingMode(.multicolor)
+                    .imageScale(.medium)
+                Text("Read Sleep & Weight")
+            }.font(.body)
         })
         .healthDataAccessRequest(store: viewModel.healthStore,
                                  readTypes: viewModel.sampleTypes,
@@ -141,24 +181,17 @@ struct BridgeView: View {
         }
     }
     
-    @ViewBuilder
-    private func chartRow(_ title: String, icon: String, color: Color, values: [Int]) -> some View {
-        HStack {
-            Text("\(Image(systemName: icon)) \(title)")
-                .foregroundStyle(color)
-                .symbolRenderingMode(.multicolor)
-                .font(.title2)
-            Spacer()
-            if !values.isEmpty {
-                chart(values: values)
-            }
-        }
-        .frame(height: 50)
+    private func sectionHeader(_ title: String, icon: String, color: Color) -> some View {
+        Text("\(Image(systemName: icon)) \(title)")
+            .foregroundStyle(color)
+            .symbolRenderingMode(.multicolor)
+            .font(.title2)
+            .frame(height: 50, alignment: .leading)
     }
     
     @ViewBuilder
     private func chart(values: [Int]) -> some View {
-        var items = {
+        let items = {
             var values = values
             values.insert(0, at: 0)
             values.append(0)
@@ -177,25 +210,6 @@ struct BridgeView: View {
         .chartXAxis(.hidden)
         .frame(height: 70, alignment: .leading)
         .padding()
-    }
-    
-    private func sourceCode(_ values: [Double]) -> some View {
-        sourceCode("[\(values.map{ $0.formatted(.number.precision(.fractionLength(1))) }.joined(separator: " "))]")
-    }
-    
-    private func sourceCode(_ values: [Int]) -> some View {
-        sourceCode("[\(values.map{ "\($0)" }.joined(separator: " "))]")
-    }
-    
-    private func sourceCode(_ code: String) -> some View {
-        Text(code)
-            .monospaced()
-            .font(.system(size: 13))
-            .padding(4)
-            .foregroundStyle(.green)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.black)
-            .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 

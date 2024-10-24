@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		320CF75F2CAA161500528366 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 322E72BA2CC9A636009B2530 /* Algorithms */; };
 		324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32F029DA2CA37007009B522D /* QuickLook.framework */; };
 		324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
@@ -281,6 +282,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */,
 				3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,6 +402,7 @@
 			);
 			name = Bridge;
 			packageProductDependencies = (
+				322E72BA2CC9A636009B2530 /* Algorithms */,
 			);
 			productName = FHEDemo;
 			productReference = 32B258372C98693800538B23 /* FHE Bridge.app */;
@@ -462,6 +465,9 @@
 			);
 			mainGroup = 32B2582E2C98693800538B23;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				322E72B92CC9A636009B2530 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 32B258382C98693800538B23 /* Products */;
 			projectDirPath = "";
@@ -952,6 +958,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		322E72B92CC9A636009B2530 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		322E72BA2CC9A636009B2530 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 322E72B92CC9A636009B2530 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 32B2582F2C98693800538B23 /* Project object */;
 }
