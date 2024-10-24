@@ -24,7 +24,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Construct paths
     let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
     let input_path = format!("/project/uploaded_files/{}.sleep_quality.input.fheencrypted", uid);
-    let output_final_score_path = format!("/project/uploaded_files/{}.sleep_quality.output_final_score.fheencrypted", uid);
+    let output_final_score_path = format!("/project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
 
     println!(
         "Paths:\n\

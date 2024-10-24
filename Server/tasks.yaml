@@ -2,7 +2,7 @@ tasks:
   add_42:
     binary: add_42
     output_files:
-      - filename: "{uid}.output.add_42.fheencrypted"
+      - filename: "{uid}.add_42.output.fheencrypted"
     response_type: stream
   weight_stats:
     binary: weight_stats
@@ -20,5 +20,5 @@ tasks:
   sleep_quality:
     binary: sleep_quality
     output_files:
-      - filename: "{uid}.output.sleep_quality.fheencrypted"
+      - filename: "{uid}.sleep_quality.output.fheencrypted"
     response_type: stream
