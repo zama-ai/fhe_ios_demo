@@ -60,29 +60,41 @@ struct ClientView: View {
     
     @ViewBuilder
     private var list: some View {
-        VStack {
-            Group {
-                if let data = viewModel.encryptedWeight {
-                    secureItem("Weight History", file: .weightList, data: viewModel.encryptedWeight)
-                    resultsRow
-                } else {
-                    ContentUnavailableView {
-                        Label("No Encrypted Health Records", systemImage: "heart.text.clipboard")
-                            .symbolRenderingMode(.multicolor)
-                    } description: {
-                        Text("Generate encrypted health records\nusing Bridge App.")
-                    } actions: {
-                        Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
-                    }
+        Group {
+            if let data = viewModel.sleepInput {
+                //secureItem("Sleep History", file: .sleepList, data: data)
+                encryptedFileRow(Storage.File.sleepList.rawValue, data: data)
+                sleepResults
+            } else {
+                ContentUnavailableView {
+                    Label("No Encrypted Sleep Records", systemImage: "bed.double.fill")
+                        .symbolRenderingMode(.multicolor)
+                } description: {
+                    Text("Generate encrypted sleep records\nusing Bridge App.")
+                } actions: {
+                    Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
                 }
             }
-            .padding(8)
-            .background {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white.opacity(0.1))
+
+            if let data = viewModel.weightInput {
+                secureItem("Weight History", file: .weightList, data: data)
+                weightStats
+            } else {
+                ContentUnavailableView {
+                    Label("No Encrypted Weight Records", systemImage: "figure")
+                        .symbolRenderingMode(.multicolor)
+                } description: {
+                    Text("Generate encrypted weight records\nusing Bridge App.")
+                } actions: {
+                    Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
+                }
             }
         }
-        .padding()
+        .padding(8)
+        .background {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.white.opacity(0.1))
+        }
     }
     
     private func encryptedFileRow(_ title: String, data: Data) -> some View {
@@ -95,8 +107,8 @@ struct ClientView: View {
         .padding(.vertical, 8)
     }
     
-    private var uploadButton: some View {
-        AsyncButton(action: viewModel.upload) {
+    private func uploadButton(_ action: @escaping() async throws -> Void) -> some View {
+        AsyncButton(action: action) {
             Text("Upload for Analysis")
                 .frame(alignment: .center)
         }
@@ -105,18 +117,27 @@ struct ClientView: View {
     }
     
     @ViewBuilder
-    private var resultsRow: some View {
-        if let a = viewModel.encryptedAvg, let b = viewModel.encryptedMin, let c = viewModel.encryptedMax {
+    private var weightStats: some View {
+        if let a = viewModel.weightResultAvg, let b = viewModel.weightResultMin, let c = viewModel.weightResultMax {
             HStack {
                 secureItem("Avg", file: .weightAvg, data: a)
                 secureItem("Min", file: .weightMin, data: b)
                 secureItem("Max", file: .weightMax, data: c)
             }
         } else {
-            uploadButton
+            uploadButton(viewModel.uploadWeight)
         }
     }
-    
+
+    @ViewBuilder
+    private var sleepResults: some View {
+        if let a = viewModel.sleepResultQuality {
+            secureItem("Sleep Quality", file: .sleepResult, data: a)
+        } else {
+            uploadButton(viewModel.uploadSleep)
+        }
+    }
+
     func secureItem(_ title: String, file: Storage.File, data: Data?) -> some View {
         VStack {
             if data != nil {

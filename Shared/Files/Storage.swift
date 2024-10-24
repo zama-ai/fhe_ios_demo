@@ -16,18 +16,20 @@ final class Storage {
         case weightAvg = "weightAvg.fheencrypted"
 
         case sleepList = "sleepList.fheencrypted"
+        case sleepResult = "sleepResult.fheencrypted"
 
         var renderingType: RenderingType? {
             switch self {
             case .clientKey, .publicKey, .serverKey: nil
-            case .ageIn, .ageOut, .weightMin, .weightMax, .weightAvg: .int
+            case .sleepResult: .int8
+            case .ageIn, .ageOut, .weightMin, .weightMax, .weightAvg: .int16
             case .weightList: .array
             case .sleepList: .cipherTextList
             }
         }
         
         enum RenderingType {
-            case int, array, cipherTextList
+            case int8, int16, array, cipherTextList
         }
     }
     
@@ -54,11 +56,11 @@ final class Storage {
     /// Returns nil if file missing
     static func read(_ file: File) async throws -> Data? {
         let fullURL = singleton.sharedFolder.appendingPathComponent(file.rawValue)
-        return try await singleton.read(at: fullURL)
+        return await singleton.read(at: fullURL)
     }
     
     static func read(_ url: URL) async throws -> Data? {
-        try await singleton.read(at: url)
+        await singleton.read(at: url)
     }
     
     static func url(for file: File) -> URL {
@@ -87,17 +89,17 @@ extension Storage {
         }
     }
     
-    private func read(at url: URL) async throws -> Data? {
+    private func read(at url: URL) async -> Data? {
         let fileName = url.lastPathComponent
         
-        return try await withCheckedThrowingContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             Task(priority: .utility) {
                 do {
                     print("👀 Reading \(fileName)")
                     let data = try Data(contentsOf: url)
                     continuation.resume(returning: data)
                 } catch {
-                    continuation.resume(throwing: error)
+                    continuation.resume(returning: nil)
                 }
             }
         }

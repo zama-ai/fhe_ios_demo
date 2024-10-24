@@ -3,8 +3,8 @@
 import Foundation
 import TFHE
 
-/// A type that contains up to 2^4 - 1 = 15 values
-final class FHEUInt4: Persistable {
+/// A type that contains up to 2^8 - 1 = 255 values
+final class FHEUInt8: Persistable {
     var pointer: OpaquePointer? = nil
     
     init(pointer: OpaquePointer?) {
@@ -12,13 +12,13 @@ final class FHEUInt4: Persistable {
     }
     
     deinit {
-        fhe_uint4_destroy(pointer)
+        fhe_uint8_destroy(pointer)
     }
     
     // MARK: to/from Data
     func toData() throws -> Data {
         var buffer = DynamicBuffer(pointer: nil, length: 0, destructor: nil)
-        try wrap { fhe_uint4_serialize(pointer, &buffer) }
+        try wrap { fhe_uint8_serialize(pointer, &buffer) }
         return try buffer.toData()
     }
     
@@ -27,7 +27,7 @@ final class FHEUInt4: Persistable {
         let bufferView = DynamicBufferView(pointer: buffer.pointer, length: buffer.length)
         var result: OpaquePointer?
         
-        try wrap { fhe_uint4_deserialize(bufferView, &result) }
+        try wrap { fhe_uint8_deserialize(bufferView, &result) }
         
         self.init(pointer: result)
     }
@@ -35,11 +35,11 @@ final class FHEUInt4: Persistable {
     // MARK: - ENCRYPTION -
     func decrypt(clientKey: ClientKey) throws -> Int {
         var result: UInt8 = 0
-        try wrap { fhe_uint4_decrypt(pointer, clientKey.pointer, &result) }
+        try wrap { fhe_uint8_decrypt(pointer, clientKey.pointer, &result) }
         return Int(result)
     }
     
     init(encrypting integer: Int, clientKey: ClientKey) throws {
-        try wrap { fhe_uint4_try_encrypt_with_client_key_u8(UInt8(integer), clientKey.pointer, &pointer) }
+        try wrap { fhe_uint8_try_encrypt_with_client_key_u8(UInt8(integer), clientKey.pointer, &pointer) }
     }
 }

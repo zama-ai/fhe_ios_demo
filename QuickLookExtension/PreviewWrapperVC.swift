@@ -45,7 +45,13 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
         }
         
         switch fileType {
-        case .int:
+        case .int8:
+            let encrypted = try FHEUInt8(fromData: data)
+            let clearInt = try encrypted.decrypt(clientKey: ck)
+            let res: Double = Double(clearInt)
+            viewModel.data = .int(res)
+
+        case .int16:
             let encrypted = try FHEUInt16(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
             let res: Double = Double(clearInt) / 10.0

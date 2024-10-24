@@ -128,7 +128,6 @@ struct BridgeView: View {
         }
     }
     
-    @ViewBuilder
     private var header: some View {
         VStack {
             Text("Bridge")
