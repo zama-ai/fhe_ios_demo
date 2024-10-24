@@ -1,6 +1,7 @@
 // Copyright © 2024 Zama. All rights reserved.
 
 import HealthKit
+import Algorithms
 
 struct HealthData {
     let weight: [Double] // Kg
@@ -48,14 +49,31 @@ final class BridgeViewModel: ObservableObject {
                 return
             }
             
-            // 28/12/13 22h30 -> 28/12/13 23h00 : sleep level 5
             weight.forEach(printSample)
             sleep.forEach(printSample)
 
-            Task { @MainActor in
-                clearData = HealthData(weight: weight.map { $0.quantity.doubleValue(for: .gramUnit(with: .kilo)) },
-                                       sleep: []) // sleep.map { $0.value })
-            }
+            processSamples(weight: weight, sleep: sleep)
+        }
+    }
+    
+    func processSamples(weight: [HKDiscreteQuantitySample], sleep: [HKCategorySample]) {
+        let cleanedWeight: [Double] = weight.map { $0.quantity.doubleValue(for: .gramUnit(with: .kilo)) }
+        
+        let chunks = sleep.chunked(by: { a, b in
+            b.startDate.timeIntervalSince(a.endDate) <= 12 * 3600
+        })
+            
+        let nights = chunks.map { samples in
+            let nightStart = samples.first!.startDate
+            return Sleep.Night(date: nightStart, samples: samples.map({ sample in
+                Sleep.Sample(start: Int(sample.startDate.timeIntervalSince(nightStart) / 60.0),
+                             end: Int(sample.endDate.timeIntervalSince(nightStart) / 60.0),
+                             level: .init(rawValue: sample.value)!)
+            }))
+        }
+
+        Task { @MainActor in
+            clearData = HealthData(weight:cleanedWeight, sleep: nights)
         }
     }
         

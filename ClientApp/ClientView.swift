@@ -67,7 +67,7 @@ struct ClientView: View {
                     resultsRow
                 } else {
                     ContentUnavailableView {
-                        Label("No encrypted health records", systemImage: "heart.text.clipboard")
+                        Label("No Encrypted Health Records", systemImage: "heart.text.clipboard")
                             .symbolRenderingMode(.multicolor)
                     } description: {
                         Text("Generate encrypted health records\nusing Bridge App.")

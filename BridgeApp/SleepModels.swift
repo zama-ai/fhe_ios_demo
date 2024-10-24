@@ -3,7 +3,7 @@
 import Foundation.NSUUID
 
 enum Sleep {
-    struct Night {
+    struct Night: Equatable {
         let date: Date
         let samples: [Sample]
         
@@ -25,7 +25,7 @@ enum Sleep {
 
     }
     
-    struct Sample: Identifiable {
+    struct Sample: Identifiable, Equatable {
         let id = UUID()
         let start: Int  // Minutes since night start
         let end: Int    // Minutes since night start
@@ -43,13 +43,22 @@ enum Sleep {
         
         var name: String {
             switch self {
+            case .inBed: "In Bed"
             case .awake: "Awake"
             case .asleepREM: "REM"
             case .asleepCore: "Core"
             case .asleepDeep: "Deep"
-            case .inBed: "in Bed"
-            case .asleepUnspecified: "asleep"
+            case .asleepUnspecified: "Asleep"
             }
         }
+        
+        static let displayOrder: [Level] = [
+//            .inBed,
+            .awake,
+            .asleepREM,
+            .asleepCore,
+            .asleepDeep,
+//            .asleepUnspecified
+        ]
     }
 }
