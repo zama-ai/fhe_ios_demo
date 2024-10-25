@@ -5,6 +5,7 @@ import Charts
 
 #Preview {
     SleepChartView(samples: Sleep.Night.fake.samples)
+        .padding()
 }
 
 struct SleepChartView: View {
@@ -42,7 +43,6 @@ struct SleepChartView: View {
         }
         .chartLegend(.hidden)
         .frame(height: 150)
-        .padding()
     }
     
     private var maxSampleEnd: Int {

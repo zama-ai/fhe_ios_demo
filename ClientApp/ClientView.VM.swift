@@ -5,20 +5,22 @@ import Foundation
 extension ClientView {
     @MainActor
     final class ViewModel: ObservableObject {
+        @Published var sleepInput: Data?
+        @Published var sleepResultQuality: Data?
+
         @Published var weightInput: Data?
         @Published var weightResultMin: Data?
         @Published var weightResultMax: Data?
         @Published var weightResultAvg: Data?
-        @Published var sleepInput: Data?
-        @Published var sleepResultQuality: Data?
 
         func loadFromDisk() async throws {
+            sleepInput = try await Storage.read(.sleepList)
+            sleepResultQuality = try await Storage.read(.sleepResult)
+
             weightInput = try await Storage.read(.weightList)
             weightResultMin = try await Storage.read(.weightMin)
             weightResultMax = try await Storage.read(.weightMax)
             weightResultAvg = try await Storage.read(.weightAvg)
-            sleepInput = try await Storage.read(.sleepList)
-            sleepResultQuality = try await Storage.read(.sleepResult)
         }
         
         func getUserID() async throws -> String {
@@ -33,6 +35,18 @@ extension ClientView {
                 UserDefaults.standard.set(new, forKey: "uid")
                 return new
             }
+        }
+
+        func uploadSleep() async throws {
+            guard let input = try await Storage.read(.sleepList) else {
+                throw NetworkingError.message("Encrypted list missing")
+            }
+
+            let userID = try await getUserID()
+            let quality = try await Network.shared.getSleepQuality(uid: userID, encryptedSleeps: input)
+            
+            try await Storage.write(.sleepResult, data: quality)
+            sleepResultQuality = quality
         }
 
         func uploadWeight() async throws {
@@ -50,18 +64,6 @@ extension ClientView {
             weightResultMin = stats.min
             weightResultMax = stats.max
             weightResultAvg = stats.avg
-        }
-
-        func uploadSleep() async throws {
-            guard let input = try await Storage.read(.sleepList) else {
-                throw NetworkingError.message("Encrypted list missing")
-            }
-
-            let userID = try await getUserID()
-            let quality = try await Network.shared.getSleepQuality(uid: userID, encryptedSleeps: input)
-            
-            try await Storage.write(.sleepResult, data: quality)
-            sleepResultQuality = quality
         }
     }
 }

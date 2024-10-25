@@ -2,29 +2,66 @@
 
 import SwiftUI
 
+#Preview {
+    SecureView().gauge(value: 3, range: 1...5, title: "Sleep Quality", labels: ["Excellent", "Good", "Average", "Poor", "Awful"])
+        .border(.red)
+        .privateDisplayRing()
+        .border(.green)
+}
+
 struct SecureView: View {
     @ObservedObject var viewModel = ViewModel()
     
     var body: some View {
         switch viewModel.data {
+        case let .gauge(value, range, title, labels):
+            gauge(value: value, range: range, title: title, labels: labels)
+                .privateDisplayRing()
+
         case .int(let int):
             SecureTextView(value: int)
-            
-        case .array(let array):
+
+        case .simpleChart(let array):
             SecureChartView(values: array, kind: .lines)
-            
+
         case .none:
             Color.red
         }
     }
     
     enum Kind {
+        case gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String])
         case int(Double)
-        case array([Double])
+        case simpleChart([Double])
     }
     
     final class ViewModel: ObservableObject {
         @Published var data: Kind?
+    }
+}
+
+extension SecureView {
+    func gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String]) -> some View {
+        VStack(spacing: 0) {
+            Gauge(value: Double(value), in: Double(range.lowerBound)...Double(range.upperBound)) {
+                Text(title)
+            } currentValueLabel: {
+                VStack(spacing: 0) {
+                    Text("\(value)")
+                        .font(.title2)
+                }
+            } minimumValueLabel: {
+                Text("\(range.lowerBound)")
+            } maximumValueLabel: {
+                Text("\(range.upperBound)")
+            }
+            .gaugeStyle(.accessoryCircular)
+            .tint(Gradient(colors: [.green, .yellow, .orange, .red, .pink]))
+            
+            Text(labels[value - 1])
+                .foregroundStyle(.secondary)
+                .font(.caption2)
+        }
     }
 }
 
@@ -33,7 +70,7 @@ struct SecureTextView: View {
     
     var body: some View {
         Text("\(value.formatted(.number.precision(.fractionLength(1))))")
-            .privateDataRing()
+            .privateDisplayRing()
     }
 }
 
@@ -65,15 +102,14 @@ struct SecureChartView: View {
             }
         }
         .chartXAxis(.hidden)
-        .padding(4) // Chart draws some elements outside of its view
-        .privateDataRing()
-        .background(.clear)
+//        .padding(4) // Chart draws some elements outside of its view
+        .privateDisplayRing()
     }
 }
 
 //#Preview {
 //    {
-//        return PrivateTextView(viewModel: .init())
+//        return PrivateTextView(vm: .init())
 //    }()
 //    
 //    PrivateChartView(values: [6, 8, 7, 6, 6, 8, 7, 6, 9, 7], kind: .lines)

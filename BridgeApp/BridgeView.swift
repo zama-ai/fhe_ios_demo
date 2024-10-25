@@ -39,21 +39,29 @@ struct BridgeView: View {
                     HStack {
                         sectionHeader("Sleep", icon: "bed.double.fill", color: .mint)
                         Spacer()
-                        Picker("", selection: $selectedNight) {
-                            ForEach(nights, id: \.date) { night in
-                                Text("\(night.date.formatted(.dateTime.weekday().day().month()))").tag(night.date)
-                            }
-                        }
+                        
                     }
-                    .onChange(of: viewModel.clearData.sleep) { oldValue, newValue in
-                        selectedNight = newValue.last?.date
-                    }
+                    
                     
                     Divider()
                     
-                    SleepChartView(samples: nights.last!.samples)
+                    HStack {
+                        VStack {
+                            Picker("", selection: $selectedNight) {
+                                ForEach(nights, id: \.date) { night in
+                                    Text("\(night.date.formatted(.dateTime.weekday().day().month()))").tag(night.date)
+                                }
+                            }.onChange(of: viewModel.clearData.sleep) { oldValue, newValue in
+                                selectedNight = newValue.last?.date
+                            }
+                            
+                            Text("Found last \(nights.count) nights")
+                                .font(.caption)
+                        }
+                    }
+                    //SleepChartView(samples: nights.last!.samples)
                     
-                    encryptedFileRow(Storage.File.sleepList.rawValue,
+                    encryptedFileRow(.sleepList,
                                      data: viewModel.encryptedSleep,
                                      encrypt: viewModel.encryptSleep,
                                      delete: viewModel.deleteSleep)
@@ -70,8 +78,8 @@ struct BridgeView: View {
                         .padding()
                 }
                 Divider().frame(maxWidth: .infinity)
-                chart(values: viewModel.clearData.weight.map { Int($0) })
-                encryptedFileRow(Storage.File.weightList.rawValue,
+                //chart(values: viewModel.clearData.weight.map { Int($0) })
+                encryptedFileRow(.weightList,
                                  data: viewModel.encryptedWeight,
                                  encrypt: viewModel.encryptWeight,
                                  delete: viewModel.deleteWeight
@@ -79,7 +87,7 @@ struct BridgeView: View {
             }
         }
         .listRowSpacing(20)
-        .buttonStyle(.bordered)
+        .buttonStyle(.borderedProminent)
         .task {
             try? await viewModel.loadFromDisk()
         }
@@ -101,19 +109,18 @@ struct BridgeView: View {
     }
 
     @ViewBuilder
-    private func encryptedFileRow(_ title: String,
+    private func encryptedFileRow(_ file: Storage.File,
                                   data: Data?,
                                   encrypt: @escaping @MainActor () async throws -> Void,
                                   delete: @escaping @MainActor () async throws -> Void) -> some View {
         if let data {
             HStack {
-                Image(systemName: "document.fill")
-                Text(title)
-                Text(data.formattedSize).foregroundStyle(.secondary)
+                Text("Encrypted \(Image(systemName: "checkmark.circle.fill"))").foregroundStyle(.green)
                 Spacer()
                 AsyncButton(action: delete) {
                     Image(systemName: "trash")
                 }
+                .buttonStyle(.bordered)
                 .tint(.red)
             }
             .font(.callout)
@@ -130,7 +137,7 @@ struct BridgeView: View {
     
     private var header: some View {
         VStack {
-            Text("Bridge")
+            Text("Bridge Health")
                 .bold()
                 .font(.largeTitle)
                 .foregroundColor(.yellow)
@@ -199,7 +206,11 @@ struct BridgeView: View {
         
         Chart {
             ForEach(Array(items.enumerated()), id: \.offset) { index, value in
-                BarMark(
+                PointMark(
+                    x: .value("Index", index),
+                    y: .value("Value", value)
+                )
+                LineMark(
                     x: .value("Index", index),
                     y: .value("Value", value)
                 )

@@ -15,8 +15,6 @@
 		324F8E3E2CA47BF900F0BB11 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
 		3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		3275F5B42CA1658B001E7377 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
-		3275F5B52CA1658B001E7377 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,23 +72,11 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3275F5B62CA1658B001E7377 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				3275F5B52CA1658B001E7377 /* TFHE.xcframework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
-		3275F5A42CA16515001E7377 /* FHE Server.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Server.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258372C98693800538B23 /* FHE Bridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Bridge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		32C9CC202CA565A100AEDA32 /* FHE Client.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Client.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,28 +103,6 @@
 			);
 			target = 32B258362C98693800538B23 /* Bridge */;
 		};
-		320C391C2CAAEEA200528366 /* Exceptions for "Shared" folder in "Server" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				AsyncButton.swift,
-				"Data+Ext.swift",
-				FHE/FHEHelpers.swift,
-				FHE/FHEUInt8.swift,
-				FHE/FHEUInt10.swift,
-				FHE/FHEUInt16.swift,
-				FHE/FHEUInt16Array.swift,
-				FHE/Keys/ClientKey.swift,
-				FHE/Keys/PublicKeyCompact.swift,
-				FHE/Keys/ServerKeyCompressed.swift,
-				"FHE/ServerOnly/FHEUInt16+Server.swift",
-				"FHE/ServerOnly/FHEUInt16Array+Server.swift",
-				"FHE/ServerOnly/ServerKey+Server.swift",
-				FHE/ServerOnly/ServerTest.swift,
-				Files/Persistable.swift,
-				Files/Storage.swift,
-			);
-			target = 3275F5A32CA16515001E7377 /* Server */;
-		};
 		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -146,14 +110,6 @@
 				"Data+Ext.swift",
 				Files/Persistable.swift,
 				Files/Storage.swift,
-			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
-		};
-		320CF7622CAA1C0C00528366 /* Exceptions for "QuickLookExtension" folder in "Client" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				PrivateDataRing.swift,
-				SecureView.swift,
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
 		};
@@ -174,6 +130,13 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QLExtension */;
 		};
+		3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Client" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PrivateDisplayRing.swift,
+			);
+			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
+		};
 		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -181,13 +144,13 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QLExtension */;
 		};
-		324F8E352CA44B1B00F0BB11 /* Exceptions for "QuickLookExtension" folder in "Server" target */ = {
+		329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Client" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				PrivateDataRing.swift,
-				SecureView.swift,
+				SleepModels.swift,
+				SleepViews.swift,
 			);
-			target = 3275F5A32CA16515001E7377 /* Server */;
+			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
 		};
 		32B1F8E62CC8F48500CE12F9 /* Exceptions for "ClientApp" folder in "Client" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -216,7 +179,6 @@
 			exceptions = (
 				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */,
 				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */,
-				320C391C2CAAEEA200528366 /* Exceptions for "Shared" folder in "Server" target */,
 				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QLExtension" target */,
 			);
 			path = Shared;
@@ -230,8 +192,7 @@
 		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				320CF7622CAA1C0C00528366 /* Exceptions for "QuickLookExtension" folder in "Client" target */,
-				324F8E352CA44B1B00F0BB11 /* Exceptions for "QuickLookExtension" folder in "Server" target */,
+				3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Client" target */,
 				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QLExtension" target */,
 			);
 			path = QuickLookExtension;
@@ -249,13 +210,9 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */,
+				329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Client" target */,
 			);
 			path = BridgeApp;
-			sourceTree = "<group>";
-		};
-		32C9CC422CA566DC00AEDA32 /* ServerApp */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ServerApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -267,14 +224,6 @@
 			files = (
 				324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */,
 				324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		3275F5A12CA16515001E7377 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3275F5B42CA1658B001E7377 /* TFHE.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,7 +262,6 @@
 				32079E3B2CAC3941004EC06A /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
 				320CFB212CAAC47500528366 /* Server */,
-				32C9CC422CA566DC00AEDA32 /* ServerApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
 				32C9CC212CA565A100AEDA32 /* ClientApp */,
 				320C391A2CAAEE2900528366 /* Shared */,
@@ -326,7 +274,6 @@
 			isa = PBXGroup;
 			children = (
 				32B258372C98693800538B23 /* FHE Bridge.app */,
-				3275F5A42CA16515001E7377 /* FHE Server.app */,
 				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
 				32C9CC202CA565A100AEDA32 /* FHE Client.app */,
 			);
@@ -358,29 +305,6 @@
 			productName = QuickLookExtension;
 			productReference = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
-		};
-		3275F5A32CA16515001E7377 /* Server */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 3275F5B12CA16516001E7377 /* Build configuration list for PBXNativeTarget "Server" */;
-			buildPhases = (
-				3275F5A02CA16515001E7377 /* Sources */,
-				3275F5A12CA16515001E7377 /* Frameworks */,
-				3275F5A22CA16515001E7377 /* Resources */,
-				3275F5B62CA1658B001E7377 /* Embed Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				32C9CC422CA566DC00AEDA32 /* ServerApp */,
-			);
-			name = Server;
-			packageProductDependencies = (
-			);
-			productName = FHEServer;
-			productReference = 3275F5A42CA16515001E7377 /* FHE Server.app */;
-			productType = "com.apple.product-type.application";
 		};
 		32B258362C98693800538B23 /* Bridge */ = {
 			isa = PBXNativeTarget;
@@ -445,9 +369,6 @@
 					324F8E1C2CA43B2100F0BB11 = {
 						CreatedOnToolsVersion = 16.0;
 					};
-					3275F5A32CA16515001E7377 = {
-						CreatedOnToolsVersion = 16.0;
-					};
 					32B258362C98693800538B23 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -475,7 +396,6 @@
 			targets = (
 				32B258362C98693800538B23 /* Bridge */,
 				32C9CC1F2CA565A100AEDA32 /* Client */,
-				3275F5A32CA16515001E7377 /* Server */,
 				324F8E1C2CA43B2100F0BB11 /* QLExtension */,
 			);
 		};
@@ -483,13 +403,6 @@
 
 /* Begin PBXResourcesBuildPhase section */
 		324F8E1B2CA43B2100F0BB11 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		3275F5A22CA16515001E7377 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -514,13 +427,6 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		324F8E192CA43B2100F0BB11 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		3275F5A02CA16515001E7377 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -598,66 +504,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEBridge.QuickLookExtension;
 				PRODUCT_NAME = "FHE QuickLookExtension";
 				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		3275F5AF2CA16516001E7377 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ServerApp/Entitlements.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEServer;
-				PRODUCT_NAME = "FHE Server";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		3275F5B02CA16516001E7377 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ServerApp/Entitlements.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEServer;
-				PRODUCT_NAME = "FHE Server";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -801,7 +647,6 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -833,7 +678,6 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -864,7 +708,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+				INFOPLIST_KEY_UIUserInterfaceStyle = light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -895,7 +739,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
+				INFOPLIST_KEY_UIUserInterfaceStyle = light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -917,15 +761,6 @@
 			buildConfigurations = (
 				324F8E2C2CA43B2100F0BB11 /* Debug */,
 				324F8E2D2CA43B2100F0BB11 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		3275F5B12CA16516001E7377 /* Build configuration list for PBXNativeTarget "Server" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				3275F5AF2CA16516001E7377 /* Debug */,
-				3275F5B02CA16516001E7377 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
