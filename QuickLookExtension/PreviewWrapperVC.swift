@@ -48,8 +48,10 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
         case .int8:
             let encrypted = try FHEUInt8(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
-            let res: Double = Double(clearInt)
-            viewModel.data = .int(res)
+            viewModel.data = .gauge(value: clearInt,
+                                    range: 1...5,
+                                    title: "Sleep Quality",
+                                    labels: ["Excellent", "Good", "Average", "Poor", "Awful"])
 
         case .int16:
             let encrypted = try FHEUInt16(fromData: data)
@@ -60,7 +62,7 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
         case .array:
             let encrypted = try FHEUInt16Array(fromData: data)
             let clearArray = try encrypted.decrypt(clientKey: ck).map { Double($0) / 10.0 }
-            viewModel.data = .array(clearArray)
+            viewModel.data = .simpleChart(clearArray)
             
         case .cipherTextList:
             assertionFailure("Not representable yet")

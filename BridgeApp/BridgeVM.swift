@@ -131,6 +131,7 @@ extension BridgeViewModel {
     
     func deleteSleep() async throws {
         try await Storage.deleteFromDisk(.sleepList)
+        try await Storage.deleteFromDisk(.sleepResult)
         encryptedSleep = nil
     }
 
@@ -148,6 +149,9 @@ extension BridgeViewModel {
 
     func deleteWeight() async throws {
         try await Storage.deleteFromDisk(.weightList)
+        try await Storage.deleteFromDisk(.weightAvg)
+        try await Storage.deleteFromDisk(.weightMin)
+        try await Storage.deleteFromDisk(.weightMax)
         encryptedWeight = nil
     }
 

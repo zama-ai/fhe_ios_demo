@@ -5,6 +5,7 @@ Implement a bridge iOS app and a user app. The user app uses our new FHE enclave
 # Useful Links
 
 - [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
+- [Canva exploration](https://www.canva.com/design/DAGUeG30ET0/Yy1lAaapPuLDaMJEukOM3Q/edit)
 - [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)

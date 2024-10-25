@@ -2,160 +2,183 @@
 
 import SwiftUI
 
+#Preview {
+    ClientView()
+}
+
 struct ClientView: View {
-    @StateObject private var viewModel = ViewModel()
-    @State private var screenshot: UIImage?
+    @StateObject private var vm = ViewModel()
     @Environment(\.scenePhase) var scenePhase
-    
+
     var body: some View {
         VStack {
             header
-            
-            list
-            
-            Spacer()
+            ScrollView {
+                section("Sleep", icon: "bed.double.fill", color: .mint, data: vm.sleepInput) { data in
+                    sleepInput(data)
+                    sleepAnalysis
+                }
+                
+                section("Weight", icon: "figure", color: .purple, data: vm.weightInput) { data in
+                    weightInput(data)
+                    weightAnalysis
+                }
+            }
         }
-        .tint(.pink)
-        .buttonStyle(.bordered)
+        .background(.yellow)
+        .buttonStyle(.borderedProminent)
+        .tint(.orange)
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
                 Task {
-                    try await viewModel.loadFromDisk()
+                    try await vm.loadFromDisk()
                 }
             case _: break
-            }
-        }
-        .overlay {
-            if let screenshot {
-                GroupBox("Screenshot") {
-                    Image(uiImage: screenshot)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding()
-                        .border(.white, width: 8)
-                        .rotationEffect(.degrees(-1.5))
-                        .shadow(radius: 5)
-                }.padding()
             }
         }
     }
     
     private var header: some View {
         VStack {
-            HStack(spacing: 0) {
-                Text("Client ")
-                Text("FHE").foregroundColor(.pink)
-                Text("alth")
-            }
-            .bold()
-            .font(.largeTitle)
+            Text("Client **FHE**alth")
+                .font(.largeTitle)
             
             Text("All Information Encrypted and Private")
-                .bold()
-                .font(.subheadline)
+                .font(.subheadline).bold()
                 .foregroundStyle(.secondary)
         }
     }
+        
+    // MARK: - SLEEP -
+    private func sleepInput(_ data: Data) -> some View {
+        GroupBox("Your Night") {
+            SleepChartView(samples: Sleep.Night.fake.samples)
+                //.privateDisplayRing()
+            
+            Text("""
+                **Awake**: Occurs between sleep cycles, often brief and unnoticed.
+                **REM**: Dreaming stage, crucial for memory and emotions.
+                **Core**: Light sleep, prepares the body for deeper stages.
+                **Deep**: Restorative sleep, vital for physical recovery and growth.
+                """)
+            .foregroundStyle(.secondary)
+            .font(.caption2)
+            .padding(.horizontal, -8)
+        }
+    }
     
-    @ViewBuilder
-    private var list: some View {
-        Group {
-            if let data = viewModel.sleepInput {
-                //secureItem("Sleep History", file: .sleepList, data: data)
-                encryptedFileRow(Storage.File.sleepList.rawValue, data: data)
-                sleepResults
-            } else {
-                ContentUnavailableView {
-                    Label("No Encrypted Sleep Records", systemImage: "bed.double.fill")
-                        .symbolRenderingMode(.multicolor)
-                } description: {
-                    Text("Generate encrypted sleep records\nusing Bridge App.")
-                } actions: {
-                    Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
+    private var sleepAnalysis: some View {
+        GroupBox("Sleep Quality") {
+            if let _ = vm.sleepResultQuality {
+                HStack(alignment: .top, spacing: 16) {
+                    secureDisplay(.sleepResult)
+                    
+                    Text("Sleep quality is based on last night's sleep duration and stages (REM, Deep, Core). A score of 1 reflects excellent rest, while 5 indicates poor sleep quality.")
+                        .font(.caption)
+                        .opacity(0.9)
                 }
+            } else {
+                uploadButton("Night", legend: "Be patient, analysis can take up to 60 seconds", action: vm.uploadSleep)
             }
+        }
+    }
+        
+    // MARK: - WEIGHT -
+    private func weightInput(_ data: Data) -> some View {
+        GroupBox("History") {
+            secureDisplay(.weightList)
+            
+            Text("Weight in Kg, as recorded in Health App")
+            .foregroundStyle(.secondary)
+            .font(.caption2)
+            .padding(.horizontal, -8)
+        }
+    }
 
-            if let data = viewModel.weightInput {
-                secureItem("Weight History", file: .weightList, data: data)
-                weightStats
-            } else {
-                ContentUnavailableView {
-                    Label("No Encrypted Weight Records", systemImage: "figure")
-                        .symbolRenderingMode(.multicolor)
-                } description: {
-                    Text("Generate encrypted weight records\nusing Bridge App.")
-                } actions: {
-                    Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
+    private var weightAnalysis: some View {
+        GroupBox("Analysis") {
+            if vm.weightResultAvg != nil,
+               vm.weightResultMin != nil,
+               vm.weightResultMax != nil {
+                let list: [(title: String, file: Storage.File)] = [
+                    ("Min", .weightMin), ("Max", .weightMax), ("Avg", .weightAvg)
+                ]
+                HStack(spacing: 0) {
+                    ForEach(list, id: \.self.title) { item in
+                        secureDisplay(item.file)
+                            .overlay(alignment: .bottom) {
+                                Text(item.title)
+                                    .padding(.bottom, 16)
+                            }
+                    }
                 }
+                .padding(.top, -8)
+                .padding(.horizontal, -16)
+            } else {
+                uploadButton("Weight", legend: "Analysis only takes a few seconds", action: vm.uploadWeight)
+            }
+        }
+    }
+
+    // MARK: - GENERIC -
+    private func section<Content: View>(_ name: String, icon: String, color: Color, data: Data?, @ViewBuilder content: (Data) -> Content) -> some View {
+        GroupBox {
+            if let data {
+                content(data)
+            } else {
+                noContent(name, icon: icon, color: color)
+                    .padding(16)
+            }
+        } label: {
+            if data != nil {
+                Label(name, systemImage: icon)
+                    .imageScale(.large)
+                    .symbolRenderingMode(.multicolor)
+                    .foregroundStyle(color)
             }
         }
         .padding(8)
-        .background {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.white.opacity(0.1))
-        }
     }
     
-    private func encryptedFileRow(_ title: String, data: Data) -> some View {
-        HStack {
-            Image(systemName: "document.fill")
-            Text(title)
-            Text(data.formattedSize).foregroundStyle(.secondary)
-            Spacer()
-        }
-        .padding(.vertical, 8)
-    }
-    
-    private func uploadButton(_ action: @escaping() async throws -> Void) -> some View {
-        AsyncButton(action: action) {
-            Text("Upload for Analysis")
-                .frame(alignment: .center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-    }
-    
-    @ViewBuilder
-    private var weightStats: some View {
-        if let a = viewModel.weightResultAvg, let b = viewModel.weightResultMin, let c = viewModel.weightResultMax {
-            HStack {
-                secureItem("Avg", file: .weightAvg, data: a)
-                secureItem("Min", file: .weightMin, data: b)
-                secureItem("Max", file: .weightMax, data: c)
+    private func noContent(_ name: String, icon: String, color: Color) -> some View {
+        ContentUnavailableView {
+            Label {
+                Text("No \(name.capitalized) Records")
+            } icon: {
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+                    .symbolRenderingMode(.multicolor)
             }
-        } else {
-            uploadButton(viewModel.uploadWeight)
+        } description: {
+            Text("Generate encrypted \(name.lowercased()) records\nusing Bridge App.")
+        } actions: {
+            Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
         }
     }
-
-    @ViewBuilder
-    private var sleepResults: some View {
-        if let a = viewModel.sleepResultQuality {
-            secureItem("Sleep Quality", file: .sleepResult, data: a)
-        } else {
-            uploadButton(viewModel.uploadSleep)
-        }
-    }
-
-    func secureItem(_ title: String, file: Storage.File, data: Data?) -> some View {
+    
+    private func uploadButton(_ name: String, legend: String? = nil, action: @escaping () async throws -> Void) -> some View {
         VStack {
-            if data != nil {
-                SecureDisplay(url: Storage.url(for: file))
-            } else {
-                Image(systemName: "questionmark")
-                    .frame(maxWidth: .infinity, maxHeight: 150)
-                    .background(.black)
-                    .cornerRadius(12)
+            AsyncButton("Upload \(name.capitalized) for Analysis", action: action)
+
+            if let legend {
+                Text(legend)
+                    .foregroundStyle(.secondary)
+                    .font(.caption2)
             }
-            Text(title)
         }
+        .padding()
+    }
+
+    func secureDisplay(_ file: Storage.File) -> some View {
+        FilePreview(url: Storage.url(for: file))
+            .frame(minHeight: 150)
+            .overlay {
+                Color.white.opacity(0.01) // Hack to allow scrolling from this view
+            }
     }
 }
 
-#Preview {
-    ClientView()
-}
 
 @main
 struct ClientApp: App {

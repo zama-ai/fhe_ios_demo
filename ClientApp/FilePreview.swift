@@ -3,15 +3,6 @@
 import SwiftUI
 import QuickLook
 
-struct SecureDisplay: View {
-    let url: URL
-    
-    var body: some View {
-        FilePreview(url: url)
-            .frame(maxHeight: 150)
-    }
-}
-
 struct FilePreview: UIViewControllerRepresentable {
     let url: URL
 
@@ -46,7 +37,7 @@ struct FilePreview: UIViewControllerRepresentable {
 }
 
 #Preview {
-    SecureDisplay(url: Bundle.main.bundleURL)
+    FilePreview(url: Bundle.main.bundleURL)
         .border(.secondary)
         .padding()
 }
