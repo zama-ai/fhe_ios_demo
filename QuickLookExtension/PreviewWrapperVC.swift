@@ -40,7 +40,7 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
         }
         
         let fileName = url.lastPathComponent
-        guard let fileType = Storage.File(rawValue: fileName)?.renderingType else {
+        guard let fileType = Storage.File(rawValue: fileName)?.decryptType else {
             throw NSError(domain: "App", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown file type at \(url)!"])
         }
         
@@ -57,7 +57,7 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
             let encrypted = try FHEUInt16(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
             let res: Double = Double(clearInt) / 10.0
-            viewModel.data = .int(res)
+            viewModel.data = .text(value: res)
             
         case .array:
             let encrypted = try FHEUInt16Array(fromData: data)

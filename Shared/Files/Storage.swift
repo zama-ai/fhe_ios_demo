@@ -7,8 +7,6 @@ final class Storage {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-        case ageIn = "ageIn.fheencrypted"
-        case ageOut = "ageOut.fheencrypted"
         
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
@@ -16,19 +14,21 @@ final class Storage {
         case weightAvg = "weightAvg.fheencrypted"
 
         case sleepList = "sleepList.fheencrypted"
-        case sleepResult = "sleepResult.fheencrypted"
+        case sleepScore = "sleepScore.fheencrypted"
 
-        var renderingType: RenderingType? {
+        var decryptType: DecryptType? {
             switch self {
-            case .clientKey, .publicKey, .serverKey: nil
-            case .sleepResult: .int8
-            case .ageIn, .ageOut, .weightMin, .weightMax, .weightAvg: .int16
-            case .weightList: .array
             case .sleepList: .cipherTextList
+            case .sleepScore: .int8
+
+            case .weightList: .array
+            case .weightMin, .weightMax, .weightAvg:  .int16
+
+            case .clientKey, .publicKey, .serverKey: nil
             }
         }
         
-        enum RenderingType {
+        enum DecryptType {
             case int8, int16, array, cipherTextList
         }
     }

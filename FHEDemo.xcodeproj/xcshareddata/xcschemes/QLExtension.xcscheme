@@ -18,7 +18,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "324F8E1C2CA43B2100F0BB11"
                BuildableName = "FHE QuickLookExtension.appex"
-               BlueprintName = "QLExtension"
+               BlueprintName = "QuickLookExtension"
                ReferencedContainer = "container:FHEDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

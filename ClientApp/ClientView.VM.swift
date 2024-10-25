@@ -15,7 +15,7 @@ extension ClientView {
 
         func loadFromDisk() async throws {
             sleepInput = try await Storage.read(.sleepList)
-            sleepResultQuality = try await Storage.read(.sleepResult)
+            sleepResultQuality = try await Storage.read(.sleepScore)
 
             weightInput = try await Storage.read(.weightList)
             weightResultMin = try await Storage.read(.weightMin)
@@ -45,7 +45,7 @@ extension ClientView {
             let userID = try await getUserID()
             let quality = try await Network.shared.getSleepQuality(uid: userID, encryptedSleeps: input)
             
-            try await Storage.write(.sleepResult, data: quality)
+            try await Storage.write(.sleepScore, data: quality)
             sleepResultQuality = quality
         }
 

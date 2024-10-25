@@ -22,14 +22,12 @@ func serverTest() async throws {
     try await pk.writeToDisk(.publicKey)
     try await sk.writeToDisk(.serverKey)
 
-    try await inputInt.writeToDisk(.ageIn)
     try await inputArray.writeToDisk(.weightList)
     
     let time = Date()
     guard let ck2 = try await ClientKey.readFromDisk(.clientKey),
           let sk2 = try await ServerKeyCompressed.readFromDisk(.serverKey),
           let _ = try await PublicKeyCompact.readFromDisk(.publicKey),
-          let inputInt2 = try await FHEUInt16.readFromDisk(.ageIn),
           let inputArray2 = try await FHEUInt16Array.readFromDisk(.weightList) else {
         assert(true, "Data not on disk")
         return
@@ -37,24 +35,21 @@ func serverTest() async throws {
     
     // On Server
     try sk2.setServerKey()
-    let resultInt = try inputInt2.addScalar(int: 10)
     let resultStats = try inputArray2.stats()
     let time2 = Date()
     
-    try await resultInt.writeToDisk(.ageOut)
     try await resultStats.min.writeToDisk(.weightMin)
     try await resultStats.max.writeToDisk(.weightMax)
     try await resultStats.avg.writeToDisk(.weightAvg)
     // End Server
     
     
-    let int = try resultInt.decrypt(clientKey: ck2)
     let min = try resultStats.min.decrypt(clientKey: ck) / coeff
     let max = try resultStats.max.decrypt(clientKey: ck) / coeff
     let rawAvg = try resultStats.avg.decrypt(clientKey: ck)
     let avg = Double(rawAvg) / Double(coeff)
 
-    print("Results are: int: \(int), min: \(min), max: \(max), avg: \(avg)")
+    print("Results are: min: \(min), max: \(max), avg: \(avg)")
     print("Time taken: \(time2.timeIntervalSince(time).formatted(.number.precision(.fractionLength(2)))) seconds")
 }
 

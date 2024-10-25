@@ -72,7 +72,7 @@ struct ClientView: View {
         GroupBox("Sleep Quality") {
             if let _ = vm.sleepResultQuality {
                 HStack(alignment: .top, spacing: 16) {
-                    secureDisplay(.sleepResult)
+                    secureDisplay(.sleepScore)
                     
                     Text("Sleep quality is based on last night's sleep duration and stages (REM, Deep, Core). A score of 1 reflects excellent rest, while 5 indicates poor sleep quality.")
                         .font(.caption)
@@ -116,7 +116,7 @@ struct ClientView: View {
                 .padding(.top, -8)
                 .padding(.horizontal, -16)
             } else {
-                uploadButton("Weight", legend: "Analysis only takes a few seconds", action: vm.uploadWeight)
+                uploadButton("Weight", legend: "Analysis takes a few seconds", action: vm.uploadWeight)
             }
         }
     }
@@ -178,14 +178,3 @@ struct ClientView: View {
             }
     }
 }
-
-
-@main
-struct ClientApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ClientView()
-        }
-    }
-}
-

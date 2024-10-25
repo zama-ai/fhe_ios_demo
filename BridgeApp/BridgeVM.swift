@@ -131,7 +131,7 @@ extension BridgeViewModel {
     
     func deleteSleep() async throws {
         try await Storage.deleteFromDisk(.sleepList)
-        try await Storage.deleteFromDisk(.sleepResult)
+        try await Storage.deleteFromDisk(.sleepScore)
         encryptedSleep = nil
     }
 
