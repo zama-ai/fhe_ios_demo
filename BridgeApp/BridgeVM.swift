@@ -167,6 +167,19 @@ extension BridgeView.ViewModel {
         try await loadFromDisk()
     }
 
+    @MainActor
+    func useFakeSleep() {
+        let night = Sleep.Night.fake
+        sleep = [night]
+        selectedNight = night.date
+    }
+    
+    @MainActor
+    func useFakeWeight() {
+        weight = [63, 70, 73, 68, 71]
+        weightDateRange = "Fake weights"
+    }
+
     func encryptWeight() async throws {
         try await ensureKeysExist()
                 
