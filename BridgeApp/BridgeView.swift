@@ -46,7 +46,7 @@ struct BridgeView: View {
     private var content: some View {
         ScrollView {
             section(for: .sleep,
-                    granted: vm.sleepGranted,
+//                    granted: vm.sleepGranted,
                     items: vm.sleep,
                     file: vm.encryptedSleep,
                     subtitle: "Select Night",
@@ -67,7 +67,7 @@ struct BridgeView: View {
             }
             
             section(for: .weight,
-                    granted: vm.weightGranted,
+//                    granted: vm.weightGranted,
                     items: vm.weight,
                     file: vm.encryptedWeight,
                     subtitle: vm.weightDateRange,
@@ -173,7 +173,19 @@ struct BridgeView: View {
                 }
             } description: {
                 Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
-                Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
+                
+                VStack(spacing: 10) {
+                    Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
+                    
+                    HStack {
+                        VStack { Divider() }
+                        Text(" or ")
+                        VStack { Divider() }
+                    }
+                    
+                    Button("Use Fake \(metric.name) Data", action: metric == .sleep ? vm.useFakeSleep : vm.useFakeWeight)
+                        .padding(.bottom, -20)
+                }
             }
         }
     }
