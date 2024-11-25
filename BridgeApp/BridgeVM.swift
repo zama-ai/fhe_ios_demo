@@ -3,43 +3,62 @@
 import HealthKit
 import Algorithms
 
-struct HealthData {
-    let weight: [Double] // Kg
-    let sleep: [Sleep.Night]
-    
-    static let empty = HealthData(weight: [], sleep: [])
-}
+extension BridgeView {
+    @MainActor
+    final class ViewModel: ObservableObject {
+        
+        @Published var weightGranted: Bool = false
+        @Published var sleepGranted: Bool = false
+        
+        @Published var weight: [Double] = []
+        @Published var weightDateRange: String = ""
+        @Published var sleep: [Sleep.Night] = []
+        @Published var selectedNight: Date?
 
-@MainActor
-final class BridgeViewModel: ObservableObject {
-    static let shared = BridgeViewModel()
-    
-    @Published var clearData: HealthData = .empty
-    @Published var encryptedWeight: Data?
-    @Published var encryptedSleep: Data?
+        @Published var encryptedWeight: Data?
+        @Published var encryptedSleep: Data?
 
-    private var ck: ClientKey?
-    private var pk: PublicKeyCompact?
-    private var sk: ServerKeyCompressed?
+        private var ck: ClientKey?
+        private var pk: PublicKeyCompact?
+        private var sk: ServerKeyCompressed?
+        
+        private let healthStore = HKHealthStore()
+        private let sampleTypes: Set<HKSampleType> = [
+            HKQuantityType(.bodyMass),
+            HKCategoryType(.sleepAnalysis)
+        ]
+        
+        private var weightType: HKQuantityType? { HKObjectType.quantityType(forIdentifier: .bodyMass) }
+        private var sleepType: HKCategoryType? { HKObjectType.categoryType(forIdentifier: .sleepAnalysis) }
 
-    lazy var healthStore: HKHealthStore = { HKHealthStore() }()
-    let sampleTypes: Set<HKSampleType> = [
-        HKQuantityType(.bodyMass),      // HKDiscreteQuantitySample
-        HKCategoryType(.sleepAnalysis)  // HKCategorySample
-    ]
-    
-    func loadFromDisk() async throws {
-        encryptedWeight = try await Storage.read(.weightList)
-        encryptedSleep = try await Storage.read(.sleepList)
-    }
-    
-    func isAllowed() async throws -> Bool {
-        let ok = try await healthStore.statusForAuthorizationRequest(toShare: [], read: sampleTypes)
-        return ok == .unnecessary
-    }
-    
-    func fetchHealthData() {
-        Task {
+        func loadFromDisk() async throws {
+            try await refreshPermission()
+            encryptedWeight = try await Storage.read(.weightList)
+            encryptedSleep = try await Storage.read(.sleepList)
+            try await fetchHealthData()
+        }
+
+        func refreshPermission() async throws {
+            guard let weightType, let sleepType else { return }
+            weightGranted = try await healthStore.statusForAuthorizationRequest(toShare: [], read: [weightType]) == .unnecessary
+            sleepGranted = try await healthStore.statusForAuthorizationRequest(toShare: [], read: [sleepType]) == .unnecessary
+        }
+
+        func requestWeightPermission() async throws {
+            guard let weightType else { return }
+            try await healthStore.requestAuthorization(toShare: [], read: [weightType])
+            try await refreshPermission()
+            try await fetchHealthData()
+        }
+
+        func requestSleepPermission() async throws {
+            guard let sleepType else { return }
+            try await healthStore.requestAuthorization(toShare: [], read: [sleepType])
+            try await refreshPermission()
+            try await fetchHealthData()
+        }
+        
+        func fetchHealthData() async throws {
             async let weightSamples = await getSamples(type: HKQuantityType(.bodyMass), last: 10)
             async let sleepSamples = await getSamples(type: HKCategoryType(.sleepAnalysis), last: 150)
             
@@ -51,71 +70,83 @@ final class BridgeViewModel: ObservableObject {
             
             weight.forEach(printSample)
             sleep.forEach(printSample)
-
-            processSamples(weight: weight, sleep: sleep)
-        }
-    }
-    
-    func processSamples(weight: [HKDiscreteQuantitySample], sleep: [HKCategorySample]) {
-        let cleanedWeight: [Double] = weight.map { $0.quantity.doubleValue(for: .gramUnit(with: .kilo)) }
-        
-        let chunks = sleep.chunked(by: { a, b in
-            b.startDate.timeIntervalSince(a.endDate) <= 12 * 3600
-        })
             
-        let nights = chunks.map { samples in
-            let nightStart = samples.first!.startDate
-            return Sleep.Night(date: nightStart, samples: samples.map({ sample in
-                Sleep.Sample(start: Int(sample.startDate.timeIntervalSince(nightStart) / 60.0),
-                             end: Int(sample.endDate.timeIntervalSince(nightStart) / 60.0),
-                             level: .init(rawValue: sample.value)!)
-            }))
+            processSamples(weightSamples: weight, sleepSamples: sleep)
         }
-
-        Task { @MainActor in
-            clearData = HealthData(weight:cleanedWeight, sleep: nights)
-        }
-    }
         
-    func getSamples(type: HKSampleType, last: Int) async -> [HKSample] {
-        await withCheckedContinuation { continuation in
-            let mostRecents = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+        private func processSamples(weightSamples: [HKDiscreteQuantitySample], sleepSamples: [HKCategorySample]) {
+            let cleanedWeight: [Double] = weightSamples.map { $0.quantity.doubleValue(for: .gramUnit(with: .kilo)) }
+            
+            let dateInterval: String = {
+                if let start = weightSamples.first?.startDate,
+                   let end = weightSamples.last?.endDate {
+                    return "\(start.formatted(.dateTime.day().month().year())) - \(end.formatted(.dateTime.day().month().year()))"
 
-            let query = HKSampleQuery(sampleType: type,
-                                      predicate: nil,
-                                      limit: last,
-                                      sortDescriptors: [mostRecents]) { query, samples, error in
-                if let error {
-                    print("error fetching: ", error.localizedDescription)
-                    continuation.resume(returning: [])
-                } else {
-                    continuation.resume(returning: samples?.reversed() ?? [])
                 }
-            }
-            healthStore.execute(query)
-        }
-    }
+                return ""
+            }()
 
-    func printSample(_ sample: HKSample) {
-        switch sample {
-        case let weight as HKDiscreteQuantitySample where sample.sampleType == HKQuantityType(.bodyMass):
-            let double = weight.quantity.doubleValue(for: .gramUnit(with: .kilo))
-            let rounded = Int(double.rounded())
-            print("weight: ", sample.startDate.formatted(), weight.quantity, double, rounded)
+            let chunks = sleepSamples.chunked(by: { a, b in
+                b.startDate.timeIntervalSince(a.endDate) <= 12 * 3600
+            })
             
-        case let sleep as HKCategorySample where sample.sampleType == HKCategoryType(.sleepAnalysis):
-            let duration = sleep.endDate.timeIntervalSince(sample.startDate)
-            let value = sleep.value
-            print("sleep:\t\(sample.startDate.formatted())\t\(duration)\t\(value)")
-
-        case _:
-            print("⚠️ Unrecognized type \(sample.sampleType) \(type(of: sample))")
+            let nights = chunks.map { samples in
+                let nightStart = samples.first!.startDate
+                return Sleep.Night(date: nightStart, samples: samples.map({ sample in
+                    Sleep.Sample(start: Int(sample.startDate.timeIntervalSince(nightStart) / 60.0),
+                                 end: Int(sample.endDate.timeIntervalSince(nightStart) / 60.0),
+                                 level: .init(rawValue: sample.value)!)
+                }))
+            }
+            
+            Task { @MainActor in
+                weight = cleanedWeight
+                weightDateRange = dateInterval
+                sleep = nights
+                selectedNight = nights.first?.date
+            }
+        }
+        
+        private func getSamples(type: HKSampleType, last: Int) async -> [HKSample] {
+            await withCheckedContinuation { continuation in
+                let mostRecents = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+                
+                let query = HKSampleQuery(sampleType: type,
+                                          predicate: nil,
+                                          limit: last,
+                                          sortDescriptors: [mostRecents]) { query, samples, error in
+                    if let error {
+                        print("error fetching: ", error.localizedDescription)
+                        continuation.resume(returning: [])
+                    } else {
+                        continuation.resume(returning: samples?.reversed() ?? [])
+                    }
+                }
+                healthStore.execute(query)
+            }
+        }
+        
+        private func printSample(_ sample: HKSample) {
+            switch sample {
+            case let weight as HKDiscreteQuantitySample where sample.sampleType == HKQuantityType(.bodyMass):
+                let double = weight.quantity.doubleValue(for: .gramUnit(with: .kilo))
+                let rounded = Int(double.rounded())
+                print("weight: ", sample.startDate.formatted(), weight.quantity, double, rounded)
+                
+            case let sleep as HKCategorySample where sample.sampleType == HKCategoryType(.sleepAnalysis):
+                let duration = sleep.endDate.timeIntervalSince(sample.startDate)
+                let value = sleep.value
+                print("sleep:\t\(sample.startDate.formatted())\t\(duration)\t\(value)")
+                
+            case _:
+                print("⚠️ Unrecognized type \(sample.sampleType) \(type(of: sample))")
+            }
         }
     }
 }
 
 // MARK: - ENCRYPTION -
-extension BridgeViewModel {
+extension BridgeView.ViewModel {
     func encryptSleep() async throws {
         try await ensureKeysExist()
         
@@ -131,15 +162,16 @@ extension BridgeViewModel {
     
     func deleteSleep() async throws {
         try await Storage.deleteFromDisk(.sleepList)
-        try await Storage.deleteFromDisk(.sleepScore)
-        encryptedSleep = nil
+        try? await Storage.deleteFromDisk(.sleepScore)
+
+        try await loadFromDisk()
     }
 
     func encryptWeight() async throws {
         try await ensureKeysExist()
                 
         if let pk {
-            let biggerInts = clearData.weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
+            let biggerInts = weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)
             let arrayData = try array.toData()
             try await Storage.write(.weightList, data: arrayData)
@@ -149,10 +181,11 @@ extension BridgeViewModel {
 
     func deleteWeight() async throws {
         try await Storage.deleteFromDisk(.weightList)
-        try await Storage.deleteFromDisk(.weightAvg)
-        try await Storage.deleteFromDisk(.weightMin)
-        try await Storage.deleteFromDisk(.weightMax)
-        encryptedWeight = nil
+        try? await Storage.deleteFromDisk(.weightAvg)
+        try? await Storage.deleteFromDisk(.weightMin)
+        try? await Storage.deleteFromDisk(.weightMax)
+        
+        try await loadFromDisk()
     }
 
     private func ensureKeysExist() async throws {

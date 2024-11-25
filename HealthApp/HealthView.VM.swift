@@ -2,7 +2,7 @@
 
 import Foundation
 
-extension ClientView {
+extension HealthView {
     @MainActor
     final class ViewModel: ObservableObject {
         @Published var sleepInput: Data?
