@@ -1,228 +1,180 @@
 // Copyright © 2024 Zama. All rights reserved.
 
 import SwiftUI
-import Charts
-import HealthKitUI
+
+#Preview {
+    BridgeView()
+}
 
 struct BridgeView: View {
-    @State private var showHealthKitSheet = false
-    @State private var selectedNight: Date?
-    @StateObject var viewModel = BridgeViewModel.shared
+    @StateObject private var vm = ViewModel()
+    
+    struct Metric: Equatable {
+        let name: String
+        let icon: String
+        let color: Color
+        
+        static let sleep: Metric = .init(name: "Sleep", icon: "bed.double.fill", color: .mint)
+        static let weight: Metric = .init(name: "Weight", icon: "figure", color: .purple)
+    }
     
     var body: some View {
         header
-                
-        if viewModel.clearData.weight.isEmpty && viewModel.clearData.sleep.isEmpty {
-            noContent
-        } else {
-            topRow
-            someContent
-        }
-    }
-    
-    var topRow: some View {
-        HStack {
-            importButton
-            openAppButton
-        }
+        
+        content
         .buttonStyle(.bordered)
-        .tint(.accentColor)
-        .padding(.top, 8)
-        .padding(.bottom, -8)
-    }
-
-    var someContent: some View {
-        List {
-            let nights = viewModel.clearData.sleep
-            if !nights.isEmpty {
-                VStack {
-                    HStack {
-                        sectionHeader("Sleep", icon: "bed.double.fill", color: .mint)
-                        Spacer()
-                        
-                    }
-                    
-                    
-                    Divider()
-                    
-                    HStack {
-                        VStack {
-                            Picker("", selection: $selectedNight) {
-                                ForEach(nights, id: \.date) { night in
-                                    Text("\(night.date.formatted(.dateTime.weekday().day().month()))").tag(night.date)
-                                }
-                            }.onChange(of: viewModel.clearData.sleep) { oldValue, newValue in
-                                selectedNight = newValue.last?.date
-                            }
-                            
-                            Text("Found last \(nights.count) nights")
-                                .font(.caption)
-                        }
-                    }
-                    //SleepChartView(samples: nights.last!.samples)
-                    
-                    encryptedFileRow(.sleepList,
-                                     data: viewModel.encryptedSleep,
-                                     encrypt: viewModel.encryptSleep,
-                                     delete: viewModel.deleteSleep)
-                }
-            }
-            
-            VStack {
-                HStack {
-                    sectionHeader("Weight", icon: "figure", color: .purple)
-                    Spacer()
-                    Text("\(viewModel.clearData.weight.last?.formatted(.number.precision(.fractionLength(1))) ?? "-") kg")
-                        .foregroundStyle(.secondary)
-                        .font(.title3)
-                        .padding()
-                }
-                Divider().frame(maxWidth: .infinity)
-                //chart(values: viewModel.clearData.weight.map { Int($0) })
-                encryptedFileRow(.weightList,
-                                 data: viewModel.encryptedWeight,
-                                 encrypt: viewModel.encryptWeight,
-                                 delete: viewModel.deleteWeight
-                )
-            }
-        }
-        .listRowSpacing(20)
-        .buttonStyle(.borderedProminent)
+        .tint(.orange)
         .task {
-            try? await viewModel.loadFromDisk()
-        }
-    }
-    
-    var noContent: some View {
-        List {
-            ContentUnavailableView {
-                Label("No Health Records", systemImage: "heart.text.clipboard")
-                    .symbolRenderingMode(.multicolor)
-            } description: {
-                Text("Give the app permission to access Sleep and Weight to perform analysis on your data.")
-            } actions: {
-                importButton
-                    .buttonStyle(.bordered)
-                    .tint(.accentColor)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func encryptedFileRow(_ file: Storage.File,
-                                  data: Data?,
-                                  encrypt: @escaping @MainActor () async throws -> Void,
-                                  delete: @escaping @MainActor () async throws -> Void) -> some View {
-        if let data {
-            HStack {
-                Text("Encrypted \(Image(systemName: "checkmark.circle.fill"))").foregroundStyle(.green)
-                Spacer()
-                AsyncButton(action: delete) {
-                    Image(systemName: "trash")
-                }
-                .buttonStyle(.bordered)
-                .tint(.red)
-            }
-            .font(.callout)
-            .padding(.vertical, 8)
-        } else {
-            AsyncButton(action: encrypt) {
-                Text("Encrypt")
-                    .frame(width: 150, alignment: .center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            try? await vm.loadFromDisk()
         }
     }
     
     private var header: some View {
         VStack {
-            Text("Bridge Health")
-                .bold()
+            Text("Bridge App")
                 .font(.largeTitle)
-                .foregroundColor(.yellow)
+                .padding(.bottom)
             
-            Text("All Information in Clear")
-                .bold()
+            Text("Encrypt health information using **[FHE](https://zama.ai)**, so that it can be consumed in a privacy-preserving way in other apps. Learn more at **[zama.ai](https://zama.ai)**")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-        }
+                .multilineTextAlignment(.center)
+        }.padding()
     }
-    
-    private var importButton: some View {
-        AsyncButton(action: {
-            showHealthKitSheet = true
-        }, label: {
-            HStack {
-                Image(systemName: "heart.text.clipboard")
-                    .symbolRenderingMode(.multicolor)
-                    .imageScale(.medium)
-                Text("Read Sleep & Weight")
-            }.font(.body)
-        })
-        .healthDataAccessRequest(store: viewModel.healthStore,
-                                 readTypes: viewModel.sampleTypes,
-                                 trigger: showHealthKitSheet) { result in
-            Task { @MainActor in
-                switch result {
-                case .success:
-                    viewModel.fetchHealthData()
-                    
-                case .failure(let failure):
-                    print("failure", failure)
-                }
-            }
-        }.task {
-            Task {
-                if try await viewModel.isAllowed() {
-                    viewModel.fetchHealthData()
-                }
-            }
-        }
-    }
-    
-    private var openAppButton: some View {
-        Button(action:{ }) {
-            Link("Open Client App", destination: URL(string: "clientapp://")!)
-        }
-    }
-    
-    private func sectionHeader(_ title: String, icon: String, color: Color) -> some View {
-        Text("\(Image(systemName: icon)) \(title)")
-            .foregroundStyle(color)
-            .symbolRenderingMode(.multicolor)
-            .font(.title2)
-            .frame(height: 50, alignment: .leading)
-    }
-    
-    @ViewBuilder
-    private func chart(values: [Int]) -> some View {
-        let items = {
-            var values = values
-            values.insert(0, at: 0)
-            values.append(0)
-            return values
-        }()
-        
-        Chart {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, value in
-                PointMark(
-                    x: .value("Index", index),
-                    y: .value("Value", value)
-                )
-                LineMark(
-                    x: .value("Index", index),
-                    y: .value("Value", value)
-                )
-            }
-        }
-        .foregroundStyle(.tint)
-        .chartXAxis(.hidden)
-        .frame(height: 70, alignment: .leading)
-        .padding()
-    }
-}
 
-#Preview {
-    BridgeView(viewModel: .shared)
+    @ViewBuilder
+    private var content: some View {
+        ScrollView {
+            section(for: .sleep,
+                    granted: vm.sleepGranted,
+                    items: vm.sleep,
+                    file: vm.encryptedSleep,
+                    subtitle: "Select Night",
+                    encrypt: vm.encryptSleep,
+                    delete: vm.deleteSleep)
+            {
+                Text("\(vm.sleep.count) nights found")
+                    .font(.title)
+
+                Picker("", selection: $vm.selectedNight) {
+                    ForEach(vm.sleep, id: \.date) { night in
+                        let day = night.date.formatted(.dateTime.weekday().day())
+                        let time = night.date.formatted(.dateTime.hour().minute())
+                        Text("\(day) at \(time)").tag(night.date)
+                    }
+                }
+                .buttonStyle(.bordered)
+            }
+            
+            section(for: .weight,
+                    granted: vm.weightGranted,
+                    items: vm.weight,
+                    file: vm.encryptedWeight,
+                    subtitle: vm.weightDateRange,
+                    encrypt: vm.encryptWeight,
+                    delete: vm.deleteWeight)
+            {
+                Text("\(vm.weight.count) records found")
+                    .font(.title)
+            }
+        }.scrollBounceBehavior(.basedOnSize)
+    }
+
+    @ViewBuilder
+    private func section<Content: View, Element: Any>(for metric: Metric,
+                                                      granted: Bool = true,
+                                                      items: Array<Element>,
+                                                      file: Data?,
+                                                      subtitle: String,
+                                                      encrypt: @escaping () async throws -> Void,
+                                                      delete: @escaping () async throws -> Void,
+                                                      @ViewBuilder content: () -> Content) -> some View {
+        if !granted {
+            permissionMissing(for: metric)
+        } else if items.isEmpty {
+            contentMissing(for: metric)
+        } else {
+            GroupBox {
+                VStack {
+                    content()
+                    
+                    if file == nil {
+                        Text("\(subtitle)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.bottom, 24)
+                        
+                        AsyncButton("Encrypt \(metric.name)") {
+                            try await encrypt()
+                        }
+                    } else {
+                        Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                            .frame(maxWidth: .infinity)
+                            .overlay(alignment: .trailing) {
+                                AsyncButton(action: delete) {
+                                    Image(systemName: "trash").imageScale(.small)
+                                }.tint(.red)
+                            }
+                            .padding(.bottom, 24)
+                        
+                        Link("View in FHE Health App", destination: URL(string: "fhehealthapp://")!)
+                    }
+                }
+                .padding(.vertical)
+            } label: {
+                Label(metric.name, systemImage: metric.icon)
+                    .imageScale(.large)
+                    .symbolRenderingMode(.multicolor)
+                    .foregroundStyle(metric.color)
+                Divider()
+            }
+        }
+    }
+    
+    private func permissionMissing(for metric: Metric) -> some View {
+        GroupBox {
+            ContentUnavailableView {
+                Label {
+                    Text("\(metric.name) Permission Needed")
+                } icon: {
+                    Image(systemName: metric.icon)
+                        .symbolRenderingMode(.multicolor)
+                        .foregroundStyle(metric.color)
+                        .overlay(alignment: .bottomTrailing) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .resizable()
+                                .frame(width: 22, height: 22)
+                                .foregroundStyle(.yellow)
+                                .background(.black)
+                                .clipShape(Circle().inset(by: 1))
+                        }
+                }
+            } description: {
+                Text("Your \(metric.name.lowercased()) will be FHE-encrypted for privacy-preserving use in other apps.")
+            } actions: {
+                AsyncButton(action: metric == .weight ? vm.requestWeightPermission : vm.requestSleepPermission) {
+                    Text("Allow \(metric.name)")
+                }
+            }
+        }
+    }
+    
+    private func contentMissing(for metric: Metric) -> some View {
+        GroupBox {
+            ContentUnavailableView {
+                Label {
+                    Text("No \(metric.name) Data on Device")
+                } icon: {
+                    Image(systemName: metric.icon)
+                        .symbolRenderingMode(.multicolor)
+                        .foregroundStyle(metric.color)
+                }
+            } description: {
+                Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
+                Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
+            }
+        }
+    }
 }

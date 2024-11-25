@@ -3,16 +3,17 @@
 import SwiftUI
 
 #Preview {
-    ClientView()
+    HealthView()
 }
 
-struct ClientView: View {
+struct HealthView: View {
     @StateObject private var vm = ViewModel()
     @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
         VStack {
             header
+
             ScrollView {
                 section("Sleep", icon: "bed.double.fill", color: .mint, data: vm.sleepInput) { data in
                     sleepInput(data)
@@ -24,6 +25,7 @@ struct ClientView: View {
                     weightAnalysis
                 }
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
         .background(.yellow)
         .buttonStyle(.borderedProminent)
@@ -41,13 +43,17 @@ struct ClientView: View {
     
     private var header: some View {
         VStack {
-            Text("Client **FHE**alth")
+            Text("**FHE**alth App")
                 .font(.largeTitle)
+                .padding(.bottom)
             
-            Text("All Information Encrypted and Private")
-                .font(.subheadline).bold()
+            Text("This app **cannot read** your health data, despite displaying and analyzing it. Learn how **[Zama's FHE encryption](https://zama.ai)** makes this possible.")
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .tint(.black)
         }
+        .padding()
     }
         
     // MARK: - SLEEP -
@@ -153,7 +159,7 @@ struct ClientView: View {
         } description: {
             Text("Generate encrypted \(name.lowercased()) records\nusing Bridge App.")
         } actions: {
-            Link("Open Bridge App", destination: URL(string: "bridgeapp://")!)
+            Link("Open Bridge App", destination: URL(string: "fhebridgeapp://")!)
         }
     }
     

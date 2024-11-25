@@ -79,7 +79,7 @@
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
 		32B258372C98693800538B23 /* FHE Bridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Bridge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		32C9CC202CA565A100AEDA32 /* FHE Client.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Client.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32C9CC202CA565A100AEDA32 /* FHE Health.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Health.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32F029DA2CA37007009B522D /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -103,7 +103,7 @@
 			);
 			target = 32B258362C98693800538B23 /* Bridge */;
 		};
-		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */ = {
+		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AsyncButton.swift,
@@ -112,7 +112,7 @@
 				Files/Persistable.swift,
 				Files/Storage.swift,
 			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
+			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
 		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -131,12 +131,12 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
 		};
-		3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Client" target */ = {
+		3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				PrivateDisplayRing.swift,
 			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
+			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
 		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -145,20 +145,20 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
 		};
-		329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Client" target */ = {
+		329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				SleepModels.swift,
 				SleepViews.swift,
 			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
+			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
-		32B1F8E62CC8F48500CE12F9 /* Exceptions for "ClientApp" folder in "Client" target */ = {
+		32B1F8E62CC8F48500CE12F9 /* Exceptions for "HealthApp" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppSupport/Info.plist,
 			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Client */;
+			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
 		32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -179,7 +179,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */,
-				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Client" target */,
+				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */,
 				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */,
 			);
 			path = Shared;
@@ -193,25 +193,25 @@
 		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Client" target */,
+				3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Health" target */,
 				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */,
 			);
 			path = QuickLookExtension;
 			sourceTree = "<group>";
 		};
-		32C9CC212CA565A100AEDA32 /* ClientApp */ = {
+		32C9CC212CA565A100AEDA32 /* HealthApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				32B1F8E62CC8F48500CE12F9 /* Exceptions for "ClientApp" folder in "Client" target */,
+				32B1F8E62CC8F48500CE12F9 /* Exceptions for "HealthApp" folder in "Health" target */,
 			);
-			path = ClientApp;
+			path = HealthApp;
 			sourceTree = "<group>";
 		};
 		32C9CC3D2CA566DC00AEDA32 /* BridgeApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */,
-				329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Client" target */,
+				329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Health" target */,
 			);
 			path = BridgeApp;
 			sourceTree = "<group>";
@@ -262,9 +262,9 @@
 				32B258512C9869A700538B23 /* README.md */,
 				32079E3B2CAC3941004EC06A /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
-				320CFB212CAAC47500528366 /* Server */,
+				32C9CC212CA565A100AEDA32 /* HealthApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
-				32C9CC212CA565A100AEDA32 /* ClientApp */,
+				320CFB212CAAC47500528366 /* Server */,
 				320C391A2CAAEE2900528366 /* Shared */,
 				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
 				32B258382C98693800538B23 /* Products */,
@@ -276,7 +276,7 @@
 			children = (
 				32B258372C98693800538B23 /* FHE Bridge.app */,
 				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
-				32C9CC202CA565A100AEDA32 /* FHE Client.app */,
+				32C9CC202CA565A100AEDA32 /* FHE Health.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -333,9 +333,9 @@
 			productReference = 32B258372C98693800538B23 /* FHE Bridge.app */;
 			productType = "com.apple.product-type.application";
 		};
-		32C9CC1F2CA565A100AEDA32 /* Client */ = {
+		32C9CC1F2CA565A100AEDA32 /* Health */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32C9CC2B2CA565A200AEDA32 /* Build configuration list for PBXNativeTarget "Client" */;
+			buildConfigurationList = 32C9CC2B2CA565A200AEDA32 /* Build configuration list for PBXNativeTarget "Health" */;
 			buildPhases = (
 				32C9CC1C2CA565A100AEDA32 /* Sources */,
 				32C9CC1D2CA565A100AEDA32 /* Frameworks */,
@@ -347,13 +347,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				32C9CC212CA565A100AEDA32 /* ClientApp */,
+				32C9CC212CA565A100AEDA32 /* HealthApp */,
 			);
-			name = Client;
+			name = Health;
 			packageProductDependencies = (
 			);
 			productName = ClientApp;
-			productReference = 32C9CC202CA565A100AEDA32 /* FHE Client.app */;
+			productReference = 32C9CC202CA565A100AEDA32 /* FHE Health.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -396,7 +396,7 @@
 			projectRoot = "";
 			targets = (
 				32B258362C98693800538B23 /* Bridge */,
-				32C9CC1F2CA565A100AEDA32 /* Client */,
+				32C9CC1F2CA565A100AEDA32 /* Health */,
 				324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */,
 			);
 		};
@@ -642,7 +642,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BridgeApp/AppSupport/Info.plist;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Allow read access so that we can encrypt your Health data.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -674,7 +674,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BridgeApp/AppSupport/Info.plist;
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Allow read access so that we can encrypt your Health data.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -699,13 +699,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ClientApp/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HealthApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ClientApp/AppSupport/Info.plist;
+				INFOPLIST_FILE = HealthApp/AppSupport/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -717,8 +717,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEClient;
-				PRODUCT_NAME = "FHE Client";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEHealth;
+				PRODUCT_NAME = "FHE Health";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -730,13 +730,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ClientApp/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HealthApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ClientApp/AppSupport/Info.plist;
+				INFOPLIST_FILE = HealthApp/AppSupport/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -748,8 +748,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEClient;
-				PRODUCT_NAME = "FHE Client";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEHealth;
+				PRODUCT_NAME = "FHE Health";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -786,7 +786,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32C9CC2B2CA565A200AEDA32 /* Build configuration list for PBXNativeTarget "Client" */ = {
+		32C9CC2B2CA565A200AEDA32 /* Build configuration list for PBXNativeTarget "Health" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32C9CC2C2CA565A200AEDA32 /* Debug */,

@@ -60,8 +60,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32C9CC1F2CA565A100AEDA32"
-            BuildableName = "FHE Client.app"
-            BlueprintName = "Client"
+            BuildableName = "FHE Health.app"
+            BlueprintName = "Health"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

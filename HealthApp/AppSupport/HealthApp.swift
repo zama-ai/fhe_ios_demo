@@ -3,10 +3,10 @@
 import SwiftUI
 
 @main
-struct ClientApp: App {
+struct HealthApp: App {
     var body: some Scene {
         WindowGroup {
-            ClientView()
+            HealthView()
         }
     }
 }
