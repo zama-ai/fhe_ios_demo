@@ -12,7 +12,7 @@ final class Network {
     static let shared = Network()
     private init() {}
 
-    private let rootURL = URL(string: "http://54.155.5.123")!
+    private let rootURL = URL(string: "http://api.zama.ai")!
     
     /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
     func uploadServerKey(_ sk: Data) async throws -> String {
