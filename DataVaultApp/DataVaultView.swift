@@ -8,6 +8,7 @@ import SwiftUI
 
 struct DataVaultView: View {
     @StateObject private var vm = ViewModel()
+    @State private var showOtherAppInstallAlert = false
     
     struct Metric: Equatable {
         let name: String
@@ -122,7 +123,8 @@ struct DataVaultView: View {
                             }
                             .padding(.bottom, 24)
                         
-                        Link("View in FHE Health", destination: URL(string: "fhehealthapp://")!)
+                        OpenOtherAppButton(appName: "FHE Health", appScheme: "fhehealthapp://", appID: nil, showAlert: $showOtherAppInstallAlert)
+                            .customFont(.callout)
                             .foregroundStyle(.black)
                     }
                 }

@@ -10,7 +10,8 @@ struct HealthView: View {
     @StateObject private var vm = ViewModel()
     @State private var isAnalyzingSleep = false
     @State private var isAnalyzingWeight = false
-    
+    @State private var showOtherAppInstallAlert = false
+
     @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
@@ -184,7 +185,7 @@ struct HealthView: View {
             Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
                 .customFont(.callout)
         } actions: {
-            Link("Open Data Vault", destination: URL(string: "fhedatavault://")!)
+            OpenOtherAppButton(appName: "Data Vault", appScheme: "fhedatavault://", appID: nil, showAlert: $showOtherAppInstallAlert)
                 .foregroundStyle(.black)
                 .customFont(.callout)
         }
