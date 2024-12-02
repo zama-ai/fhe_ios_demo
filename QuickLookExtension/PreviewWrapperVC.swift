@@ -65,7 +65,9 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
             viewModel.data = .simpleChart(clearArray)
             
         case .cipherTextList:
-            assertionFailure("Not representable yet")
+            let encrypted = try CompactCiphertextList(fromData: data)
+            let clearNight = try encrypted.decrypt(clientKey: ck)
+            viewModel.data = .sleepChart(clearNight)
         }
     }
 }

@@ -113,3 +113,9 @@ extension Storage {
         return folder
     }
 }
+
+extension Data {
+    var formattedSize: String {
+        self.count.formatted(.byteCount(style: .file))
+    }
+}
