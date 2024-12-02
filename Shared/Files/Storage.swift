@@ -12,18 +12,18 @@ final class Storage {
         case weightMin = "weightMin.fheencrypted"
         case weightMax = "weightMax.fheencrypted"
         case weightAvg = "weightAvg.fheencrypted"
-
+        
         case sleepList = "sleepList.fheencrypted"
         case sleepScore = "sleepScore.fheencrypted"
-
+        
         var decryptType: DecryptType? {
             switch self {
             case .sleepList: .cipherTextList
             case .sleepScore: .int8
-
+                
             case .weightList: .array
             case .weightMin, .weightMax, .weightAvg:  .int16
-
+                
             case .clientKey, .publicKey, .serverKey: nil
             }
         }
@@ -44,11 +44,11 @@ final class Storage {
         let fullURL = singleton.sharedFolder.appendingPathComponent(file.rawValue)
         try await singleton.write(at: fullURL, data: data)
     }
-
+    
     static func write(_ url: URL, data: Data?) async throws {
         try await singleton.write(at: url, data: data)
     }
-
+    
     static func deleteFromDisk(_ file: Storage.File) async throws {
         try await Storage.write(file, data: nil)
     }

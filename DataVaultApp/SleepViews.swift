@@ -37,7 +37,7 @@ struct SleepChartView: View {
                     if let intValue = value.as(Int.self) {
                         let hours = Double(intValue / 60)
                         Text("\(hours.formatted(.number.precision(.integerLength(2)))):00")
-                      }
+                    }
                 }
             }
         }

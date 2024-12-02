@@ -21,7 +21,7 @@ func serverTest() async throws {
     try await ck.writeToDisk(.clientKey)
     try await pk.writeToDisk(.publicKey)
     try await sk.writeToDisk(.serverKey)
-
+    
     try await inputArray.writeToDisk(.weightList)
     
     let time = Date()
@@ -48,7 +48,7 @@ func serverTest() async throws {
     let max = try resultStats.max.decrypt(clientKey: ck) / coeff
     let rawAvg = try resultStats.avg.decrypt(clientKey: ck)
     let avg = Double(rawAvg) / Double(coeff)
-
+    
     print("Results are: min: \(min), max: \(max), avg: \(avg)")
     print("Time taken: \(time2.timeIntervalSince(time).formatted(.number.precision(.fractionLength(2)))) seconds")
 }

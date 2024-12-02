@@ -14,10 +14,10 @@ extension DataVaultView {
         @Published var weightDateRange: String = ""
         @Published var sleep: [Sleep.Night] = []
         @Published var selectedNight: Date?
-
+        
         @Published var encryptedWeight: Data?
         @Published var encryptedSleep: Data?
-
+        
         private var ck: ClientKey?
         private var pk: PublicKeyCompact?
         private var sk: ServerKeyCompressed?
@@ -30,27 +30,27 @@ extension DataVaultView {
         
         private var weightType: HKQuantityType? { HKObjectType.quantityType(forIdentifier: .bodyMass) }
         private var sleepType: HKCategoryType? { HKObjectType.categoryType(forIdentifier: .sleepAnalysis) }
-
+        
         func loadFromDisk() async throws {
             try await refreshPermission()
             encryptedWeight = try await Storage.read(.weightList)
             encryptedSleep = try await Storage.read(.sleepList)
             try await fetchHealthData()
         }
-
+        
         func refreshPermission() async throws {
             guard let weightType, let sleepType else { return }
             weightGranted = try await healthStore.statusForAuthorizationRequest(toShare: [], read: [weightType]) == .unnecessary
             sleepGranted = try await healthStore.statusForAuthorizationRequest(toShare: [], read: [sleepType]) == .unnecessary
         }
-
+        
         func requestWeightPermission() async throws {
             guard let weightType else { return }
             try await healthStore.requestAuthorization(toShare: [], read: [weightType])
             try await refreshPermission()
             try await fetchHealthData()
         }
-
+        
         func requestSleepPermission() async throws {
             guard let sleepType else { return }
             try await healthStore.requestAuthorization(toShare: [], read: [sleepType])
@@ -81,11 +81,11 @@ extension DataVaultView {
                 if let start = weightSamples.first?.startDate,
                    let end = weightSamples.last?.endDate {
                     return "\(start.formatted(.dateTime.day().month().year())) - \(end.formatted(.dateTime.day().month().year()))"
-
+                    
                 }
                 return ""
             }()
-
+            
             let chunks = sleepSamples.chunked(by: { a, b in
                 b.startDate.timeIntervalSince(a.endDate) <= 12 * 3600
             })
@@ -163,10 +163,10 @@ extension DataVaultView.ViewModel {
     func deleteSleep() async throws {
         try await Storage.deleteFromDisk(.sleepList)
         try? await Storage.deleteFromDisk(.sleepScore)
-
+        
         try await loadFromDisk()
     }
-
+    
     @MainActor
     func useFakeSleep() {
         let night = Sleep.Night.fake
@@ -179,10 +179,10 @@ extension DataVaultView.ViewModel {
         weight = [63, 70, 73, 68, 71]
         weightDateRange = "Fake weights"
     }
-
+    
     func encryptWeight() async throws {
         try await ensureKeysExist()
-                
+        
         if let pk {
             let biggerInts = weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)
@@ -191,7 +191,7 @@ extension DataVaultView.ViewModel {
             encryptedWeight = arrayData
         }
     }
-
+    
     func deleteWeight() async throws {
         try await Storage.deleteFromDisk(.weightList)
         try? await Storage.deleteFromDisk(.weightAvg)
@@ -200,7 +200,7 @@ extension DataVaultView.ViewModel {
         
         try await loadFromDisk()
     }
-
+    
     private func ensureKeysExist() async throws {
         if ck == nil {
             if let saved = try? await ClientKey.readFromDisk(.clientKey) {

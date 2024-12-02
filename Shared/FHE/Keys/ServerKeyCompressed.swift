@@ -10,13 +10,13 @@ final class ServerKeyCompressed: Persistable {
     init(pointer: OpaquePointer?) {
         self.pointer = pointer
     }
-
+    
     convenience init(clientKey: ClientKey) throws {
         var pointer: OpaquePointer? // ServerKeyCompressed
         try wrap { compressed_server_key_new(clientKey.pointer, &pointer) }
         self.init(pointer: pointer)
     }
-
+    
     deinit {
         compressed_server_key_destroy(pointer)
     }

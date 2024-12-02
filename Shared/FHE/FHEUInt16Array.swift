@@ -6,7 +6,7 @@ import TFHE
 final class FHEUInt16Array: Persistable {
     var pointer: OpaquePointer? = nil
     var cachedItems: [FHEUInt16] = []
-
+    
     init(pointer: OpaquePointer?) {
         self.pointer = pointer // CompactCiphertextList
     }
@@ -47,7 +47,7 @@ final class FHEUInt16Array: Persistable {
         
         try wrap { compact_ciphertext_list_builder_build(builder, &compact_list) }
         try wrap { compact_ciphertext_list_builder_destroy(builder) }
-
+        
         self.init(pointer: compact_list)
     }
     
@@ -56,17 +56,17 @@ final class FHEUInt16Array: Persistable {
             try $0.decrypt(clientKey: clientKey)
         }
     }
-
+    
     func readItems() throws -> [FHEUInt16] {
         if cachedItems.isEmpty {
             self.cachedItems = try expandItems()
         }
         return cachedItems
     }
-
+    
     private func expandItems() throws -> [FHEUInt16] {
         var expander: OpaquePointer? // CompactCiphertextListExpander
-
+        
         try wrap {
             compact_ciphertext_list_expand(pointer, &expander)
         }
@@ -75,7 +75,7 @@ final class FHEUInt16Array: Persistable {
         try wrap {
             compact_ciphertext_list_expander_len(expander, &length)
         }
-
+        
         var array: [FHEUInt16] = []
         for int in 0..<length {
             var pointer: OpaquePointer? // FheUint16
@@ -86,7 +86,7 @@ final class FHEUInt16Array: Persistable {
                 assert(type == Type_FheUint16);
                 return ok
             }
-
+            
             try wrap {
                 compact_ciphertext_list_expander_get_fhe_uint16(expander, int, &pointer)
             }

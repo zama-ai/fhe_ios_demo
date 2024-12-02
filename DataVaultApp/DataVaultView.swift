@@ -43,7 +43,7 @@ struct DataVaultView: View {
                 .tint(.white)
         }.padding()
     }
-
+    
     @ViewBuilder
     private var content: some View {
         ScrollView {
@@ -58,7 +58,7 @@ struct DataVaultView: View {
                 let nights = vm.sleep.count == 1 ? "night" : "nights"
                 Text("\(vm.sleep.count) \(nights) found")
                     .customFont(.title)
-
+                
                 Picker("", selection: $vm.selectedNight) {
                     ForEach(vm.sleep, id: \.date) { night in
                         let day = night.date.formatted(.dateTime.weekday().day())
@@ -82,7 +82,7 @@ struct DataVaultView: View {
             }
         }.scrollBounceBehavior(.basedOnSize)
     }
-
+    
     @ViewBuilder
     private func section<Content: View, Element: Any>(for metric: Metric,
                                                       granted: Bool,
@@ -135,7 +135,7 @@ struct DataVaultView: View {
                     .symbolRenderingMode(.multicolor)
                     .foregroundStyle(metric.color)
                     .customFont(.title3)
-
+                
                 Divider()
             }
         }
@@ -180,7 +180,7 @@ struct DataVaultView: View {
                 Label {
                     Text("No \(metric.name) Data on Device")
                         .customFont(.title3)
-
+                    
                 } icon: {
                     Image(systemName: metric.icon)
                         .symbolRenderingMode(.multicolor)
@@ -189,7 +189,7 @@ struct DataVaultView: View {
             } description: {
                 Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
                     .customFont(.callout)
-
+                
                 VStack(spacing: 10) {
                     Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
                         .foregroundStyle(.black)

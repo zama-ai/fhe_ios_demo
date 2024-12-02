@@ -9,20 +9,20 @@ extension FHEUInt16 {
         try wrap { fhe_uint16_scalar_add(pointer, UInt16(int), &result) }
         return FHEUInt16(pointer: result)
     }
-
+    
     func addFHE(int: FHEUInt16) throws -> FHEUInt16 {
         var result: OpaquePointer? // FheUint16
         try wrap { fhe_uint16_add(pointer, int.pointer, &result) }
         return FHEUInt16(pointer: result)
     }
-
+    
     /// Warning: result is necessarily clipped (Int not Float)
     func divScalar(int: Int) throws -> FHEUInt16 {
         var result: OpaquePointer? // FheUint16
         try wrap { fhe_uint16_scalar_div(pointer, UInt16(int), &result) }
         return FHEUInt16(pointer: result)
     }
-
+    
     func max(with int: FHEUInt16) throws -> FHEUInt16 {
         var result: OpaquePointer? // FheUint16
         try wrap { fhe_uint16_max(self.pointer, int.pointer, &result) }

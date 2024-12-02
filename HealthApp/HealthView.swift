@@ -11,13 +11,13 @@ struct HealthView: View {
     @State private var isAnalyzingSleep = false
     @State private var isAnalyzingWeight = false
     @State private var showOtherAppInstallAlert = false
-
+    
     @Environment(\.scenePhase) var scenePhase
-
+    
     var body: some View {
         VStack {
             header
-
+            
             ScrollView {
                 section("Sleep", icon: "bed.double.fill", color: .mint, data: vm.sleepInput) { data in
                     sleepInput(data)
@@ -51,23 +51,23 @@ struct HealthView: View {
             Text("FHE Health")
                 .padding(.bottom)
                 .customFont(.largeTitle)
-
+            
             Text("""
                 This app **cannot read** your health data, despite displaying and analyzing it.
                 Learn how **[Zama](https://zama.ai)** makes it possible using Fully Homomorphic Encryption (FHE).
                 """)
-                .customFont(.subheadline)
-                .multilineTextAlignment(.center)
-                .tint(.black)
+            .customFont(.subheadline)
+            .multilineTextAlignment(.center)
+            .tint(.black)
         }
         .padding()
     }
-        
+    
     // MARK: - SLEEP -
     private func sleepInput(_ data: Data) -> some View {
         GroupBox {
             SleepChartView(samples: Sleep.Night.fake.samples)
-                //.privateDisplayRing()
+            //.privateDisplayRing()
             
             Text("""
                 **Awake**: Often brief and unnoticed.
@@ -105,22 +105,22 @@ struct HealthView: View {
                 .customFont(.title3)
         }
     }
-        
+    
     // MARK: - WEIGHT -
     private func weightInput(_ data: Data) -> some View {
         GroupBox {
             secureDisplay(.weightList)
             
             Text("Weight is in Kg, as recorded in Apple Health.")
-            .foregroundStyle(.secondary)
-            .customFont(.caption2)
-            .padding(.horizontal, -8)
+                .foregroundStyle(.secondary)
+                .customFont(.caption2)
+                .padding(.horizontal, -8)
         } label: {
             Text("History")
                 .customFont(.title3)
         }
     }
-
+    
     private var weightAnalysis: some View {
         GroupBox {
             if vm.weightResultAvg != nil,
@@ -151,7 +151,7 @@ struct HealthView: View {
                 .customFont(.title3)
         }
     }
-
+    
     // MARK: - GENERIC -
     private func section<Content: View>(_ name: String, icon: String, color: Color, data: Data?, @ViewBuilder content: (Data) -> Content) -> some View {
         GroupBox {
@@ -201,9 +201,9 @@ struct HealthView: View {
                 try await action()
                 isAnalyzing.wrappedValue = false
             })
-                .foregroundStyle(.black)
-                .customFont(.callout)
-
+            .foregroundStyle(.black)
+            .customFont(.callout)
+            
             if isAnalyzing.wrappedValue {
                 Text(legend)
                     .customFont(.caption2)
@@ -211,7 +211,7 @@ struct HealthView: View {
         }
         .padding()
     }
-
+    
     func secureDisplay(_ file: Storage.File) -> some View {
         FilePreview(url: Storage.url(for: file))
             .frame(minHeight: 150)

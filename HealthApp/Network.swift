@@ -11,7 +11,7 @@ final class Network {
     
     static let shared = Network()
     private init() {}
-
+    
     private let rootURL = URL(string: "http://api.zama.ai")!
     
     /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
@@ -20,9 +20,9 @@ final class Network {
                                                        path: "/add_key",
                                                        json: [:],
                                                        file: (name: "key", data: sk)))
-
+        
         if let json = try JSONSerialization.jsonObject(with: res, options: []) as? [String: Any],
-            let uid = json["uid"] as? String {
+           let uid = json["uid"] as? String {
             return uid
         } else {
             throw NetworkingError.resultParsingFailed
@@ -39,7 +39,7 @@ final class Network {
         let obj = try JSONDecoder().decode(StatsResponse.self, from: res)
         return (obj.min, obj.max, obj.avg)
     }
-
+    
     /// - Returns: FheUint8 score between 1 and 5. 1 is best, 5 is bad.
     func getSleepQuality(uid: String, encryptedSleeps: Data) async throws -> Data {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
@@ -49,7 +49,7 @@ final class Network {
         
         return res
     }
-
+    
     
     // MARK: - Helpers -
     private func sendRequest(_ request: URLRequest, session: URLSession = .shared) async throws -> Data {
@@ -58,11 +58,11 @@ final class Network {
         guard let response = response as? HTTPURLResponse else {
             throw NetworkingError.nonHTTPResponse
         }
-
+        
         guard response.statusCode == 200 else {
             throw NetworkingError.invalidHTTPCode(code: response.statusCode)
         }
-
+        
         print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") ✅")
         return data
     }
@@ -74,19 +74,19 @@ final class Network {
 extension URLRequest {
     static func multipartPOST(root: URL, path: String, json: [String: Any], file: (name: String, data: Data)) throws -> URLRequest {
         let url = root.appending(path: path)
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-
+        
         // Create multipart content
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         var body = Data()
-
+        
         // Add JSON part
         if !json.isEmpty {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
-
+            
             if let inlineable = json.first, json.count == 1 {
                 body.append("Content-Disposition: form-data; name=\"\(inlineable.key)\"\r\n\r\n".data(using: .utf8)!)
                 body.append("\(inlineable.value)".data(using: .utf8)!)
@@ -96,20 +96,20 @@ extension URLRequest {
                 body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
                 body.append(jsonData)
             }
-
+            
             body.append("\r\n".data(using: .utf8)!)
         }
-
+        
         // Add file part
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.name)\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
         body.append(file.data)
         body.append("\r\n".data(using: .utf8)!)
-
+        
         // End the boundary
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
+        
         request.httpBody = body
         return request
     }
@@ -121,7 +121,7 @@ enum NetworkingError: LocalizedError {
     case invalidHTTPCode(code: Int)
     case resultParsingFailed
     case message(String)
-
+    
     var errorDescription: String? {
         switch self {
         case .jsonSerializationFailed(let details): "Error serializing JSON \(details.localizedDescription)"
