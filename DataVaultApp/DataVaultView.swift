@@ -33,11 +33,11 @@ struct DataVaultView: View {
     private var header: some View {
         VStack(spacing: 0) {
             Text("Data Vault")
-                .font(.largeTitle)
+                .customFont(.largeTitle)
                 .padding(.bottom)
             
             Text("Encrypt your health information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring health data.\n Powered by Zama (learn more on **[zama.ai](https://zama.ai)**)")
-                .font(.subheadline)
+                .customFont(.subheadline)
                 .multilineTextAlignment(.center)
                 .tint(.white)
         }.padding()
@@ -54,7 +54,7 @@ struct DataVaultView: View {
                     delete: vm.deleteSleep)
             {
                 Text("\(vm.sleep.count) nights found")
-                    .font(.title)
+                    .customFont(.title)
 
                 Picker("", selection: $vm.selectedNight) {
                     ForEach(vm.sleep, id: \.date) { night in
@@ -74,7 +74,7 @@ struct DataVaultView: View {
                     delete: vm.deleteWeight)
             {
                 Text("\(vm.weight.count) records found")
-                    .font(.title)
+                    .customFont(.title)
             }
         }.scrollBounceBehavior(.basedOnSize)
     }
@@ -99,7 +99,7 @@ struct DataVaultView: View {
                     
                     if file == nil {
                         Text("\(subtitle)")
-                            .font(.caption)
+                            .customFont(.caption)
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 24)
                         
@@ -109,7 +109,7 @@ struct DataVaultView: View {
                         .foregroundStyle(.black)
                     } else {
                         Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
-                            .font(.caption)
+                            .customFont(.caption)
                             .foregroundStyle(.green)
                             .frame(maxWidth: .infinity)
                             .overlay(alignment: .trailing) {
