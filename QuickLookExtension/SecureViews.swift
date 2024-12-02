@@ -86,5 +86,6 @@ struct SecureView: View {
             }
         }
         .chartXAxis(.hidden)
+        .foregroundStyle(.pink)
     }
 }

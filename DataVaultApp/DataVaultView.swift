@@ -47,13 +47,15 @@ struct DataVaultView: View {
     private var content: some View {
         ScrollView {
             section(for: .sleep,
+                    granted: vm.sleepGranted,
                     items: vm.sleep,
                     file: vm.encryptedSleep,
                     subtitle: "Select Night",
                     encrypt: vm.encryptSleep,
                     delete: vm.deleteSleep)
             {
-                Text("\(vm.sleep.count) nights found")
+                let nights = vm.sleep.count == 1 ? "night" : "nights"
+                Text("\(vm.sleep.count) \(nights) found")
                     .customFont(.title)
 
                 Picker("", selection: $vm.selectedNight) {
@@ -67,6 +69,7 @@ struct DataVaultView: View {
             }
             
             section(for: .weight,
+                    granted: vm.weightGranted,
                     items: vm.weight,
                     file: vm.encryptedWeight,
                     subtitle: vm.weightDateRange,
@@ -81,7 +84,7 @@ struct DataVaultView: View {
 
     @ViewBuilder
     private func section<Content: View, Element: Any>(for metric: Metric,
-                                                      granted: Bool = true,
+                                                      granted: Bool,
                                                       items: Array<Element>,
                                                       file: Data?,
                                                       subtitle: String,
@@ -129,6 +132,8 @@ struct DataVaultView: View {
                     .imageScale(.large)
                     .symbolRenderingMode(.multicolor)
                     .foregroundStyle(metric.color)
+                    .customFont(.title3)
+
                 Divider()
             }
         }
@@ -139,6 +144,7 @@ struct DataVaultView: View {
             ContentUnavailableView {
                 Label {
                     Text("\(metric.name) Permission Needed")
+                        .customFont(.title3)
                 } icon: {
                     Image(systemName: metric.icon)
                         .symbolRenderingMode(.multicolor)
@@ -154,10 +160,14 @@ struct DataVaultView: View {
                 }
             } description: {
                 Text("Your \(metric.name.lowercased()) data will be FHE-encrypted for privacy-preserving use in other apps.")
+                    .customFont(.callout)
+                
             } actions: {
                 AsyncButton(action: metric == .weight ? vm.requestWeightPermission : vm.requestSleepPermission) {
                     Text("Allow \(metric.name)")
-                }.foregroundStyle(.black)
+                }
+                .customFont(.callout)
+                .foregroundStyle(.black)
             }
         }
     }
@@ -167,6 +177,8 @@ struct DataVaultView: View {
             ContentUnavailableView {
                 Label {
                     Text("No \(metric.name) Data on Device")
+                        .customFont(.title3)
+
                 } icon: {
                     Image(systemName: metric.icon)
                         .symbolRenderingMode(.multicolor)
@@ -174,7 +186,8 @@ struct DataVaultView: View {
                 }
             } description: {
                 Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
-                
+                    .customFont(.callout)
+
                 VStack(spacing: 10) {
                     Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
                         .foregroundStyle(.black)
@@ -189,6 +202,7 @@ struct DataVaultView: View {
                         .padding(.bottom, -20)
                         .foregroundStyle(.black)
                 }
+                .customFont(.callout)
             }
         }
     }
