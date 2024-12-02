@@ -11,6 +11,8 @@ Implements 2 iOS apps: a DataVault app and a User app. The User app uses our new
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
 - [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
 - [Using imported C APIs in Swift](https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis)
+- [Learn Swift - Official  Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language)
+- [Learn Swift UI - Official  Guide](https://developer.apple.com/tutorials/swiftui)
 
 # Installation Steps
 
