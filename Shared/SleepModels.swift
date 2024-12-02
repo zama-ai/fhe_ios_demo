@@ -6,23 +6,6 @@ enum Sleep {
     struct Night: Equatable {
         let date: Date
         let samples: [Sample]
-        
-        static let fake: Night = {
-            let slotInMinutes = 30
-            let values = [[0, 0, 210], [0, 240, 570], [2, 0, 30], [5, 30, 60], [3, 60, 90], [4, 90, 120], [3, 120, 150], [5, 150, 180], [2, 180, 240], [3, 240, 300], [5, 300, 330], [4, 330, 390], [2, 390, 420], [5, 420, 450], [4, 450, 510], [3, 510, 540], [5, 540, 570]]
-            
-            let samples: [Sleep.Sample] = values.map { row in
-                Sleep.Sample(start: row[1],
-                             end: row[2],
-                             level: Sleep.Level(rawValue: row[0])!)
-            }
-            
-            // Go to bed at 11pm
-            let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-1*3600)
-            
-            return Night(date: start, samples: samples)
-        }()
-        
     }
     
     struct Sample: Identifiable, Equatable {
@@ -53,12 +36,30 @@ enum Sleep {
         }
         
         static let displayOrder: [Level] = [
-            //            .inBed,
+            // .inBed,
             .awake,
             .asleepREM,
             .asleepCore,
             .asleepDeep,
-            //            .asleepUnspecified
+            // .asleepUnspecified
         ]
     }
+}
+
+extension Sleep.Night {
+    static let fake: Sleep.Night = {
+        let slotInMinutes = 30
+        let values = [[0, 0, 210], [0, 240, 570], [2, 0, 30], [5, 30, 60], [3, 60, 90], [4, 90, 120], [3, 120, 150], [5, 150, 180], [2, 180, 240], [3, 240, 300], [5, 300, 330], [4, 330, 390], [2, 390, 420], [5, 420, 450], [4, 450, 510], [3, 510, 540], [5, 540, 570]]
+        
+        let samples: [Sleep.Sample] = values.map { row in
+            Sleep.Sample(start: row[1],
+                         end: row[2],
+                         level: Sleep.Level(rawValue: row[0])!)
+        }
+        
+        // Go to bed at 11pm
+        let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-1*3600)
+        
+        return Sleep.Night(date: start, samples: samples)
+    }()
 }

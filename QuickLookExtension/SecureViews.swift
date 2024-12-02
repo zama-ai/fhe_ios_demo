@@ -25,6 +25,7 @@ struct SecureView: View {
         case text(value: Double)
         case gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String])
         case simpleChart([Double])
+        case sleepChart([Sleep.Sample])
     }
     
     var body: some View {
@@ -38,6 +39,9 @@ struct SecureView: View {
                 
             case .simpleChart(let values):
                 simpleChart(values)
+                
+            case .sleepChart(let samples):
+                SleepChartView(samples: samples)
                 
             case .none:
                 Color.red

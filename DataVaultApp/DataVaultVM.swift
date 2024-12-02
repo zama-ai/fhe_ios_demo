@@ -150,7 +150,14 @@ extension DataVaultView.ViewModel {
     func encryptSleep() async throws {
         try await ensureKeysExist()
         
-        let example: [[Int]] = [[0, 0, 210], [0, 240, 570], [2, 0, 30], [5, 30, 60], [3, 60, 90], [4, 90, 120], [3, 120, 150], [5, 150, 180], [2, 180, 240], [3, 240, 300], [5, 300, 330], [4, 330, 390], [2, 390, 420], [5, 420, 450], [4, 450, 510], [3, 510, 540], [5, 540, 570]]
+        guard let selectedNight, let data = sleep.first(where: { $0.date == selectedNight }) else {
+            print("can't find a night to encrypt")
+            return
+        }
+        
+        let example: [[Int]] = data.samples.map {
+            [$0.level.rawValue, $0.start, $0.end]
+        }
         
         if let pk {
             let list = try CompactCiphertextList(encrypting: example, publicKey: pk)

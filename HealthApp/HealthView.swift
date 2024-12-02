@@ -66,9 +66,9 @@ struct HealthView: View {
     // MARK: - SLEEP -
     private func sleepInput(_ data: Data) -> some View {
         GroupBox {
-            SleepChartView(samples: Sleep.Night.fake.samples)
-            //.privateDisplayRing()
-            
+            secureDisplay(.sleepList)
+                .frame(minHeight: 220)
+
             Text("""
                 **Awake**: Often brief and unnoticed.
                 **REM**: Dreaming stage, crucial for memory and emotions.

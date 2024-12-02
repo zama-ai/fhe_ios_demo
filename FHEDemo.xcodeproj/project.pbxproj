@@ -80,7 +80,6 @@
 				"CustomFont/Telegraf-Bold.ttf",
 				"CustomFont/Telegraf-Regular.ttf",
 				"CustomFont/Telegraf-UltraBold.ttf",
-				"Data+Ext.swift",
 				FHE/CompactCiphertextList.swift,
 				FHE/FHEHelpers.swift,
 				FHE/FHEUInt8.swift,
@@ -93,6 +92,7 @@
 				Files/Persistable.swift,
 				Files/Storage.swift,
 				OpenOtherAppButton.swift,
+				SleepModels.swift,
 			);
 			target = 32B258362C98693800538B23 /* DataVault */;
 		};
@@ -104,11 +104,11 @@
 				"CustomFont/Telegraf-Bold.ttf",
 				"CustomFont/Telegraf-Regular.ttf",
 				"CustomFont/Telegraf-UltraBold.ttf",
-				"Data+Ext.swift",
 				FilePreview.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
 				OpenOtherAppButton.swift,
+				SleepModels.swift,
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
@@ -119,7 +119,7 @@
 				"CustomFont/Telegraf-Bold.ttf",
 				"CustomFont/Telegraf-Regular.ttf",
 				"CustomFont/Telegraf-UltraBold.ttf",
-				"Data+Ext.swift",
+				FHE/CompactCiphertextList.swift,
 				FHE/FHEHelpers.swift,
 				FHE/FHEUInt8.swift,
 				FHE/FHEUInt10.swift,
@@ -130,15 +130,9 @@
 				FHE/Keys/ServerKeyCompressed.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
+				SleepModels.swift,
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
-		};
-		3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Health" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				PrivateDisplayRing.swift,
-			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
 		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -146,14 +140,6 @@
 				AppSupport/Info.plist,
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
-		};
-		329651AD2CCA93C800C037D7 /* Exceptions for "DataVaultApp" folder in "Health" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				SleepModels.swift,
-				SleepViews.swift,
-			);
-			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
 		32B1F8E62CC8F48500CE12F9 /* Exceptions for "HealthApp" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -195,7 +181,6 @@
 		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3234D1B52CCC053E007E80B1 /* Exceptions for "QuickLookExtension" folder in "Health" target */,
 				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */,
 			);
 			path = QuickLookExtension;
@@ -213,7 +198,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				32C9CC4E2CA567D800AEDA32 /* Exceptions for "DataVaultApp" folder in "DataVault" target */,
-				329651AD2CCA93C800C037D7 /* Exceptions for "DataVaultApp" folder in "Health" target */,
 			);
 			path = DataVaultApp;
 			sourceTree = "<group>";
