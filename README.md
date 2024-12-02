@@ -4,7 +4,7 @@ Implements 2 iOS apps: a DataVault app and a User app. The User app uses our new
 
 # Useful Links
 
-- [GitHub Repo](https://github.com/zama-ai/fhe_appstore_on_ios)
+- [GitHub Repo](https://github.com/zama-ai/fhe_ios_demo)
 - [Canva exploration](https://www.canva.com/design/DAGUeG30ET0/Yy1lAaapPuLDaMJEukOM3Q/edit)
 - [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
