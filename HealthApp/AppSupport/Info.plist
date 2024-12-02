@@ -15,9 +15,11 @@
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>54.155.5.123</key>
+			<key>api.zama.ai</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
 		</dict>
