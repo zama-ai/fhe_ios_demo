@@ -1,6 +1,6 @@
-#  Welcome to FHE iOS Enclave Demo  
+#  Welcome to FHE iOS Demo  
 
-Implements 2 iOS apps: a DataVault app and a User app. The User app uses our new FHE enclave principle, ie can only manipulate encrypted data. The DataVault app generates the private keys and decrypt the final results the user app want the user to see, without returning clear results to the user app.
+Implements 2 iOS apps: a DataVault app and a User app. The User app uses data from the DataVault, ie can only manipulate encrypted data. The DataVault app generates the private keys and decrypt the final results the user app want the user to see, without returning clear results to the user app.
 
 # Useful Links
 
