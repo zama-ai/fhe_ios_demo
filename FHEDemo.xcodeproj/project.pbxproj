@@ -77,14 +77,14 @@
 /* Begin PBXFileReference section */
 		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
-		32B258372C98693800538B23 /* FHE Bridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Bridge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32B258372C98693800538B23 /* FHE Data Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Data Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		32C9CC202CA565A100AEDA32 /* FHE Health.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Health.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32F029DA2CA37007009B522D /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */ = {
+		320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "DataVault" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AsyncButton.swift,
@@ -101,7 +101,7 @@
 				Files/Persistable.swift,
 				Files/Storage.swift,
 			);
-			target = 32B258362C98693800538B23 /* Bridge */;
+			target = 32B258362C98693800538B23 /* DataVault */;
 		};
 		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -145,7 +145,7 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
 		};
-		329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Health" target */ = {
+		329651AD2CCA93C800C037D7 /* Exceptions for "DataVaultApp" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				SleepModels.swift,
@@ -160,12 +160,12 @@
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
-		32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */ = {
+		32C9CC4E2CA567D800AEDA32 /* Exceptions for "DataVaultApp" folder in "DataVault" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppSupport/Info.plist,
 			);
-			target = 32B258362C98693800538B23 /* Bridge */;
+			target = 32B258362C98693800538B23 /* DataVault */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -178,7 +178,7 @@
 		320C391A2CAAEE2900528366 /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "Bridge" target */,
+				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "DataVault" target */,
 				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */,
 				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */,
 			);
@@ -207,13 +207,13 @@
 			path = HealthApp;
 			sourceTree = "<group>";
 		};
-		32C9CC3D2CA566DC00AEDA32 /* BridgeApp */ = {
+		32C9CC3D2CA566DC00AEDA32 /* DataVaultApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				32C9CC4E2CA567D800AEDA32 /* Exceptions for "BridgeApp" folder in "Bridge" target */,
-				329651AD2CCA93C800C037D7 /* Exceptions for "BridgeApp" folder in "Health" target */,
+				32C9CC4E2CA567D800AEDA32 /* Exceptions for "DataVaultApp" folder in "DataVault" target */,
+				329651AD2CCA93C800C037D7 /* Exceptions for "DataVaultApp" folder in "Health" target */,
 			);
-			path = BridgeApp;
+			path = DataVaultApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -261,7 +261,7 @@
 			children = (
 				32B258512C9869A700538B23 /* README.md */,
 				32079E3B2CAC3941004EC06A /* Docs */,
-				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
+				32C9CC3D2CA566DC00AEDA32 /* DataVaultApp */,
 				32C9CC212CA565A100AEDA32 /* HealthApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
 				320CFB212CAAC47500528366 /* Server */,
@@ -274,7 +274,7 @@
 		32B258382C98693800538B23 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32B258372C98693800538B23 /* FHE Bridge.app */,
+				32B258372C98693800538B23 /* FHE Data Vault.app */,
 				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
 				32C9CC202CA565A100AEDA32 /* FHE Health.app */,
 			);
@@ -307,9 +307,9 @@
 			productReference = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		32B258362C98693800538B23 /* Bridge */ = {
+		32B258362C98693800538B23 /* DataVault */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "Bridge" */;
+			buildConfigurationList = 32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "DataVault" */;
 			buildPhases = (
 				32B258332C98693800538B23 /* Sources */,
 				32B258342C98693800538B23 /* Frameworks */,
@@ -323,14 +323,14 @@
 				324F8E292CA43B2100F0BB11 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				32C9CC3D2CA566DC00AEDA32 /* BridgeApp */,
+				32C9CC3D2CA566DC00AEDA32 /* DataVaultApp */,
 			);
-			name = Bridge;
+			name = DataVault;
 			packageProductDependencies = (
 				322E72BA2CC9A636009B2530 /* Algorithms */,
 			);
 			productName = FHEDemo;
-			productReference = 32B258372C98693800538B23 /* FHE Bridge.app */;
+			productReference = 32B258372C98693800538B23 /* FHE Data Vault.app */;
 			productType = "com.apple.product-type.application";
 		};
 		32C9CC1F2CA565A100AEDA32 /* Health */ = {
@@ -395,7 +395,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32B258362C98693800538B23 /* Bridge */,
+				32B258362C98693800538B23 /* DataVault */,
 				32C9CC1F2CA565A100AEDA32 /* Health */,
 				324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */,
 			);
@@ -635,13 +635,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BridgeApp/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DataVaultApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BridgeApp/AppSupport/Info.plist;
+				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -654,8 +654,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEBridge;
-				PRODUCT_NAME = "FHE Bridge";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDataVault;
+				PRODUCT_NAME = "FHE Data Vault";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -667,13 +667,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BridgeApp/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DataVaultApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = JCG5NG5ZNH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BridgeApp/AppSupport/Info.plist;
+				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -686,8 +686,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEBridge;
-				PRODUCT_NAME = "FHE Bridge";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDataVault;
+				PRODUCT_NAME = "FHE Data Vault";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -777,7 +777,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "Bridge" */ = {
+		32B258452C98693900538B23 /* Build configuration list for PBXNativeTarget "DataVault" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32B258462C98693900538B23 /* Debug */,

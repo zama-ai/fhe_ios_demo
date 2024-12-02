@@ -3,10 +3,10 @@
 import SwiftUI
 
 #Preview {
-    BridgeView()
+    DataVaultView()
 }
 
-struct BridgeView: View {
+struct DataVaultView: View {
     @StateObject private var vm = ViewModel()
     
     struct Metric: Equatable {
@@ -22,23 +22,24 @@ struct BridgeView: View {
         header
         
         content
-        .buttonStyle(.bordered)
-        .tint(.orange)
-        .task {
-            try? await vm.loadFromDisk()
-        }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.roundedRectangle)
+            .tint(.orange)
+            .task {
+                try? await vm.loadFromDisk()
+            }
     }
     
     private var header: some View {
-        VStack {
-            Text("Bridge App")
+        VStack(spacing: 0) {
+            Text("Data Vault")
                 .font(.largeTitle)
                 .padding(.bottom)
             
-            Text("Encrypt health information using **[FHE](https://zama.ai)**, so that it can be consumed in a privacy-preserving way in other apps. Learn more at **[zama.ai](https://zama.ai)**")
+            Text("Encrypt your health information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring health data.\n Powered by Zama (learn more on **[zama.ai](https://zama.ai)**)")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .tint(.white)
         }.padding()
     }
 
@@ -46,7 +47,6 @@ struct BridgeView: View {
     private var content: some View {
         ScrollView {
             section(for: .sleep,
-//                    granted: vm.sleepGranted,
                     items: vm.sleep,
                     file: vm.encryptedSleep,
                     subtitle: "Select Night",
@@ -67,7 +67,6 @@ struct BridgeView: View {
             }
             
             section(for: .weight,
-//                    granted: vm.weightGranted,
                     items: vm.weight,
                     file: vm.encryptedWeight,
                     subtitle: vm.weightDateRange,
@@ -107,6 +106,7 @@ struct BridgeView: View {
                         AsyncButton("Encrypt \(metric.name)") {
                             try await encrypt()
                         }
+                        .foregroundStyle(.black)
                     } else {
                         Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
                             .font(.caption)
@@ -119,7 +119,8 @@ struct BridgeView: View {
                             }
                             .padding(.bottom, 24)
                         
-                        Link("View in FHE Health App", destination: URL(string: "fhehealthapp://")!)
+                        Link("View in FHE Health", destination: URL(string: "fhehealthapp://")!)
+                            .foregroundStyle(.black)
                     }
                 }
                 .padding(.vertical)
@@ -152,11 +153,11 @@ struct BridgeView: View {
                         }
                 }
             } description: {
-                Text("Your \(metric.name.lowercased()) will be FHE-encrypted for privacy-preserving use in other apps.")
+                Text("Your \(metric.name.lowercased()) data will be FHE-encrypted for privacy-preserving use in other apps.")
             } actions: {
                 AsyncButton(action: metric == .weight ? vm.requestWeightPermission : vm.requestSleepPermission) {
                     Text("Allow \(metric.name)")
-                }
+                }.foregroundStyle(.black)
             }
         }
     }
@@ -176,6 +177,7 @@ struct BridgeView: View {
                 
                 VStack(spacing: 10) {
                     Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
+                        .foregroundStyle(.black)
                     
                     HStack {
                         VStack { Divider() }
@@ -183,8 +185,9 @@ struct BridgeView: View {
                         VStack { Divider() }
                     }
                     
-                    Button("Use Fake \(metric.name) Data", action: metric == .sleep ? vm.useFakeSleep : vm.useFakeWeight)
+                    Button("Simulate \(metric.name) Data", action: metric == .sleep ? vm.useFakeSleep : vm.useFakeWeight)
                         .padding(.bottom, -20)
+                        .foregroundStyle(.black)
                 }
             }
         }

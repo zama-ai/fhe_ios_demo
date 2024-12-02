@@ -8,6 +8,9 @@ import SwiftUI
 
 struct HealthView: View {
     @StateObject private var vm = ViewModel()
+    @State private var isAnalyzingSleep = false
+    @State private var isAnalyzingWeight = false
+    
     @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
@@ -29,6 +32,7 @@ struct HealthView: View {
         }
         .background(.yellow)
         .buttonStyle(.borderedProminent)
+        .buttonBorderShape(.roundedRectangle)
         .tint(.orange)
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -42,14 +46,16 @@ struct HealthView: View {
     }
     
     private var header: some View {
-        VStack {
-            Text("**FHE**alth App")
+        VStack(spacing: 0) {
+            Text("**FHE** Health")
                 .font(.largeTitle)
                 .padding(.bottom)
             
-            Text("This app **cannot read** your health data, despite displaying and analyzing it. Learn how **[Zama's FHE encryption](https://zama.ai)** makes this possible.")
+            Text("""
+                This app **cannot read** your health data, despite displaying and analyzing it.
+                Learn how **[Zama](https://zama.ai)** makes it possible using Fully Homomorphic Encryption (FHE).
+                """)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .tint(.black)
         }
@@ -58,24 +64,23 @@ struct HealthView: View {
         
     // MARK: - SLEEP -
     private func sleepInput(_ data: Data) -> some View {
-        GroupBox("Your Night") {
+        GroupBox("History") {
             SleepChartView(samples: Sleep.Night.fake.samples)
                 //.privateDisplayRing()
             
             Text("""
-                **Awake**: Occurs between sleep cycles, often brief and unnoticed.
+                **Awake**: Often brief and unnoticed.
                 **REM**: Dreaming stage, crucial for memory and emotions.
                 **Core**: Light sleep, prepares the body for deeper stages.
                 **Deep**: Restorative sleep, vital for physical recovery and growth.
                 """)
-            .foregroundStyle(.secondary)
             .font(.caption2)
             .padding(.horizontal, -8)
         }
     }
     
     private var sleepAnalysis: some View {
-        GroupBox("Sleep Quality") {
+        GroupBox("Analysis") {
             if let _ = vm.sleepResultQuality {
                 HStack(alignment: .top, spacing: 16) {
                     secureDisplay(.sleepScore)
@@ -83,9 +88,13 @@ struct HealthView: View {
                     Text("Sleep quality is based on last night's sleep duration and stages (REM, Deep, Core). A score of 1 reflects excellent rest, while 5 indicates poor sleep quality.")
                         .font(.caption)
                         .opacity(0.9)
+                        .padding(.top, 8)
                 }
             } else {
-                uploadButton("Night", legend: "Be patient, analysis can take up to 60 seconds", action: vm.uploadSleep)
+                uploadButton("Sleep",
+                             legend: "Be patient, analysis can take up to 60 seconds",
+                             isAnalyzing: $isAnalyzingSleep,
+                             action: vm.uploadSleep)
             }
         }
     }
@@ -95,7 +104,7 @@ struct HealthView: View {
         GroupBox("History") {
             secureDisplay(.weightList)
             
-            Text("Weight in Kg, as recorded in Health App")
+            Text("Weight is in Kg, as recorded in Apple Health.")
             .foregroundStyle(.secondary)
             .font(.caption2)
             .padding(.horizontal, -8)
@@ -122,7 +131,10 @@ struct HealthView: View {
                 .padding(.top, -8)
                 .padding(.horizontal, -16)
             } else {
-                uploadButton("Weight", legend: "Analysis takes a few seconds", action: vm.uploadWeight)
+                uploadButton("Weight",
+                             legend: "Analysis can take a few seconds",
+                             isAnalyzing: $isAnalyzingWeight,
+                             action: vm.uploadWeight)
             }
         }
     }
@@ -140,8 +152,6 @@ struct HealthView: View {
             if data != nil {
                 Label(name, systemImage: icon)
                     .imageScale(.large)
-                    .symbolRenderingMode(.multicolor)
-                    .foregroundStyle(color)
             }
         }
         .padding(8)
@@ -157,19 +167,27 @@ struct HealthView: View {
                     .symbolRenderingMode(.multicolor)
             }
         } description: {
-            Text("Generate encrypted \(name.lowercased()) records\nusing Bridge App.")
+            Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
         } actions: {
-            Link("Open Bridge App", destination: URL(string: "fhebridgeapp://")!)
+            Link("Open Data Vault", destination: URL(string: "fhedatavault://")!)
+                .foregroundStyle(.black)
         }
     }
     
-    private func uploadButton(_ name: String, legend: String? = nil, action: @escaping () async throws -> Void) -> some View {
+    private func uploadButton(_ name: String,
+                              legend: String,
+                              isAnalyzing: Binding<Bool>,
+                              action: @escaping () async throws -> Void) -> some View {
         VStack {
-            AsyncButton("Upload \(name.capitalized) for Analysis", action: action)
+            AsyncButton("Upload \(name.capitalized) Data for Encrypted Analysis", action: {
+                isAnalyzing.wrappedValue = true
+                try await action()
+                isAnalyzing.wrappedValue = false
+            })
+                .foregroundStyle(.black)
 
-            if let legend {
+            if isAnalyzing.wrappedValue {
                 Text(legend)
-                    .foregroundStyle(.secondary)
                     .font(.caption2)
             }
         }

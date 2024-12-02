@@ -6,11 +6,8 @@ import SwiftUI
     Text("This data is private and wide enough")
         .privateDisplayRing()
 
-    Text("This one also")
-        .border(.blue)
+    Text("This one shorter")
         .privateDisplayRing()
-        .border(.red)
-
 }
 
 extension View {
@@ -29,22 +26,19 @@ private struct PrivateDisplayRing: ViewModifier {
             }
             .padding(.bottom, 16)
             .overlay(alignment: .bottom) {
-                Link(destination: URL(string: "https://zama.ai")!) {
-                    let eye = Image(systemName:"eye.slash")
-                    let info = Image(systemName:"info.circle")
-                    ViewThatFits {
-                        Text("\(eye) Privately Displayed, app cannot see this. \(info)")
-                        Text("Private Display \(info)")
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                            .imageScale(.small)
-                    }
+                let icon = Image(systemName:"lock.fill")
+                ViewThatFits {
+                    Text("\(icon) Privately Displayed, app cannot see this.")
+                    Text("\(icon) Private Display")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .imageScale(.small)
                 }
                 .foregroundStyle(.tint)
                 .font(.caption2).bold()
             }
             .padding(.bottom, 8)
             .buttonStyle(.plain)
-            .tint(.orange)
+            .tint(.black)
     }
 }
