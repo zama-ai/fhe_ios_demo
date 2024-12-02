@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the image name
-IMAGE_NAME="fhe_appstore_server"
+IMAGE_NAME="fhe_ios_demo_server"
 
 # Set the Dockerfile name
 DOCKERFILE_NAME="Dockerfile.server"
