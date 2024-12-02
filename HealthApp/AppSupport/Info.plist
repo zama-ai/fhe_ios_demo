@@ -30,5 +30,10 @@
 		<string>Telegraf-UltraBold.ttf</string>
 		<string>Telegraf-Regular.ttf</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchScreenColor</string>
+	</dict>
 </dict>
 </plist>
