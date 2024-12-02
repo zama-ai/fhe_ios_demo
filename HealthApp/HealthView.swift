@@ -47,15 +47,15 @@ struct HealthView: View {
     
     private var header: some View {
         VStack(spacing: 0) {
-            Text("**FHE** Health")
-                .font(.largeTitle)
+            Text("FHE Health")
                 .padding(.bottom)
-            
+                .customFont(.largeTitle)
+
             Text("""
                 This app **cannot read** your health data, despite displaying and analyzing it.
                 Learn how **[Zama](https://zama.ai)** makes it possible using Fully Homomorphic Encryption (FHE).
                 """)
-                .font(.subheadline)
+                .customFont(.subheadline)
                 .multilineTextAlignment(.center)
                 .tint(.black)
         }
@@ -64,7 +64,7 @@ struct HealthView: View {
         
     // MARK: - SLEEP -
     private func sleepInput(_ data: Data) -> some View {
-        GroupBox("History") {
+        GroupBox {
             SleepChartView(samples: Sleep.Night.fake.samples)
                 //.privateDisplayRing()
             
@@ -74,19 +74,22 @@ struct HealthView: View {
                 **Core**: Light sleep, prepares the body for deeper stages.
                 **Deep**: Restorative sleep, vital for physical recovery and growth.
                 """)
-            .font(.caption2)
+            .customFont(.caption2)
             .padding(.horizontal, -8)
+        } label: {
+            Text("History")
+                .customFont(.title3)
         }
     }
     
     private var sleepAnalysis: some View {
-        GroupBox("Analysis") {
+        GroupBox {
             if let _ = vm.sleepResultQuality {
                 HStack(alignment: .top, spacing: 16) {
                     secureDisplay(.sleepScore)
                     
                     Text("Sleep quality is based on last night's sleep duration and stages (REM, Deep, Core). A score of 1 reflects excellent rest, while 5 indicates poor sleep quality.")
-                        .font(.caption)
+                        .customFont(.caption)
                         .opacity(0.9)
                         .padding(.top, 8)
                 }
@@ -96,23 +99,29 @@ struct HealthView: View {
                              isAnalyzing: $isAnalyzingSleep,
                              action: vm.uploadSleep)
             }
+        } label: {
+            Text("Analysis")
+                .customFont(.title3)
         }
     }
         
     // MARK: - WEIGHT -
     private func weightInput(_ data: Data) -> some View {
-        GroupBox("History") {
+        GroupBox {
             secureDisplay(.weightList)
             
             Text("Weight is in Kg, as recorded in Apple Health.")
             .foregroundStyle(.secondary)
-            .font(.caption2)
+            .customFont(.caption2)
             .padding(.horizontal, -8)
+        } label: {
+            Text("History")
+                .customFont(.title3)
         }
     }
 
     private var weightAnalysis: some View {
-        GroupBox("Analysis") {
+        GroupBox {
             if vm.weightResultAvg != nil,
                vm.weightResultMin != nil,
                vm.weightResultMax != nil {
@@ -136,6 +145,9 @@ struct HealthView: View {
                              isAnalyzing: $isAnalyzingWeight,
                              action: vm.uploadWeight)
             }
+        } label: {
+            Text("Analysis")
+                .customFont(.title3)
         }
     }
 
@@ -152,6 +164,7 @@ struct HealthView: View {
             if data != nil {
                 Label(name, systemImage: icon)
                     .imageScale(.large)
+                    .customFont(.title3)
             }
         }
         .padding(8)
@@ -161,6 +174,7 @@ struct HealthView: View {
         ContentUnavailableView {
             Label {
                 Text("No \(name.capitalized) Records")
+                    .customFont(.title3)
             } icon: {
                 Image(systemName: icon)
                     .foregroundStyle(color)
@@ -168,9 +182,11 @@ struct HealthView: View {
             }
         } description: {
             Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
+                .customFont(.callout)
         } actions: {
             Link("Open Data Vault", destination: URL(string: "fhedatavault://")!)
                 .foregroundStyle(.black)
+                .customFont(.callout)
         }
     }
     
@@ -185,10 +201,11 @@ struct HealthView: View {
                 isAnalyzing.wrappedValue = false
             })
                 .foregroundStyle(.black)
+                .customFont(.callout)
 
             if isAnalyzing.wrappedValue {
                 Text(legend)
-                    .font(.caption2)
+                    .customFont(.caption2)
             }
         }
         .padding()

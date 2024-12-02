@@ -88,6 +88,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AsyncButton.swift,
+				CustomFont/CustomFont.swift,
+				"CustomFont/Telegraf-Bold.ttf",
+				"CustomFont/Telegraf-Regular.ttf",
+				"CustomFont/Telegraf-UltraBold.ttf",
 				"Data+Ext.swift",
 				FHE/CompactCiphertextList.swift,
 				FHE/FHEHelpers.swift,
@@ -107,6 +111,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AsyncButton.swift,
+				CustomFont/CustomFont.swift,
+				"CustomFont/Telegraf-Bold.ttf",
+				"CustomFont/Telegraf-Regular.ttf",
+				"CustomFont/Telegraf-UltraBold.ttf",
 				"Data+Ext.swift",
 				FilePreview.swift,
 				Files/Persistable.swift,
@@ -117,6 +125,10 @@
 		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				CustomFont/CustomFont.swift,
+				"CustomFont/Telegraf-Bold.ttf",
+				"CustomFont/Telegraf-Regular.ttf",
+				"CustomFont/Telegraf-UltraBold.ttf",
 				"Data+Ext.swift",
 				FHE/FHEHelpers.swift,
 				FHE/FHEUInt8.swift,

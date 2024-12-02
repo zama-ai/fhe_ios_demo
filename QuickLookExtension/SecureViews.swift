@@ -56,7 +56,7 @@ struct SecureView: View {
             } currentValueLabel: {
                 VStack(spacing: 0) {
                     Text("\(value)")
-                        .font(.title2)
+                        .customFont(.title2)
                 }
             } minimumValueLabel: {
                 Text("\(range.lowerBound)")
@@ -68,7 +68,7 @@ struct SecureView: View {
             
             Text(labels[value - 1])
                 .foregroundStyle(.secondary)
-                .font(.caption2)
+                .customFont(.caption2)
         }
     }
     

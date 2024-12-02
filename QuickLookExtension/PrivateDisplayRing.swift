@@ -35,7 +35,7 @@ private struct PrivateDisplayRing: ViewModifier {
                         .imageScale(.small)
                 }
                 .foregroundStyle(.tint)
-                .font(.caption2).bold()
+                .customFont(.caption2).bold()
             }
             .padding(.bottom, 8)
             .buttonStyle(.plain)
