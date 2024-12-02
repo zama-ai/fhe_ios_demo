@@ -7,7 +7,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fhebridgeapp</string>
+				<string>fhedatavault</string>
 			</array>
 		</dict>
 	</array>

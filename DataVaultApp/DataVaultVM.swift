@@ -3,7 +3,7 @@
 import HealthKit
 import Algorithms
 
-extension BridgeView {
+extension DataVaultView {
     @MainActor
     final class ViewModel: ObservableObject {
         
@@ -146,7 +146,7 @@ extension BridgeView {
 }
 
 // MARK: - ENCRYPTION -
-extension BridgeView.ViewModel {
+extension DataVaultView.ViewModel {
     func encryptSleep() async throws {
         try await ensureKeysExist()
         

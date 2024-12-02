@@ -3,10 +3,10 @@
 import SwiftUI
 
 @main
-struct BridgeApp: App {
+struct DataVaultApp: App {
     var body: some Scene {
         WindowGroup {
-            BridgeView()
+            DataVaultView()
         }
     }
 }

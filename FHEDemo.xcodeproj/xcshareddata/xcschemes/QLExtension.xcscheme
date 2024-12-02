@@ -31,8 +31,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "32B258362C98693800538B23"
-               BuildableName = "FHE Bridge.app"
-               BlueprintName = "Bridge"
+               BuildableName = "FHE Data Vault.app"
+               BlueprintName = "DataVault"
                ReferencedContainer = "container:FHEDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -69,8 +69,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32B258362C98693800538B23"
-            BuildableName = "FHE Bridge.app"
-            BlueprintName = "Bridge"
+            BuildableName = "FHE Data Vault.app"
+            BlueprintName = "DataVault"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -88,8 +88,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32B258362C98693800538B23"
-            BuildableName = "FHE Bridge.app"
-            BlueprintName = "Bridge"
+            BuildableName = "FHE Data Vault.app"
+            BlueprintName = "DataVault"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
