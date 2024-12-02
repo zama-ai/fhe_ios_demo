@@ -28,7 +28,7 @@ struct CustomFontModifier: ViewModifier {
     private let ultraBold = "Telegraf-UltraBold"
     
     func body(content: Content) -> some View {
-//        return content.font(.system(style))
+        //        return content.font(.system(style))
         switch style {
         case .largeTitle: content.font(.custom(ultraBold, size: 30))
         case .title: content.font(.custom(bold, size: 28))

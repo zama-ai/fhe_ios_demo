@@ -67,7 +67,7 @@ struct AsyncButton<Label: View>: View {
         AsyncButton(action: {}) {
             Image(systemName: "heart.text.clipboard")
         }
-
+        
         AsyncButton("Try me! (error)") {
             throw NSError(domain: "Test", code: 1, userInfo: [NSLocalizedDescriptionKey: "Something went wrong!"])
         }

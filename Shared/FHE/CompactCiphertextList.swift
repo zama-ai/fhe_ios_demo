@@ -48,8 +48,8 @@ extension CompactCiphertextList {
         
         try wrap { compact_ciphertext_list_builder_build(builder, &compact_list) }
         try wrap { compact_ciphertext_list_builder_destroy(builder) }
-
+        
         self.init(pointer: compact_list)
     }
-
+    
 }

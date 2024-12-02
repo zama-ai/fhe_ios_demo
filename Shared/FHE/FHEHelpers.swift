@@ -43,14 +43,14 @@ extension DynamicBuffer {
         }
         
         let data = Data(bytes: pointer, count: self.length)
-
+        
         if let destructor = self.destructor {
             let freeResult = destructor(pointer, self.length)
             if freeResult != 0 {
                 print("Failed to free memory")
             }
         }
-
+        
         return data
     }
 }

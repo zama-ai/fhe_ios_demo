@@ -5,20 +5,20 @@ import SwiftUI
 import QuickLook
 
 final class PreviewWrapperVC: UIViewController, QLPreviewingController {
-
+    
     @IBOutlet private var container: UIView!
     private var viewModel = SecureView.ViewModel()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         let swiftUIView = SecureView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: swiftUIView)
         addChild(hostingController)
-
+        
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(hostingController.view)
-
+        
         container.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
         
@@ -28,10 +28,10 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
             hostingController.view.topAnchor.constraint(equalTo: container.topAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
-
+        
         hostingController.didMove(toParent: self)
     }
-
+    
     func preparePreviewOfFile(at url: URL) async throws {
         guard let data = try await Storage.read(url),
               let ck = try await ClientKey.readFromDisk(.clientKey) else {
@@ -52,7 +52,7 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
                                     range: 1...5,
                                     title: "Sleep Quality",
                                     labels: ["Excellent", "Good", "Average", "Poor", "Awful"])
-
+            
         case .int16:
             let encrypted = try FHEUInt16(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)

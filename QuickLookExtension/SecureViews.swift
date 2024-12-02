@@ -26,7 +26,7 @@ struct SecureView: View {
         case gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String])
         case simpleChart([Double])
     }
-
+    
     var body: some View {
         Group {
             switch viewModel.data {
@@ -44,11 +44,11 @@ struct SecureView: View {
             }
         }.privateDisplayRing()
     }
-
+    
     private func text(value: Double)  -> some View {
         Text("\(value.formatted(.number.precision(.fractionLength(1))))")
     }
-
+    
     private func gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String]) -> some View {
         VStack(spacing: 0) {
             Gauge(value: Double(value), in: Double(range.lowerBound)...Double(range.upperBound)) {

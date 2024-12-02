@@ -22,7 +22,7 @@ enum Sleep {
             
             return Night(date: start, samples: samples)
         }()
-
+        
     }
     
     struct Sample: Identifiable, Equatable {
@@ -53,12 +53,12 @@ enum Sleep {
         }
         
         static let displayOrder: [Level] = [
-//            .inBed,
+            //            .inBed,
             .awake,
             .asleepREM,
             .asleepCore,
             .asleepDeep,
-//            .asleepUnspecified
+            //            .asleepUnspecified
         ]
     }
 }

@@ -26,14 +26,14 @@ final class ClientKey: Persistable {
     deinit {
         client_key_destroy(pointer)
     }
-
+    
     // MARK: to/from Data
     func toData() throws -> Data {
         var buffer = DynamicBuffer(pointer: nil, length: 0, destructor: nil)
         try wrap { client_key_serialize(pointer, &buffer) }
         return try buffer.toData()
     }
-
+    
     convenience init(fromData input: Data) throws {
         let buffer = input.toDynamicBuffer()
         let bufferView = DynamicBufferView(pointer: buffer.pointer, length: buffer.length)

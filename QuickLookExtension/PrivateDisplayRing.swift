@@ -5,7 +5,7 @@ import SwiftUI
 #Preview {
     Text("This data is private and wide enough")
         .privateDisplayRing()
-
+    
     Text("This one shorter")
         .privateDisplayRing()
 }
