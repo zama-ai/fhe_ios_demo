@@ -12,7 +12,7 @@ echo "Received UID: $EXTRACTED_UID"
 
 # Stats using the received UID
 curl \
-  -X POST http://api.zama.ai/weight_stats \
+  -X POST http://api.zama.ai/sleep_quality \
   -F "uid=$EXTRACTED_UID" \
-  -F "input=@client_files/1234.inputList.fheencrypted" \
-  -o client_files/stats_output.fheencrypted
+  -F "input=@client_files/sleepList.fheencrypted" \
+  -o client_files/sleep_quality_output.fheencrypted
