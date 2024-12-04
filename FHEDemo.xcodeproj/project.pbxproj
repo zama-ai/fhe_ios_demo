@@ -11,9 +11,7 @@
 		324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32F029DA2CA37007009B522D /* QuickLook.framework */; };
 		324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
-		324F8E3E2CA47BF900F0BB11 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
-		3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,7 +31,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3250B3CA2C9B2C8B009B48C3 /* TFHE.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -55,7 +52,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				324F8E3E2CA47BF900F0BB11 /* TFHE.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -628,7 +624,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight data will be FHE-encrypted for privacy-preserving use in other apps.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Sleep and Weight data will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -661,7 +658,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight data will be FHE-encrypted for privacy-preserving use in other apps.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Sleep and Weight data will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
