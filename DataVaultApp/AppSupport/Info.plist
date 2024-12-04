@@ -11,15 +11,15 @@
 			</array>
 		</dict>
 	</array>
-	<key>QLSupportedContentTypes</key>
-	<array>
-		<string>com.zama.fhe.encrypted</string>
-	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Telegraf-Bold.ttf</string>
 		<string>Telegraf-UltraBold.ttf</string>
 		<string>Telegraf-Regular.ttf</string>
+	</array>
+	<key>QLSupportedContentTypes</key>
+	<array>
+		<string>com.zama.fhe.encrypted</string>
 	</array>
 	<key>UTExportedTypeDeclarations</key>
 	<array>

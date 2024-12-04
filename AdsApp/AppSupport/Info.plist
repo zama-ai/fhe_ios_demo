@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fheadsapp</string>
+			</array>
+		</dict>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchScreenColor</string>
+	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Telegraf-Bold.ttf</string>
+		<string>Telegraf-UltraBold.ttf</string>
+		<string>Telegraf-Regular.ttf</string>
+	</array>
+</dict>
+</plist>

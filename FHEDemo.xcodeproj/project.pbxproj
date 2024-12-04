@@ -61,6 +61,7 @@
 /* Begin PBXFileReference section */
 		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
+		328F5CB32D009CA800D7B219 /* FHE Ads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Ads.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258372C98693800538B23 /* FHE Data Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Data Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		32C9CC202CA565A100AEDA32 /* FHE Health.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Health.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -137,6 +138,26 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
 		};
+		328F5CC22D009FB200D7B219 /* Exceptions for "AdsApp" folder in "Ads" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppSupport/Info.plist,
+			);
+			target = 328F5CB22D009CA800D7B219 /* Ads */;
+		};
+		328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CustomFont/CustomFont.swift,
+				"CustomFont/Telegraf-Bold.ttf",
+				"CustomFont/Telegraf-Regular.ttf",
+				"CustomFont/Telegraf-UltraBold.ttf",
+				Files/Persistable.swift,
+				Files/Storage.swift,
+				OpenOtherAppButton.swift,
+			);
+			target = 328F5CB22D009CA800D7B219 /* Ads */;
+		};
 		32B1F8E62CC8F48500CE12F9 /* Exceptions for "HealthApp" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -163,8 +184,9 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "DataVault" target */,
-				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */,
 				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */,
+				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */,
+				328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -180,6 +202,14 @@
 				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */,
 			);
 			path = QuickLookExtension;
+			sourceTree = "<group>";
+		};
+		328F5CB42D009CA800D7B219 /* AdsApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				328F5CC22D009FB200D7B219 /* Exceptions for "AdsApp" folder in "Ads" target */,
+			);
+			path = AdsApp;
 			sourceTree = "<group>";
 		};
 		32C9CC212CA565A100AEDA32 /* HealthApp */ = {
@@ -207,6 +237,13 @@
 			files = (
 				324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */,
 				324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		328F5CB02D009CA800D7B219 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +283,7 @@
 				32C9CC3D2CA566DC00AEDA32 /* DataVaultApp */,
 				32C9CC212CA565A100AEDA32 /* HealthApp */,
 				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
+				328F5CB42D009CA800D7B219 /* AdsApp */,
 				320CFB212CAAC47500528366 /* Server */,
 				320C391A2CAAEE2900528366 /* Shared */,
 				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
@@ -259,6 +297,7 @@
 				32B258372C98693800538B23 /* FHE Data Vault.app */,
 				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
 				32C9CC202CA565A100AEDA32 /* FHE Health.app */,
+				328F5CB32D009CA800D7B219 /* FHE Ads.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -288,6 +327,28 @@
 			productName = QuickLookExtension;
 			productReference = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
+		};
+		328F5CB22D009CA800D7B219 /* Ads */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 328F5CBE2D009CA900D7B219 /* Build configuration list for PBXNativeTarget "Ads" */;
+			buildPhases = (
+				328F5CAF2D009CA800D7B219 /* Sources */,
+				328F5CB02D009CA800D7B219 /* Frameworks */,
+				328F5CB12D009CA800D7B219 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				328F5CB42D009CA800D7B219 /* AdsApp */,
+			);
+			name = Ads;
+			packageProductDependencies = (
+			);
+			productName = "FHE Ad Targeting";
+			productReference = 328F5CB32D009CA800D7B219 /* FHE Ads.app */;
+			productType = "com.apple.product-type.application";
 		};
 		32B258362C98693800538B23 /* DataVault */ = {
 			isa = PBXNativeTarget;
@@ -344,12 +405,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
+				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1600;
 				ORGANIZATIONNAME = Zama;
 				TargetAttributes = {
 					324F8E1C2CA43B2100F0BB11 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					328F5CB22D009CA800D7B219 = {
+						CreatedOnToolsVersion = 16.1;
 					};
 					32B258362C98693800538B23 = {
 						CreatedOnToolsVersion = 16.0;
@@ -377,14 +441,22 @@
 			projectRoot = "";
 			targets = (
 				32B258362C98693800538B23 /* DataVault */,
-				32C9CC1F2CA565A100AEDA32 /* Health */,
 				324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */,
+				32C9CC1F2CA565A100AEDA32 /* Health */,
+				328F5CB22D009CA800D7B219 /* Ads */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		324F8E1B2CA43B2100F0BB11 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		328F5CB12D009CA800D7B219 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -409,6 +481,13 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		324F8E192CA43B2100F0BB11 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		328F5CAF2D009CA800D7B219 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -486,6 +565,70 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault.quickLookExtension;
 				PRODUCT_NAME = "FHE QuickLookExtension";
 				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		328F5CBF2D009CA900D7B219 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AdsApp/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AdsApp/AppSupport/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.adsTargeting;
+				PRODUCT_NAME = "FHE Ads";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		328F5CC02D009CA900D7B219 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AdsApp/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AdsApp/AppSupport/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.adsTargeting;
+				PRODUCT_NAME = "FHE Ads";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -749,6 +892,15 @@
 			buildConfigurations = (
 				324F8E2C2CA43B2100F0BB11 /* Debug */,
 				324F8E2D2CA43B2100F0BB11 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		328F5CBE2D009CA900D7B219 /* Build configuration list for PBXNativeTarget "Ads" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				328F5CBF2D009CA900D7B219 /* Debug */,
+				328F5CC02D009CA900D7B219 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
