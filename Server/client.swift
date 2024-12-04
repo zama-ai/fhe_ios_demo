@@ -2,7 +2,7 @@
 
 import Foundation
 
-let rootURL = URL(string: "http://localhost:8888")!
+let rootURL = URL(string: "https://localhost:8888")!
 test_program()
 
 func test_program() {
