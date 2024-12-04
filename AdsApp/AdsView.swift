@@ -18,8 +18,11 @@ struct AdsView: View {
             ScrollView {
                 disclaimer
                 
-                ForEach(vm.posts) { post in
+                ForEach(Array(vm.samplePosts.enumerated()), id: \.offset) { index, post in
                     postView(post)
+                    if index % 2 == 1 {
+                        adView(vm.sampleAds[index % vm.sampleAds.count])
+                    }
                 }
                 .padding(.horizontal, 8)
             }
@@ -56,6 +59,31 @@ struct AdsView: View {
         .padding(.bottom)
     }
     
+    private func adView(_ ad: Ad) -> some View {
+        GroupBox {
+            HStack(alignment: .top) {
+                ad.color.frame(width: 80, height: 80)
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(ad.title).font(.headline)
+                    
+                    HStack(alignment: .top) {
+                        Text(ad.subtitle)
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Button(ad.action) {
+                            print("Ad tapped")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(ad.color)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
     private func postView(_ post: Post) -> some View {
         GroupBox {
             HStack(alignment: .top) {
@@ -78,9 +106,9 @@ struct AdsView: View {
                     Text(post.content)
                         .customFont(.body)
                         .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
