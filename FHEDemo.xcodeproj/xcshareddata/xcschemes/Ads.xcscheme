@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "328F5CB22D009CA800D7B219"
-               BuildableName = "Ads.app"
+               BuildableName = "FHE Ads.app"
                BlueprintName = "Ads"
                ReferencedContainer = "container:FHEDemo.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "328F5CB22D009CA800D7B219"
-            BuildableName = "Ads.app"
+            BuildableName = "FHE Ads.app"
             BlueprintName = "Ads"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "328F5CB22D009CA800D7B219"
-            BuildableName = "Ads.app"
+            BuildableName = "FHE Ads.app"
             BlueprintName = "Ads"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
