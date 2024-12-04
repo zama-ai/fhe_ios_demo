@@ -184,4 +184,10 @@ for task_name, task_config in tasks.items():
     )
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(PORT))
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=int(PORT),
+        ssl_keyfile="/project/key.pem",
+        ssl_certfile="/project/cert.pem"
+    )

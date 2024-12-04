@@ -16,12 +16,12 @@ RUN ./build_tasks.sh
 # Stage 2: Final image
 FROM python:3.9-slim
 
-# Set environment variables to prevent interactive prompts
+# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -37,10 +37,17 @@ COPY --from=builder /build/bin/* ./
 # Make binaries executable
 RUN chmod +x ./*
 
-# Copy the configuration file and Python server file (copied after heavy steps)
+# Copy configuration files and Python server
 COPY tasks.yaml ./
 COPY server.py ./
+COPY entrypoint.sh ./
 
-# Expose port and set entrypoint
+# Make the entrypoint script executable
+RUN chmod +x /project/entrypoint.sh
+
+# Expose necessary ports
+EXPOSE 80
 EXPOSE 5000
-ENTRYPOINT ["python", "server.py"]
+
+# Set the entrypoint
+ENTRYPOINT ["/project/entrypoint.sh"]

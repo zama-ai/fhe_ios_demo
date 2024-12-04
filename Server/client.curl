@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Add key and store the returned UID
-RESPONSE=$(curl -v -X POST http://api.zama.ai/add_key \
+RESPONSE=$(curl -v -X POST https://api.zama.ai/add_key \
   -F "key=@client_files/serverKeyCompressed")
 
 echo "Add key response: $RESPONSE"
@@ -12,7 +12,7 @@ echo "Received UID: $EXTRACTED_UID"
 
 # Stats using the received UID
 curl \
-  -X POST http://api.zama.ai/sleep_quality \
+  -X POST https://api.zama.ai/sleep_quality \
   -F "uid=$EXTRACTED_UID" \
   -F "input=@client_files/sleepList.fheencrypted" \
   -o client_files/sleep_quality_output.fheencrypted
