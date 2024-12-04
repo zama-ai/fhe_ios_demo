@@ -19,7 +19,7 @@ struct OpenOtherAppButton: View {
     @Environment(\.openURL) private var openURL
     
     var body: some View {
-        Button("View in \(appName)") {
+        Button("Open \(appName)") {
             openURL(URL(string: appScheme)!) { canOpen in
                 if !canOpen {
                     showAlert = true

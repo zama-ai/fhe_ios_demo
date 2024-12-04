@@ -6,6 +6,7 @@ Implements 2 iOS apps: a DataVault app and a User app. The User app uses data fr
 
 - [GitHub Repo](https://github.com/zama-ai/fhe_ios_demo)
 - [Canva exploration](https://www.canva.com/design/DAGUeG30ET0/Yy1lAaapPuLDaMJEukOM3Q/edit)
+- [Google Docs UI Feedbacks](https://docs.google.com/document/d/1VOvwO9D7kKKPg0mRWacHJUfFZYBwRZezs_tmD3H6384/)
 - [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
