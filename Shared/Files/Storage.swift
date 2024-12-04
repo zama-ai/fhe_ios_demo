@@ -106,7 +106,7 @@ extension Storage {
     }
     
     private var sharedFolder: URL {
-        let appGroup = "group.com.dimdl.shared"
+        let appGroup = "group.ai.zama.fhedemo.shared"
         guard let folder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }

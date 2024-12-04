@@ -80,7 +80,9 @@ struct DataVaultView: View {
                 Text("\(vm.weight.count) records found")
                     .customFont(.title)
             }
-        }.scrollBounceBehavior(.basedOnSize)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .padding(8)
     }
     
     @ViewBuilder

@@ -450,7 +450,7 @@
 				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QuickLookExtension/AppSupport/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = QuickLookExtension;
@@ -461,7 +461,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDataVault.QuickLookExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault.quickLookExtension;
 				PRODUCT_NAME = "FHE QuickLookExtension";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -476,7 +476,7 @@
 				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QuickLookExtension/AppSupport/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = QuickLookExtension;
@@ -487,7 +487,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDataVault.QuickLookExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault.quickLookExtension;
 				PRODUCT_NAME = "FHE QuickLookExtension";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -623,10 +623,11 @@
 				CODE_SIGN_ENTITLEMENTS = DataVaultApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -639,7 +640,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDataVault;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault;
 				PRODUCT_NAME = "FHE Data Vault";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -655,10 +656,11 @@
 				CODE_SIGN_ENTITLEMENTS = DataVaultApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Sleep and Weight will be FHE-encrypted for privacy-preserving use in other apps.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -671,7 +673,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEDataVault;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault;
 				PRODUCT_NAME = "FHE Data Vault";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -687,10 +689,11 @@
 				CODE_SIGN_ENTITLEMENTS = HealthApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HealthApp/AppSupport/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -701,7 +704,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEHealth;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.health;
 				PRODUCT_NAME = "FHE Health";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -717,10 +720,11 @@
 				CODE_SIGN_ENTITLEMENTS = HealthApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = JCG5NG5ZNH;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HealthApp/AppSupport/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -731,7 +735,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dimdl.zama.FHEHealth;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.health;
 				PRODUCT_NAME = "FHE Health";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

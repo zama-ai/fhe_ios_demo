@@ -3,17 +3,18 @@
 Implements 2 iOS apps: a DataVault app and a User app. The User app uses data from the DataVault, ie can only manipulate encrypted data. The DataVault app generates the private keys and decrypt the final results the user app want the user to see, without returning clear results to the user app.
 
 # Useful Links
-
+- [Zama Website](https://www.zama.ai)
+- [Zama THFE-rs](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
+- [ Developer](https://developer.apple.com/account/)
+- [ Learn Swift Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language)
+- [ Learn Swift UI Guide](https://developer.apple.com/tutorials/swiftui)
 - [GitHub Repo](https://github.com/zama-ai/fhe_ios_demo)
 - [Canva exploration](https://www.canva.com/design/DAGUeG30ET0/Yy1lAaapPuLDaMJEukOM3Q/edit)
 - [Google Docs UI Feedbacks](https://docs.google.com/document/d/1VOvwO9D7kKKPg0mRWacHJUfFZYBwRZezs_tmD3H6384/)
-- [THFE-rs doc](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
 - [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
 - [Using imported C APIs in Swift](https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis)
-- [Learn Swift - Official  Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language)
-- [Learn Swift UI - Official  Guide](https://developer.apple.com/tutorials/swiftui)
 
 # Installation Steps
 
