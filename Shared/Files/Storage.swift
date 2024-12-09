@@ -8,6 +8,8 @@ final class Storage {
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
         
+        case profile = "profile.fheencrypted"
+
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
         case weightMax = "weightMax.fheencrypted"
@@ -15,7 +17,7 @@ final class Storage {
         
         case sleepList = "sleepList.fheencrypted"
         case sleepScore = "sleepScore.fheencrypted"
-        
+
         var decryptType: DecryptType? {
             switch self {
             case .sleepList: .cipherTextList
@@ -24,7 +26,7 @@ final class Storage {
             case .weightList: .array
             case .weightMin, .weightMax, .weightAvg:  .int16
                 
-            case .clientKey, .publicKey, .serverKey: nil
+            case .clientKey, .publicKey, .serverKey, .profile: nil
             }
         }
         

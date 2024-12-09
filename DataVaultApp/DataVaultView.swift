@@ -9,12 +9,13 @@ import SwiftUI
 struct DataVaultView: View {
     @StateObject private var vm = ViewModel()
     @State private var showOtherAppInstallAlert = false
-    
+
     struct Metric: Equatable {
         let name: String
         let icon: String
         let color: Color
         
+        static let profile: Metric = .init(name: "Personal Profile", icon: "person.text.rectangle.fill", color: .teal)
         static let sleep: Metric = .init(name: "Sleep", icon: "bed.double.fill", color: .mint)
         static let weight: Metric = .init(name: "Weight", icon: "figure", color: .purple)
     }
@@ -37,52 +38,75 @@ struct DataVaultView: View {
                 .customFont(.largeTitle)
                 .padding(.bottom)
             
-            Text("Encrypt your health information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring health data.\n Powered by Zama (learn more on **[zama.ai](https://zama.ai)**)")
+            Text("Encrypt your information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring these data.\n Powered by Zama (learn more on **[zama.ai](https://zama.ai)**)")
                 .customFont(.subheadline)
                 .multilineTextAlignment(.center)
                 .tint(.white)
         }.padding()
     }
     
-    @ViewBuilder
     private var content: some View {
         ScrollView {
-            section(for: .sleep,
-                    granted: vm.sleepGranted,
-                    items: vm.sleep,
-                    file: vm.encryptedSleep,
-                    subtitle: "Select Night",
-                    encrypt: vm.encryptSleep,
-                    delete: vm.deleteSleep)
-            {
-                let nights = vm.sleep.count == 1 ? "night" : "nights"
-                Text("\(vm.sleep.count) \(nights) found")
-                    .customFont(.title)
-                
-                Picker("", selection: $vm.selectedNight) {
-                    ForEach(vm.sleep, id: \.date) { night in
-                        let day = night.date.formatted(.dateTime.weekday().day())
-                        let time = night.date.formatted(.dateTime.hour().minute())
-                        Text("\(day) at \(time)").tag(night.date)
-                    }
-                }
-                .buttonStyle(.bordered)
-            }
-            
-            section(for: .weight,
-                    granted: vm.weightGranted,
-                    items: vm.weight,
-                    file: vm.encryptedWeight,
-                    subtitle: vm.weightDateRange,
-                    encrypt: vm.encryptWeight,
-                    delete: vm.deleteWeight)
-            {
-                Text("\(vm.weight.count) records found")
-                    .customFont(.title)
-            }
+            profileSection
+            sleepSection
+            weightSection
         }
         .scrollBounceBehavior(.basedOnSize)
         .padding(8)
+    }
+    
+    private var profileSection: some View {
+        section(for: .profile,
+                granted: true,
+                items: [12],
+                file: vm.encryptedProfile,
+                subtitle: "Once encrypted, other apps can't access your information",
+                encrypt: vm.encryptProfile,
+                delete: vm.deleteProfile,
+                openIn: .fheAdTargeting)
+        {
+            ProfileForm(vm: vm)
+        }
+    }
+    
+    private var sleepSection: some View {
+        section(for: .sleep,
+                granted: vm.sleepGranted,
+                items: vm.sleep,
+                file: vm.encryptedSleep,
+                subtitle: "Select Night",
+                encrypt: vm.encryptSleep,
+                delete: vm.deleteSleep,
+                openIn: .fheHealth)
+        {
+            let nights = vm.sleep.count == 1 ? "night" : "nights"
+            Text("\(vm.sleep.count) \(nights) found")
+                .customFont(.title)
+            
+            Picker("", selection: $vm.selectedNight) {
+                ForEach(vm.sleep, id: \.date) { night in
+                    let day = night.date.formatted(.dateTime.weekday().day())
+                    let time = night.date.formatted(.dateTime.hour().minute())
+                    Text("\(day) at \(time)").tag(night.date)
+                }
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+    
+    private var weightSection: some View {
+        section(for: .weight,
+                granted: vm.weightGranted,
+                items: vm.weight,
+                file: vm.encryptedWeight,
+                subtitle: vm.weightDateRange,
+                encrypt: vm.encryptWeight,
+                delete: vm.deleteWeight,
+                openIn: .fheHealth)
+        {
+            Text("\(vm.weight.count) records found")
+                .customFont(.title)
+        }
     }
     
     @ViewBuilder
@@ -93,6 +117,7 @@ struct DataVaultView: View {
                                                       subtitle: String,
                                                       encrypt: @escaping () async throws -> Void,
                                                       delete: @escaping () async throws -> Void,
+                                                      openIn clientApp: OpenOtherAppButton.App,
                                                       @ViewBuilder content: () -> Content) -> some View {
         if !granted {
             permissionMissing(for: metric)
@@ -125,7 +150,7 @@ struct DataVaultView: View {
                             }
                             .padding(.bottom, 24)
                         
-                        OpenOtherAppButton(appName: "FHE Health", appScheme: "fhehealthapp://", appID: nil, showAlert: $showOtherAppInstallAlert)
+                        OpenOtherAppButton(app: clientApp, showAlert: $showOtherAppInstallAlert)
                             .customFont(.callout)
                             .foregroundStyle(.black)
                     }
@@ -193,9 +218,10 @@ struct DataVaultView: View {
                     .customFont(.callout)
                 
                 VStack(spacing: 10) {
-                    Link("Open Apple Health", destination: URL(string: "x-apple-health://")!)
+                    OpenOtherAppButton(app: .appleHealth, showAlert: $showOtherAppInstallAlert)
+                        .customFont(.callout)
                         .foregroundStyle(.black)
-                    
+
                     HStack {
                         VStack { Divider() }
                         Text(" or ")

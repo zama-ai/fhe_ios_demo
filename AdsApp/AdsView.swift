@@ -7,9 +7,9 @@ import SwiftUI
 }
 
 struct AdsView: View {
-    @StateObject private var vm = ViewModel()
+    @StateObject private var vm = ViewModel.preview
     @Environment(\.openURL) private var openURL
-
+    
     var body: some View {
         VStack {
             titleBar
@@ -18,10 +18,10 @@ struct AdsView: View {
             ScrollView {
                 disclaimer
                 
-                ForEach(Array(vm.samplePosts.enumerated()), id: \.offset) { index, post in
+                ForEach(Array(vm.posts.enumerated()), id: \.offset) { index, post in
                     postView(post)
                     if index % 2 == 1 {
-                        adView(vm.sampleAds[index % vm.sampleAds.count])
+                        adView(vm.ads[index % vm.ads.count])
                     }
                 }
                 .padding(.horizontal, 8)
@@ -31,21 +31,21 @@ struct AdsView: View {
     }
     
     private var titleBar: some View {
-        Text("FHE Ad Targeting")
-            .customFont(.largeTitle)
-            .frame(maxWidth: .infinity)
-            .overlay(alignment: .trailing) {
-                Button {
-                    print("profile")
-                    openURL(URL(string: "fhedatavault://")!)
-                } label: {
-                    Image(systemName: "person.crop.circle.fill")
-                        .resizable()
-                        .frame(width: 32, height: 32)
-                        .padding()
-                }
-                .tint(.black)
+        VStack(spacing: 0) {
+            Text("FHE Ad Targeting")
+                .customFont(.largeTitle)
+                .frame(maxWidth: .infinity)
+            
+            Button {
+                // TODO: use OpenOtherAppButton
+                openURL(URL(string: "fhedatavault://")!)
+            } label: {
+                Label("Edit Profile", systemImage: "person.crop.circle.fill")
             }
+            .padding(6)
+            .buttonStyle(.bordered)
+            .tint(.black)
+        }
     }
     
     private var disclaimer: some View {
@@ -62,7 +62,10 @@ struct AdsView: View {
     private func adView(_ ad: Ad) -> some View {
         GroupBox {
             HStack(alignment: .top) {
-                ad.color.frame(width: 80, height: 80)
+                AsyncImage(url: ad.url)
+                    .overlay { ad.color.opacity(0.2) }
+                    .frame(width: 80, height: 80)
+                    .cornerRadius(8)
                 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(ad.title).font(.headline)
@@ -71,7 +74,7 @@ struct AdsView: View {
                         Text(ad.subtitle)
                             .font(.subheadline)
                             .frame(maxWidth: .infinity, alignment: .leading)
-
+                        
                         Button(ad.action) {
                             print("Ad tapped")
                         }
@@ -83,7 +86,7 @@ struct AdsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     private func postView(_ post: Post) -> some View {
         GroupBox {
             HStack(alignment: .top) {

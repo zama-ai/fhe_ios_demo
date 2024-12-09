@@ -2,6 +2,7 @@
 
 import HealthKit
 import Algorithms
+import SwiftUI
 
 extension DataVaultView {
     @MainActor
@@ -15,9 +16,15 @@ extension DataVaultView {
         @Published var sleep: [Sleep.Night] = []
         @Published var selectedNight: Date?
         
+        @AppStorage("name") var clearProfileName: String?
+        @AppStorage("sex") var clearProfileSex: String?
+        @AppStorage("age") var clearProfileAge: String?
+        @AppStorage("interests") var clearProfileInterests: String?
+
         @Published var encryptedWeight: Data?
         @Published var encryptedSleep: Data?
-        
+        @Published var encryptedProfile: Data?
+
         private var ck: ClientKey?
         private var pk: PublicKeyCompact?
         private var sk: ServerKeyCompressed?
@@ -35,6 +42,7 @@ extension DataVaultView {
             try await refreshPermission()
             encryptedWeight = try await Storage.read(.weightList)
             encryptedSleep = try await Storage.read(.sleepList)
+            encryptedProfile = try await Storage.read(.profile)
             try await fetchHealthData()
         }
         
@@ -142,6 +150,25 @@ extension DataVaultView {
                 print("⚠️ Unrecognized type \(sample.sampleType) \(type(of: sample))")
             }
         }
+    }
+}
+
+// MARK: - Profile -
+extension DataVaultView.ViewModel {
+    func encryptProfile() async throws {
+        try await ensureKeysExist()
+        
+        if let pk {
+            let list = try FHEUInt16Array(encrypting: [1, 2, 3, 4], publicKey: pk)
+            let listData = try list.toData()
+            try await Storage.write(.profile, data: listData)
+            encryptedProfile = listData
+        }
+    }
+    
+    func deleteProfile() async throws {
+        try await Storage.deleteFromDisk(.profile)
+        try await loadFromDisk()
     }
 }
 

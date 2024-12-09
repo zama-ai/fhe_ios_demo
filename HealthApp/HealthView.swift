@@ -185,7 +185,7 @@ struct HealthView: View {
             Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
                 .customFont(.callout)
         } actions: {
-            OpenOtherAppButton(appName: "Data Vault", appScheme: "fhedatavault://", appID: nil, showAlert: $showOtherAppInstallAlert)
+            OpenOtherAppButton(app: .fheDataVault, showAlert: $showOtherAppInstallAlert)
                 .foregroundStyle(.black)
                 .customFont(.callout)
         }
