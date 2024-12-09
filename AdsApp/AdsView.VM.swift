@@ -17,7 +17,6 @@ struct Ad: Identifiable {
     let action: String
     var color: Color
     let url: URL = {
-        print("init Ad")
         let id = (0...30).randomElement()!
         return URL(string: "https://picsum.photos/id/\(id)/80/80")!
     }()
@@ -53,7 +52,6 @@ extension AdsView {
         @Published var ads: [Ad]
         
         init(posts: [Post], ads: [Ad]) {
-            print("init VM")
             self.posts = posts
             self.ads = ads
         }

@@ -10,7 +10,6 @@ struct HealthView: View {
     @StateObject private var vm = ViewModel()
     @State private var isAnalyzingSleep = false
     @State private var isAnalyzingWeight = false
-    @State private var showOtherAppInstallAlert = false
     
     @Environment(\.scenePhase) var scenePhase
     
@@ -185,7 +184,7 @@ struct HealthView: View {
             Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
                 .customFont(.callout)
         } actions: {
-            OpenOtherAppButton(app: .fheDataVault, showAlert: $showOtherAppInstallAlert)
+            OpenAppButton(.fheDataVault)
                 .foregroundStyle(.black)
                 .customFont(.callout)
         }
