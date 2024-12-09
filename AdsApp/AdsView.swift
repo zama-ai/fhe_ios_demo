@@ -36,10 +36,7 @@ struct AdsView: View {
                 .customFont(.largeTitle)
                 .frame(maxWidth: .infinity)
             
-            Button {
-                // TODO: use OpenOtherAppButton
-                openURL(URL(string: "fhedatavault://")!)
-            } label: {
+            OpenAppButton(.fheDataVault) {
                 Label("Edit Profile", systemImage: "person.crop.circle.fill")
             }
             .padding(6)

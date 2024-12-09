@@ -8,7 +8,6 @@ import SwiftUI
 
 struct DataVaultView: View {
     @StateObject private var vm = ViewModel()
-    @State private var showOtherAppInstallAlert = false
 
     struct Metric: Equatable {
         let name: String
@@ -117,7 +116,7 @@ struct DataVaultView: View {
                                                       subtitle: String,
                                                       encrypt: @escaping () async throws -> Void,
                                                       delete: @escaping () async throws -> Void,
-                                                      openIn clientApp: OpenOtherAppButton.App,
+                                                      openIn clientApp: AppInfo,
                                                       @ViewBuilder content: () -> Content) -> some View {
         if !granted {
             permissionMissing(for: metric)
@@ -150,7 +149,7 @@ struct DataVaultView: View {
                             }
                             .padding(.bottom, 24)
                         
-                        OpenOtherAppButton(app: clientApp, showAlert: $showOtherAppInstallAlert)
+                        OpenAppButton(clientApp)
                             .customFont(.callout)
                             .foregroundStyle(.black)
                     }
@@ -218,7 +217,7 @@ struct DataVaultView: View {
                     .customFont(.callout)
                 
                 VStack(spacing: 10) {
-                    OpenOtherAppButton(app: .appleHealth, showAlert: $showOtherAppInstallAlert)
+                    OpenAppButton(.appleHealth)
                         .customFont(.callout)
                         .foregroundStyle(.black)
 
