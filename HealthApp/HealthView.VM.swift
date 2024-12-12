@@ -12,7 +12,7 @@ extension HealthView {
         @Published var weightResultMin: Data?
         @Published var weightResultMax: Data?
         @Published var weightResultAvg: Data?
-        
+                
         func loadFromDisk() async throws {
             sleepInput = try await Storage.read(.sleepList)
             sleepResultQuality = try await Storage.read(.sleepScore)

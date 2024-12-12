@@ -161,25 +161,17 @@ struct HealthView: View {
                     .padding(16)
             }
         } label: {
-            if data != nil {
-                Label(name, systemImage: icon)
-                    .imageScale(.large)
-                    .customFont(.title3)
-            }
+            Label(name, systemImage: icon)
+                .imageScale(.large)
+                .customFont(.title3)
         }
         .padding(8)
     }
     
     private func noContent(_ name: String, icon: String, color: Color) -> some View {
         ContentUnavailableView {
-            Label {
-                Text("No \(name.capitalized) Records")
-                    .customFont(.title3)
-            } icon: {
-                Image(systemName: icon)
-                    .foregroundStyle(color)
-                    .symbolRenderingMode(.multicolor)
-            }
+            Text("No \(name.capitalized) Records")
+                .customFont(.title3)
         } description: {
             Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
                 .customFont(.callout)
