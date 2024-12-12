@@ -84,9 +84,9 @@ struct DataVaultView: View {
             
             Picker("", selection: $vm.selectedNight) {
                 ForEach(vm.sleep, id: \.date) { night in
-                    let day = night.date.formatted(.dateTime.weekday().day())
+                    let day = night.date.formatted(.dateTime.weekday().day().month())
                     let time = night.date.formatted(.dateTime.hour().minute())
-                    Text("\(day) at \(time)").tag(night.date)
+                    Text("\(day), begins at \(time)").tag(night.date)
                 }
             }
             .buttonStyle(.bordered)
@@ -118,43 +118,44 @@ struct DataVaultView: View {
                                                       delete: @escaping () async throws -> Void,
                                                       openIn clientApp: AppInfo,
                                                       @ViewBuilder content: () -> Content) -> some View {
-        if !granted {
-            permissionMissing(for: metric)
-        } else if items.isEmpty {
-            contentMissing(for: metric)
-        } else {
             GroupBox {
-                VStack {
-                    content()
-                    
-                    if file == nil {
-                        Text("\(subtitle)")
-                            .customFont(.caption)
-                            .foregroundStyle(.secondary)
-                            .padding(.bottom, 24)
+                if !granted {
+                    permissionMissing(for: metric)
+                } else if items.isEmpty {
+                    contentMissing(for: metric)
+                } else {
+                    VStack {
+                        content()
                         
-                        AsyncButton("Encrypt \(metric.name)") {
-                            try await encrypt()
-                        }
-                        .foregroundStyle(.black)
-                    } else {
-                        Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
-                            .customFont(.caption)
-                            .foregroundStyle(.green)
-                            .frame(maxWidth: .infinity)
-                            .overlay(alignment: .trailing) {
-                                AsyncButton(action: delete) {
-                                    Image(systemName: "trash").imageScale(.small)
-                                }.tint(.red)
+                        if file == nil {
+                            Text("\(subtitle)")
+                                .customFont(.caption)
+                                .foregroundStyle(.secondary)
+                                .padding(.bottom, 24)
+                            
+                            AsyncButton("Encrypt \(metric.name)") {
+                                try await encrypt()
                             }
-                            .padding(.bottom, 24)
-                        
-                        OpenAppButton(clientApp)
-                            .customFont(.callout)
                             .foregroundStyle(.black)
+                        } else {
+                            Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
+                                .customFont(.caption)
+                                .foregroundStyle(.green)
+                                .frame(maxWidth: .infinity)
+                                .overlay(alignment: .trailing) {
+                                    AsyncButton(action: delete) {
+                                        Image(systemName: "trash").imageScale(.small)
+                                    }.tint(.red)
+                                }
+                                .padding(.bottom, 24)
+                            
+                            OpenAppButton(clientApp)
+                                .customFont(.callout)
+                                .foregroundStyle(.black)
+                        }
                     }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             } label: {
                 Label(metric.name, systemImage: metric.icon)
                     .imageScale(.large)
@@ -164,7 +165,6 @@ struct DataVaultView: View {
                 
                 Divider()
             }
-        }
     }
     
     private func permissionMissing(for metric: Metric) -> some View {
@@ -203,15 +203,8 @@ struct DataVaultView: View {
     private func contentMissing(for metric: Metric) -> some View {
         GroupBox {
             ContentUnavailableView {
-                Label {
-                    Text("No \(metric.name) Data on Device")
+                Text("No \(metric.name) Data on Device")
                         .customFont(.title3)
-                    
-                } icon: {
-                    Image(systemName: metric.icon)
-                        .symbolRenderingMode(.multicolor)
-                        .foregroundStyle(metric.color)
-                }
             } description: {
                 Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
                     .customFont(.callout)

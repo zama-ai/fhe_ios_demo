@@ -107,7 +107,7 @@ extension DataVaultView {
                 }))
             }
             
-            Task { @MainActor in
+            Task {
                 weight = cleanedWeight
                 weightDateRange = dateInterval
                 sleep = nights
@@ -201,28 +201,24 @@ extension DataVaultView.ViewModel {
         try await loadFromDisk()
     }
     
-    @MainActor
     func useFakeSleep() {
         let night = Sleep.Night.fake
         sleep = [night]
         selectedNight = night.date
     }
 
-    @MainActor
     func useFakeBadSleep() {
         let night = Sleep.Night.fakeBad
         sleep = [night]
         selectedNight = night.date
     }
 
-    @MainActor
     func useLargeFakeSleep() {
         let night = Sleep.Night.fakeLarge
         sleep = [night]
         selectedNight = night.date
     }
     
-    @MainActor
     func useFakeWeight() {
         weight = [63, 70, 73, 68, 71]
         weightDateRange = "Fake weights"
