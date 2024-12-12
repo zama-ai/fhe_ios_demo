@@ -207,6 +207,20 @@ extension DataVaultView.ViewModel {
         sleep = [night]
         selectedNight = night.date
     }
+
+    @MainActor
+    func useFakeBadSleep() {
+        let night = Sleep.Night.fakeBad
+        sleep = [night]
+        selectedNight = night.date
+    }
+
+    @MainActor
+    func useLargeFakeSleep() {
+        let night = Sleep.Night.fakeLarge
+        sleep = [night]
+        selectedNight = night.date
+    }
     
     @MainActor
     func useFakeWeight() {

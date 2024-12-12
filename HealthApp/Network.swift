@@ -77,7 +77,8 @@ extension URLRequest {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        
+        request.timeoutInterval = 300
+
         // Create multipart content
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")

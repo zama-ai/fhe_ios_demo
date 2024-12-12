@@ -62,4 +62,96 @@ extension Sleep.Night {
         
         return Sleep.Night(date: start, samples: samples)
     }()
+
+    static let fakeBad: Sleep.Night = {
+        let values = [
+            [0,   0, 120],
+            [3, 120, 150],
+            [0, 150, 210],
+            [4, 210, 240],
+            [0, 240, 300]
+        ]
+
+        let samples: [Sleep.Sample] = values.map { row in
+            Sleep.Sample(start: row[1],
+                         end: row[2],
+                         level: Sleep.Level(rawValue: row[0])!)
+        }
+        
+        let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-3600)
+        
+        return Sleep.Night(date: start, samples: samples)
+    }()
+
+    static let fakeLarge: Sleep.Night = {
+        // Helper function to create realistic sleep cycles
+        func generateSleepCycle(startMinute: Int, cycleLength: Int) -> [(Int, Int, Sleep.Level)] {
+            var segments: [(Int, Int, Sleep.Level)] = []
+            var currentMinute = startMinute
+            
+            // Light sleep (Core)
+            let lightSleepDuration = Int.random(in: 20...30)
+            segments.append((currentMinute, currentMinute + lightSleepDuration, .asleepCore))
+            currentMinute += lightSleepDuration
+            
+            // Deep sleep
+            let deepSleepDuration = Int.random(in: 15...25)
+            segments.append((currentMinute, currentMinute + deepSleepDuration, .asleepDeep))
+            currentMinute += deepSleepDuration
+            
+            // More light sleep
+            let lightSleep2Duration = Int.random(in: 20...30)
+            segments.append((currentMinute, currentMinute + lightSleep2Duration, .asleepCore))
+            currentMinute += lightSleep2Duration
+            
+            // REM sleep
+            let remSleepDuration = Int.random(in: 15...25)
+            segments.append((currentMinute, currentMinute + remSleepDuration, .asleepREM))
+            currentMinute += remSleepDuration
+            
+            // Possible brief awakening
+            if Bool.random() {
+                let awakeningDuration = Int.random(in: 3...8)
+                segments.append((currentMinute, currentMinute + awakeningDuration, .awake))
+                currentMinute += awakeningDuration
+            }
+            
+            return segments
+        }
+        
+        var allSegments: [(Int, Int, Sleep.Level)] = []
+        
+        // Initial falling asleep period
+        allSegments.append((0, 15, .awake))
+        allSegments.append((15, 30, .asleepCore))
+        
+        // Generate 6-7 sleep cycles
+        let numberOfCycles = Int.random(in: 6...7)
+        var currentMinute = 30
+        
+        for _ in 0..<numberOfCycles {
+            let cycleLength = Int.random(in: 90...120)
+            let cycleSegments = generateSleepCycle(startMinute: currentMinute, cycleLength: cycleLength)
+            allSegments.append(contentsOf: cycleSegments)
+            currentMinute += cycleLength
+        }
+        
+        // Add some final awakening periods
+        allSegments.append((currentMinute, currentMinute + 10, .awake))
+        
+        // Convert to Sleep.Sample array
+        let samples = allSegments.map { segment in
+            Sleep.Sample(
+                start: segment.0,
+                end: segment.1,
+                level: segment.2
+            )
+        }
+        
+        // Set bedtime to 11 PM of current day
+        let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-1 * 3600)
+        
+        return Sleep.Night(date: start, samples: samples)
+    }()
+
 }
