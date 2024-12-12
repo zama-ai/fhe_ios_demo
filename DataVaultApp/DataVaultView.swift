@@ -227,11 +227,22 @@ struct DataVaultView: View {
                         VStack { Divider() }
                     }
                     
-                    Button("Simulate \(metric.name) Data", action: metric == .sleep ? vm.useFakeSleep : vm.useFakeWeight)
-                        .padding(.bottom, -20)
-                        .foregroundStyle(.black)
+                    if metric == .sleep {
+                        Menu {
+                            Button("Regular Sample", action: vm.useFakeSleep)
+                            Button("Bad Sample", action: vm.useFakeBadSleep)
+                            Button("Large Dataset (100 samples)", action: vm.useLargeFakeSleep)
+                        } label: {
+                            Text("Simulate \(metric.name) Data")
+                                .foregroundStyle(.black)
+                        }
+                    } else {
+                        Button("Simulate \(metric.name) Data", action: vm.useFakeWeight)
+                            .foregroundStyle(.black)
+                    }
                 }
                 .customFont(.callout)
+                .padding(.bottom, -20)
             }
         }
     }
