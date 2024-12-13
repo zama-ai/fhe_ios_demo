@@ -13,34 +13,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     
     let uid = &args[1];
-    
-    println!("\n========\n");
-    println!("CLI Args: {}", uid);
 
     let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
     let input_path = format!("/project/uploaded_files/{}.add_42.input.fheencrypted", uid);
     let output_path = format!("/project/uploaded_files/{}.add_42.output.fheencrypted", uid);
-    println!(
-        "Paths:\n\
-        \tsk: {}\n\
-        \tin: {}\n\
-        \tout: {}",
-        sk_path, input_path, output_path
-    );
 
     let compressed = deserialize_compressed_server_key(&sk_path);
     let decompressed = compressed.decompress();
     set_server_key(decompressed);
-
-    println!("ServerKey set");
     
     let input: FheUint16 = deserialize_fheuint16(&input_path);
     let result = input + 42;
     
     serialize_fheuint16(result, &output_path);
 
-    println!("Successful end");
-    println!("\n========\n");
     Ok(())
 }
 

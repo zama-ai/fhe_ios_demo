@@ -1,10 +1,10 @@
-# Stage 1: Build Rust binaries
-FROM rust:1.76 AS builder
+# Stage 1: Build Rust binaries (built separately with --rebuild-rust)
+FROM rust:1.76 AS rust-builder
 
 # Set working directory
 WORKDIR /build
 
-# Copy the build script and all task source files
+# Copy only the Rust-related files
 COPY build_tasks.sh .
 COPY tasks/ tasks/
 
@@ -12,7 +12,7 @@ COPY tasks/ tasks/
 RUN ./build_tasks.sh
 
 # Stage 2: Final image
-FROM python:3.9-slim
+FROM python:3.9-slim as python-image
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,8 +35,11 @@ COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
 # Install Python dependencies
 RUN pip install --no-cache-dir -r server_requirements.txt
 
-# Copy Rust binaries from the builder stage
-COPY --from=builder /build/bin/* ./
+# Stage 3: Final image
+FROM python-image
+
+# Copy Rust binaries from the rust-builder stage
+COPY --from=rust-builder /build/bin/* ./
 
 # Make binaries and entrypoint script executable
 RUN chmod +x ./* && chmod +x /project/entrypoint.sh
