@@ -28,22 +28,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /project
 
 # Copy and install Python dependencies
-COPY server_requirements.txt ./
+# Copy configuration files and Python server
+COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
 RUN pip install --no-cache-dir -r server_requirements.txt
 
 # Copy Rust binaries from the builder stage
 COPY --from=builder /build/bin/* ./
 
 # Make binaries executable
-RUN chmod +x ./*
-
-# Copy configuration files and Python server
-COPY tasks.yaml ./
-COPY server.py ./
-COPY entrypoint.sh ./
-
 # Make the entrypoint script executable
-RUN chmod +x /project/entrypoint.sh
+RUN chmod +x ./* && chmod +x /project/entrypoint.sh
 
 # Expose necessary ports
 EXPOSE 80
