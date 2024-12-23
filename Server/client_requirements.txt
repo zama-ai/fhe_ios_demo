@@ -1,0 +1,11 @@
+grequests
+numpy
+requests
+scikit-learn
+tqdm
+
+fastapi
+uvicorn
+PyYAML
+python-multipart
+
