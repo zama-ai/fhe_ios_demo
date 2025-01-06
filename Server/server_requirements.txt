@@ -1,4 +1,6 @@
+numpy
 fastapi
 uvicorn
 PyYAML
 python-multipart
+concrete_ml_extensions
