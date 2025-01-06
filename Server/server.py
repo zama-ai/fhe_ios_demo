@@ -210,6 +210,6 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=int(PORT),
-        # ssl_keyfile="/project/key.pem",
-        # ssl_certfile="/project/cert.pem"
+        ssl_keyfile="/project/key.pem",
+        ssl_certfile="/project/cert.pem"
     )
