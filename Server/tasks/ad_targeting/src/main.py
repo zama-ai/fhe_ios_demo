@@ -16,8 +16,7 @@ def main():
     print(f"CLI Args: {uid}")
 
     sk_path = f"uploaded_files/{uid}.serverKey"
-    input_path = f"uploaded_files/{uid}.matrix.input.fheencrypted"
-    output_path = f"uploaded_files/{uid}.matrix.output.fheencrypted"
+    input_path = f"uploaded_files/{uid}.ad_targeting.input.fheencrypted"
     output_path = f"uploaded_files/{uid}.ad_targeting.output.fheencrypted"
 
     print(
