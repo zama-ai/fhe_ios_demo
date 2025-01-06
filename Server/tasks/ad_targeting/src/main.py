@@ -15,9 +15,10 @@ def main():
     print("\n========\n")
     print(f"CLI Args: {uid}")
 
-    sk_path = f"encrypted_data/{uid}.serverKey"
-    input_path = f"encrypted_data/{uid}.matrix.input.fheencrypted"
-    output_path = f"encrypted_data/{uid}.matrix.output.fheencrypted"
+    sk_path = f"uploaded_files/{uid}.serverKey"
+    input_path = f"uploaded_files/{uid}.matrix.input.fheencrypted"
+    output_path = f"uploaded_files/{uid}.matrix.output.fheencrypted"
+    output_path = f"uploaded_files/{uid}.ad_targeting.output.fheencrypted"
 
     print(
         f"Paths:\n"
