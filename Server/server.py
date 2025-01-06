@@ -52,7 +52,7 @@ async def add_key(key: UploadFile):
         Dict[str, str]
             - uid: a unique identifier
     """
-    uid = 727 # str(uuid.uuid4())
+    uid = str(uuid.uuid4())
     
     # Write uploaded ServerKey to disk
     file_content = await key.read()
