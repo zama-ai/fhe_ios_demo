@@ -43,7 +43,7 @@ def main():
     deserialized_encrypted_a = fhext.EncryptedMatrix.deserialize(serialized_ciphertext)
 
     # Load clear data
-    with open("onehot_ads.pkl", "rb") as f:
+    with open("data/onehot_ads.pkl", "rb") as f:
         b = pkl.load(f).T
 
     # Unsigned integers [0, 2⁶⁴ - 1]
