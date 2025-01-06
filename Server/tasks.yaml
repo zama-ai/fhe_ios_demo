@@ -11,6 +11,7 @@ tasks:
     output_files:
       - filename: "{uid}.add_42.output.fheencrypted"
     response_type: stream
+
   weight_stats:
     binary: weight_stats
     output_files:
@@ -24,14 +25,18 @@ tasks:
         key: max
         response_type: base64
     response_type: json
+
   sleep_quality:
     binary: sleep_quality
     output_files:
       - filename: "{uid}.sleep_quality.output.fheencrypted"
     response_type: stream
+
   ad_targeting:
-    binary: ad_targeting
+    binary: python
+    script: ad_targeting.py
     output_files:
       - filename: "{uid}.ad_targeting.output.fheencrypted"
     response_type: stream
+
 
