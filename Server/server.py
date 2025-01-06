@@ -30,8 +30,16 @@ with open(CONFIG_FILE, 'r') as file:
     config = yaml.safe_load(file)
 
 tasks = config.get('tasks', {})
+
+print(f"Tasks: {tasks}")
 PORT = os.environ.get("PORT", "5000")
 
+@app.get("/")
+def read_root():
+    return {
+        "message": "Welcome to fhe_ios_demo_server!",
+        "available_routes": ["/add_key", "/tasks"]
+    }
 
 @app.post("/add_key")
 async def add_key(key: UploadFile):
@@ -44,8 +52,8 @@ async def add_key(key: UploadFile):
         Dict[str, str]
             - uid: a unique identifier
     """
-    uid = str(uuid.uuid4())
-
+    uid = 727 # str(uuid.uuid4())
+    
     # Write uploaded ServerKey to disk
     file_content = await key.read()
     file_path = FILES_FOLDER / f"{uid}.serverKey"
@@ -75,7 +83,10 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
     Returns:
         Callable: The endpoint function.
     """
-    binary = task_config['binary']
+
+    binary = task_config["binary"]               # ex: "python" ou "sleep_quality"
+    script = task_config.get("script", None)     # ex: "ad_targeting.py" ou None
+
     response_type = task_config.get('response_type', 'stream')
     output_files = task_config.get('output_files', [])
 
@@ -93,14 +104,21 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
         input_filename_template = task_config.get('input_filename', "{uid}.{task}.input.fheencrypted")
         input_filename = input_filename_template.format(uid=uid, task=task_name)
         input_file_path = FILES_FOLDER / input_filename
-        print(f"Input file path: {input_file_path}")
         # Save the input file
         file_content = await input.read()
         with open(input_file_path, "wb") as f:
             f.write(file_content)
 
-        # Execute the corresponding Rust binary using subprocess
-        commandline = [f'./{binary}', uid]
+
+        if script:
+            # => Cas script Python
+            #    python ad_targeting.py <uid>
+            commandline = [binary, script, uid]
+        else:
+            # Execute the corresponding Rust binary using subprocess
+            #    ./add_42 <uid>
+            commandline = [f'./{binary}', uid]
+
         try:
             result = subprocess.run(
                 commandline,
@@ -109,7 +127,7 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
                 check=True,
                 text=True
             )
-            print(f"Output from {binary}:\n{result.stdout}")
+
             if result.stderr:
                 print(f"Error from {binary}:\n{result.stderr}")
         except subprocess.CalledProcessError as e:
@@ -128,16 +146,18 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
             output_file_path = FILES_FOLDER / output_filename
 
             if not output_file_path.exists():
+                print(f"Output file {output_filename} not found.")
                 raise HTTPException(status_code=500, detail=f"Output file {output_filename} not found.")
 
             with open(output_file_path, "rb") as f:
                 data = f.read()
-
+            
             return StreamingResponse(
                 io.BytesIO(data),
                 media_type="application/octet-stream",
                 headers={"Content-Disposition": f"attachment; filename={output_filename}"}
             )
+        
 
         elif response_type == 'json':
             response_data = {}
@@ -183,11 +203,13 @@ for task_name, task_config in tasks.items():
         description=f"Process input data using the {task_name} task."
     )
 
+
 if __name__ == "__main__":
+    print("******** Launch Unicorn Server ******** ")
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=int(PORT),
-        ssl_keyfile="/project/key.pem",
-        ssl_certfile="/project/cert.pem"
+        # ssl_keyfile="/project/key.pem",
+        # ssl_certfile="/project/cert.pem"
     )
