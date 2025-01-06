@@ -84,9 +84,7 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
         Callable: The endpoint function.
     """
 
-    binary = task_config["binary"]               # ex: "python" ou "sleep_quality"
-    script = task_config.get("script", None)     # ex: "ad_targeting.py" ou None
-
+    binary = task_config["binary"]
     response_type = task_config.get('response_type', 'stream')
     output_files = task_config.get('output_files', [])
 
@@ -110,14 +108,7 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
             f.write(file_content)
 
 
-        if script:
-            # => Cas script Python
-            #    python ad_targeting.py <uid>
-            commandline = [binary, script, uid]
-        else:
-            # Execute the corresponding Rust binary using subprocess
-            #    ./add_42 <uid>
-            commandline = [f'./{binary}', uid]
+        commandline = [f'./{binary}', uid]
 
         try:
             result = subprocess.run(

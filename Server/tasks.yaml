@@ -33,8 +33,7 @@ tasks:
     response_type: stream
 
   ad_targeting:
-    binary: python
-    script: ad_targeting.py
+    binary: ad_targeting.py
     output_files:
       - filename: "{uid}.ad_targeting.output.fheencrypted"
     response_type: stream
