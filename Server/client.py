@@ -23,12 +23,17 @@ if __name__ == "__main__":
     # FIXME: get the real key from the iOS application
     serialized_evaluation_keys = b"fixme: some evaluation key"
 
+    # <!> TODO: remove this part
+    with open("uploaded_files/727.serverKey", "rb") as f:
+        serialized_evaluation_keys = f.read()
+
     # Step 1: save keys on the server
     if True:
 
         response = requests.post(
             f"{URL}/add_key", files={"key": io.BytesIO(initial_bytes=serialized_evaluation_keys)}
         )
+
         assert response.status_code == STATUS_OK
 
         # This is the ID of the key, such that next time one can reuse it
@@ -39,13 +44,17 @@ if __name__ == "__main__":
     # FIXME: get a real encrypted value
     encrypted_input = b"fime: some encrypted input"
 
+    # <!> TODO: remove this part
+    with open("uploaded_files/727.matrix.input.fheencrypted", "rb") as f:
+        encrypted_input = f.read()
+
     # Step 2: launch FHE computations
     if True:
 
         inference = grequests.post(
                     f"{URL}/compute",
                     files={
-                        "model_input": io.BytesIO(encrypted_input),
+                        "input": io.BytesIO(encrypted_input),
                     },
                     data={
                         "uid": uid,
