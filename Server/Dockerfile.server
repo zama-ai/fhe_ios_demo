@@ -28,6 +28,7 @@ WORKDIR /project
 
 # Copy Python dependencies, configuration files and Python server
 COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
+COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/.
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r server_requirements.txt
