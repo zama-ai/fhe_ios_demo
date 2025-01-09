@@ -1,6 +1,9 @@
+grequests
 numpy
+requests
+scikit-learn
+tqdm
 fastapi
 uvicorn
 PyYAML
 python-multipart
-concrete_ml_extensions

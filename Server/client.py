@@ -11,7 +11,8 @@ import requests
 from sklearn.datasets import load_breast_cancer
 from tqdm import tqdm
 
-URL = os.environ.get("URL", f"http://localhost:8888")
+URL = os.environ.get("URL", f"https://api.zama.ai")
+
 STATUS_OK = 200
 ROOT = Path(__file__).parent / "client"
 ROOT.mkdir(exist_ok=True)
@@ -29,6 +30,7 @@ if __name__ == "__main__":
         response = requests.post(
             f"{URL}/add_key", files={"key": io.BytesIO(initial_bytes=serialized_evaluation_keys)}
         )
+
         assert response.status_code == STATUS_OK
 
         # This is the ID of the key, such that next time one can reuse it
@@ -43,14 +45,14 @@ if __name__ == "__main__":
     if True:
 
         inference = grequests.post(
-                    f"{URL}/compute",
-                    files={
-                        "model_input": io.BytesIO(encrypted_input),
-                    },
-                    data={
-                        "uid": uid,
-                    },
-                )
+            f"{URL}/compute",
+            files={
+                "input": io.BytesIO(encrypted_input),
+            },
+            data={
+                "uid": uid,
+            },
+        )
 
         result = grequests.map([inference])[0]
 
@@ -59,8 +61,7 @@ if __name__ == "__main__":
 
         assert result.status_code == STATUS_OK, "Failure in the 'compute' function"
 
-        print(f"\nResults:\n{result.content.decode('UTF-8')}")
+        # print(f"\nResults:\n{result.content.decode('UTF-8')}")
 
     # End
     print("Successful end")
-

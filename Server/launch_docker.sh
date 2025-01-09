@@ -6,6 +6,11 @@ IMAGE_NAME="fhe_ios_demo_server"
 # Set the Dockerfile name
 DOCKERFILE_NAME="Dockerfile.server"
 
+if ! command -v certbot &> /dev/null; then
+    echo "Certbot is not installed. Please install it and try again."
+    exit 1
+fi
+
 # Collect DOMAIN_NAME and CERTBOT_EMAIL
 if [ -z "$DOMAIN_NAME" ]; then
     read -p "Enter your DOMAIN_NAME: " DOMAIN_NAME
