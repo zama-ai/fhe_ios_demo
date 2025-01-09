@@ -39,7 +39,6 @@ PORT = os.environ.get("PORT", "5000")
 def read_root():
     return {
         "message": "Welcome to fhe_ios_demo_server!",
-        "available_routes": ["/add_key", "/tasks"],
     }
 
 
