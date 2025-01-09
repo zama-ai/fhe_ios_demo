@@ -62,7 +62,7 @@ def main():
     print("Successful end")
     print("\n========\n")
 
-    return encrypted_scores.serialize()
+    return encrypted_scores
 
 if __name__ == "__main__":
     main()
