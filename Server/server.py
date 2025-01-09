@@ -6,18 +6,18 @@ Routes:
     - /{task_name}
 """
 
-import io
 import base64
+import io
 import os
+import subprocess
 import uuid
 from pathlib import Path
-from typing import Dict, Callable, Any
+from typing import Any, Callable, Dict
 
 import uvicorn
-from fastapi import FastAPI, UploadFile, Form, HTTPException
-from fastapi.responses import StreamingResponse, JSONResponse
 import yaml
-import subprocess
+from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi.responses import JSONResponse, StreamingResponse
 
 app = FastAPI(debug=False)
 
@@ -26,12 +26,12 @@ FILES_FOLDER.mkdir(exist_ok=True)  # Ensure the directory exists
 
 # Load task configuration
 CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
-with open(CONFIG_FILE, 'r') as file:
+with open(CONFIG_FILE, "r") as file:
     config = yaml.safe_load(file)
 
-tasks = config.get('tasks', {})
-PORT = os.environ.get("PORT", "5000")
+tasks = config.get("tasks", {})
 
+PORT = os.environ.get("PORT", "5000")
 
 @app.post("/add_key")
 async def add_key(key: UploadFile):
@@ -75,9 +75,10 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
     Returns:
         Callable: The endpoint function.
     """
-    binary = task_config['binary']
-    response_type = task_config.get('response_type', 'stream')
-    output_files = task_config.get('output_files', [])
+
+    binary = task_config["binary"]
+    response_type = task_config.get("response_type", "stream")
+    output_files = task_config.get("output_files", [])
 
     async def task_endpoint(input: UploadFile, uid: str = Form(...)):
         """Handle the specific task.
@@ -90,7 +91,9 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
             StreamingResponse or JSONResponse: Result of the task.
         """
         # Use input_filename from task_config if specified, otherwise default
-        input_filename_template = task_config.get('input_filename', "{uid}.{task}.input.fheencrypted")
+        input_filename_template = task_config.get(
+            "input_filename", "{uid}.{task}.input.fheencrypted"
+        )
         input_filename = input_filename_template.format(uid=uid, task=task_name)
         input_file_path = FILES_FOLDER / input_filename
         print(f"Input file path: {input_file_path}")
@@ -100,14 +103,11 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
             f.write(file_content)
 
         # Execute the corresponding Rust binary using subprocess
-        commandline = [f'./{binary}', uid]
+        commandline = [f"./{binary}", uid]
+
         try:
             result = subprocess.run(
-                commandline,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-                text=True
+                commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True
             )
             print(f"Output from {binary}:\n{result.stdout}")
             if result.stderr:
@@ -117,18 +117,22 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
             raise HTTPException(status_code=500, detail=f"Error executing {binary}: {e.stderr}")
 
         # Handle outputs based on the configuration
-        if response_type == 'stream':
+        if response_type == "stream":
             # Expect a single output file
             if not output_files:
-                raise HTTPException(status_code=500, detail="No output files defined for streaming response.")
+                raise HTTPException(
+                    status_code=500, detail="No output files defined for streaming response."
+                )
 
             output_file_config = output_files[0]
-            output_filename_template = output_file_config['filename']
+            output_filename_template = output_file_config["filename"]
             output_filename = output_filename_template.format(uid=uid, task=task_name)
             output_file_path = FILES_FOLDER / output_filename
 
             if not output_file_path.exists():
-                raise HTTPException(status_code=500, detail=f"Output file {output_filename} not found.")
+                raise HTTPException(
+                    status_code=500, detail=f"Output file {output_filename} not found."
+                )
 
             with open(output_file_path, "rb") as f:
                 data = f.read()
@@ -136,33 +140,37 @@ def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callabl
             return StreamingResponse(
                 io.BytesIO(data),
                 media_type="application/octet-stream",
-                headers={"Content-Disposition": f"attachment; filename={output_filename}"}
+                headers={"Content-Disposition": f"attachment; filename={output_filename}"},
             )
 
-        elif response_type == 'json':
+        elif response_type == "json":
             response_data = {}
             for output_file_config in output_files:
-                filename_template = output_file_config['filename']
+                filename_template = output_file_config["filename"]
                 output_filename = filename_template.format(uid=uid, task=task_name)
-                key = output_file_config.get('key', output_filename)
-                response_format = output_file_config.get('response_type', 'base64')
+                key = output_file_config.get("key", output_filename)
+                response_format = output_file_config.get("response_type", "base64")
 
                 output_file_path = FILES_FOLDER / output_filename
                 if not output_file_path.exists():
-                    raise HTTPException(status_code=500, detail=f"Output file {output_filename} not found.")
+                    raise HTTPException(
+                        status_code=500, detail=f"Output file {output_filename} not found."
+                    )
 
                 with open(output_file_path, "rb") as f:
                     data = f.read()
 
-                if response_format == 'base64':
-                    encoded_data = base64.b64encode(data).decode('utf-8')
+                if response_format == "base64":
+                    encoded_data = base64.b64encode(data).decode("utf-8")
                     response_data[key] = encoded_data
                 else:
-                    response_data[key] = data.decode('utf-8')
+                    response_data[key] = data.decode("utf-8")
 
             return JSONResponse(content=response_data)
         else:
-            raise HTTPException(status_code=500, detail=f"Unsupported response type: {response_type}")
+            raise HTTPException(
+                status_code=500, detail=f"Unsupported response type: {response_type}"
+            )
 
     return task_endpoint
 
@@ -180,14 +188,16 @@ for task_name, task_config in tasks.items():
         methods=["POST"],
         name=task_name,
         summary=f"Execute the {task_name} task",
-        description=f"Process input data using the {task_name} task."
+        description=f"Process input data using the {task_name} task.",
     )
 
+
 if __name__ == "__main__":
+    print("******** Launch Unicorn Server ******** ")
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=int(PORT),
         ssl_keyfile="/project/key.pem",
-        ssl_certfile="/project/cert.pem"
+        ssl_certfile="/project/cert.pem",
     )

@@ -4,10 +4,8 @@ FROM rust:1.76 AS builder
 # Set working directory
 WORKDIR /build
 
-# Copy the build script
+# Copy the build script and all task source files
 COPY build_tasks.sh .
-
-# Copy all task source files
 COPY tasks/ tasks/
 
 # Run the build script
@@ -20,30 +18,28 @@ FROM python:3.9-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /project
+RUN mkdir -p /project/data
 
-# Copy and install Python dependencies
-COPY server_requirements.txt ./
+
+# Copy Python dependencies, configuration files and Python server
+COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
+COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r server_requirements.txt
 
 # Copy Rust binaries from the builder stage
 COPY --from=builder /build/bin/* ./
 
-# Make binaries executable
-RUN chmod +x ./*
-
-# Copy configuration files and Python server
-COPY tasks.yaml ./
-COPY server.py ./
-COPY entrypoint.sh ./
-
-# Make the entrypoint script executable
-RUN chmod +x /project/entrypoint.sh
+# Make binaries and entrypoint script executable
+RUN chmod +x ./* && chmod +x /project/entrypoint.sh
 
 # Expose necessary ports
 EXPOSE 80
@@ -51,3 +47,7 @@ EXPOSE 5000
 
 # Set the entrypoint
 ENTRYPOINT ["/project/entrypoint.sh"]
+
+# In multi-stage build setup, Docker creates intermediate images. 
+# They sometimes appear in the form `<none>:<none>` see: `docker image ls`
+# To clean them, do `docker image prune`
