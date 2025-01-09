@@ -31,16 +31,7 @@ with open(CONFIG_FILE, "r") as file:
 
 tasks = config.get("tasks", {})
 
-print(f"Tasks: {tasks}")
 PORT = os.environ.get("PORT", "5000")
-
-
-@app.get("/")
-def read_root():
-    return {
-        "message": "Welcome to fhe_ios_demo_server!",
-    }
-
 
 @app.post("/add_key")
 async def add_key(key: UploadFile):
