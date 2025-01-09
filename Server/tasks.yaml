@@ -37,5 +37,3 @@ tasks:
     output_files:
       - filename: "{uid}.ad_targeting.output.fheencrypted"
     response_type: stream
-
-

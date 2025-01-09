@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-import numpy as np
 import pickle as pkl
-import concrete_ml_extensions as fhext
 import sys
+
+import concrete_ml_extensions as fhext
+import numpy as np
+
 
 def main():
     if len(sys.argv) < 2:
@@ -19,12 +21,7 @@ def main():
     input_path = f"uploaded_files/{uid}.ad_targeting.input.fheencrypted"
     output_path = f"uploaded_files/{uid}.ad_targeting.output.fheencrypted"
 
-    print(
-        f"Paths:\n"
-        f"\tsk: {sk_path}\n"
-        f"\tin: {input_path}\n"
-        f"\tout: {output_path}"
-    )
+    print(f"Paths:\n" f"\tsk: {sk_path}\n" f"\tin: {input_path}\n" f"\tout: {output_path}")
 
     # Load the serialized key
     with open(sk_path, "rb") as binary_file:
@@ -64,6 +61,6 @@ def main():
 
     return encrypted_scores.serialize()
 
+
 if __name__ == "__main__":
     main()
-
