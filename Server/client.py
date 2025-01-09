@@ -45,7 +45,7 @@ if __name__ == "__main__":
     if True:
 
         inference = grequests.post(
-            f"{URL}/ad_targeting",
+            f"{URL}/compute",
             files={
                 "input": io.BytesIO(encrypted_input),
             },
