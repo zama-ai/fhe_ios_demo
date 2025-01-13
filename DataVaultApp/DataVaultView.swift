@@ -7,17 +7,23 @@ import SwiftUI
 }
 
 struct DataVaultView: View {
-    @StateObject private var vm = ViewModel()
-
+    
     struct Metric: Equatable {
         let name: String
         let icon: String
         let color: Color
         
-        static let profile: Metric = .init(name: "Personal Profile", icon: "person.text.rectangle.fill", color: .teal)
+        static let profile: Metric = .init(name: "Profile", icon: "person.text.rectangle.fill", color: .teal)
         static let sleep: Metric = .init(name: "Sleep", icon: "bed.double.fill", color: .mint)
         static let weight: Metric = .init(name: "Weight", icon: "figure", color: .purple)
     }
+    
+    enum TabKind {
+        case profile, sleep, weight
+    }
+    
+    @StateObject private var vm = ViewModel()
+    @State private var selectedTab: TabKind = .profile
     
     var body: some View {
         header
@@ -45,13 +51,17 @@ struct DataVaultView: View {
     }
     
     private var content: some View {
-        ScrollView {
-            profileSection
-            sleepSection
-            weightSection
+        TabView(selection: $selectedTab) {
+            Tab(Metric.profile.name, systemImage: Metric.profile.icon, value: TabKind.profile) {
+                profileSection
+            }
+            Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
+                sleepSection
+            }
+            Tab(Metric.weight.name, systemImage: Metric.weight.icon, value: TabKind.weight) {
+                weightSection
+            }
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .padding(8)
     }
     
     private var profileSection: some View {
@@ -118,53 +128,53 @@ struct DataVaultView: View {
                                                       delete: @escaping () async throws -> Void,
                                                       openIn clientApp: AppInfo,
                                                       @ViewBuilder content: () -> Content) -> some View {
-            GroupBox {
-                if !granted {
-                    permissionMissing(for: metric)
-                } else if items.isEmpty {
-                    contentMissing(for: metric)
-                } else {
-                    VStack {
-                        content()
+        GroupBox {
+            if !granted {
+                permissionMissing(for: metric)
+            } else if items.isEmpty {
+                contentMissing(for: metric)
+            } else {
+                VStack {
+                    content()
+                    
+                    if file == nil {
+                        Text("\(subtitle)")
+                            .customFont(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.bottom, 24)
                         
-                        if file == nil {
-                            Text("\(subtitle)")
-                                .customFont(.caption)
-                                .foregroundStyle(.secondary)
-                                .padding(.bottom, 24)
-                            
-                            AsyncButton("Encrypt \(metric.name)") {
-                                try await encrypt()
-                            }
-                            .foregroundStyle(.black)
-                        } else {
-                            Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
-                                .customFont(.caption)
-                                .foregroundStyle(.green)
-                                .frame(maxWidth: .infinity)
-                                .overlay(alignment: .trailing) {
-                                    AsyncButton(action: delete) {
-                                        Image(systemName: "trash").imageScale(.small)
-                                    }.tint(.red)
-                                }
-                                .padding(.bottom, 24)
-                            
-                            OpenAppButton(clientApp)
-                                .customFont(.callout)
-                                .foregroundStyle(.black)
+                        AsyncButton("Encrypt \(metric.name)") {
+                            try await encrypt()
                         }
+                        .foregroundStyle(.black)
+                    } else {
+                        Text("\(Image(systemName: "checkmark.circle.fill")) Encrypted")
+                            .customFont(.caption)
+                            .foregroundStyle(.green)
+                            .frame(maxWidth: .infinity)
+                            .overlay(alignment: .trailing) {
+                                AsyncButton(action: delete) {
+                                    Image(systemName: "trash").imageScale(.small)
+                                }.tint(.red)
+                            }
+                            .padding(.bottom, 24)
+                        
+                        OpenAppButton(clientApp)
+                            .customFont(.callout)
+                            .foregroundStyle(.black)
                     }
-                    .padding(.vertical)
                 }
-            } label: {
-                Label(metric.name, systemImage: metric.icon)
-                    .imageScale(.large)
-                    .symbolRenderingMode(.multicolor)
-                    .foregroundStyle(metric.color)
-                    .customFont(.title3)
-                
-                Divider()
+                .padding(.vertical)
             }
+        } label: {
+            Label(metric.name, systemImage: metric.icon)
+                .imageScale(.large)
+                .symbolRenderingMode(.multicolor)
+                .foregroundStyle(metric.color)
+                .customFont(.title3)
+            
+            Divider()
+        }
     }
     
     private func permissionMissing(for metric: Metric) -> some View {
@@ -204,7 +214,7 @@ struct DataVaultView: View {
         GroupBox {
             ContentUnavailableView {
                 Text("No \(metric.name) Data on Device")
-                        .customFont(.title3)
+                    .customFont(.title3)
             } description: {
                 Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
                     .customFont(.callout)
@@ -213,7 +223,7 @@ struct DataVaultView: View {
                     OpenAppButton(.appleHealth)
                         .customFont(.callout)
                         .foregroundStyle(.black)
-
+                    
                     HStack {
                         VStack { Divider() }
                         Text(" or ")

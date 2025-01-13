@@ -4,95 +4,74 @@ import SwiftUI
 
 #Preview {
     ProfileForm(vm: .init())
-        .padding()
-        .background {
-            Color.gray.opacity(0.5)
-                .cornerRadius(8)
-        }
 }
-
-/*
- Vector:
-- interests: QCM
-- age: 5 ranges
-- gender
-- kids, marital
-- languages/country
-
- 
- Ad:
- titre
- description
- image: 1024x1024
- */
-
 
 struct ProfileForm: View {
     @StateObject var vm: DataVaultView.ViewModel
-    @FocusState private var focus: Field?
-
-    enum Field: Hashable {
-        case name, sex, age, interests
-    }
-
+    @State private var editProfile: EditProfile = .init()
+    @State private var interests: [Interest] = []
+    
     var body: some View {
-        VStack {
-            let margin = 80.0
-            TextField("Name", text: Binding($vm.clearProfileName, default: ""))
-                .textContentType(.name)
-                .focused($focus, equals: .name)
-                .submitLabel(.next) // Show "Next" button on keyboard
-                .onSubmit {
-                    focus = .sex
-                }
-                .padding(.leading, margin)
-                .overlay(alignment: .leading) {
-                    Text("Name")
-                }
+        NavigationStack {
             
-            TextField("Sex", text: Binding($vm.clearProfileSex, default: ""))
-                .focused($focus, equals: .sex)
-                .submitLabel(.next) // Show "Next" button on keyboard
-                .onSubmit {
-                    focus = .age
+            Form {
+                Section {
+                    LabeledContent("Gender") {
+                        Picker("Gender", selection: $editProfile.gender) {
+                            ForEach(Gender.allCases.reversed(), id: \.self) { item in
+                                Text(item.displayName).tag(item)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
+                    LabeledContent("Age") {
+                        Picker("Age", selection: $editProfile.age) {
+                            ForEach(AgeGroup.allCases, id: \.self) { item in
+                                Text(item.displayName).tag(item)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
+                    Toggle("Interested In Kids Ads", isOn: $editProfile.interestedInKids)
+                    
+                    Picker("Interested In", selection: $editProfile.interests) {
+                        ForEach(Interest.allCases, id: \.self) { item in
+                            Text(item.displayName).tag(item)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
                 }
-                .padding(.leading, margin)
-                .overlay(alignment: .leading) {
-                    Text("Sex")
+                
+                Section {
+                    Picker("Country", selection: $editProfile.country) {
+                        let sorted = Country.allCases.sorted(by: { $0.localizedCountryName < $1.localizedCountryName })
+                        ForEach(sorted, id: \.self) { item in
+                            Text("\(item.flag) \(item.localizedCountryName)")
+                                .tag(item)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+                    
+                    Picker("Language", selection: $editProfile.language) {
+                        let sorted = Language.allCases.sorted(by: { $0.languageName.local < $1.languageName.local })
+                        ForEach(sorted, id: \.self) { item in
+                            Text("\(item.languageName.local) (\(item.languageName.translated))").tag(item)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
                 }
-            
-            TextField("Age", text: Binding($vm.clearProfileAge, default: ""))
-                .focused($focus, equals: .age)
-                .submitLabel(.next) // Show "Next" button on keyboard
-                .onSubmit {
-                    focus = .interests
+                
+                Section("OneHot") {
+                    if let profile = Profile(editProfile: editProfile) {
+                        Text("\(profile.oneHotBinary)")
+                    } else {
+                        Text("Fill all mandatory fields")
+                    }
                 }
-                .padding(.leading, margin)
-                .overlay(alignment: .leading) {
-                    Text("Age")
-                }
-            
-            TextField("Interests", text: Binding($vm.clearProfileInterests, default: ""))
-                .focused($focus, equals: .interests)
-                .submitLabel(.done)
-                .onSubmit {
-                    focus = nil
-                }
-                .padding(.leading, margin)
-                .overlay(alignment: .leading) {
-                    Text("Interests")
-                }
-                .padding(.bottom, 12)
+            }
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .textFieldStyle(.roundedBorder)
-    }
-}
-
-extension Binding {
-    init(_ optional: Binding<Value?>, default defaultValue: Value) {
-        self.init(
-            get: { optional.wrappedValue ?? defaultValue },
-            set: { newValue in optional.wrappedValue = newValue }
-        )
     }
 }

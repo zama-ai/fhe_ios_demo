@@ -21,7 +21,7 @@ Un tweet est sous forme de tuple (pseudo, gender, age, spoken languages, marital
 ```
 
 - Dans `ads_files.json` tu trouveras les publicités sous format dict id -> ad
-- Dans `onehot_ads.json`  y a le vecteur en representation  one hot (0, 1) des publicités de taille (nb ads: 4434, nb features: 62)
+- Dans `onehot_ads.json`  y a le vecteur en representation one hot (0, 1) des publicités de taille (nb ads: 4434, nb features: 62)
 Une publicité est définie comme un tuple `(ad_title, ad_country, target_countries, ad_language, target_age_group, target_gender, area of interests, weighted_interest, description, image_path)`
 
 Le `weighted_interest` est utilisé pour ponderer le dot product.
