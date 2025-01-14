@@ -19,7 +19,7 @@ struct ProfileForm: View {
                     LabeledContent("Gender") {
                         Picker("Gender", selection: $editProfile.gender) {
                             ForEach(Gender.allCases.reversed(), id: \.self) { item in
-                                Text(item.displayName).tag(item)
+                                Text(item.prettyTypeName).tag(item)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -38,7 +38,7 @@ struct ProfileForm: View {
                     
                     Picker("Interested In", selection: $editProfile.interests) {
                         ForEach(Interest.allCases, id: \.self) { item in
-                            Text(item.displayName).tag(item)
+                            Text(item.prettyTypeName).tag(item)
                         }
                     }
                     .pickerStyle(.navigationLink)
@@ -55,9 +55,10 @@ struct ProfileForm: View {
                     .pickerStyle(.navigationLink)
                     
                     Picker("Language", selection: $editProfile.language) {
-                        let sorted = Language.allCases.sorted(by: { $0.languageName.local < $1.languageName.local })
+                        let sorted = Language.allCases.sorted(by: { $0.languageNames.native < $1.languageNames.native })
                         ForEach(sorted, id: \.self) { item in
-                            Text("\(item.languageName.local) (\(item.languageName.translated))").tag(item)
+                            Text("\(item.languageNames.native) (\(item.languageNames.translated))")
+                                .tag(item)
                         }
                     }
                     .pickerStyle(.navigationLink)
@@ -68,6 +69,7 @@ struct ProfileForm: View {
                         Text("\(profile.oneHotBinary)")
                     } else {
                         Text("Fill all mandatory fields")
+                            .foregroundStyle(.red)
                     }
                 }
             }
