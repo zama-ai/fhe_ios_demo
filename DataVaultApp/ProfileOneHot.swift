@@ -11,19 +11,18 @@ import SwiftUI
                      interests: [.art, .photography, .sports, .writers])
     Text("\(me.oneHotBinary)")
 }
-        
-protocol PrettyEnum {}
 
-protocol OneHotable: CaseIterable where Self: Equatable {
-    var oneHot: [Bool] { get }
-}
-
-extension PrettyEnum {
-    var displayName: String {
+protocol PrettyNamable {}
+extension PrettyNamable {
+    var prettyTypeName: String {
         String(describing: self)
             .replacingOccurrences(of: "_", with: " ")
             .localizedCapitalized
     }
+}
+
+protocol OneHotable: CaseIterable where Self: Equatable {
+    var oneHot: [Bool] { get }
 }
 
 extension OneHotable {
@@ -44,8 +43,13 @@ struct EditProfile {
     init() {
         self.gender = nil
         self.age = nil
-        self.language = .french // TODO: read from OS
-        self.country = .france  // TODO: read from OS
+        
+        let deviceLanguage = Locale.preferredLanguages.first?.split(separator: "-").first.flatMap(String.init) // e.g., "en-US"
+        let deviceCountry = Locale.current.region?.identifier // e.g., "US"
+        
+        self.language = deviceLanguage.flatMap(Language.init(rawValue:)) ?? .english
+        self.country = deviceCountry.flatMap(Country.init(rawValue:)) ?? .united_states
+        
         self.interestedInKids = false
         self.interests = nil
     }
@@ -91,15 +95,15 @@ extension Profile {
     }
 }
 
-enum MaritalStatus: PrettyEnum, CaseIterable {
+enum MaritalStatus: PrettyNamable, CaseIterable {
     case single, engaged
 }
 
-enum Gender: PrettyEnum, OneHotable {
+enum Gender: PrettyNamable, OneHotable {
     case female, male
 }
 
-enum AgeGroup: Int, PrettyEnum, OneHotable {
+enum AgeGroup: Int, OneHotable {
     case child = 12
     case teen = 19
     case young_adult = 45
@@ -125,7 +129,7 @@ enum AgeGroup: Int, PrettyEnum, OneHotable {
     }
 }
 
-enum Language: String, PrettyEnum, OneHotable {
+enum Language: String, PrettyNamable, OneHotable {
     case arabic = "ar"
     case english = "en"
     case spanish = "es"
@@ -138,14 +142,14 @@ enum Language: String, PrettyEnum, OneHotable {
     case italian = "it"
     case tamazight = "ber"
     
-    var languageName: (local: String, translated: String) {
-        let raw = Locale(identifier: rawValue).localizedString(forLanguageCode: rawValue)?.localizedCapitalized
+    var languageNames: (native: String, translated: String) {
+        let native = Locale(identifier: rawValue).localizedString(forLanguageCode: rawValue)?.localizedCapitalized
         let clear = Locale.current.localizedString(forLanguageCode: rawValue)?.localizedCapitalized
-        return (local: raw ?? displayName, translated: clear ?? displayName)
+        return (native: native ?? prettyTypeName, translated: clear ?? prettyTypeName)
     }
 }
 
-enum Country: String, PrettyEnum, OneHotable {
+enum Country: String, PrettyNamable, OneHotable {
     case united_arab_emirates = "AE",
          united_states = "US",
          france = "FR",
@@ -159,6 +163,10 @@ enum Country: String, PrettyEnum, OneHotable {
          algeria = "DZ",
          australia = "AU",
          spain = "ES"
+    
+    var localizedCountryName: String {
+        Locale.current.localizedString(forRegionCode: rawValue) ?? prettyTypeName
+    }
     
     var flag: String {
         let countryCode = rawValue.uppercased()
@@ -175,13 +183,9 @@ enum Country: String, PrettyEnum, OneHotable {
         
         return flag.joined()
     }
-    
-    var localizedCountryName: String {
-        Locale.current.localizedString(forRegionCode: rawValue) ?? displayName
-    }
 }
 
-enum Interest: PrettyEnum, OneHotable {
+enum Interest: PrettyNamable, OneHotable {
     case animals,
          art,
          automobiles,

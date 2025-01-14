@@ -1,6 +1,11 @@
 #  Welcome to FHE iOS Demo  
 
-Implements 2 iOS apps: a DataVault app and a User app. The User app uses data from the DataVault, ie can only manipulate encrypted data. The DataVault app generates the private keys and decrypt the final results the user app want the user to see, without returning clear results to the user app.
+Implements 3 iOS apps:
+1. **FHE Data Vault**: Encrypts user data (sleep, weight, user profile) using [TFHE-rs](https://github.com/zama-ai/tfhe-rs), and stores encrypted result in a shared folder for consumption by other apps. Data never leaves device.
+2. **FHE Health**: Analyzes encrypted sleep & weight info, producing graphs and insights, without ever accessing the clear data.
+3. **FHE Ads**: Displays targeted ads based on encrypted user profile, without ever accessing the clear data.
+
+In app #2 and #3, analysis and targeting is done privately on Zama's servers; you can monitor its activity at [https://api.zama.ai/logs](https://api.zama.ai/logs).
 
 # Useful Links
 - [Zama Website](https://www.zama.ai)
