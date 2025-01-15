@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict
 
 import uvicorn
 import yaml
-from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi import FastAPI, Form, HTTPException, UploadFile, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 
 app = FastAPI(debug=False)
@@ -191,6 +191,10 @@ for task_name, task_config in tasks.items():
         description=f"Process input data using the {task_name} task.",
     )
 
+@app.get("/robots.txt")
+def robots():
+    content = "User-agent: *\nDisallow: /"
+    return Response(content=content, media_type="text/plain")
 
 if __name__ == "__main__":
     print("******** Launch Unicorn Server ******** ")
