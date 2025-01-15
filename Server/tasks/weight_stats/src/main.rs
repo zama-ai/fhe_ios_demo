@@ -10,51 +10,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 
     if args.len() == 1 {
-        println!("No arguments provided.");
+        return Err("No arguments provided.".into());
     }
     
     let uid = &args[1];
-    
-    println!("\n========\n");
-    println!("CLI Args: {}", uid);
 
     let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
     let input_path = format!("/project/uploaded_files/{}.weight_stats.input.fheencrypted", uid);
     let output_avg_path = format!("/project/uploaded_files/{}.outputAvg.weight_stats.fheencrypted", uid);
     let output_min_path = format!("/project/uploaded_files/{}.outputMin.weight_stats.fheencrypted", uid);
     let output_max_path = format!("/project/uploaded_files/{}.outputMax.weight_stats.fheencrypted", uid);
-    
-    println!(
-        "Paths:\n\
-        \tsk: {}\n\
-        \tin: {}\n\
-        \toutAvg: {}\n\
-        \toutMin: {}\n\
-        \toutMax: {}",
-        sk_path, input_path, output_avg_path, output_min_path, output_max_path
-    );
 
     let compressed = deserialize_compressed_server_key(&sk_path);
     let decompressed = compressed.decompress();
     set_server_key(decompressed);
 
-    println!("ServerKey set");
-    
-    println!("deserialize…");
     let compact_list = deserialize_list(&input_path);
-    
-    println!("Expand…");
     let expanded = compact_list.expand().unwrap();
     
-    println!("Compute");
     let (min, max, avg) = compute_min_max_avg(&expanded);
     
     serialize_fheuint16(min, &output_min_path);
     serialize_fheuint16(max, &output_max_path);
     serialize_fheuint16(avg, &output_avg_path);
 
-    println!("Successful end");
-    println!("\n========\n");
     Ok(())
 }
 
@@ -67,7 +46,6 @@ fn compute_min_max_avg(expanded: &CompactCiphertextListExpander) -> (FheUint16, 
     let mut sum: FheUint16 = first.clone();
 
     for i in 1..expanded.len() {
-        println!("Loop {}", i);
         let value: FheUint16 = expanded.get::<FheUint16>(i).unwrap().unwrap();
         min = min.min(&value);
         max = max.max(&value);
