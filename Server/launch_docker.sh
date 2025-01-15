@@ -1,14 +1,34 @@
 #!/bin/bash
 
+# Deployment Script for fhe_ios_demo Server
+
 # Set the image names
 RUST_IMAGE_NAME="fhe_ios_demo_rust_builder"
 FINAL_IMAGE_NAME="fhe_ios_demo_server"
 
-# Set the Dockerfile name
-DOCKERFILE_NAME="Dockerfile.server"
-
 # Parse command line arguments
 REBUILD_RUST=false
+
+# Load environment variables
+if [ -f .env ]; then
+    set -o allexport  # Enables automatic export of variables
+    source .env       # Loads the .env file
+    set +o allexport  # Disables automatic export
+fi
+
+for arg in "$@"; do
+    case "$arg" in
+        --rebuild-rust)
+            REBUILD_RUST=true
+            ;;
+    esac
+done
+
+# Check for certbot
+if ! command -v certbot &> /dev/null; then
+    echo "Certbot is not installed. Please install it and try again."
+    exit 1
+fi
 
 for arg in "$@"; do
     case "$arg" in
@@ -27,43 +47,41 @@ if [ -z "$CERTBOT_EMAIL" ]; then
     read -p "Enter your CERTBOT_EMAIL: " CERTBOT_EMAIL
 fi
 
-# Check for certbot
-if ! command -v certbot &> /dev/null; then
-    echo "Certbot is not installed. Please install it and try again."
-    exit 1
-fi
-
-# Ensure root privileges
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root to allow certificate generation."
-    exit 1
-fi
 
 # Handle certificates
-CERT_PATH="/etc/letsencrypt/live/$DOMAIN_NAME"
-if [ ! -d "$CERT_PATH" ]; then
-    echo "Certificates for $DOMAIN_NAME not found. Running certbot..."
+if [ ! -d "$HOST_CERTS_PATH" ]; then
+    echo "SSL Certificates for '$DOMAIN_NAME' not found in '$HOST_CERTS_PATH'. Running certbot..."
+
+    # Ensure the script is run as root before attempting to regenerate certificates
+    if [ "$EUID" -ne 0 ]; then
+        echo "Error: Root privileges required to generate SSL certificates."
+        echo "Please re-run this script as root: 'sudo bash $0'"
+        exit 1
+    fi
+    
     certbot certonly --standalone \
         --non-interactive \
         --agree-tos \
         --email "$CERTBOT_EMAIL" \
         -d "$DOMAIN_NAME" \
         --cert-name "$DOMAIN_NAME"
+
+    if [ $? -eq 0 ]; then
+        echo "SSL certificates successfully generated for '$DOMAIN_NAME'."
+    else
+        echo "Error: Failed to generate SSL certificates."
+        exit 1
+    fi
 else
-    echo "Certificates for $DOMAIN_NAME found."
+    echo "SSL Certificates for '$DOMAIN_NAME' already exist in '$HOST_CERTS_PATH'."
 fi
 
 # Clean up existing containers
 echo "Cleaning up existing containers..."
-CONTAINERS=$(docker ps -a -q --filter ancestor=$FINAL_IMAGE_NAME --filter name=${FINAL_IMAGE_NAME}_container)
-if [ -n "$CONTAINERS" ]; then
-    echo "Stopping containers: $CONTAINERS"
-    docker stop $CONTAINERS
-    echo "Removing containers: $CONTAINERS"
-    docker rm $CONTAINERS
-else
-    echo "No containers to stop or remove."
-fi
+# With `docker-compose down,` Docker Compose tries to delete the network associated with 
+# the services. If no network exists, it displays this warning: 
+# `WARNING: Network server_default not found.`
+docker-compose down
 
 # Build the Rust stage if needed
 if $REBUILD_RUST; then
@@ -71,20 +89,9 @@ if $REBUILD_RUST; then
     docker build --target rust-builder -t $RUST_IMAGE_NAME -f $DOCKERFILE_NAME .
 fi
 
-# Build the final image (default behavior is to rebuild without Rust)
-echo "Building Docker image..."
-docker build -t $FINAL_IMAGE_NAME -f $DOCKERFILE_NAME .
+# Build the Docker image and starting the Docker containers
+echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
+docker-compose up --build -d
 
-# Run the container
-echo "Running Docker container..."
-docker run -d \
-    -p 80:80 \
-    -p 443:5000 \
-    -e DOMAIN_NAME="$DOMAIN_NAME" \
-    --name ${FINAL_IMAGE_NAME}_container \
-    -v /etc/letsencrypt/live/$DOMAIN_NAME/fullchain.pem:/project/cert.pem \
-    -v /etc/letsencrypt/live/$DOMAIN_NAME/privkey.pem:/project/key.pem \
-    $FINAL_IMAGE_NAME
-
-echo "Container is running in detached mode. To view logs, use:"
-echo "docker logs -f ${FINAL_IMAGE_NAME}_container"
+echo "Containers are running in detached mode. To view logs, use:"
+echo "docker-compose logs -f"

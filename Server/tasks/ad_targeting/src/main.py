@@ -2,7 +2,7 @@
 
 import pickle as pkl
 import sys
-
+import time
 import concrete_ml_extensions as fhext
 import numpy as np
 
@@ -57,6 +57,9 @@ def main():
         binary_file.write(encrypted_scores.serialize())
 
     print("Successful end")
+    sleep_time = 60
+    print(f"Sleep for {sleep_time} secondes")
+    time.sleep(sleep_time)
     print("\n========\n")
 
     return encrypted_scores.serialize()
