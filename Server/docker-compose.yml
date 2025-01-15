@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+
+  # Redis raised a warning, for a potentiel "Out of Memory" issue
+  # To get rid of potentiel failures and the warning, allow memory overcommitment:
+  # - Use `sudo sysctl vm.overcommit_memory=1` for a temporary chang
+  # - Use `echo "vm.overcommit_memory=1" | sudo tee -a /etc/sysctl.conf` for a permanent change
+  # On this machine, the setting is permanent in `sysctl.conf`
+  service_redis:
+    container_name: container_redis_bd
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  service_fastapi:
+    container_name: container_fastapi_app
+    env_file:
+      - .env  # Load the environment variables
+    build:
+      context: $DOCKERFILE_LOCATION
+      dockerfile: $DOCKERFILE_NAME
+    image: $FINAL_IMAGE
+    depends_on:
+      service_redis:
+        condition: service_healthy
+    command: python server.py
+    environment:
+      RUN_CELERY: "false"
+    volumes:
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./uploaded_files:/project/uploaded_files
+    ports:
+      - "$FASTAPI_PORT_HTTP:80"
+      - "$FASTAPI_PORT_HTTPS:5000"
+    depends_on:
+      service_redis:
+        condition: service_healthy
+    environment:
+      DOMAIN_NAME: $DOMAIN_NAME
+    restart: unless-stopped
+
+  service_celery:
+    container_name: container_celery_app
+    env_file:
+      - .env  # Load the environment variables
+    build:
+      context: $DOCKERFILE_LOCATION
+      dockerfile: $DOCKERFILE_NAME
+    image: $FINAL_IMAGE
+    # Running Celery as root is not a best practice and triggers a security warning.
+    # Setting `user: "nobody:nogroup"` would eliminate the warning, but it prevents Celery
+    # from accessing necessary files, which is required in our use case
+    command: celery -A worker.celery_app worker --loglevel=info
+    volumes:
+      # Docker Compose allows mounting directories, but not individual files, to containers
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./uploaded_files:/project/uploaded_files
+    depends_on:
+      - service_redis
+      - service_fastapi
+    environment:
+      RUN_CELERY: "true"
+      DOMAIN_NAME: $DOMAIN_NAME
+      CELERY_BROKER_URL: redis://service_redis:6379/0
+      CELERY_RESULT_BACKEND: redis://service_redis:6379/1
+    restart: unless-stopped
