@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let uid = &args[1];
 
-    let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
+    let sk_path = format!("/project/uploaded_files/{}.weight_stats.serverKey", uid);
     let input_path = format!("/project/uploaded_files/{}.weight_stats.input.fheencrypted", uid);
     let output_avg_path = format!("/project/uploaded_files/{}.outputAvg.weight_stats.fheencrypted", uid);
     let output_min_path = format!("/project/uploaded_files/{}.outputMin.weight_stats.fheencrypted", uid);
