@@ -48,8 +48,8 @@ fastlane/test_output
 # Thumbnails
 ._*
 
-# Other
-TFHE.xcframework
+# 3rd party Frameworks (TFHE.xcframework, ConcreteMLExtensions.xcframework)
+Frameworks/
 
 # Server
 Server/url.txt

@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3226D94C2D38168D00595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
+		3226D94F2D38169A00595BBC /* ConcreteMLExtensions.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */; };
+		3226D9512D3816A500595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
+		3226D9542D3816DD00595BBC /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */; };
 		322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 322E72BA2CC9A636009B2530 /* Algorithms */; };
-		324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32F029DA2CA37007009B522D /* QuickLook.framework */; };
 		324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
-		3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */; };
+		32543D8D2D47EFA4007600B2 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32543D8C2D47EFA4007600B2 /* QuickLook.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,16 +27,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		320927A82C98800A0011F52E /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		324F8E2F2CA43B2100F0BB11 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,26 +38,18 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		324F8E3F2CA47BF900F0BB11 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3226D94B2D38168D00595BBC /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TFHE.xcframework; path = Frameworks/TFHE.xcframework; sourceTree = "<group>"; };
+		3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ConcreteMLExtensions.xcframework; path = Frameworks/ConcreteMLExtensions.xcframework; sourceTree = "<group>"; };
+		3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = concrete_ml_extensions.swift; path = Frameworks/concrete_ml_extensions.swift; sourceTree = "<group>"; };
 		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = TFHE.xcframework; sourceTree = "<group>"; };
+		32543D8C2D47EFA4007600B2 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 		328F5CB32D009CA800D7B219 /* FHE Ads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Ads.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		32B258372C98693800538B23 /* FHE Data Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Data Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		32B258372C98693800538B23 /* ZAMA Data Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ZAMA Data Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258512C9869A700538B23 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		32C9CC202CA565A100AEDA32 /* FHE Health.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Health.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		32F029DA2CA37007009B522D /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -235,8 +219,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				324F8E3D2CA47BF900F0BB11 /* TFHE.xcframework in Frameworks */,
-				324F8E1E2CA43B2100F0BB11 /* QuickLook.framework in Frameworks */,
+				3226D9512D3816A500595BBC /* TFHE.xcframework in Frameworks */,
+				32543D8D2D47EFA4007600B2 /* QuickLook.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,8 +235,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3226D94C2D38168D00595BBC /* TFHE.xcframework in Frameworks */,
 				322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */,
-				3250B3C92C9B2C8B009B48C3 /* TFHE.xcframework in Frameworks */,
+				3226D94F2D38169A00595BBC /* ConcreteMLExtensions.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,11 +251,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		3250B3C72C9B2C8B009B48C3 /* Frameworks */ = {
+		3226D94A2D38168D00595BBC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3250B3C82C9B2C8B009B48C3 /* TFHE.xcframework */,
-				32F029DA2CA37007009B522D /* QuickLook.framework */,
+				32543D8C2D47EFA4007600B2 /* QuickLook.framework */,
+				3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */,
+				3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */,
+				3226D94B2D38168D00595BBC /* TFHE.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -286,7 +273,7 @@
 				328F5CB42D009CA800D7B219 /* AdsApp */,
 				320CFB212CAAC47500528366 /* Server */,
 				320C391A2CAAEE2900528366 /* Shared */,
-				3250B3C72C9B2C8B009B48C3 /* Frameworks */,
+				3226D94A2D38168D00595BBC /* Frameworks */,
 				32B258382C98693800538B23 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -294,7 +281,7 @@
 		32B258382C98693800538B23 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32B258372C98693800538B23 /* FHE Data Vault.app */,
+				32B258372C98693800538B23 /* ZAMA Data Vault.app */,
 				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
 				32C9CC202CA565A100AEDA32 /* FHE Health.app */,
 				328F5CB32D009CA800D7B219 /* FHE Ads.app */,
@@ -312,7 +299,6 @@
 				324F8E192CA43B2100F0BB11 /* Sources */,
 				324F8E1A2CA43B2100F0BB11 /* Frameworks */,
 				324F8E1B2CA43B2100F0BB11 /* Resources */,
-				324F8E3F2CA47BF900F0BB11 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -357,7 +343,6 @@
 				32B258332C98693800538B23 /* Sources */,
 				32B258342C98693800538B23 /* Frameworks */,
 				32B258352C98693800538B23 /* Resources */,
-				320927A82C98800A0011F52E /* Embed Frameworks */,
 				324F8E2F2CA43B2100F0BB11 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -373,7 +358,7 @@
 				322E72BA2CC9A636009B2530 /* Algorithms */,
 			);
 			productName = FHEDemo;
-			productReference = 32B258372C98693800538B23 /* FHE Data Vault.app */;
+			productReference = 32B258372C98693800538B23 /* ZAMA Data Vault.app */;
 			productType = "com.apple.product-type.application";
 		};
 		32C9CC1F2CA565A100AEDA32 /* Health */ = {
@@ -498,6 +483,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3226D9542D3816DD00595BBC /* concrete_ml_extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -781,7 +767,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault;
-				PRODUCT_NAME = "FHE Data Vault";
+				PRODUCT_NAME = "ZAMA Data Vault";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -815,7 +801,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault;
-				PRODUCT_NAME = "FHE Data Vault";
+				PRODUCT_NAME = "ZAMA Data Vault";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

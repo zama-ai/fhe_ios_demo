@@ -31,7 +31,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "32B258362C98693800538B23"
-               BuildableName = "FHE Data Vault.app"
+               BuildableName = "ZAMA Data Vault.app"
                BlueprintName = "DataVault"
                ReferencedContainer = "container:FHEDemo.xcodeproj">
             </BuildableReference>
@@ -69,7 +69,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32B258362C98693800538B23"
-            BuildableName = "FHE Data Vault.app"
+            BuildableName = "ZAMA Data Vault.app"
             BlueprintName = "DataVault"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
@@ -88,7 +88,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32B258362C98693800538B23"
-            BuildableName = "FHE Data Vault.app"
+            BuildableName = "ZAMA Data Vault.app"
             BlueprintName = "DataVault"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>

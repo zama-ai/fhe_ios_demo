@@ -153,20 +153,16 @@ extension DataVaultView {
     }
 }
 
+import concrete_ml_extensionsFFI
 // MARK: - Profile -
 extension DataVaultView.ViewModel {
     func encryptProfile() async throws {
-        try await ensureKeysExist()
-        
-        if let pk {
-            let list = try FHEUInt16Array(encrypting: [1, 2, 3, 4], publicKey: pk)
-            let listData = try list.toData()
-            try await Storage.write(.profile, data: listData)
-            encryptedProfile = listData
-        }
+        print(#function)
+        sayHello()
     }
     
     func deleteProfile() async throws {
+        print(#function)
         try await Storage.deleteFromDisk(.profile)
         try await loadFromDisk()
     }

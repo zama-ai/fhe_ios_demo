@@ -1,21 +1,25 @@
 #  Welcome to FHE iOS Demo  
 
 Implements 3 iOS apps:
-1. **FHE Data Vault**: Encrypts user data (sleep, weight, user profile) using [TFHE-rs](https://github.com/zama-ai/tfhe-rs), and stores encrypted result in a shared folder for consumption by other apps. Data never leaves device.
-2. **FHE Health**: Analyzes encrypted sleep & weight info, producing graphs and insights, without ever accessing the clear data.
-3. **FHE Ads**: Displays targeted ads based on encrypted user profile, without ever accessing the clear data.
+1. **Zama Data Vault**: Encrypts sensitive user data (sleep, weight, profile info) using [TFHE-rs](https://github.com/zama-ai/tfhe-rs), and stores encrypted result in a shared folder for consumption by other apps. Clear, sensitive data never leaves device.
+2. **FHE Health**: Analyzes encrypted sleep & weight, producing graphs and insights, without ever accessing the clear data.
+3. **FHE Ads**: Displays targeted ads based on encrypted profile info, without ever accessing the clear data.
 
 In app #2 and #3, analysis and targeting is done privately on Zama's servers; you can monitor its activity at [https://api.zama.ai/logs](https://api.zama.ai/logs).
 
 # Useful Links
-- [Zama Website](https://www.zama.ai)
-- [Zama THFE-rs](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
-- [ Developer](https://developer.apple.com/account/)
-- [ Learn Swift Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language)
-- [ Learn Swift UI Guide](https://developer.apple.com/tutorials/swiftui)
+- [Miro flow](https://miro.com/app/board/uXjVLpwDx3c=/)
+- [Canva mockups](https://www.canva.com/design/DAGdBWLkdRE/UGMKBeI8vSnK1R-O5NFH2Q/edit)
 - [GitHub iOS Demo](https://github.com/zama-ai/fhe_ios_demo)
 - [GitHub DEAI](https://github.com/zama-ai/deai-dot-products)
-- [Canva exploration](https://www.canva.com/design/DAGUeG30ET0/Yy1lAaapPuLDaMJEukOM3Q/edit)
+- [ Developer](https://developer.apple.com/account/)
+
+# References
+- [Zama Website](https://www.zama.ai)
+- [Zama THFE-rs](https://docs.zama.ai/tfhe-rs/get-started/quick_start)
+- [ Learn Swift Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language)
+- [ Learn Swift UI Guide](https://developer.apple.com/tutorials/swiftui)
+- [Canva old exploration](https://www.canva.com/design/DAGUeG30ET0/Yy1lAaapPuLDaMJEukOM3Q/edit)
 - [Google Docs UI Feedbacks](https://docs.google.com/document/d/1VOvwO9D7kKKPg0mRWacHJUfFZYBwRZezs_tmD3H6384/)
 - [Huggingface Demo](https://huggingface.co/spaces/zama-fhe/encrypted_image_filtering)
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
