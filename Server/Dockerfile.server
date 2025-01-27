@@ -21,12 +21,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /project
 RUN mkdir -p /project/data
-
 
 # Copy Python dependencies, configuration files and Python server
 COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
@@ -54,3 +54,22 @@ ENTRYPOINT ["/project/entrypoint.sh"]
 # In multi-stage build setup, Docker creates intermediate images. 
 # They sometimes appear in the form `<none>:<none>` see: `docker image ls`
 # To clean them, do `docker image prune`
+
+
+# First, list the active tasks on your :
+# docker exec -it server_service_celery_1 celery -A server.celery_app inspect active
+# See if there are any tasks queued in Redis (those not yet executed) :
+# docker exec -it container_redis_bd redis-cli LRANGE celery 0 -1
+# Kill
+# Arrête proprement tout le conteneur
+# Comme tu as restart: unless-stopped, Docker va redémarrer automatiquement le conteneur.
+
+# docker stop server_service_celery_1
+# docker exec -it server_service_celery_1 pkill -9 -f "celery"
+# Tue immédiatement Celery, mais garde le conteneur actif
+# docker start server_service_celery_1
+# b7f95b4e-885e-4fd7-9a77-57a0eb518f4d
+
+# check: policy: docker inspect -f "{{ .HostConfig.RestartPolicy.Name }}" server_service_celery_1
+# check redis queue: docker exec -it container_redis_bd redis-cli LRANGE celery 0 -1
+# clean redis: docker exec -it container_redis_bd redis-cli FLUSHDB

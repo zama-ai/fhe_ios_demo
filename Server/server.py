@@ -3,39 +3,49 @@
 We use Celery for asynchronous processing (polling approach).
 
 Routes:
-    - /add_key         
-    - /tasks         
+    - /add_key
+    - /get_use_cases
     - /start_task  
     - /get_task_status
     - /get_task_result
     - /cancel_task
 """
+import re
 
-import asyncio
 import base64
+import datetime
 import io
 import logging
 import os
 import subprocess
 import time
 import uuid
-from pprint import pformat
-
-from dotenv import load_dotenv
 from contextlib import contextmanager
+from glob import glob
 from pathlib import Path
-from typing import Any, Callable, Dict
+from pprint import pformat
+from typing import Dict, List
 
 import uvicorn
 import yaml
-from fastapi import FastAPI, Form, HTTPException, UploadFile, Response, File, Query
-from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi import Request, Depends, Form, Query
-from fastapi import Response
-
 from celery import Celery
 from celery.result import AsyncResult
-
+from dotenv import load_dotenv
+from fastapi import (
+    Depends,
+    FastAPI,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+)
+from fastapi.responses import JSONResponse, StreamingResponse
+import redis
+import os
+import json
+from urllib.parse import urlparse
 
 # Load environment variables from '.env' file
 load_dotenv(dotenv_path="./.env")
@@ -57,13 +67,20 @@ PORT = os.getenv("CONTAINER_PORT")
 BROKER_URL = os.getenv("CELERY_BROKER_URL")
 BACKEND_URL = os.getenv("CELERY_RESULT_BACKEND")
 
+REDIS_URL = os.getenv("CELERY_BROKER_URL")
+PARSED_URL = urlparse(REDIS_URL)
+
 CERTS_PATH = os.getenv("CONTAINER_CERTS_PATH")
 CERT = os.getenv("CERT_FILE_NAME")
 PRIVKEY = os.getenv("PRIVKEY_FILE_NAME")
 
-MOUNTED_DIR = os.getenv("MOUNTED_DIR")
-FILES_FOLDER = Path(__file__).parent / MOUNTED_DIR
+SHARED_DIR = os.getenv("SHARED_DIR")
+FILES_FOLDER = Path(__file__).parent / SHARED_DIR
 FILES_FOLDER.mkdir(exist_ok=True)
+
+BACKUP_DIR = os.getenv("BACKUP_DIR")
+BACKUP_FOLDER = Path(__file__).parent / BACKUP_DIR
+BACKUP_FOLDER.mkdir(exist_ok=True)
 
 # Instanciate FastAPI app
 app = FastAPI(debug=False)
@@ -71,7 +88,7 @@ app = FastAPI(debug=False)
 # Load task configuration
 CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
 try:
-    with open(CONFIG_FILE, "r", encoding="utf-8")  as file:
+    with open(CONFIG_FILE, "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
         tasks = config.get("tasks", {})
     logger.info("Loaded task configuration from 'tasks.yaml'")
@@ -80,58 +97,45 @@ except Exception as e:
     raise e
 
 # Instanciate Celery app
-celery_app = Celery(
-    "tasks",
-    broker=BROKER_URL,
-    backend=BACKEND_URL,
-    broker_connection_retry_on_startup=True,
-)
-celery_app.conf.update(
-    # task_serializer='json',
-    # accept_content=['json'],
-    # result_serializer='json',
-    timezone='Europe/Paris',
-    enable_utc=True,
-    # This will enable the STARTED status.
-    task_track_started=True,
-    # One-day history
-    result_expires=86400,
+try:
+    celery_app = Celery(
+        "tasks",
+        broker=BROKER_URL,
+        backend=BACKEND_URL,
+        broker_connection_retry_on_startup=True,
     )
 
-class TaskLogger:
-    def __init__(self, logger):
-        self._logger = logger
-        self._task_name = None
+    celery_app.conf.update(
+        timezone="Europe/Paris",
+        enable_utc=True,
+        task_track_started=True,  # This will enable the STARTED status
+        result_expires=60 * 60 * 24 * 30,  # One-month history
+        task_acks_late=True,  # Redispatch unfinished tasks
+        task_acks_on_failure_or_timeout=False,  # Avoid marking a task as “acknowledged” if it crashes
+        broker_transport_options={"visibility_timeout": 60 * 1},  # X seconds before the  before an abandoned task becomes available again
+        worker_prefetch_multiplier=1,  # How many tasks a Celery worker will prefetch before starting execution
+    )
 
-    @contextmanager
-    def task_context(self, task_name):
-        old_task_name = self._task_name
-        self._task_name = task_name
-        try:
-            yield self
-        finally:
-            self._task_name = old_task_name
-
-    def _log(self, level, msg, *args, **kwargs):
-        if self._task_name:
-            msg = f"[{self._task_name}] {msg}"
-        return getattr(self._logger, level)(msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        return self._log("info", msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        return self._log("error", msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        return self._log("warning", msg, *args, **kwargs)
-
-    def debug(self, msg, *args, **kwargs):
-        return self._log("debug", msg, *args, **kwargs)
+except Exception as e:
+    celery_app = None
+    logger.error(f"❌ Failed to initialize Celery app: {e}")
+    raise RuntimeError("Celery initialization failed") from e
 
 
-# Replace the existing logger with our wrapped version
-task_logger = TaskLogger(logger)
+# Instanciate Redis data-base
+try:
+    redis_bd = redis.Redis(
+        host=PARSED_URL.hostname,
+        port=PARSED_URL.port,
+        db=int(PARSED_URL.path.lstrip('/')),
+        decode_responses=True,
+    )
+    redis_bd.ping()
+    logger.info("Connected to Redis successfully!")
+
+except redis.ConnectionError:
+    redis_bd = None
+    logger.error("❌ Failed to connect to Redis!")
 
 
 async def get_task_id(request: Request, task_id: str = Query(None), task_id_form: str = Form(None)):
@@ -140,7 +144,9 @@ async def get_task_id(request: Request, task_id: str = Query(None), task_id_form
     return task_id or task_id_form or form_data.get("task_id")
 
 
-async def get_task_name(request: Request, task_name: str = Query(None), task_name_form: str = Form(None)):
+async def get_task_name(
+    request: Request, task_name: str = Query(None), task_name_form: str = Form(None)
+):
     """Retieve the `task_name` from Query, Form, or Request Body."""
     form_data = await request.form()
     return task_name or task_name_form or form_data.get("task_name")
@@ -188,8 +194,81 @@ class TaskLogger:
 task_logger = TaskLogger(logger)
 
 
+def generate_filename(config, file_type, args) -> str:
+    """Generates a filename based on a given configuration.
+
+    Args:
+        config (dict): Configuration dictionary containing filename templates.
+        file_type (str): Type of file, either "output" or "input".
+        args (dict): Dictionary with formatting arguments (e.g., uid, task_name).
+
+    Returns:
+        str: The generated filename based on the template.
+    """
+    assert file_type in ["input", "output"], f"`{file_type}` not supported."
+    template = "{uid}" if file_type == "output" else "{uid}.{task_name}"
+    filename_template = config.get("filename", f"{template}.{file_type}.fheencrypted")
+    return filename_template.format(**args)
+
+
+def ensure_file_exists(file_path, error_message) -> None:
+    """Ensures that the specified file exists; otherwise, logs an error and raises an exception.
+
+    Args:
+        file_path (Path): The path of the file to check.
+        error_message (str): The error message to log and include in the exception.
+
+    Raises:
+        HTTPException: Raised with status code 500 if the file does not exist.
+    """
+    if not file_path.exists():
+        task_logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+    else:
+        task_logger.debug(f"Output file path: `{file_path}` exists.")
+
+
+def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
+    """Reads a file, optionally saves a backup, and returns its content.
+
+    Args:
+        output_file_path (Path): The path of the file to read.
+        task_id (str): The task id used for backup naming.
+        backup (bool): Whether to save a backup of the file.
+
+    Returns:
+        bytes: The content of the file.
+
+    Raises:
+        HTTPException: Raised with status code 500 if the file cannot be read.
+    """
+    ensure_file_exists(
+        output_file_path, error_message=f"Output file `{output_file_path.name}` not found."
+    )
+    try:
+        data = output_file_path.read_bytes()
+        task_logger.info(
+            f"Processed output file `{output_file_path}` to client (Size: `{len(data)}` bytes)"
+        )
+    except Exception as e:
+        task_logger.error(f"Error reading output file `{output_file_path.name}`: `{e}`")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to read output file `{output_file_path.name}`."
+        ) from e
+
+    if backup:
+        backup_path = BACKUP_FOLDER / f"backup.{task_id}.{output_file_path.name}"
+        try:
+            backup_path.write_bytes(data)
+            task_logger.debug(f"Backup saved at `{backup_path}`")
+        except Exception as e:
+            task_logger.warning(f"Failed to create backup `{backup_path}`: {e}")
+
+    return data
+
+
 @app.post("/add_key")
-async def add_key(key: UploadFile = Form(...), task_name = Depends(get_task_name)) -> Dict:
+async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name)) -> Dict:
     """Save the evaluation key on the server side.
 
     Args:
@@ -215,72 +294,94 @@ async def add_key(key: UploadFile = Form(...), task_name = Depends(get_task_name
         logger.info("Saved server key to `%s` (Size: `%s` bytes)", file_path, file_size)
 
     except Exception as e:
-        logger.error("Error saving server key: `%s`", e)
+        task_logger.error("Error saving server key: `%s`", e)
         raise HTTPException(status_code=500, detail="Failed to save server key.") from e
 
     return {"uid": uid}
 
 
-@app.get("/tasks")
+@app.get("/get_use_cases")
 def get_use_cases() -> Dict:
     """List available use-cases based on configuration.
 
     Returns:
         Dict[str, List[str]]: Available use-case names
     """
-    logger.info("Fetching list of available use-cases.")
-    return {"tasks": list(tasks.keys())}
+    logger.info("******* Endpoint/get_use_cases *******")
+    available_use_cases = list(tasks.keys())
+    logger.info("Fetching list of available use-cases: %s", available_use_cases)
+    return {"Use-cases": available_use_cases}
 
 
-@celery_app.task(name='tasks.run_binary_task')
+@celery_app.task(name="tasks.run_binary_task")
 def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
+    """Executes a binary command as a Celery task.
+
+    Args:
+        binary (str): The name of the executable binary to run.
+        uid (str): The unique key identifier.
+        task_name (str): The name of the task to execute.
+
+    Returns:
+        Dict: A dictionary containing the command's stdout, stderr, and the returned code.
+
+    Raises:
+        subprocess.CalledProcessError: Raised if the binary execution fails.
+    """
     logger.info("******* run_binary_task *******")
-        
+
     commandline = [f"./{binary}", uid]
 
     try:
-        # result is a subprocess.CompletedProcess object, and 
-        # Celery can't store that in Redis.
+        # Result is a subprocess.CompletedProcess object, and Celery can't store that in Redis.
         start_time = time.time()
-        result = subprocess.run(
-            commandline, capture_output=True, check=True, text=True
-        )
+        result = subprocess.run(commandline, capture_output=True, check=True, text=True)
         execution_time = time.time() - start_time
-        
+
         task_logger.info(f"Task: `{task_name}` completed in {execution_time:.2f}s")
-        
+
         if result.stderr:
             task_logger.error(f"Error from `{binary}`:\n`{result.stderr}`")
-            
+
     except subprocess.CalledProcessError as e:
         error_message = f"Error executing {binary}: {e.stderr}"
         task_logger.error(error_message)
         return {"status": "error", "detail": error_message}
-    
-    # type(result): <class 'subprocess.CompletedProcess'>
-    # Celry cannot serialize a CompletedProcess object in JSON
-    return {
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-        "returncode": result.returncode
-    }
+
+    # Celry cannot serialize a <class 'subprocess.CompletedProcess'> object in JSON
+    return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
 
 
 @app.post("/start_task")
-async def start_task(uid: str = Form(...),
-                     task_name: str = Form(...),
-                     encrypted_input: UploadFile = Form(...)
-):
-    """Star task."""
+async def start_task(
+    uid: str = Form(...), task_name: str = Form(...), encrypted_input: UploadFile = Form(...)
+) -> JSONResponse:
+    """Starts a Celery task by processing an encrypted input file.
+
+    Args:
+        uid (str): The unique key identifier.
+        task_name (str): The name of the task to be executed.
+        encrypted_input (UploadFile): The encrypted input file.
+
+    Returns:
+        JSONResponse: A JSON object containing the `task_id` if the task starts successfully.
+
+    Raises:
+        HTTPException: Raised with status code 400 if the `task_name` is invalid.
+        HTTPException: Raised with status code 500 if saving the file or starting the task fails.
+    """
     logger.info("******* Endpoint/start_task *******")
 
-    binary = tasks[task_name]['binary']
+    if task_name not in tasks:
+        task_logger.error("Invalid task name: `%s`", task_name)
+        raise HTTPException(status_code=400, detail=f"Task `{task_name}` does not exist.")
+
+    binary = tasks[task_name]["binary"]
 
     # Use input_filename from task_config if specified, otherwise default
-    input_filename_template = tasks[task_name].get(
-        "input_filename", "{uid}.{task}.input.fheencrypted"
+    input_filename = generate_filename(
+        config=tasks[task_name], file_type="input", args={"uid": uid, "task_name": task_name}
     )
-    input_filename = input_filename_template.format(uid=uid, task=task_name)
     input_file_path = FILES_FOLDER / input_filename
     task_logger.debug(f"Input file path: {input_file_path}")
 
@@ -289,44 +390,55 @@ async def start_task(uid: str = Form(...),
         with open(input_file_path, "wb") as f:
             f.write(file_content)
         file_size = input_file_path.stat().st_size  # Get file size in bytes
-        task_logger.info(f"Saved input file to {input_file_path} (Size: {file_size} bytes)")
+        task_logger.info(
+            f"Saved encrypted input file to `{input_file_path} `(Size: `{file_size}` bytes)"
+        )
 
     except Exception as e:
         task_logger.error(f"Error saving input file: {e}")
         raise HTTPException(status_code=500, detail="Failed to save input file.") from e
 
+    # Start the Celery task
+    try:
+        task_logger.info(f"Executing task: `{task_name}` with UID `{uid}`")
+        # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue.
+        # The args you pass to .delay() are the arguments that will be used to execute the task.
+        task = run_binary_task.delay(binary, uid, task_name)
+        logger.info("Task: `%s` started successfully. TASK_ID: `%s`", task_name, task.id)
 
-    # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue. 
-    # The arguments you pass to .delay() are the arguments that will be used to execute the task.
-    task_logger.info(f"Executing `{task_name}`")
-    task = run_binary_task.delay(binary, uid, task_name)
-    
-    logger.info("Your TASK_ID is `%s`", task.id)
+        return JSONResponse({"task_id": task.id})
 
-    return JSONResponse({"task_id": task.id})
+    except Exception as e:
+        task_logger.error(f"Failed to start task `{task_name}`: {e}")
+        raise HTTPException(status_code=500, detail="Failed to start the task.") from e
 
 
 @app.get("/list_current_tasks")
-def list_current_tasks():
+def list_current_tasks() -> List[Dict]:
+    """Lists all Celery tasks, including pending ones in the queue.
+
+    For workers, tasks may be active, reserved (queued), or scheduled (waiting for execution).
+    If the worker is full, the tasks are queued in Radis and wait to be pickup.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing task details (task_id, status, worker).
     """
-    List all Celery tasks that are currently active, reserved (queued),
-    or scheduled (waiting to be executed at a later time).
-    Tasks that are finished (SUCCESS, FAILURE, REVOKED) won't appear here.
-    """
-    
     logger.info("******* Endpoint /list_current_tasks *******")
 
     inspector = celery_app.control.inspect()
 
+    if inspector is None:
+        task_logger.error("Celery Inspector returned `None`. No workers may be available.")
+        return []
+
     task_states = {
         # Show the tasks that are currently active
         "active": inspector.active() or {},
-        # Show the tasks that have been claimed by workers
+        # Show the tasks that have been claimed by `workers`
         "reserved": inspector.reserved() or {},
         # Show tasks that have an ETA or are scheduled for later processing
         "scheduled": inspector.scheduled() or {},
     }
-    
     all_tasks = []
 
     for state, tasks_data in task_states.items():
@@ -334,20 +446,37 @@ def list_current_tasks():
             for t in tasks_list:
                 task_info = {
                     "task_id": t.get("id"),
-                    "state": state,
+                    "status": state,
                     "worker": worker_name,
                     # "name": t.get("name"),
-                    # "args": t.get("args"),                    
+                    # "args": t.get("args"),
                 }
-                # For scheduled tasks, information are under "request"
                 if state == "scheduled":
                     request_info = t.get("request", {})
-                    task_info.update({
-                        "task_id": request_info.get("id"),
-                        # "name": request_info.get("name"),
-                        # "args": request_info.get("args"),
-                    })
+                    task_info.update(
+                        {
+                            "task_id": request_info.get("id"),
+                            # "name": request_info.get("name"),
+                            # "args": request_info.get("args"),
+                        }
+                    )
                 all_tasks.append(task_info)
+
+    #  Retrieving pending tasks from the Redis queue
+    try:
+        pending_tasks = redis_bd.lrange("celery", 0, -1)
+        for task in pending_tasks:
+            task_data = json.loads(task)
+            task_info = {
+                "task_id": task_data["headers"]["id"],
+                "status": "queued",
+                "worker": "queue",
+                "details": "The task is currently in the Redis queue, waiting to be picked up by a worker."
+            }
+            all_tasks.append(task_info)
+    except Exception as e:
+        error_message =  f"Error retrieving pending tasks from REDIS: {e}"
+        logger.error(error_message)
 
     logger.info("All tasks:\n%s", pformat(all_tasks))
 
@@ -355,180 +484,313 @@ def list_current_tasks():
 
 
 @app.get("/get_task_status")
-def get_task_status(task_id: str = Depends(get_task_id)):
-    """Retrieves the status of a task by task_id.
-    
-    If no `task_id` is provided, returns a list of all current Celery tasks (active, reserved, scheduled).
+def get_task_status(task_id: str = Depends(get_task_id)) -> Dict:
+    """Retrieves the status of a Celery task by its task ID.
+
+    If no `task_id` is provided, returns an "unknown" status with details.
+
+    Args:
+        task_id (str): The ID of the task to check.
+
+    Returns:
+        Dict: A dictionary containing the task ID, status, and additional details.
+
+    Raises:
+        HTTPException: Raised if an unexpected error occurs while retrieving the task status.
     """
 
     logger.info("******* Endpoint/get_task_status *******")
-    if task_id is None or task_id.strip() == "":
-        tasks_list = list_current_tasks()
-        logger.info("`task_id=%s` is None or Empty. Returning all current tasks: %s", task_id, tasks_list)
 
-        return tasks_list
+    # Validate input: If no task_id is provided, return a list of all current tasks
+    if not task_id or task_id.strip() == "":
+        logger.info("No `task_id` provided. Please retry with a valid task ID.")
+        logger.debug("All current tasks: %s", list_current_tasks())
+        return {
+            "task_id": "none",
+            "status": "unknown",
+            "details": "Task id is None or Empty.",
+        }
 
     result = AsyncResult(task_id, app=celery_app)
+    status = result.state.lower()
 
-    if result is None or result.state == "PENDING":
-        status = {"task_id": task_id, "status": "Completely unknown status: an associated task might not even exist"}
-    elif result.state == "FAILURE":
-        status = {"task_id": task_id, "status": "error", "error": str(result.info or "Unknown error")}
-    else:    
-        status = {"task_id": task_id, "status": result.state.lower()}
-        
-    logger.info("For TASK_ID: `%s` - status: `%s`", task_id, status)
+    # Mapping Celery task states to structured responses
+    status_mapping = {
+        "started": {
+            "task_id": task_id,
+            "status": "started",
+            "details": "Task is still in progress.",
+        },
+        "success": {
+            "task_id": task_id,
+            "status": "success",
+            "details": "Task successfully completed.",
+        },
+        "failure": {
+            "task_id": task_id,
+            "status": "failure",
+            "details": str(result.info or "This task might be lost."),
+        },
+    }
 
-    return status
+    # If the task is "PENDING" but a saved output file exists, treat it as "completed"
+    if status == "pending":
+        file_pattern = f"{BACKUP_FOLDER}/backup.{task_id}.*.*.output.fheencrypted"
+        matching_files = glob(file_pattern)
+
+        if matching_files:
+            file_path = Path(matching_files[0])
+            file_date = file_path.stat().st_mtime  # Get file's last modified time
+            date = datetime.datetime.fromtimestamp(file_date).strftime("%Y-%m-%d %H:%M:%S")
+
+            response = {
+                "task_id": task_id,
+                "status": "completed",
+                "details": f"Task completed on `{date}`. The result is stored.",
+                "output_file_path": [str(file_path)],
+            }
+        else:
+            try:
+                queued_tasks = redis_bd.lrange("celery", 0, -1)
+                queued_tasks_text = " ".join(queued_tasks)
+
+                if re.search(rf'"id"\s*:\s*"{re.escape(task_id)}"', queued_tasks_text):
+                    response = {
+                        "task_id": task_id,
+                        "status": "queued",
+                        "details": "Task is in Redis queue, waiting for a worker to pick it up.",
+                    }
+                else:
+                    response = {
+                        "task_id": task_id,
+                        "status": "unknown",
+                        "details": "Unknown status: task may not exist. You may need to restart it.",
+                    }
+            except Exception as e:
+                logger.error("Error checking Redis queue: %s", str(e))
+                response = {
+                    "task_id": task_id,
+                    "status": "unknown",
+                    "details": "Could not check Redis queue due to an error.",
+                }
+    else:
+        # Return the corresponding status from the mapping
+        response = status_mapping.get(
+            status,
+            {
+                "task_id": task_id,
+                "status": status,
+                "details": str(result.info or "No additional details available."),
+            },
+        )
+
+    logger.info(
+        "Task ID: `%s` - status: `%s` - details: `%s`",
+        response["task_id"],
+        response["status"],
+        response["details"],
+    )
+
+    return response
 
 
 @app.post("/cancel_task")
-def cancel_task(task_id: str = Depends(get_task_id)):
-    """Cancels a running task by ID, if possible."""
+def cancel_task(task_id: str = Depends(get_task_id)) -> Dict:
+    """Attempts to cancel a running task by ID, if possible.
 
+    Args:
+        task_id (str): The ID of the task to cancel.
+
+    Returns:
+        Dict: A dictionary containing the task ID, its status, and details about the cancellation.
+
+    Raises:
+        HTTPException: Raised with status code 500 if revoking the task fails.
+    """
     logger.info("******* Endpoint/cancel_task *******")
-    logger.info("Cancel TASK_ID: `%s`", task_id)
+    logger.info("Cancel request received for TASK_ID: `%s`", task_id)
 
-    if task_id is None:
-        return {"task_id": task_id, "error": "Missing task_id"}
+    # Get the current task status
+    current_overall_status = get_task_status(task_id)
+    current_status = current_overall_status.get("status", "unknown").lower()
 
-    result = AsyncResult(task_id, app=celery_app)
-    logger.info("Current task state: `%s`", result.state)
-    
-    if not result or result.state in ["SUCCESS", "FAILURE", "REVOKED", "PENDING"]:
-        return {"task_id": task_id, "status": "Cannot cancel this task (already finished or unknown)."}
+    logger.info("Current status of TASK_ID `%s`: `%s`.", task_id, current_status)
 
-    # Terminate task
-    celery_app.control.revoke(task_id, terminate=True, signal='SIGKILL')
+    # Tasks that cannot be canceled
+    non_cancellable_statuses = {
+        "success",
+        "completed",
+        "failure",
+        "revoked",
+        "pending",
+        "unknown",
+        "error",
+    }
 
-    result = AsyncResult(task_id, app=celery_app)
-    time.sleep(4)
-    logger.info("New task state: `%s`", result.state)
+    if current_status in non_cancellable_statuses:
+        task_logger.warning("Cannot cancel TASK_ID `%s` (already finished or unknown).", task_id)
+        return {
+            "task_id": task_id,
+            "status": current_status,
+            "details": f"Cannot cancel this task (already finished or unknown). Additional info: {current_overall_status.get('details', '')}",
+        }
 
-    return {"task_id": task_id, "status": result.state.lower()}
+    # Attempt to revoke the task
+    try:
+        celery_app.control.revoke(task_id, terminate=True, signal="SIGKILL")
+        logger.info("TASK_ID `%s` revocation initiated.", task_id)
+    except Exception as e:
+        task_logger.error("Failed to revoke TASK_ID `%s`: %s.", task_id, str(e))
+        raise HTTPException(status_code=500, detail=f"Error while revoking task: {str(e)}")
+
+    # Wait for the state to update
+    time.sleep(2)
+
+    # Fetch the new state of the task
+    new_result = AsyncResult(task_id, app=celery_app)
+    new_status = new_result.state.lower()
+    logger.info("New status of TASK_ID `%s`: %s.", task_id, new_status)
+
+    return {
+        "task_id": task_id,
+        "status": new_status,
+        "details": "Task revocation requested successfully.",
+    }
 
 
 @app.get("/get_task_result")
 async def get_task_result(
-    task_name: str = Depends(get_task_name), 
+    task_name: str = Depends(get_task_name),
     task_id: str = Depends(get_task_id),
-    uid: str = Depends(get_uid)
+    uid: str = Depends(get_uid),
 ):
-    """
-    Retrieves the final result of a completed task (stream or JSON), 
-    using the config in tasks.yaml to decide how to respond.
+    """Retrieves the final result of a completed task, returning it based on configuration.
+
+    Args:
+        task_name (str): The name of the task/
+        task_id (str): The ID of the task to retrieve the result for.
+        uid (str): The unique key identifier.
+
+    Returns:
+        StreamingResponse: If `response_type` is set to "stream".
+        JSONResponse: If `response_type` is set to "json".
+
+    Raises:
+        HTTPException: Raised with a 400 status code if the task name is invalid.
+        HTTPException: Raised with a 500 status code for unsupported response types or other errors.
     """
     logger.info("******* Endpoint/get_task_result *******")
+    if task_name not in tasks:
+        task_logger.error("Invalid task name: `%s`", task_name)
+        raise HTTPException(status_code=400, detail=f"Task `{task_name}` does not exist.")
 
-    # Check if the task is done
-    celery_result = AsyncResult(task_id, app=celery_app)
-  
-    if celery_result.state != "SUCCESS":
-        logger.info("task_id=`%s` is not completed.", task_id)
-        return get_task_status(task_id)
-    
+    # Check task configuration
+    task_config = tasks.get(task_name, {})
     # Defines whether the response will be in stream or JSON format
-    response_type = tasks[task_name].get("response_type", "stream")
+    response_type = task_config.get("response_type", "stream")
     # Output name file as specified in the yaml task file
-    output_files = tasks[task_name].get("output_files", [])
-    
-    outcome_celery = celery_result.result
+    output_files = task_config.get("output_files", [])
+    stderr_output = ""
+
+    # Check task status
+    status = get_task_status(task_id)
+
+    logger.info(f"Task ID: `%s` with state `%s`", task_id, status["status"])
+
+    if status.get("status") == "started":
+        logger.info("Task ID: `%s` is still in progress. Status: `%s`", task_id, status)
+        return JSONResponse(
+            content=status,
+            status_code=200,
+            headers={"status": status["status"], "job_id": task_id, "stderr": stderr_output},
+        )
+
+    if status.get("status") in ["pending", "failure", "revoked", "unknown", "error", "queue"]:
+        logger.info("task_id=`%s` not strarted. Status: `%s`", task_id, status)
+        return JSONResponse(
+            content=status,
+            status_code=200,
+            headers={
+                "status": status["status"],
+                "job_id": status["task_id"],
+                "stderr": status["details"],
+            },
+        )
+
+    if status.get("status") == "completed":
+        logger.info("task_id=`%s` already completed", task_id)
+        backup = False  # No need for a backup if already completed
+
+    elif status.get("status") == "success":
+        logger.info("task_id=`%s` successfully completed", task_id)
+
+        celery_result = AsyncResult(task_id, app=celery_app)
+        outcome_celery = celery_result.result
+        stderr_output = outcome_celery.get("stderr", "")
+
+        backup = True
+    else:
+        error_message = "Unknown status"
+        logger.error("task_id=`%s` has an unknown status: `%s`", task_id, status)
+        raise HTTPException(status_code=500, detail=error_message)
+
 
     # Handle outputs based on the configuration
     if response_type == "stream":
         # Expect a single output file
-        if not output_files:
-            error_message = "No output files defined for streaming response."
-            task_logger.error(error_message)
-            raise HTTPException(status_code=500, detail=error_message)
-
-        output_file_config = output_files[0]
-        output_filename_template = output_file_config["filename"]
-        output_filename = output_filename_template.format(uid=uid, task=task_name)
+        output_filename = (
+            generate_filename(output_files[0], file_type="output", args={"uid": uid})
+            if backup
+            else status["output_file_path"][0]
+        )
         output_file_path = FILES_FOLDER / output_filename
-        task_logger.debug(f"Output file path: {output_file_path}")
+        data = fetch_file_content(output_file_path, task_id, backup=backup)
 
-        if not output_file_path.exists():
-            error_message = f"Output file `{output_filename}` not found."
-            task_logger.error(error_message)
-            raise HTTPException(status_code=500, detail=error_message)
-
-        try:
-            file_size = output_file_path.stat().st_size  # Get file size in bytes
-            with open(output_file_path, "rb") as f:
-                data = f.read()
-            task_logger.info(
-                f"Streaming output file `{output_filename}` to client (Size: {file_size} bytes)"
-            )
-            
-            return StreamingResponse(
-                io.BytesIO(data),
-                media_type="application/octet-stream",
-                headers={
-                    "Content-Disposition": f"attachment; filename={output_filename}",
-                    "status": "success",
-                    "job_id": task_id,
-                    "stderr": outcome_celery['stderr'],
+        return StreamingResponse(
+            io.BytesIO(data),
+            media_type="application/octet-stream",
+            headers={
+                "Content-Disposition": f"attachment; filename={output_filename}",
+                "status": "success",
+                "job_id": task_id,
+                "stderr": stderr_output,
             },
-            )
-        except Exception as e:
-            task_logger.error(f"Error reading output file: {e}")
-            raise HTTPException(status_code=500, detail="Failed to read output file.") from e
-
+        )
     elif response_type == "json":
-        response_data = {}
-        for output_file_config in output_files:
-            filename_template = output_file_config["filename"]
-            output_filename = filename_template.format(uid=uid, task=task_name)
+        response_data = {"status": "success", "job_id": task_id, "stderr": stderr_output}
+
+        iter_files = (
+            [
+                generate_output_filename(output_file_config, uid)
+                for output_file_config in output_files
+            ]
+            if backup
+            else status["file_path"]
+        )
+
+        for output_filename in iter_files:
+            output_file_path = FILES_FOLDER / output_filename
             key = output_file_config.get("key", output_filename)
             response_format = output_file_config.get("response_type", "base64")
-
             response_data[output_filename] = output_filename
-            response_data['status'] = "success"
-            response_data['job_id'] = task_id
-            response_data['stderr'] = outcome_celery['stderr']
-            
-            output_file_path = FILES_FOLDER / output_filename
-            task_logger.debug(f"Processing output file: `{output_file_path}`")
+            data = fetch_file_content(output_file_path, task_id)
 
-            if not output_file_path.exists():
-                error_message = f"Output file `{output_filename}` not found."
-                task_logger.error(error_message)
-                raise HTTPException(status_code=500, detail=error_message)
-                
-            try:
-                file_size = output_file_path.stat().st_size  # Get file size in bytes
-                with open(output_file_path, "rb") as f:
-                    data = f.read()
+            response_data[key] = (
+                base64.b64encode(data).decode("utf-8")
+                if response_format == "base64"
+                else data.decode("utf-8")
+            )
 
-                if response_format == "base64":
-                    encoded_data = base64.b64encode(data).decode("utf-8")
-                    response_data[key] = encoded_data
-                    task_logger.info(
-                        f"Processed output file {output_filename} (Size: {file_size} bytes) as base64."
-                    )
-                else:
-                    response_data[key] = data.decode("utf-8")
-                    task_logger.info(
-                        f"Processed output file {output_filename} (Size: {file_size} bytes) as UTF-8 string."
-                    )
-            except Exception as e:
-                task_logger.error(f"Error processing output file {output_filename}: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Error processing output file {output_filename}.",
-                ) from e
-                
         task_logger.info(f"Returning JSON response for task '{task_name}'")
         return JSONResponse(content=response_data)
     else:
-        error_message = f"Unsupported response type: {response_type}"
+        error_message = f"Unsupported response type: `{response_type}`"
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
 
 @app.get("/logs")
-def get_logs(lines: int = 10):
+def get_logs(lines: int = 10) -> Response:
     """Serve the server log file with the specified number of last lines.
 
     Args:
@@ -682,13 +944,3 @@ def robots():
     content = "User-agent: *\nDisallow: /"
     return Response(content=content, media_type="text/plain")
 
-
-if __name__ == "__main__":
-    logger.info("Starting server on port `%s`", PORT)
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=int(PORT),
-        ssl_keyfile=f"{CERTS_PATH}/{PRIVKEY}",
-        ssl_certfile=f"{CERTS_PATH}/{CERT}",
-    )
