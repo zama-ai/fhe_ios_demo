@@ -12,8 +12,6 @@ struct ProfileForm: View {
     @State private var interests: [Interest] = []
     
     var body: some View {
-        NavigationStack {
-            
             Form {
                 Section {
                     LabeledContent("Gender") {
@@ -34,7 +32,7 @@ struct ProfileForm: View {
                         .pickerStyle(.segmented)
                     }
                     
-                    Toggle("Interested In Kids Ads", isOn: $editProfile.interestedInKids)
+                    // Toggle("Interested In Kids Ads", isOn: $editProfile.interestedInKids)
                     
                     Picker("Interested In", selection: $editProfile.interests) {
                         ForEach(Interest.allCases, id: \.self) { item in
@@ -42,9 +40,7 @@ struct ProfileForm: View {
                         }
                     }
                     .pickerStyle(.navigationLink)
-                }
-                
-                Section {
+
                     Picker("Country", selection: $editProfile.country) {
                         let sorted = Country.allCases.sorted(by: { $0.localizedCountryName < $1.localizedCountryName })
                         ForEach(sorted, id: \.self) { item in
@@ -72,8 +68,6 @@ struct ProfileForm: View {
                             .foregroundStyle(.red)
                     }
                 }
-            }
-            .scrollBounceBehavior(.basedOnSize)
         }
     }
 }

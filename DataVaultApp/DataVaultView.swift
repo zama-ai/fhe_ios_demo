@@ -33,7 +33,11 @@ struct DataVaultView: View {
             .buttonBorderShape(.roundedRectangle)
             .tint(.orange)
             .task {
-                try? await vm.loadFromDisk()
+                do {
+                    try await vm.loadFromDisk()
+                } catch {
+                    print("Error loading data: \(error)")
+                }
             }
     }
     
@@ -51,17 +55,20 @@ struct DataVaultView: View {
     }
     
     private var content: some View {
-        TabView(selection: $selectedTab) {
-            Tab(Metric.profile.name, systemImage: Metric.profile.icon, value: TabKind.profile) {
+        ScrollView {
+//        TabView(selection: $selectedTab) {
+//            Tab(Metric.profile.name, systemImage: Metric.profile.icon, value: TabKind.profile) {
                 profileSection
-            }
-            Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
+//            }
+//            Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
                 sleepSection
-            }
-            Tab(Metric.weight.name, systemImage: Metric.weight.icon, value: TabKind.weight) {
+//            }
+//            Tab(Metric.weight.name, systemImage: Metric.weight.icon, value: TabKind.weight) {
                 weightSection
-            }
+//            }
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .padding(8)
     }
     
     private var profileSection: some View {
@@ -74,7 +81,10 @@ struct DataVaultView: View {
                 delete: vm.deleteProfile,
                 openIn: .fheAdTargeting)
         {
-            ProfileForm(vm: vm)
+            NavigationStack {
+                ProfileForm(vm: vm)
+            }
+            .frame(height: 400)
         }
     }
     
