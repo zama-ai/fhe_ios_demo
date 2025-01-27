@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let uid = &args[1];
 
-    let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
+    let sk_path = format!("/project/uploaded_files/{}.add_42.serverKey", uid);
     let input_path = format!("/project/uploaded_files/{}.add_42.input.fheencrypted", uid);
     let output_path = format!("/project/uploaded_files/{}.add_42.output.fheencrypted", uid);
 

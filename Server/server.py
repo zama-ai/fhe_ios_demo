@@ -71,12 +71,12 @@ app = FastAPI(debug=False)
 # Load task configuration
 CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
 try:
-    with open(CONFIG_FILE, "r") as file:
+    with open(CONFIG_FILE, "r", encoding="utf-8")  as file:
         config = yaml.safe_load(file)
         tasks = config.get("tasks", {})
     logger.info("Loaded task configuration from 'tasks.yaml'")
 except Exception as e:
-    logger.error(f"Failed to load configuration file: {e}")
+    logger.error("Failed to load configuration file: `%s`", e)
     raise e
 
 # Instanciate Celery app
@@ -189,11 +189,12 @@ task_logger = TaskLogger(logger)
 
 
 @app.post("/add_key")
-async def add_key(key: UploadFile = Form(...)) -> Dict:
-    """Save the evaluation key.
+async def add_key(key: UploadFile = Form(...), task_name = Depends(get_task_name)) -> Dict:
+    """Save the evaluation key on the server side.
 
-    Arguments:
-        key (UploadFile): evaluation key
+    Args:
+        key (UploadFile): The evaluation key
+        task_name (str): The name of the task
 
     Returns:
         Dict[str, str]
@@ -202,25 +203,26 @@ async def add_key(key: UploadFile = Form(...)) -> Dict:
     logger.info("******* Endpoint/add_key *******")
 
     uid = str(uuid.uuid4())
-    logger.info(f"Received new key upload. Assigned UID: {uid}")
+    logger.info("Received new key upload. Assigned UID: `%s`", uid)
 
     # Write uploaded ServerKey to disk
     try:
         file_content = await key.read()
-        file_path = FILES_FOLDER / f"{uid}.serverKey"
+        file_path = FILES_FOLDER / f"{uid}.{task_name}.serverKey"
         with open(file_path, "wb") as f:
             f.write(file_content)
         file_size = file_path.stat().st_size  # Get file size in bytes
-        logger.info(f"Saved server key to `{file_path}` (Size: `{file_size}` bytes)")
+        logger.info("Saved server key to `%s` (Size: `%s` bytes)", file_path, file_size)
+
     except Exception as e:
-        logger.error(f"Error saving server key: {e}")
-        raise HTTPException(status_code=500, detail="Failed to save server key.")
+        logger.error("Error saving server key: `%s`", e)
+        raise HTTPException(status_code=500, detail="Failed to save server key.") from e
 
     return {"uid": uid}
 
 
 @app.get("/tasks")
-def get_use_cases():
+def get_use_cases() -> Dict:
     """List available use-cases based on configuration.
 
     Returns:
@@ -231,7 +233,7 @@ def get_use_cases():
 
 
 @celery_app.task(name='tasks.run_binary_task')
-def run_binary_task(binary: str, uid: str, task_name: str):
+def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
     logger.info("******* run_binary_task *******")
         
     commandline = [f"./{binary}", uid]
@@ -239,8 +241,6 @@ def run_binary_task(binary: str, uid: str, task_name: str):
     try:
         # result is a subprocess.CompletedProcess object, and 
         # Celery can't store that in Redis.
-        
-        # type(result): <class 'subprocess.CompletedProcess'>
         start_time = time.time()
         result = subprocess.run(
             commandline, capture_output=True, check=True, text=True
@@ -257,6 +257,7 @@ def run_binary_task(binary: str, uid: str, task_name: str):
         task_logger.error(error_message)
         return {"status": "error", "detail": error_message}
     
+    # type(result): <class 'subprocess.CompletedProcess'>
     # Celry cannot serialize a CompletedProcess object in JSON
     return {
         "stdout": result.stdout,
@@ -266,10 +267,11 @@ def run_binary_task(binary: str, uid: str, task_name: str):
 
 
 @app.post("/start_task")
-async def start_task(uid: str = Form(...), 
-                     task_name: str = Form(...), 
-                     input: UploadFile = Form(...)
+async def start_task(uid: str = Form(...),
+                     task_name: str = Form(...),
+                     encrypted_input: UploadFile = Form(...)
 ):
+    """Star task."""
     logger.info("******* Endpoint/start_task *******")
 
     binary = tasks[task_name]['binary']
@@ -283,21 +285,23 @@ async def start_task(uid: str = Form(...),
     task_logger.debug(f"Input file path: {input_file_path}")
 
     try:
-        file_content = await input.read()
+        file_content = await encrypted_input.read()
         with open(input_file_path, "wb") as f:
             f.write(file_content)
         file_size = input_file_path.stat().st_size  # Get file size in bytes
         task_logger.info(f"Saved input file to {input_file_path} (Size: {file_size} bytes)")
+
     except Exception as e:
         task_logger.error(f"Error saving input file: {e}")
-        raise HTTPException(status_code=500, detail="Failed to save input file.")
+        raise HTTPException(status_code=500, detail="Failed to save input file.") from e
+
 
     # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue. 
     # The arguments you pass to .delay() are the arguments that will be used to execute the task.
     task_logger.info(f"Executing `{task_name}`")
     task = run_binary_task.delay(binary, uid, task_name)
     
-    logger.info(f"Your TASK_ID is `{task.id}`")
+    logger.info("Your TASK_ID is `%s`", task.id)
 
     return JSONResponse({"task_id": task.id})
 
@@ -360,10 +364,10 @@ def get_task_status(task_id: str = Depends(get_task_id)):
     logger.info("******* Endpoint/get_task_status *******")
     if task_id is None or task_id.strip() == "":
         tasks_list = list_current_tasks()
-        logger.info(f"`{task_id=}` is None or Empty. Returning all current tasks: {tasks_list}")
+        logger.info("`task_id=%s` is None or Empty. Returning all current tasks: %s", task_id, tasks_list)
+
         return tasks_list
 
-     # TODO: is AsyncResult really async ?
     result = AsyncResult(task_id, app=celery_app)
 
     if result is None or result.state == "PENDING":
@@ -373,7 +377,7 @@ def get_task_status(task_id: str = Depends(get_task_id)):
     else:    
         status = {"task_id": task_id, "status": result.state.lower()}
         
-    logger.info(f"For TASK_ID: `{task_id}` - status: `{status}`")
+    logger.info("For TASK_ID: `%s` - status: `%s`", task_id, status)
 
     return status
 
@@ -382,14 +386,14 @@ def get_task_status(task_id: str = Depends(get_task_id)):
 def cancel_task(task_id: str = Depends(get_task_id)):
     """Cancels a running task by ID, if possible."""
 
-    logger.info(f"******* Endpoint/cancel_task *******")
-    logger.info(f"Cancel TASK_ID: `{task_id}`")
+    logger.info("******* Endpoint/cancel_task *******")
+    logger.info("Cancel TASK_ID: `%s`", task_id)
 
     if task_id is None:
         return {"task_id": task_id, "error": "Missing task_id"}
 
     result = AsyncResult(task_id, app=celery_app)
-    logger.info(f"Current task state: `{result.state}`")
+    logger.info("Current task state: `%s`", result.state)
     
     if not result or result.state in ["SUCCESS", "FAILURE", "REVOKED", "PENDING"]:
         return {"task_id": task_id, "status": "Cannot cancel this task (already finished or unknown)."}
@@ -399,7 +403,7 @@ def cancel_task(task_id: str = Depends(get_task_id)):
 
     result = AsyncResult(task_id, app=celery_app)
     time.sleep(4)
-    logger.info(f"New task state: `{result.state}`")
+    logger.info("New task state: `%s`", result.state)
 
     return {"task_id": task_id, "status": result.state.lower()}
 
@@ -420,7 +424,7 @@ async def get_task_result(
     celery_result = AsyncResult(task_id, app=celery_app)
   
     if celery_result.state != "SUCCESS":
-        logger.info(f"task_id=`{task_id}` is not completed.")
+        logger.info("task_id=`%s` is not completed.", task_id)
         return get_task_status(task_id)
     
     # Defines whether the response will be in stream or JSON format
@@ -469,7 +473,7 @@ async def get_task_result(
             )
         except Exception as e:
             task_logger.error(f"Error reading output file: {e}")
-            raise HTTPException(status_code=500, detail="Failed to read output file.")
+            raise HTTPException(status_code=500, detail="Failed to read output file.") from e
 
     elif response_type == "json":
         response_data = {}
@@ -513,7 +517,7 @@ async def get_task_result(
                 raise HTTPException(
                     status_code=500,
                     detail=f"Error processing output file {output_filename}.",
-                )
+                ) from e
                 
         task_logger.info(f"Returning JSON response for task '{task_name}'")
         return JSONResponse(content=response_data)
@@ -535,7 +539,7 @@ def get_logs(lines: int = 10):
     """
     try:
         # Read last N lines efficiently
-        with open(LOG_FILE, "r") as log_file:
+        with open(LOG_FILE, "r", encoding="utf-8") as log_file:
             # Use deque with maxlen for memory efficiency
             from collections import deque
 
@@ -669,7 +673,7 @@ def get_logs(lines: int = 10):
             content="Log file not found. Logs might not have been generated yet.", status_code=404
         )
     except Exception as e:
-        logger.error(f"Error serving logs: {e}")
+        logger.error("Error serving logs: `%s`", e)
         return Response(content="An error occurred while fetching logs.", status_code=500)
 
 
@@ -680,7 +684,7 @@ def robots():
 
 
 if __name__ == "__main__":
-    logger.info(f"Starting server on port `{PORT}`")
+    logger.info("Starting server on port `%s`", PORT)
     uvicorn.run(
         app,
         host="0.0.0.0",
