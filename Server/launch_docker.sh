@@ -81,7 +81,7 @@ echo "Cleaning up existing containers..."
 # With `docker-compose down,` Docker Compose tries to delete the network associated with 
 # the services. If no network exists, it displays this warning: 
 # `WARNING: Network server_default not found.`
-docker-compose down
+docker-compose down --rmi all
 
 # Build the Rust stage if needed
 if $REBUILD_RUST; then
@@ -91,7 +91,22 @@ fi
 
 # Build the Docker image and starting the Docker containers
 echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
-docker-compose up --build -d
+docker-compose build  #--no-cache
+docker-compose up -d --scale service_celery=$CELERY_NB_INSTANCE
+docker-compose logs -f
 
-echo "Containers are running in detached mode. To view logs, use:"
+echo ""
+echo "Containers are running in detached mode. To view real-time logs, use:"
 echo "docker-compose logs -f"
+echo ""
+echo "Check the status of all running containers:"
+echo "docker-compose ps"
+echo ""
+echo "Celery worker monitoring:"
+echo "View active tasks currently being processed by Celery:"
+echo "docker exec -it server_service_celery_1 celery -A server.celery_app inspect active"
+echo ""
+echo "View all registered tasks available in Celery:"
+echo "docker exec -it server_service_celery_1 celery -A server.celery_app inspect registered"
+
+# journalctl -u docker --no-pager --since "10 min ago" | tail -50
