@@ -16,8 +16,20 @@ fi
 # Start the appropriate service
 if [ "$RUN_CELERY" = "true" ]; then
   echo "🚀 Starting Celery Worker..."
-  exec celery -A server.celery_app worker --loglevel=info
+  # Running Celery as root is not a best practice and triggers a security warning.
+  # Setting `user: "nobody:nogroup"` would eliminate the warning, but it prevents Celery from
+  # accessing necessary files, which is required in our use-case.
+  # -A server.celery_app: Indicates where the celery app is defined
+  # --loglevel=debug: Displays all the information
+  exec celery -A server.celery_app worker \
+      --loglevel="$CELERY_LOGLEVEL" \
+      --concurrency="$CELERY_CONCURRENCY" \
+
 else
   echo "🚀 Starting Uvicorn Python server..."
-  exec python server.py
+  exec uvicorn server:app \
+      --host 0.0.0.0 \
+      --port "$CONTAINER_PORT" \
+      --ssl-keyfile "$CONTAINER_CERTS_PATH/$PRIVKEY_FILE_NAME" \
+      --ssl-certfile "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME"
 fi
