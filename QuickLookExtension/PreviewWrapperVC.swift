@@ -1,4 +1,4 @@
-// Copyright © 2024 Zama. All rights reserved.
+// Copyright © 2025 Zama. All rights reserved.
 
 import UIKit
 import SwiftUI
