@@ -29,7 +29,7 @@ WORKDIR /project
 RUN mkdir -p /project/data
 
 # Copy Python dependencies, configuration files and Python server
-COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
+COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
 COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
 
 # Install Python dependencies
