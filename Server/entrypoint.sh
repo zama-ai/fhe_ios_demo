@@ -19,9 +19,9 @@ if [ "$RUN_CELERY" = "true" ]; then
   # Running Celery as root is not a best practice and triggers a security warning.
   # Setting `user: "nobody:nogroup"` would eliminate the warning, but it prevents Celery from
   # accessing necessary files, which is required in our use-case.
-  # -A server.celery_app: Indicates where the celery app is defined
+  # -A tasks.celery_app: Indicates where the celery app is defined
   # --loglevel=debug: Displays all the information
-  exec celery -A server.celery_app worker \
+  exec celery -A tasks.celery_app worker \
       --loglevel="$CELERY_LOGLEVEL" \
       --concurrency="$CELERY_CONCURRENCY" \
 

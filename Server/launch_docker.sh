@@ -91,22 +91,31 @@ fi
 
 # Build the Docker image and starting the Docker containers
 echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
-docker-compose build  #--no-cache
+docker-compose build #--no-cache
 docker-compose up -d --scale service_celery=$CELERY_NB_INSTANCE
 docker-compose logs -f
 
+echo "--------------"
+echo "Containers are running in detached mode. To view real-time logs, use: 'docker-compose logs -f'"
 echo ""
-echo "Containers are running in detached mode. To view real-time logs, use:"
-echo "docker-compose logs -f"
-echo ""
-echo "Check the status of all running containers:"
-echo "docker-compose ps"
+echo "Check the status of all running containers: 'docker-compose ps'"
 echo ""
 echo "Celery worker monitoring:"
-echo "View active tasks currently being processed by Celery:"
-echo "docker exec -it server_service_celery_1 celery -A server.celery_app inspect active"
+echo "View active tasks currently being processed by Celery: 'docker exec -it server_service_celery_1 celery -A server.celery_app inspect active'"
+echo "View all registered tasks available in Celery: 'docker exec -it server_service_celery_1 celery -A server.celery_app inspect registered'"
+
 echo ""
-echo "View all registered tasks available in Celery:"
-echo "docker exec -it server_service_celery_1 celery -A server.celery_app inspect registered"
+echo "View queued taks in Redis: 'docker exec -it container_redis_bd redis-cli LRANGE celery 0 -1'"
+echo "Refresh Redis 'docker exec -it container_redis_bd redis-cli FLUSHALL'"
+
+echo ""
+echo "Verifying Task Recovery After a Container Crash:"
+echo """
+- Step 1: Open Terminal (1) and launch tasks using: 'bash ./client.curl'
+- Step 2: Open Terminal (2) list running containers with: 'docker ps', then monitor logs of a Celery worker: 'docker logs -f server_service_celery_1docker logs -f server_service_celery_1'
+- Step 3: Open Terminal (3), simulate a crash by repeatedly killing the Celery process inside the container: 
+    'for i in {1..1000}; do docker exec server_service_celery_2 pkill -9 -f 'celery'; done'
+- Step 4: Return to Terminal (1) and check logs. The tasks handled by the killed container should transition from 'started' back to 'queued', awaiting reassignment.
+"""
 
 # journalctl -u docker --no-pager --since "10 min ago" | tail -50
