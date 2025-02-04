@@ -40,9 +40,9 @@ extension DataVaultView {
         
         func loadFromDisk() async throws {
             try await refreshPermission()
-            encryptedWeight = try await Storage.read(.weightList)
-            encryptedSleep = try await Storage.read(.sleepList)
-            encryptedProfile = try await Storage.read(.profile)
+            encryptedWeight = await Storage.read(.weightList)
+            encryptedSleep = await Storage.read(.sleepList)
+            encryptedProfile = await Storage.read(.matrixEncryptedProfile)
             try await fetchHealthData()
         }
         
@@ -153,17 +153,17 @@ extension DataVaultView {
     }
 }
 
-import concrete_ml_extensionsFFI
+//import concrete_ml_extensionsFFI
 // MARK: - Profile -
 extension DataVaultView.ViewModel {
     func encryptProfile() async throws {
         print(#function)
-        sayHello()
+        //sayHello()
     }
     
     func deleteProfile() async throws {
         print(#function)
-        try await Storage.deleteFromDisk(.profile)
+        try await Storage.deleteFromDisk(.matrixEncryptedProfile)
         try await loadFromDisk()
     }
 }
