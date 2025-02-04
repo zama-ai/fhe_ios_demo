@@ -14,7 +14,7 @@ extension Persistable {
     }
     
     static func readFromDisk(_ file: Storage.File) async throws -> Self? {
-        if let data = try await Storage.read(file) {
+        if let data = await Storage.read(file) {
             return try self.init(fromData: data)
         } else {
             return nil

@@ -1,4 +1,4 @@
-// Copyright © 2024 Zama. All rights reserved.
+// Copyright © 2025 Zama. All rights reserved.
 
 import SwiftUI
 
@@ -75,7 +75,7 @@ struct Profile {
         ].flatMap(\.self)
     }
     
-    var oneHotBinary: [Int] {
+    var oneHotBinary: [UInt64] {
         oneHot.map { $0 ? 1 : 0 }
     }
 }

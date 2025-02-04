@@ -7,8 +7,10 @@ final class Storage {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-        
-        case profile = "profile.fheencrypted"
+
+        case matrixPrivateKey = "matrixPrivateKey"
+        case matrixCPUCompressionKey = "matrixCPUCompressionKey"
+        case matrixEncryptedProfile = "matrixProfile.fheencrypted"
 
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
@@ -26,7 +28,9 @@ final class Storage {
             case .weightList: .array
             case .weightMin, .weightMax, .weightAvg:  .int16
                 
-            case .clientKey, .publicKey, .serverKey, .profile: nil
+            case .clientKey, .publicKey, .serverKey: nil
+            case .matrixPrivateKey, .matrixCPUCompressionKey,
+                    .matrixEncryptedProfile: nil
             }
         }
         
@@ -56,12 +60,12 @@ final class Storage {
     }
     
     /// Returns nil if file missing
-    static func read(_ file: File) async throws -> Data? {
+    static func read(_ file: File) async -> Data? {
         let fullURL = singleton.sharedFolder.appendingPathComponent(file.rawValue)
         return await singleton.read(at: fullURL)
     }
     
-    static func read(_ url: URL) async throws -> Data? {
+    static func read(_ url: URL) async -> Data? {
         await singleton.read(at: url)
     }
     

@@ -3,11 +3,16 @@
 import Foundation
 
 final class Network {
-    struct StatsResponse: Codable {
-        let min: Data
-        let max: Data
-        let avg: Data
+    struct StatusResponse: Decodable {
+        let status: String
+        let details: String?
     }
+        
+    enum ServerTask: String {
+        case weight_stats, sleep_quality, ad_targeting
+    }
+    
+    typealias TaskID = String
     
     static let shared = Network()
     private init() {}
@@ -15,10 +20,14 @@ final class Network {
     private let rootURL = URL(string: "https://api.zama.ai")!
     
     /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
-    func uploadServerKey(_ sk: Data) async throws -> String {
+    func uploadServerKey(_ sk: Data, for task: ServerTask) async throws -> String {
+        guard task != .ad_targeting else {
+            throw NSError(domain: "com.zama.network", code: 1001, userInfo: [NSLocalizedDescriptionKey : "ad_targeting is not supported yet"])
+        }
+        
         let res = try await sendRequest(.multipartPOST(root: rootURL,
                                                        path: "/add_key",
-                                                       json: [:],
+                                                       json: ["task_name": task.rawValue],
                                                        file: (name: "key", data: sk)))
         
         if let json = try JSONSerialization.jsonObject(with: res, options: []) as? [String: Any],
@@ -29,36 +38,115 @@ final class Network {
         }
     }
     
-    /// - Returns: FheUint16 min, max and avg of the list of weights. Clear values have to be divided by 10.
-    func getWeightStats(uid: String, encryptedWeights: Data) async throws -> (min: Data, max: Data, avg: Data) {
+    // MARK: - GENERIC -
+    func startTask(_ task: ServerTask, uid: String, encrypted_input: Data) async throws -> TaskID {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
-                                                       path: "/weight_stats",
-                                                       json: ["uid": uid],
-                                                       file: ("input", encryptedWeights)))
+                                                       path: "/start_task",
+                                                       json: ["task_name": task.rawValue,
+                                                              "uid": uid],
+                                                       file: ("encrypted_input", encrypted_input)))
         
-        let obj = try JSONDecoder().decode(StatsResponse.self, from: res)
-        return (obj.min, obj.max, obj.avg)
+        struct StartTaskResponse: Decodable {
+            let task_id: String
+        }
+
+        let obj = try JSONDecoder().decode(StartTaskResponse.self, from: res)
+        return obj.task_id
+    }
+
+    func getStatus(for task: ServerTask, id taskID: TaskID, uid: String) async throws -> String {
+        let res = try await sendRequest(.GET(root: rootURL,
+                                             path: "/get_task_status",
+                                             json: ["task_name": task.rawValue,
+                                                    "task_id": taskID,
+                                                    "uid": uid]))
+        /*
+          "details" : "Task may not exist, you may need to restart it.",
+          "status" : "unknown",
+        
+         
+          "details" : "Task is still in progress.",
+          "status" : "started",
+        
+         
+          "details" : "Task successfully completed.",
+          "status" : "success",
+         */
+        
+        let obj = try JSONDecoder().decode(StatusResponse.self, from: res)
+        return obj.status
+    }
+
+    
+//     `get_task_result` endpoint returns up to 10 different statuses, sometimes located in JSON body, sometimes in HTTP Headers.
+//     
+//     Moreover, data returned comes in various shapes and is not type-safe:
+//     - StreamingResponse (when returning 1 encryptedOutput, ex: sleep)
+//     - JSONResponse with status/min/max/avg (when returning multiple encrypted output, ex: weight)
+//     - JSONResponse with status/details (ex: when status = started or failed)
+//     - JSONResponse with details only (ex: Internal server error)
+//   
+//    So to 'parse' it, we poke and try to find 'status', using JSONSerialization since it's untyped.
+    func validateStatus(for data: Data) throws {
+        let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+        guard let string = json?["status"] as? String,
+              let taskError = TaskError(status: string) else {
+            print("Failed to determine task status. Assuming StreamingResponse, or status == success")
+            return
+        }
+        
+        throw taskError
+    }
+        
+    // MARK: - SPECIALIZED -
+    
+    /// - Returns: FheUint16 min, max and avg of the list of weights. Clear values have to be divided by 10.
+    func getWeightResult(taskID: TaskID, uid: String) async throws -> (min: Data, max: Data, avg: Data) {
+        let data = try await sendRequest(.GET(root: rootURL,
+                                             path: "/get_task_result",
+                                             json: ["task_name": ServerTask.weight_stats.rawValue,
+                                                    "task_id": taskID,
+                                                    "uid": uid]))
+
+        try validateStatus(for: data)
+        struct WeightResponse: Decodable {
+            let min: Data?
+            let max: Data?
+            let avg: Data?
+        }
+
+        let json = try JSONDecoder().decode(WeightResponse.self, from: data)
+        guard let min = json.min, let max = json.max, let avg = json.avg else {
+            throw NetworkingError.message("Result not ready yet: \(data.prettyPrinted ?? "-")")
+        }
+        
+        return (min: min, max: max, avg: avg)
     }
     
     /// - Returns: FheUint8 score between 1 and 5. 1 is best, 5 is bad.
-    func getSleepQuality(uid: String, encryptedSleeps: Data) async throws -> Data {
-        let res = try await sendRequest(.multipartPOST(root: rootURL,
-                                                       path: "/sleep_quality",
-                                                       json: ["uid": uid],
-                                                       file: ("input", encryptedSleeps)))
-        
-        return res
+    func getSleepResult(_ taskID: TaskID, uid: String) async throws -> Data {
+        let data = try await sendRequest(.GET(root: rootURL,
+                                             path: "/get_task_result",
+                                             json: ["task_name": ServerTask.sleep_quality.rawValue,
+                                                    "task_id": taskID,
+                                                    "uid": uid]))
+        try validateStatus(for: data)
+        return data
     }
-    
-    
+
     // MARK: - Helpers -
     private func sendRequest(_ request: URLRequest, session: URLSession = .shared) async throws -> Data {
-        print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") 🔄 (\(request.url?.absoluteString ?? "-"))")
+        print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") ➡️ (\(request.url?.absoluteString ?? "-"))")
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse else {
             throw NetworkingError.nonHTTPResponse
         }
         
+        print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") ⬅️")
+        if let pretty = data.prettyPrinted {
+            print("🌐      \(pretty)")
+        }
+
         guard response.statusCode == 200 else {
             throw NetworkingError.invalidHTTPCode(code: response.statusCode)
         }
@@ -72,7 +160,28 @@ final class Network {
 // MARK: - Helpers -
 
 extension URLRequest {
-    static func multipartPOST(root: URL, path: String, json: [String: Any], file: (name: String, data: Data)) throws -> URLRequest {
+    static func GET(root: URL, path: String, json: [String: String]) throws -> URLRequest {
+        var url = root.appending(path: path)
+        
+        // Convert JSON dictionary to a query string
+        if !json.isEmpty {
+            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            urlComponents?.queryItems = json.map { key, value in
+                URLQueryItem(name: key, value: "\(value)")
+            }
+            if let newURL = urlComponents?.url {
+                url = newURL
+            }
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 300
+
+        return request
+    }
+    
+    static func multipartPOST(root: URL, path: String, json: [String: String], file: (name: String, data: Data)) throws -> URLRequest {
         let url = root.appending(path: path)
         
         var request = URLRequest(url: url)
@@ -83,36 +192,59 @@ extension URLRequest {
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         var body = Data()
-        
-        // Add JSON part
-        if !json.isEmpty {
+
+        // Add JSON fields
+        json.forEach { key, value in
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            
-            if let inlineable = json.first, json.count == 1 {
-                body.append("Content-Disposition: form-data; name=\"\(inlineable.key)\"\r\n\r\n".data(using: .utf8)!)
-                body.append("\(inlineable.value)".data(using: .utf8)!)
-            } else {
-                let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-                body.append("Content-Disposition: form-data; name=\"json\"\r\n".data(using: .utf8)!)
-                body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
-                body.append(jsonData)
-            }
-            
-            body.append("\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
         }
         
-        // Add file part
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.name)\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
-        body.append(file.data)
-        body.append("\r\n".data(using: .utf8)!)
-        
-        // End the boundary
+        // Add files fields
+        [file].forEach { (fileName, fileData) in
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(fileName)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/octet-stream\r\n\r\n".data(using: .utf8)!)
+            body.append(fileData)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+
+        // Close the body with boundary
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         
         request.httpBody = body
         return request
+    }
+}
+
+
+enum TaskError: LocalizedError {
+    case needToWait
+    case needToRestart
+    
+    var errorDescription: String? {
+        switch self {
+        case .needToWait: "Need to wait task completion"
+        case .needToRestart: "Need to restart task"
+        }
+    }
+    
+    internal enum ServerStatus: String {
+        case started, reserved, queued, pending, // NEED TO WAIT
+             failure, revoked, unknown, error, // NEED TO RESTART
+             completed, success // RESULT AVAILABLE
+    }
+
+    init?(status: String) {
+        guard let status = ServerStatus(rawValue: status) else {
+            return nil
+        }
+        
+        switch status {
+        case .success, .completed: return nil
+        case .started, .reserved, .queued: self = .needToWait
+        case .pending, .failure, .revoked, .unknown, .error: self = .needToRestart
+        }
     }
 }
 
@@ -130,6 +262,23 @@ enum NetworkingError: LocalizedError {
         case .invalidHTTPCode(let code): "Request failed with status code: \(code)"
         case .resultParsingFailed: "Failed to parse response"
         case .message(let message): "Error: \(message)"
+        }
+    }
+}
+
+extension Data {
+    var prettyPrinted: String? {
+        do {
+            let jsonObject = try JSONSerialization.jsonObject(with: self, options: [])
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                return jsonString
+            }
+            
+            return nil
+        } catch {
+            return nil
         }
     }
 }

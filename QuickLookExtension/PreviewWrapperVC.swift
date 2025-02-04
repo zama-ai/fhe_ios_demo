@@ -33,7 +33,7 @@ final class PreviewWrapperVC: UIViewController, QLPreviewingController {
     }
     
     func preparePreviewOfFile(at url: URL) async throws {
-        guard let data = try await Storage.read(url),
+        guard let data = await Storage.read(url),
               let ck = try await ClientKey.readFromDisk(.clientKey) else {
             print("QL: cannot read ClientKey or file at \(url)")
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey or file at \(url)!"])
