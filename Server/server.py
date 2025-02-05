@@ -43,6 +43,17 @@ app = FastAPI(debug=False)
 logger.info(f"🚀 FastAPI server running at {URL}:{CONTAINER_PORT}")
 
 
+# Tasks that cannot be canceled
+NON_CANCELLABLE_STATUSES: List = [
+    "success",
+    "completed",
+    "failure",
+    "revoked",
+    "pending",
+    "unknown",
+    "error",
+]
+   
 # Instanciate Redis data-base
 try:
     redis_bd = redis.Redis(
@@ -76,7 +87,7 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
     # Write uploaded ServerKey to disk
     try:
         file_content = await key.read()
-        file_path = FILES_FOLDER / f"{uid}.{task_name}.serverKey"
+        file_path = FILES_FOLDER / f"{uid}.serverKey"
         with open(file_path, "wb") as f:
             f.write(file_content)
         file_size = file_path.stat().st_size  # Get file size in bytes
@@ -392,22 +403,11 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
         HTTPException: Raised with status code 500 if revoking the task fails.
     """
 
-    # Tasks that cannot be canceled
-    non_cancellable_statuses: List = [
-        "success",
-        "completed",
-        "failure",
-        "revoked",
-        "pending",
-        "unknown",
-        "error",
-    ]
-
     # Get the current task status
     initial_overall_info = get_task_status(task_id, uid)
     initial_status = initial_overall_info.get("status", "unknown").lower()
 
-    if initial_status in non_cancellable_statuses:
+    if initial_status in NON_CANCELLABLE_STATUSES:
         logger.warning(
             "⚠️ Cannot cancel task ID [task_id=`%s`] (already finished or unknown).", task_id
         )

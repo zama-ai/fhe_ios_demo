@@ -40,7 +40,7 @@ except Exception as e:
     raise RuntimeError(error_message)
 
 
-@celery_app.task(name="tasks.run_binary_task")
+@celery_app.task(name="tasks.run_binary_task", queue="use-cases")
 def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
     """Executes a binary command as a Celery task.
 
@@ -71,4 +71,3 @@ def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
 
     # Celry cannot serialize a <class 'subprocess.CompletedProcess'> object in JSON
     return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
-

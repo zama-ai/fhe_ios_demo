@@ -20,9 +20,10 @@ if [ "$RUN_CELERY" = "true" ]; then
   # Setting `user: "nobody:nogroup"` would eliminate the warning, but it prevents Celery from
   # accessing necessary files, which is required in our use-case.
   # -A tasks.celery_app: Indicates where the celery app is defined
-  # --loglevel=debug: Displays all the information
+  # --loglevel=debug   : Displays all the information
   exec celery -A tasks.celery_app worker \
       --loglevel="$CELERY_LOGLEVEL" \
+      --queues="use-cases" \
       --concurrency="$CELERY_CONCURRENCY" \
 
 else

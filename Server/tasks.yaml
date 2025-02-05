@@ -6,11 +6,6 @@
 # 3. The response format (e.g., stream, JSON, base64).
 
 tasks:
-  add_42:
-    binary: add_42
-    output_files:
-      - filename: "{uid}.add_42.output.fheencrypted"
-    response_type: stream
 
   weight_stats:
     binary: weight_stats
