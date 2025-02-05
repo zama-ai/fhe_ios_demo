@@ -60,27 +60,14 @@ final class Network {
                                              json: ["task_name": task.rawValue,
                                                     "task_id": taskID,
                                                     "uid": uid]))
-        /*
-          "details" : "Task may not exist, you may need to restart it.",
-          "status" : "unknown",
-        
-         
-          "details" : "Task is still in progress.",
-          "status" : "started",
-        
-         
-          "details" : "Task successfully completed.",
-          "status" : "success",
-         */
-        
         let obj = try JSONDecoder().decode(StatusResponse.self, from: res)
         return obj.status
     }
 
     
-//     `get_task_result` endpoint returns up to 10 different statuses, sometimes located in JSON body, sometimes in HTTP Headers.
-//     
-//     Moreover, data returned comes in various shapes and is not type-safe:
+//     `get_task_status/_result` endpoints return up to 10 different statuses, sometimes in JSON body, sometimes in HTTP Headers.
+//
+//     Moreover, data returned comes in various shapes, is not type-safe:
 //     - StreamingResponse (when returning 1 encryptedOutput, ex: sleep)
 //     - JSONResponse with status/min/max/avg (when returning multiple encrypted output, ex: weight)
 //     - JSONResponse with status/details (ex: when status = started or failed)
@@ -88,7 +75,7 @@ final class Network {
 //   
 //    So to 'parse' it, we poke and try to find 'status', using JSONSerialization since it's untyped.
     func validateStatus(for data: Data) throws {
-        let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+        let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
         guard let string = json?["status"] as? String,
               let taskError = TaskError(status: string) else {
             print("Failed to determine task status. Assuming StreamingResponse, or status == success")

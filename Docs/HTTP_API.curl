@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Add key and store the returned UID
+RESPONSE=$(curl -v -X POST https://api.zama.ai/add_key \
+  -F "key=@client_files/serverKeyCompressed")
+
+echo "Add key response: $RESPONSE"
+
+EXTRACTED_UID=$(echo "$RESPONSE" | jq -r '.uid')
+
+echo "Received UID: $EXTRACTED_UID"
+
+# Stats using the received UID
+# curl \
+#   -X POST https://api.zama.ai/sleep_quality \
+#   -F "uid=$EXTRACTED_UID" \
+#   -F "input=@client_files/sleepList.fheencrypted" \
+#   -o client_files/sleep_quality_output.fheencrypted
+
+# Start
+#######
+curl \
+  -X POST "https://api.zama.ai/start_task" \
+  -F "task_name=weight_stats" \
+  -F "uid=5c8bb483-6e60-49bd-bb0c-09eb9cf40ca9" \
+  -F "encrypted_input=@weightList.fheencrypted"
+
+# Return: {
+#     "task_id": "6a45a60b-99f9-4370-a7d3-89712cf8623a",
+# }
+
+
+# GET status
+############
+curl \
+  -X GET "https://api.zama.ai/get_task_status" \
+  -F "task_name=weight_stats" \
+  -F "task_id=6a45a60b-99f9-4370-a7d3-89712cf8623a" \
+  -F "uid=5c8bb483-6e60-49bd-bb0c-09eb9cf40ca9"
+
+# Return: {
+#     "task_id": "6a45a60b-99f9-4370-a7d3-89712cf8623a",
+#     "status": "success",
+#     "details": "Task successfully completed.",
+#     "worker": "not tracked"
+# }
+
+# GET result
+############
+curl \
+  -X GET "https://api.zama.ai/get_task_result?task_name=weight_stats&task_id=8b458da4-1307-42fb-850a-b32c12a1feca&uid=5c8bb483-6e60-49bd-bb0c-09eb9cf40ca9" \
+  -o output.json
+
+curl \
+  -X GET "https://api.zama.ai/get_task_result" \
+    -G \
+    --data-urlencode "task_name=weight_stats" \
+    --data-urlencode "task_id=6a45a60b-99f9-4370-a7d3-89712cf8623a" \
+    --data-urlencode "uid=5c8bb483-6e60-49bd-bb0c-09eb9cf40ca9"
