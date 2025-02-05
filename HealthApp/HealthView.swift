@@ -60,25 +60,15 @@ struct HealthView: View {
             .tint(.black)
             
             HStack {
-                Text("Weight")
-                AsyncButton("Status") {
-                    try await vm.checkStatus(for: .weight_stats)
-                }
-                
-                AsyncButton("Result") {
-                    try await vm.getResultForWeight()
-                }
-            }
-
-            HStack {
                 Text("Sleep")
-                AsyncButton("Status") {
-                    try await vm.checkStatus(for: .sleep_quality)
-                }
-                
-                AsyncButton("Result") {
-                    try await vm.getResultForSleep()
-                }
+                AsyncButton("Status") { try await vm.checkStatus(for: .sleep_quality) }
+                AsyncButton("Result") { try await vm.getResultForSleep() }
+            }
+            
+            HStack {
+                Text("Weight")
+                AsyncButton("Status") { try await vm.checkStatus(for: .weight_stats) }
+                AsyncButton("Result") { try await vm.getResultForWeight() }
             }
         }
         .padding()
