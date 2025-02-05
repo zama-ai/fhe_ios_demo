@@ -149,7 +149,7 @@ def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
         backup_path = BACKUP_FOLDER / f"backup.{task_id}.{output_file_path.name}"
         try:
             backup_path.write_bytes(data)
-            logger.info(f"💾 Successfully saved backup file at `{backup_path}`.")
+            logger.debug(f"💾 Successfully saved backup file at `{backup_path}`.")
         except Exception as e:
             logger.warning(f"🚨 Failed to create backup `{backup_path}`: {e}.")
 
