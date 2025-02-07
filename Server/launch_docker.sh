@@ -96,6 +96,7 @@ docker-compose up -d --scale service_celery=$CELERY_NB_INSTANCE
 
 echo "--------------"
 echo "Containers are running in detached mode. To view real-time logs, use: 'docker-compose logs -f'"
+echo "Check the container: 'docker exec -it container_fastapi_app /bin/bash"
 echo ""
 echo "Check the status of all running containers: 'docker-compose ps'"
 echo ""
