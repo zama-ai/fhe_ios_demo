@@ -531,7 +531,11 @@ async def get_task_result(
         output_file_path = FILES_FOLDER / output_filename
         data = fetch_file_content(output_file_path, task_id, backup=backup)
         
-        task_logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+        if backup:
+            task_logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+        else:
+            task_logger.info("📜 [task_id=`%s`] already complete (Size: `%s`)", task_id, len(data))
+
         task_logger.debug(f"Returning STREM response for task '{task_name}'")
 
         return StreamingResponse(
@@ -574,7 +578,11 @@ async def get_task_result(
                 else data.decode("utf-8")
             )
 
-        task_logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+        if backup:
+            task_logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+        else:
+            task_logger.info("📜 [task_id=`%s`] already complete (Size: `%s`)", task_id, len(data))
+
         task_logger.debug(f"Returning JSON response for task '{task_name}'")
         
         return JSONResponse(content=response_data)
