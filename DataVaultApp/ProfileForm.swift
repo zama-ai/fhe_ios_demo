@@ -8,14 +8,13 @@ import SwiftUI
 
 struct ProfileForm: View {
     @StateObject var vm: DataVaultView.ViewModel
-    @State private var editProfile: EditProfile = .init()
     @State private var interests: [Interest] = []
     
     var body: some View {
             Form {
                 Section {
                     LabeledContent("Gender") {
-                        Picker("Gender", selection: $editProfile.gender) {
+                        Picker("Gender", selection: $vm.editProfile.gender) {
                             ForEach(Gender.allCases.reversed(), id: \.self) { item in
                                 Text(item.prettyTypeName).tag(item)
                             }
@@ -24,7 +23,7 @@ struct ProfileForm: View {
                     }
                     
                     LabeledContent("Age") {
-                        Picker("Age", selection: $editProfile.age) {
+                        Picker("Age", selection: $vm.editProfile.age) {
                             ForEach(AgeGroup.allCases, id: \.self) { item in
                                 Text(item.displayName).tag(item)
                             }
@@ -34,14 +33,14 @@ struct ProfileForm: View {
                     
                     // Toggle("Interested In Kids Ads", isOn: $editProfile.interestedInKids)
                     
-                    Picker("Interested In", selection: $editProfile.interests) {
+                    Picker("Interested In", selection: $vm.editProfile.interests) {
                         ForEach(Interest.allCases, id: \.self) { item in
                             Text(item.prettyTypeName).tag(item)
                         }
                     }
                     .pickerStyle(.navigationLink)
 
-                    Picker("Country", selection: $editProfile.country) {
+                    Picker("Country", selection: $vm.editProfile.country) {
                         let sorted = Country.allCases.sorted(by: { $0.localizedCountryName < $1.localizedCountryName })
                         ForEach(sorted, id: \.self) { item in
                             Text("\(item.flag) \(item.localizedCountryName)")
@@ -50,7 +49,7 @@ struct ProfileForm: View {
                     }
                     .pickerStyle(.navigationLink)
                     
-                    Picker("Language", selection: $editProfile.language) {
+                    Picker("Language", selection: $vm.editProfile.language) {
                         let sorted = Language.allCases.sorted(by: { $0.languageNames.native < $1.languageNames.native })
                         ForEach(sorted, id: \.self) { item in
                             Text("\(item.languageNames.native) (\(item.languageNames.translated))")
@@ -58,16 +57,7 @@ struct ProfileForm: View {
                         }
                     }
                     .pickerStyle(.navigationLink)
-                }
-                
-                Section("OneHot") {
-                    if let profile = Profile(editProfile: editProfile) {
-                        Text("\(profile.oneHotBinary)")
-                    } else {
-                        Text("Fill all mandatory fields")
-                            .foregroundStyle(.red)
-                    }
-                }
+                }                
         }
     }
 }

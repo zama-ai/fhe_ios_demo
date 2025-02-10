@@ -20,11 +20,7 @@ final class Network {
     private let rootURL = URL(string: "https://api.zama.ai")!
     
     /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
-    func uploadServerKey(_ sk: Data, for task: ServerTask) async throws -> String {
-        guard task != .ad_targeting else {
-            throw NSError(domain: "com.zama.network", code: 1001, userInfo: [NSLocalizedDescriptionKey : "ad_targeting is not supported yet"])
-        }
-        
+    func uploadServerKey(_ sk: Data, for task: ServerTask) async throws -> String {        
         let res = try await sendRequest(.multipartPOST(root: rootURL,
                                                        path: "/add_key",
                                                        json: ["task_name": task.rawValue],

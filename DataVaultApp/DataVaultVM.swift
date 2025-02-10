@@ -8,6 +8,8 @@ extension DataVaultView {
     @MainActor
     final class ViewModel: ObservableObject {
         
+        @Published var editProfile: EditProfile = .init()
+
         @Published var weightGranted: Bool = false
         @Published var sleepGranted: Bool = false
         
@@ -158,7 +160,12 @@ extension DataVaultView {
 extension DataVaultView.ViewModel {
     func encryptProfile() async throws {
         print(#function)
-        //sayHello()
+        
+        if let profile = Profile(editProfile: editProfile) {
+            let text = "\(profile.oneHotBinary)"
+            print(profile.oneHotBinary)
+            UIPasteboard.general.string = text
+        }
     }
     
     func deleteProfile() async throws {

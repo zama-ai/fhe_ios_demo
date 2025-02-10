@@ -11,6 +11,7 @@ final class Storage {
         case matrixPrivateKey = "matrixPrivateKey"
         case matrixCPUCompressionKey = "matrixCPUCompressionKey"
         case matrixEncryptedProfile = "matrixProfile.fheencrypted"
+        case matrixEncryptedResult = "matrixResult.fheencrypted"
 
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
@@ -30,7 +31,7 @@ final class Storage {
                 
             case .clientKey, .publicKey, .serverKey: nil
             case .matrixPrivateKey, .matrixCPUCompressionKey,
-                    .matrixEncryptedProfile: nil
+                    .matrixEncryptedProfile, .matrixEncryptedResult: nil
             }
         }
         
