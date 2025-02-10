@@ -11,7 +11,7 @@ services:
     container_name: container_redis_bd
     image: redis:latest
     ports:
-      - "6379:6379"
+      - "$REDIS_HOST_PORT:$REDIS_CONTAINER_PORT"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -40,8 +40,8 @@ services:
       - ./$SHARED_DIR:/project/$SHARED_DIR
       - ./$BACKUP_DIR:/project/$BACKUP_DIR
     ports:
-      - "$FASTAPI_PORT_HTTP:80"
-      - "$FASTAPI_PORT_HTTPS:5000"
+      - "$FASTAPI_HOST_PORT_HTTP:$FASTAP_CONTAINER_PORT_HTTP"
+      - "$FASTAPI_HOST_PORT_HTTPS:$FASTAP_CONTAINER_PORT_HTTPS"
     depends_on:
       service_redis:
         condition: service_healthy
@@ -67,6 +67,6 @@ services:
     environment:
       RUN_TYPE: "usecases"
       DOMAIN_NAME: $DOMAIN_NAME
-      CELERY_BROKER_URL: $CELERY_BROKER_URL
-      CELERY_RESULT_BACKEND: $CELERY_RESULT_BACKEND
+      CELERY_BROKER_URL: $BROKER_URL
+      CELERY_RESULT_BACKEND: $BACKEND_URL
     restart: $RESTART_POLICY
