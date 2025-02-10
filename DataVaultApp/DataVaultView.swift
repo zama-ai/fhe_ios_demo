@@ -13,17 +13,17 @@ struct DataVaultView: View {
         let icon: String
         let color: Color
         
-        static let profile: Metric = .init(name: "Profile", icon: "person.text.rectangle.fill", color: .teal)
         static let sleep: Metric = .init(name: "Sleep", icon: "bed.double.fill", color: .mint)
         static let weight: Metric = .init(name: "Weight", icon: "figure", color: .purple)
+        static let profile: Metric = .init(name: "Profile", icon: "person.text.rectangle.fill", color: .teal)
     }
     
     enum TabKind {
-        case profile, sleep, weight
+        case sleep, weight, profile
     }
     
     @StateObject private var vm = ViewModel()
-    @State private var selectedTab: TabKind = .profile
+    @State private var selectedTab: TabKind = .sleep
     
     var body: some View {
         header
@@ -55,20 +55,20 @@ struct DataVaultView: View {
     }
     
     private var content: some View {
-        ScrollView {
-//        TabView(selection: $selectedTab) {
-//            Tab(Metric.profile.name, systemImage: Metric.profile.icon, value: TabKind.profile) {
-                profileSection
-//            }
-//            Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
-                sleepSection
-//            }
-//            Tab(Metric.weight.name, systemImage: Metric.weight.icon, value: TabKind.weight) {
-                weightSection
-//            }
+        //ScrollView {
+        TabView(selection: $selectedTab) {
+            Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
+              sleepSection
+            }
+            Tab(Metric.weight.name, systemImage: Metric.weight.icon, value: TabKind.weight) {
+              weightSection
+            }
+            Tab(Metric.profile.name, systemImage: Metric.profile.icon, value: TabKind.profile) {
+              profileSection
+            }
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .padding(8)
+//        .scrollBounceBehavior(.basedOnSize)
+//        .padding(8)
     }
     
     private var profileSection: some View {
@@ -84,7 +84,7 @@ struct DataVaultView: View {
             NavigationStack {
                 ProfileForm(vm: vm)
             }
-            .frame(height: 400)
+            .frame(height: 300)
         }
     }
     
@@ -173,6 +173,8 @@ struct DataVaultView: View {
                             .customFont(.callout)
                             .foregroundStyle(.black)
                     }
+                    
+                    Spacer()
                 }
                 .padding(.vertical)
             }

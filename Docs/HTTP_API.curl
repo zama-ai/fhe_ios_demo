@@ -1,14 +1,55 @@
 #!/bin/bash
 
-# Add key and store the returned UID
-RESPONSE=$(curl -v -X POST https://api.zama.ai/add_key \
-  -F "key=@client_files/serverKeyCompressed")
+##################
+## AD TARGETING  #
+##################
+curl \
+  -X POST "https://api.zama.ai/add_key" \
+  -F "task_name=ad_targeting" \
+  -F "key=@matrixCPUCompressionKey"
 
-echo "Add key response: $RESPONSE"
+# {
+#     "uid": "906ead1d-1618-4f00-abbb-2850d6c0e3a9",
+# }
 
-EXTRACTED_UID=$(echo "$RESPONSE" | jq -r '.uid')
+curl \
+  -X POST "https://api.zama.ai/start_task" \
+  -F "task_name=ad_targeting" \
+  -F "uid=906ead1d-1618-4f00-abbb-2850d6c0e3a9" \
+  -F "encrypted_input=@matrixProfile.fheencrypted"
 
-echo "Received UID: $EXTRACTED_UID"
+# {
+#     "task_id": "51e63bae-c44c-4c53-82ea-0c7fb47400cf",
+# }
+
+curl \
+  -X GET "https://api.zama.ai/get_task_status" \
+  -F "task_name=ad_targeting" \
+  -F "task_id=51e63bae-c44c-4c53-82ea-0c7fb47400cf" \
+  -F "uid=906ead1d-1618-4f00-abbb-2850d6c0e3a9"
+
+# {
+#     "task_id": "51e63bae-c44c-4c53-82ea-0c7fb47400cf",
+#     "status": "success",
+#     "details": "Task successfully completed.",
+#     "worker": "not tracked",
+#     "uid":"906ead1d-1618-4f00-abbb-2850d6c0e3a9"
+# }
+
+curl \
+  -X GET "https://api.zama.ai/get_task_result" \
+    -G \
+    --data-urlencode "task_name=ad_targeting" \
+    --data-urlencode "task_id=51e63bae-c44c-4c53-82ea-0c7fb47400cf" \
+    --data-urlencode "uid=906ead1d-1618-4f00-abbb-2850d6c0e3a9"
+
+curl \
+  -X GET "https://api.zama.ai/get_task_result?task_name=ad_targeting&task_id=51e63bae-c44c-4c53-82ea-0c7fb47400cf&uid=906ead1d-1618-4f00-abbb-2850d6c0e3a9"
+
+
+################
+##   HEALTH    #
+################
 
 # Stats using the received UID
 # curl \
@@ -25,7 +66,7 @@ curl \
   -F "uid=5c8bb483-6e60-49bd-bb0c-09eb9cf40ca9" \
   -F "encrypted_input=@weightList.fheencrypted"
 
-# Return: {
+# {
 #     "task_id": "6a45a60b-99f9-4370-a7d3-89712cf8623a",
 # }
 
@@ -38,7 +79,7 @@ curl \
   -F "task_id=6a45a60b-99f9-4370-a7d3-89712cf8623a" \
   -F "uid=5c8bb483-6e60-49bd-bb0c-09eb9cf40ca9"
 
-# Return: {
+# {
 #     "task_id": "6a45a60b-99f9-4370-a7d3-89712cf8623a",
 #     "status": "success",
 #     "details": "Task successfully completed.",

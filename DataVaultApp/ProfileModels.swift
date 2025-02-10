@@ -132,16 +132,16 @@ enum AgeGroup: Int, OneHotable {
 enum Language: String, PrettyNamable, OneHotable {
     case arabic = "ar"
     case english = "en"
-    case spanish = "es"
     case french = "fr"
-    case mandarin = "zh"
     case german = "de"
-    case japanese = "ja"
     case hindi = "hi"
-    case tamil = "ta"
     case italian = "it"
+    case japanese = "ja"
+    case mandarin = "zh"
+    case spanish = "es"
     case tamazight = "ber"
-    
+    case tamil = "ta"
+
     var languageNames: (native: String, translated: String) {
         let native = Locale(identifier: rawValue).localizedString(forLanguageCode: rawValue)?.localizedCapitalized
         let clear = Locale.current.localizedString(forLanguageCode: rawValue)?.localizedCapitalized
