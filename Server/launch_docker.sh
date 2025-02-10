@@ -92,10 +92,12 @@ fi
 # Build the Docker image and starting the Docker containers
 echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
 docker-compose build --no-cache
-docker-compose up -d --scale service_celery=$CELERY_NB_INSTANCE
+docker-compose up -d --scale service_celery_usecases=$CELERY_WORKER_COUNT_USECASE_QUEUE
+docker-compose logs -f
 
 echo "--------------"
 echo "Containers are running in detached mode. To view real-time logs, use: 'docker-compose logs -f'"
+echo ""
 echo "Check the container: 'docker exec -it container_fastapi_app /bin/bash"
 echo ""
 echo "Check the status of all running containers: 'docker-compose ps'"

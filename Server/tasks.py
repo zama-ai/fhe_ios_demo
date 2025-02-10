@@ -23,12 +23,18 @@ try:
     celery_app.conf.update(
         timezone="Europe/Paris",
         enable_utc=True,
-        task_track_started=True,  # This will enable the STARTED status
-        result_expires=60 * 60 * 24 * 30,  # One-month history
-        task_acks_late=True,  # Redispatch unfinished tasks
-        task_acks_on_failure_or_timeout=False,  # Avoid marking a task as “acknowledged” if it crashes
-        broker_transport_options={"visibility_timeout": 60 * 1},  # X seconds before the  before an abandoned task becomes available again
-        worker_prefetch_multiplier=1,  # How many tasks a Celery worker will prefetch before starting execution
+        # `task_track_started`: Enables the `STARTED` status
+        task_track_started=True,
+        # `result_expires`: One-month history
+        result_expires=60 * 60 * 24 * 30,
+        # `task_acks_late`: Redispatch unfinished tasks
+        task_acks_late=True,
+        # `task_acks_on_failure_or_timeout`: Avoid marking a task as “acknowledged” if it crashes
+        task_acks_on_failure_or_timeout=False,
+        # `broker_transport_options`: X seconds before an abandoned task becomes available again
+        broker_transport_options={"visibility_timeout": 60 * 1},
+        # `worker_prefetch_multiplier`: How many tasks a Celery worker prefetchs before starting it
+        worker_prefetch_multiplier=1,
         task_reject_on_worker_lost=True,
     )
     logger.info("🔥 Successfully connected to Celery!")
@@ -40,8 +46,7 @@ except Exception as e:
     raise RuntimeError(error_message)
 
 
-@celery_app.task(name="tasks.run_binary_task", queue="use-cases")
-def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
+def execute_binary(binary: str, uid: str, task_name: str) -> Dict:
     """Executes a binary command as a Celery task.
 
     Args:
@@ -71,3 +76,9 @@ def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
 
     # Celry cannot serialize a <class 'subprocess.CompletedProcess'> object in JSON
     return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
+
+
+# Queue 1: `use-cases`
+@celery_app.task(name="tasks.run_binary_task", queue="usecases")
+def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
+    return execute_binary(binary, uid, task_name)

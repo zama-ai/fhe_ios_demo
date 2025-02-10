@@ -4,7 +4,7 @@ services:
 
   # Redis raised a warning, for a potentiel "Out of Memory" issue
   # To get rid of potentiel failures and the warning, allow memory overcommitment:
-  # - Use `sudo sysctl vm.overcommit_memory=1` for a temporary chang
+  # - Use `sudo sysctl vm.overcommit_memory=1` for a temporary change
   # - Use `echo "vm.overcommit_memory=1" | sudo tee -a /etc/sysctl.conf` for a permanent change
   # On this machine, the setting is permanent in `sysctl.conf`
   service_redis:
@@ -33,7 +33,8 @@ services:
     # No need because we have it in entrypoint.sh
     # command: python server.py
     environment:
-      RUN_CELERY: "false"
+      RUN_TYPE: "fastapi"
+      DOMAIN_NAME: $DOMAIN_NAME
     volumes:
       - $HOST_CERTS_PATH:/project/certs:ro
       - ./$SHARED_DIR:/project/$SHARED_DIR
@@ -44,11 +45,9 @@ services:
     depends_on:
       service_redis:
         condition: service_healthy
-    environment:
-      DOMAIN_NAME: $DOMAIN_NAME
     restart: $RESTART_POLICY
 
-  service_celery:
+  service_celery_usecases:
     env_file:
       - .env  # Load the environment variables
     build:
@@ -66,7 +65,7 @@ services:
       - service_redis
       - service_fastapi
     environment:
-      RUN_CELERY: "true"
+      RUN_TYPE: "usecases"
       DOMAIN_NAME: $DOMAIN_NAME
       CELERY_BROKER_URL: $CELERY_BROKER_URL
       CELERY_RESULT_BACKEND: $CELERY_RESULT_BACKEND

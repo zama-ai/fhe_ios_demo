@@ -2,7 +2,7 @@
 
 import pickle as pkl
 import sys
-import time
+
 import concrete_ml_extensions as fhext
 import numpy as np
 
