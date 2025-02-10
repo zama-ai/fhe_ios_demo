@@ -8,8 +8,8 @@ from celery import Celery
 
 from utils import *
 
-BROKER_URL = os.getenv("CELERY_BROKER_URL")
-BACKEND_URL = os.getenv("CELERY_RESULT_BACKEND")
+BROKER_URL = os.getenv("BROKER_URL")
+BACKEND_URL = os.getenv("BACKEND_URL")
 
 # Instanciate Celery app
 try:
