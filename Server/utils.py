@@ -15,8 +15,9 @@ from dotenv import load_dotenv
 # Load environment variables from '.env' file
 load_dotenv(dotenv_path="./.env")
 
-# Environment variables
-BROKER_URL = os.getenv("CELERY_BROKER_URL")
+URL = os.getenv("URL")
+CONTAINER_PORT = os.getenv("FASTAP_CONTAINER_PORT_HTTPS")
+BROKER_URL = os.getenv("BROKER_URL")
 PARSED_URL = urlparse(BROKER_URL)
 
 SHARED_DIR = os.getenv("SHARED_DIR")
@@ -26,9 +27,6 @@ FILES_FOLDER.mkdir(exist_ok=True)
 BACKUP_DIR = os.getenv("BACKUP_DIR")
 BACKUP_FOLDER = Path(__file__).parent / BACKUP_DIR
 BACKUP_FOLDER.mkdir(exist_ok=True)
-
-URL = os.getenv("URL")
-CONTAINER_PORT = os.getenv("CONTAINER_PORT")
 
 LOG_FILE = Path(__file__).parent / "server.log"
 CONFIG_FILE = Path(__file__).parent / "tasks.yaml"

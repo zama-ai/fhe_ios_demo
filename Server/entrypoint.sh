@@ -24,7 +24,7 @@ elif [ "$RUN_TYPE" = "fastapi" ]; then
   echo "🚀 Starting Uvicorn Python server..."
   exec uvicorn server:app \
       --host 0.0.0.0 \
-      --port "$CONTAINER_PORT" \
+      --port "$FASTAP_CONTAINER_PORT_HTTPS" \
       --ssl-keyfile "$CONTAINER_CERTS_PATH/$PRIVKEY_FILE_NAME" \
       --ssl-certfile "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME"
 else
