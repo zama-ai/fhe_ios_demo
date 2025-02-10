@@ -14,23 +14,19 @@ if [ ! -e "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME" ] || [ ! -e "$CONTAINER_CERTS_
 fi
 
 # Start the appropriate service
-if [ "$RUN_CELERY" = "true" ]; then
-  echo "🚀 Starting Celery Worker..."
-  # Running Celery as root is not a best practice and triggers a security warning.
-  # Setting `user: "nobody:nogroup"` would eliminate the warning, but it prevents Celery from
-  # accessing necessary files, which is required in our use-case.
-  # -A tasks.celery_app: Indicates where the celery app is defined
-  # --loglevel=debug   : Displays all the information
+if [ "$RUN_TYPE" = "usecases" ]; then
+  echo "🚀 Starting Celery Worker for tasks..."
   exec celery -A tasks.celery_app worker \
       --loglevel="$CELERY_LOGLEVEL" \
-      --queues="use-cases" \
-      --concurrency="$CELERY_CONCURRENCY" \
-
-else
+      --queues="usecases" \
+      --concurrency="$CELERY_WORKER_CONCURRENCY_USECASE_QUEUE"
+elif [ "$RUN_TYPE" = "fastapi" ]; then
   echo "🚀 Starting Uvicorn Python server..."
   exec uvicorn server:app \
       --host 0.0.0.0 \
       --port "$CONTAINER_PORT" \
       --ssl-keyfile "$CONTAINER_CERTS_PATH/$PRIVKEY_FILE_NAME" \
       --ssl-certfile "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME"
+else
+  echo "$RUN_TYPE not valid."
 fi

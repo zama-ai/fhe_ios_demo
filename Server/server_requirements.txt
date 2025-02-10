@@ -5,7 +5,7 @@ PyYAML
 python-multipart
 concrete_ml_extensions
 celery[redis]
-redis #  sudo apt install redis
+redis
 python-dotenv
 pytest
 requests
