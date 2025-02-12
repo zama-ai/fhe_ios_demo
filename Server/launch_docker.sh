@@ -2,17 +2,24 @@
 
 # Deployment Script for fhe_ios_demo Server
 
-# Set the image names
-RUST_IMAGE_NAME="fhe_ios_demo_rust_builder"
-FINAL_IMAGE_NAME="fhe_ios_demo_server"
-
 # Parse command line arguments
 REBUILD_RUST=false
 
+if [ "$1" == "dev" ]; then
+    echo "🚀 Development mode..."
+    export COMPOSE_PROJECT_NAME="fhe_ios_demo_dev"
+    export ENV_FILE=".env_dev"
+elif [ "$1" == "prod" ]; then
+    echo "🚀 Production mode..."
+    export COMPOSE_PROJECT_NAME="fhe_ios_demo_prod"
+    export ENV_FILE=".env_prod"
+fi
+
 # Load environment variables
-if [ -f .env ]; then
+if [ -f $ENV_FILE ]; then
+    echo "Loading environment variables..."
     set -o allexport  # Enables automatic export of variables
-    source .env       # Loads the .env file
+    source $ENV_FILE  # Loads the .env file
     set +o allexport  # Disables automatic export
 fi
 
@@ -81,7 +88,8 @@ echo "Cleaning up existing containers..."
 # With `docker-compose down,` Docker Compose tries to delete the network associated with 
 # the services. If no network exists, it displays this warning: 
 # `WARNING: Network server_default not found.`
-docker-compose down --rmi all
+docker-compose -p "$COMPOSE_PROJECT_NAME" down --rmi all
+docker system prune -a -f
 
 # Build the Rust stage if needed
 if $REBUILD_RUST; then
@@ -91,29 +99,7 @@ fi
 
 # Build the Docker image and starting the Docker containers
 echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
-docker-compose build --no-cache
-docker-compose up -d --scale service_celery_usecases=$CELERY_WORKER_COUNT_USECASE_QUEUE
-docker-compose logs -f
-
-echo "--------------"
-echo "Containers are running in detached mode. To view real-time logs, use: 'docker-compose logs -f'"
-echo ""
-echo "Check the container: 'docker exec -it container_fastapi_app /bin/bash"
-echo ""
-echo "Check the status of all running containers: 'docker-compose ps'"
-echo ""
-echo "Celery worker monitoring:"
-echo "View active tasks currently being processed by Celery: 'docker exec -it server_service_celery_1 celery -A server.celery_app inspect active'"
-echo "View all registered tasks available in Celery: 'docker exec -it server_service_celery_1 celery -A server.celery_app inspect registered'"
-echo ""
-echo "View queued taks in Redis: 'docker exec -it container_redis_bd redis-cli LRANGE celery 0 -1'"
-echo "Refresh Redis 'docker exec -it container_redis_bd redis-cli FLUSHALL'"
-echo ""
-echo "Verifying task recovery after a container crash:"
-echo """
-- Step 1: Open Terminal (1) and launch tasks using: 'bash ./client.curl'
-- Step 2: Open Terminal (2) list running containers with: 'docker ps', then monitor logs of a Celery worker: 'docker logs -f server_service_celery_1docker logs -f server_service_celery_1'
-- Step 3: Open Terminal (3), simulate a crash by repeatedly killing the Celery process inside the container: 
-    'for i in {1..1000}; do docker exec server_service_celery_2 pkill -9 -f 'celery'; done'
-- Step 4: Return to Terminal (1) and check logs. The tasks handled by the killed container should transition from 'started' back to 'queued', awaiting reassignment.
-"""
+docker-compose -p "$COMPOSE_PROJECT_NAME" build --no-cache
+docker-compose -p "$COMPOSE_PROJECT_NAME" up -d \
+  --scale service_celery_usecases=$CELERY_WORKER_COUNT_USECASE_QUEUE
+docker-compose -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f
