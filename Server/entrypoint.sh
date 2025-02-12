@@ -36,6 +36,12 @@ elif [ "$RUN_TYPE" = "fastapi" ]; then
           --host 0.0.0.0 \
           --port "$PORT"
     fi
+elif [ "$RUN_TYPE" = "ads" ]; then
+  echo "🚀 Starting Celery Worker for ads..."
+  exec celery -A tasks.celery_app worker \
+        --loglevel="$CELERY_LOGLEVEL" \
+        --queues="ads" \
+        --concurrency="$CELERY_WORKER_CONCURRENCY_AD_QUEUE"
 else
   echo "RUN_TYPE='$RUN_TYPE' not valid!"
 fi

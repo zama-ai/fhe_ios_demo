@@ -101,5 +101,6 @@ fi
 echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
 docker-compose -p "$COMPOSE_PROJECT_NAME" build --no-cache
 docker-compose -p "$COMPOSE_PROJECT_NAME" up -d \
-  --scale service_celery_usecases=$CELERY_WORKER_COUNT_USECASE_QUEUE
+  --scale service_celery_usecases=$CELERY_WORKER_COUNT_USECASE_QUEUE \
+  --scale service_celery_ads=$CELERY_WORKER_COUNT_AD_QUEUE
 docker-compose -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f

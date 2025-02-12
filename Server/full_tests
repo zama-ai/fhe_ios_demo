@@ -7,16 +7,14 @@ N_NEW_TASKS=${3:-5}
 if [ "$1" == "dev" ]; then
     echo "🚀 Testing in the development environment..."
     PORT=444
-    PROTOCOL="HTTPS"
+    PROTOCOL="https"
     ENV_FILE=".env_dev"
 elif [ "$1" == "prod" ]; then
     echo "🚀 Testing in the production environment..."
     PORT=443
-    PROTOCOL="HTTPS"
-    ENV_FILE=".env"
+    PROTOCOL="https"
+    ENV_FILE=".env_prod"
 fi 
-
-ENV_FILE=".env"
 
 # Load variables from '.env'
 if [ -f $ENV_FILE ]; then
@@ -26,6 +24,7 @@ if [ -f $ENV_FILE ]; then
 fi
 
 URL="$PROTOCOL://$DOMAIN_NAME:$PORT"
+echo "URL: $URL"
 GET_STATUS_ACTION="true"
 CANCEL_ACTION="true"
 GET_TASK_RESULT_ACTION="true"

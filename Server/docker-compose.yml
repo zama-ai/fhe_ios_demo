@@ -72,3 +72,24 @@ services:
       CELERY_BROKER_URL: $BROKER_URL
       CELERY_RESULT_BACKEND: $BACKEND_URL
     restart: $RESTART_POLICY
+
+  service_celery_ads:
+    container_name: $CELERY_ADS_CONTAINER_NAME
+    env_file:
+      - $ENV_FILE # Load the environment variables
+    build:
+      context: $DOCKERFILE_LOCATION
+      dockerfile: $DOCKERFILE_NAME
+    image: $FINAL_IMAGE
+    volumes:
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./$SHARED_DIR:/project/$SHARED_DIR
+    depends_on:
+      - service_redis
+      - service_fastapi
+    environment:
+      RUN_TYPE: "ads"
+      DOMAIN_NAME: $DOMAIN_NAME
+      CELERY_BROKER_URL: $BROKER_URL
+      CELERY_RESULT_BACKEND: $BACKEND_URL
+    restart: $RESTART_POLICY

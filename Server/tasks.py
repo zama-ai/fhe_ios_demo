@@ -82,3 +82,9 @@ def execute_binary(binary: str, uid: str, task_name: str) -> Dict:
 @celery_app.task(name="tasks.run_binary_task", queue="usecases")
 def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
     return execute_binary(binary, uid, task_name)
+
+
+# Queue 2: `ads`
+@celery_app.task(name="tasks.fetch_ad", queue="ads")
+def fetch_ad(binary: str, uid: str) -> Dict:
+    return execute_binary(binary, uid, "fetch_ad")

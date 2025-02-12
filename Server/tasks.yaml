@@ -32,3 +32,9 @@ tasks:
     output_files:
       - filename: "{uid}.ad_targeting.output.fheencrypted"
     response_type: stream
+
+  fetch_ad:
+    binary: fetch_ad.py
+    output_files:
+      - filename: "{uid}.fetch_ad.output.fheencrypted"
+    response_type: stream
