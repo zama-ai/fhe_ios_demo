@@ -10,13 +10,19 @@ from contextlib import contextmanager
 from typing import Dict
 
 from fastapi import Form, Query, Request, HTTPException
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 
-# Load environment variables from '.env' file
-load_dotenv(dotenv_path="./.env")
+# Load environment variables from 'ENV_FILE' file
+ENV_FILE = os.getenv("ENV_FILE")
+load_dotenv(dotenv_path=ENV_FILE)
+
+env_values = dotenv_values(ENV_FILE)
+print(f"📜 Loaded values: {env_values}")
 
 URL = os.getenv("URL")
-CONTAINER_PORT = os.getenv("FASTAP_CONTAINER_PORT_HTTPS")
+CONTAINER_PORT = os.getenv("FASTAPI_CONTAINER_PORT_HTTPS")
+PORT = os.getenv("PORT")
+print("POOOOOOOOOORt", PORT)
 BROKER_URL = os.getenv("BROKER_URL")
 PARSED_URL = urlparse(BROKER_URL)
 

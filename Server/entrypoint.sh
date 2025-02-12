@@ -21,12 +21,21 @@ if [ "$RUN_TYPE" = "usecases" ]; then
       --queues="usecases" \
       --concurrency="$CELERY_WORKER_CONCURRENCY_USECASE_QUEUE"
 elif [ "$RUN_TYPE" = "fastapi" ]; then
-  echo "🚀 Starting Uvicorn Python server..."
-  exec uvicorn server:app \
-      --host 0.0.0.0 \
-      --port "$FASTAP_CONTAINER_PORT_HTTPS" \
-      --ssl-keyfile "$CONTAINER_CERTS_PATH/$PRIVKEY_FILE_NAME" \
-      --ssl-certfile "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME"
+    if [ -f "$CONTAINER_CERTS_PATH/$PRIVKEY_FILE_NAME" ] && [ -f "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME" ]; then
+      export PORT=$FASTAPI_CONTAINER_PORT_HTTPS
+      echo "🚀 Starting Uvicorn Python server in HTTPS mode...POST:$PORT"
+      exec uvicorn server:app \
+          --host 0.0.0.0 \
+          --port "$PORT" \
+          --ssl-keyfile "$CONTAINER_CERTS_PATH/$PRIVKEY_FILE_NAME" \
+          --ssl-certfile "$CONTAINER_CERTS_PATH/$CERT_FILE_NAME"
+    else
+      export PORT=$FASTAPI_CONTAINER_PORT_HTTP
+      echo "🚀 Starting Uvicorn Python server in HTTP mode...POST:$PORT"
+      exec uvicorn server:app \
+          --host 0.0.0.0 \
+          --port "$PORT"
+    fi
 else
-  echo "$RUN_TYPE not valid."
+  echo "RUN_TYPE='$RUN_TYPE' not valid!"
 fi
