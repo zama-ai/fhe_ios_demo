@@ -8,7 +8,7 @@ services:
   # - Use `echo "vm.overcommit_memory=1" | sudo tee -a /etc/sysctl.conf` for a permanent change
   # On this machine, the setting is permanent in `sysctl.conf`
   service_redis:
-    container_name: container_redis_bd
+    container_name: $REDIS_CONTAINER_NAME
     image: redis:latest
     ports:
       - "$REDIS_HOST_PORT:$REDIS_CONTAINER_PORT"
@@ -20,9 +20,9 @@ services:
     restart: $RESTART_POLICY
 
   service_fastapi:
-    container_name: container_fastapi_app
+    container_name: $FASTAPI_CONTAINER_NAME
     env_file:
-      - .env  # Load the environment variables
+      - $ENV_FILE # Load the environment variables
     build:
       context: $DOCKERFILE_LOCATION
       dockerfile: $DOCKERFILE_NAME
@@ -40,16 +40,18 @@ services:
       - ./$SHARED_DIR:/project/$SHARED_DIR
       - ./$BACKUP_DIR:/project/$BACKUP_DIR
     ports:
-      - "$FASTAPI_HOST_PORT_HTTP:$FASTAP_CONTAINER_PORT_HTTP"
-      - "$FASTAPI_HOST_PORT_HTTPS:$FASTAP_CONTAINER_PORT_HTTPS"
+      - "$FASTAPI_HOST_PORT_HTTP:$FASTAPI_CONTAINER_PORT_HTTP"
+      - "$FASTAPI_HOST_PORT_HTTPS:$FASTAPI_CONTAINER_PORT_HTTPS"
     depends_on:
       service_redis:
         condition: service_healthy
     restart: $RESTART_POLICY
 
   service_celery_usecases:
+    # To run multiple instances of a service, avoid specifying a container name.
+    # By default, Docker Compose automatically generates container names in the format: <project>_<service>_<index>.
     env_file:
-      - .env  # Load the environment variables
+      - $ENV_FILE # Load the environment variables
     build:
       context: $DOCKERFILE_LOCATION
       dockerfile: $DOCKERFILE_NAME

@@ -18,11 +18,14 @@ FROM python:3.9-slim as python-image
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     procps \
-    && rm -rf /var/lib/apt/lists/*
+    net-tools \
+    iproute2 \
+    netcat-traditional \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # Set working directory
 WORKDIR /project

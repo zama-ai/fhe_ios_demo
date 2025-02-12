@@ -7,5 +7,3 @@ concrete_ml_extensions
 celery[redis]
 redis
 python-dotenv
-pytest
-requests
