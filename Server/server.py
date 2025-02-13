@@ -17,6 +17,7 @@ import io
 import os
 import time
 import uuid
+import secrets
 
 from glob import glob
 from typing import List
@@ -30,8 +31,10 @@ from fastapi import (
     HTTPException,
     Response,
     UploadFile,
+    status,
 )
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, HTMLResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import redis
 import json
 
@@ -42,6 +45,23 @@ from tasks import *
 app = FastAPI(debug=False)
 logger.info("🚀 FastAPI server running at `%s`: `%s`", URL, CONTAINER_PORT)
 
+security = HTTPBasic()
+
+def get_current_user(
+    credentials: HTTPBasicCredentials = Depends(security)
+) -> str:
+    """Verify HTTP Basic credentials against env vars API_USERNAME/PASSWORD, raising 401 if invalid."""
+    expected_username = os.getenv("API_USERNAME")
+    expected_password = os.getenv("API_PASSWORD")
+    is_correct_username = secrets.compare_digest(credentials.username, expected_username)
+    is_correct_password = secrets.compare_digest(credentials.password, expected_password)
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 # Tasks that cannot be canceled
 NON_CANCELLABLE_STATUSES: List = [
@@ -592,8 +612,8 @@ async def get_task_result(
         raise HTTPException(status_code=500, detail=error_message)
 
 
-@app.get("/logs")
-def get_logs(lines: int = 10) -> Response:
+@app.get("/logs", response_class=HTMLResponse)
+def get_logs(user: str = Depends(get_current_user), lines: int = 10) -> Response:
     """Serve the server log file with the specified number of last lines.
 
     Args:
