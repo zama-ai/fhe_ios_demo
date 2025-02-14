@@ -53,6 +53,11 @@ def get_current_user(
     """Verify HTTP Basic credentials against env vars API_USERNAME/PASSWORD, raising 401 if invalid."""
     expected_username = os.getenv("API_USERNAME")
     expected_password = os.getenv("API_PASSWORD")
+    
+    # Assert expected credentials are set and non-empty
+    assert expected_username, "API_USERNAME environment variable must be set and non-empty"
+    assert expected_password, "API_PASSWORD environment variable must be set and non-empty"
+
     is_correct_username = secrets.compare_digest(credentials.username, expected_username)
     is_correct_password = secrets.compare_digest(credentials.password, expected_password)
     if not (is_correct_username and is_correct_password):
