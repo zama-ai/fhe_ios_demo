@@ -40,10 +40,9 @@ try:
     logger.info("🔥 Successfully connected to Celery!")
 
 except Exception as e:
-    celery_app = None
-    error_message = f"❌ Failed to initialize Celery app: {e}"
+    error_message = f"❌ Failed to initialize Celery app: `{e}`"
     logger.error(error_message)
-    raise RuntimeError(error_message)
+    raise RuntimeError(error_message) from e
 
 
 def execute_binary(binary: str, uid: str, task_name: str) -> Dict:
@@ -82,3 +81,9 @@ def execute_binary(binary: str, uid: str, task_name: str) -> Dict:
 @celery_app.task(name="tasks.run_binary_task", queue="usecases")
 def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
     return execute_binary(binary, uid, task_name)
+
+
+# Queue 2: `ads`
+@celery_app.task(name="tasks.fetch_ad", queue="ads")
+def fetch_ad(binary: str, uid: str) -> Dict:
+    return execute_binary(binary, uid, "fetch_ad")
