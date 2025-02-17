@@ -33,7 +33,7 @@ RUN mkdir -p /project/data
 
 # Copy Python dependencies, configuration files and Python server
 COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
-COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
+COPY tasks/ad_targeting/data/*.pkl /project/data/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r server_requirements.txt
