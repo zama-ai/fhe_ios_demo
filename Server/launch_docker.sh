@@ -9,10 +9,13 @@ if [ "$1" == "dev" ]; then
     echo "🚀 Development mode..."
     export COMPOSE_PROJECT_NAME="fhe_ios_demo_dev"
     export ENV_FILE=".env_dev"
-elif [ "$1" == "prod" ]; then
+elif [ "$1" == "prod" ] || [ -z "$1" ]; then
     echo "🚀 Production mode..."
     export COMPOSE_PROJECT_NAME="fhe_ios_demo_prod"
     export ENV_FILE=".env_prod"
+else
+    echo "❌ Invalid argument. Use 'dev' or 'prod'."
+    exit 1
 fi
 
 # Load environment variables

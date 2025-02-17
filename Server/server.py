@@ -116,7 +116,7 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
         with open(file_path, "wb") as f:
             f.write(file_content)
         file_size = file_path.stat().st_size  # Get file size in bytes
-        logger.info("🔐 Successfully received new key upload (Size: `%s` bytes). Assigned UID: `%s`", file_size, uid)
+        logger.info("🔐 Successfully received new key upload for `%s` task (Size: `%s` bytes). Assigned UID: `%s`", task_name, file_size, uid)
     except Exception as e:
         error_message = f"❌ Failed to store the server key: `{e}`"
         task_logger.error(error_message)

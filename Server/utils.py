@@ -17,12 +17,10 @@ ENV_FILE = os.getenv("ENV_FILE")
 load_dotenv(dotenv_path=ENV_FILE)
 
 env_values = dotenv_values(ENV_FILE)
-print(f"📜 Loaded values: {env_values}")
 
 URL = os.getenv("URL")
 CONTAINER_PORT = os.getenv("FASTAPI_CONTAINER_PORT_HTTPS")
 PORT = os.getenv("PORT")
-print("POOOOOOOOOORt", PORT)
 BROKER_URL = os.getenv("BROKER_URL")
 PARSED_URL = urlparse(BROKER_URL)
 
