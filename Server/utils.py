@@ -12,6 +12,8 @@ from typing import Dict
 from fastapi import Form, Query, Request, HTTPException
 from dotenv import load_dotenv, dotenv_values
 
+RADIX = 8
+
 # Load environment variables from 'ENV_FILE' file
 ENV_FILE = os.getenv("ENV_FILE")
 load_dotenv(dotenv_path=ENV_FILE)

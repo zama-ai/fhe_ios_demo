@@ -327,8 +327,7 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     result = AsyncResult(task_id, app=celery_app)
     status = result.state.lower()
     
-    print(f"------> Current status = {status}")
-    logger.debug(f"------> Current status = {status}")
+    logger.info(f"------> Current status = {status}")
 
     if status in ["started"]:
         task_meta = result.backend.get_task_meta(task_id) or {}
@@ -474,13 +473,10 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
 
 def get_output_filename(config, history, index, uid: str, backup: bool) -> str:
     """Returns the name of the output file according to the configuration."""
-    print("in backup files", history)
     if backup:
-        print("configconfigconfigconfig", config, type(config))
-        return generate_filename(config[index], file_type="output", args={"uid": uid})
+        return generate_filename(config, file_type="output", args={"uid": uid})
     else:
         backup_file = history.get("output_file_path", [])
-        print("backup_fileggggggggggggggggggggggg", backup_file, index, len(backup_file))
         if len(backup_file) >= index:
             return backup_file[index]
         else:
@@ -526,14 +522,9 @@ def build_stream_response(
     backup: bool, stderr_output: str, status: dict
     ) -> StreamingResponse:
 
-    print("output_files, status", output_files, status)
-
-    output_filename = get_output_filename(output_files, status, 0, uid, backup)
-    print(output_filename, FILES_FOLDER)
+    output_filename = get_output_filename(output_files[0], status, 0, uid, backup)
     output_file_path = FILES_FOLDER / output_filename
-    print("output_file_pathh", output_file_path)
     data = fetch_file_content(output_file_path, task_id, backup=backup)
-    print("dattttaaaa", len(data))
 
     headers = {
         "Content-Disposition": f"attachment; filename={output_filename}",
@@ -543,8 +534,6 @@ def build_stream_response(
         "task_name": task_name,
         "worker": status.get("worker"),
     }
-
-    print("----------------------", headers)
     task_logger.debug(f"Returning STREM response for task '{task_name}'")
     return StreamingResponse(io.BytesIO(data), media_type="application/octet-stream", headers=headers)
 
@@ -557,13 +546,11 @@ def build_json_response(task_id: str, uid: str, task_name: str, output_files: li
         "task_name": task_name,
         "output_file_path": [],
         "worker": status.get("worker"),
+        "radix": str(RADIX),
     }
     for index, file_config in enumerate(output_files):
         response_format = file_config.get("response_type", "base64")
-        print("index", index, "response_format", response_format)
-        print("key", file_config.get("key"))
         output_filename = get_output_filename(file_config, status, index, uid, backup)
-        print("output_filename", output_filename)
         response_data["output_file_path"].append(output_filename)
 
         key = file_config.get("key", output_filename)
@@ -615,10 +602,8 @@ async def get_task_result(
 
     # Check task status
     status = process_task_status(task_id, uid)
-    print(task_id, "statussssss", status)
 
     if status.get('status') in ['started', "pending", "failure", "revoked", "unknown", "error", "queue", "queued"]:
-        print("laaaaa")
         headers = {
             "status": status.get("status"),
             "job_id": status.get("task_id"),
@@ -630,13 +615,9 @@ async def get_task_result(
 
     backup, stderr_output = is_backup_needed(status, task_id)
 
-    print("response_type", response_type, "backup", backup, "stderr_output", stderr_output)
-    print("output_files", output_files)
     # Handle outputs based on the configuration
     if response_type == "stream":
-        t = build_stream_response(task_id, uid, task_name, output_files, backup, stderr_output, status)
-        print("typppp", type(t))
-        return t    
+        return build_stream_response(task_id, uid, task_name, output_files, backup, stderr_output, status)
     if response_type == "json":
         return build_json_response(task_id, uid, task_name, output_files, backup, stderr_output, status)
 

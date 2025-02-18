@@ -36,10 +36,10 @@ tasks:
   fetch_ad:
     binary: fetch_ad.py
     output_files:
-      - filename: "{uid}.relevent_ad.fetch_ad.output.fheencrypted"
+      - filename: "{uid}.fetch_ad.relevent_ad.output.fheencrypted"
         key: relevent_ad
         response_type: base64
-      - filename: "{uid}.metadata.fetch_ad.output.fheencrypted"
+      - filename: "{uid}.fetch_ad.metadata.output.fheencrypted"
         key: metadata
         response_type: base64
     response_type: json
