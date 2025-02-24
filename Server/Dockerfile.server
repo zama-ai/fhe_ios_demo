@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
     net-tools \
     iproute2 \
+    gdown \
     netcat-traditional \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -34,6 +35,17 @@ RUN mkdir -p /project/data
 # Copy Python dependencies, configuration files and Python server
 COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
 COPY tasks/ad_targeting/data/*.pkl /project/data/
+
+# Define environment variables for Google Drive file
+ENV FILE_ID="174lb6hdXM6iZDFlkL_OqECqaxj-1t1SO"
+ENV FILE_NAME="ads_numeric_representation.zip"
+
+# Download the file from Google Drive
+RUN gdown --id $FILE_ID -O /project/data/$FILE_NAME
+
+# Extract the .gz file inside /project/data/
+RUN gunzip /project/data/$FILE_NAME
+RUN unzip -o $FILE_PATH -d /project/data/ && rm -f $FILE_PATH
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r server_requirements.txt

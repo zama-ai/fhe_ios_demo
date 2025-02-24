@@ -5,16 +5,7 @@ import sys
 
 import concrete_ml_extensions as fhext
 import numpy as np
-
-part_files = [
-    "ads_numeric_representation_part_1.pkl",
-    "ads_numeric_representation_part_2.pkl",
-    "ads_numeric_representation_part_3.pkl",
-    "ads_numeric_representation_part_4.pkl",
-    "ads_numeric_representation_part_5.pkl",
-    "ads_numeric_representation_part_6.pkl",
-    
-]
+import time
 
 
 def main():
@@ -48,44 +39,35 @@ def main():
         serialized_ciphertext = binary_file.read()
 
     # Deserialize the encrypted matrix
+    device = "cuda" if fhext.is_cuda_enabled() and fhext.is_cuda_available() else "cpu" 
+    start_time = time.time()
     deserialized_encrypted_a = fhext.EncryptedMatrix.deserialize(serialized_ciphertext)
+    tot_server_time = time.time() - start_time
+    print(f"Server time without serialization {tot_server_time}s on {device}. ", end='')
 
     # Load clear data
-    parts = []
-    for file in part_files:
-        with open(f"data/{file}", "rb") as f:
-            part = pkl.load(f)
-            parts.append(part)
-    ads = np.concatenate(parts, axis=1)
-
-    with open("data/ads_original_size.pkl", "rb") as f:
-        original_sizes = pkl.load(f)
-        original_sizes = np.array(original_sizes)
+    with open("data/ads_numeric_representation.pkl", "rb") as f:
+        ads = pkl.load(f)
+    
+    print(ads.shape, "ads.shape")
 
     # Unsigned integers [0, 2⁶⁴ - 1]
     CRYPTO_DTYPE = np.uint64
     ads = ads.astype(CRYPTO_DTYPE)
-    original_sizes = original_sizes.astype(CRYPTO_DTYPE)
 
     # Perform matrix multiplication
     relevent_ad = fhext.matrix_multiplication(
         encrypted_matrix=deserialized_encrypted_a, data=ads, compression_key=compression_key
-    )
-    original_ad_size = fhext.matrix_multiplication(
-        encrypted_matrix=deserialized_encrypted_a, data=original_sizes, compression_key=compression_key
     )
 
     # Save the encrypted result
     with open(output_path, "wb") as binary_file:
         binary_file.write(relevent_ad.serialize())
 
-    with open(output_path_metadata, "wb") as binary_file:
-        binary_file.write(original_ad_size.serialize())
-        
     print("Successful end")
     print("\n========\n")
 
-    return relevent_ad.serialize(), original_ad_size.serialize()
+    return relevent_ad.serialize()
 
 
 if __name__ == "__main__":
