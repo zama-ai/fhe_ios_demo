@@ -13,10 +13,15 @@ def main():
         print("No arguments provided.")
         return
 
+
     uid = sys.argv[1]
+    print("fhext.is_cuda_enabled()", fhext.is_cuda_enabled())
+    print("fhext.is_cuda_available()", fhext.is_cuda_available())
+    device = "cuda" if fhext.is_cuda_enabled() and fhext.is_cuda_available() else "cpu" 
 
     print("\n========\n")
-    print(f"CLI Args: {uid}")
+    print(f"CLI Args: {uid} - {device=}")
+
 
     sk_path = f"uploaded_files/{uid}.serverKey"
     input_path = f"uploaded_files/{uid}.fetch_ad.input.fheencrypted"
@@ -39,11 +44,7 @@ def main():
         serialized_ciphertext = binary_file.read()
 
     # Deserialize the encrypted matrix
-    device = "cuda" if fhext.is_cuda_enabled() and fhext.is_cuda_available() else "cpu" 
-    start_time = time.time()
     deserialized_encrypted_a = fhext.EncryptedMatrix.deserialize(serialized_ciphertext)
-    tot_server_time = time.time() - start_time
-    print(f"Server time without serialization {tot_server_time}s on {device}. ", end='')
 
     # Load clear data
     with open("data/ads_numeric_representation.pkl", "rb") as f:
@@ -54,12 +55,15 @@ def main():
     # Unsigned integers [0, 2⁶⁴ - 1]
     CRYPTO_DTYPE = np.uint64
     ads = ads.astype(CRYPTO_DTYPE)
-
+    
     # Perform matrix multiplication
+    start_time = time.time()
     relevent_ad = fhext.matrix_multiplication(
         encrypted_matrix=deserialized_encrypted_a, data=ads, compression_key=compression_key
     )
-
+    end_time = time.time() - start_time
+    print(f"Task 'fetch_ad': Server time: {end_time:.2f}s on {device.upper()}. ")
+    
     # Save the encrypted result
     with open(output_path, "wb") as binary_file:
         binary_file.write(relevent_ad.serialize())
@@ -72,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

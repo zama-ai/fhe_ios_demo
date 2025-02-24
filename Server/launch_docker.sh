@@ -34,57 +34,57 @@ for arg in "$@"; do
     esac
 done
 
-# Check for certbot
-if ! command -v certbot &> /dev/null; then
-    echo "Certbot is not installed. Please install it and try again."
-    exit 1
-fi
+# # Check for certbot
+# if ! command -v certbot &> /dev/null; then
+#     echo "Certbot is not installed. Please install it and try again."
+#     exit 1
+# fi
 
-for arg in "$@"; do
-    case "$arg" in
-        --rebuild-rust)
-            REBUILD_RUST=true
-            ;;
-    esac
-done
+# for arg in "$@"; do
+#     case "$arg" in
+#         --rebuild-rust)
+#             REBUILD_RUST=true
+#             ;;
+#     esac
+# done
 
-# Collect DOMAIN_NAME and CERTBOT_EMAIL if not set
-if [ -z "$DOMAIN_NAME" ]; then
-    read -p "Enter your DOMAIN_NAME: " DOMAIN_NAME
-fi
+# # Collect DOMAIN_NAME and CERTBOT_EMAIL if not set
+# if [ -z "$DOMAIN_NAME" ]; then
+#     read -p "Enter your DOMAIN_NAME: " DOMAIN_NAME
+# fi
 
-if [ -z "$CERTBOT_EMAIL" ]; then
-    read -p "Enter your CERTBOT_EMAIL: " CERTBOT_EMAIL
-fi
+# if [ -z "$CERTBOT_EMAIL" ]; then
+#     read -p "Enter your CERTBOT_EMAIL: " CERTBOT_EMAIL
+# fi
 
 
-# Handle certificates
-if [ ! -d "$HOST_CERTS_PATH" ]; then
-    echo "SSL Certificates for '$DOMAIN_NAME' not found in '$HOST_CERTS_PATH'. Running certbot..."
+# # Handle certificates
+# if [ ! -d "$HOST_CERTS_PATH" ]; then
+#     echo "SSL Certificates for '$DOMAIN_NAME' not found in '$HOST_CERTS_PATH'. Running certbot..."
 
-    # Ensure the script is run as root before attempting to regenerate certificates
-    if [ "$EUID" -ne 0 ]; then
-        echo "Error: Root privileges required to generate SSL certificates."
-        echo "Please re-run this script as root: 'sudo bash $0'"
-        exit 1
-    fi
+#     # Ensure the script is run as root before attempting to regenerate certificates
+#     if [ "$EUID" -ne 0 ]; then
+#         echo "Error: Root privileges required to generate SSL certificates."
+#         echo "Please re-run this script as root: 'sudo bash $0'"
+#         exit 1
+#     fi
     
-    certbot certonly --standalone \
-        --non-interactive \
-        --agree-tos \
-        --email "$CERTBOT_EMAIL" \
-        -d "$DOMAIN_NAME" \
-        --cert-name "$DOMAIN_NAME"
+#     certbot certonly --standalone \
+#         --non-interactive \
+#         --agree-tos \
+#         --email "$CERTBOT_EMAIL" \
+#         -d "$DOMAIN_NAME" \
+#         --cert-name "$DOMAIN_NAME"
 
-    if [ $? -eq 0 ]; then
-        echo "SSL certificates successfully generated for '$DOMAIN_NAME'."
-    else
-        echo "Error: Failed to generate SSL certificates."
-        exit 1
-    fi
-else
-    echo "SSL Certificates for '$DOMAIN_NAME' already exist in '$HOST_CERTS_PATH'."
-fi
+#     if [ $? -eq 0 ]; then
+#         echo "SSL certificates successfully generated for '$DOMAIN_NAME'."
+#     else
+#         echo "Error: Failed to generate SSL certificates."
+#         exit 1
+#     fi
+# else
+#     echo "SSL Certificates for '$DOMAIN_NAME' already exist in '$HOST_CERTS_PATH'."
+# fi
 
 # Clean up existing containers
 echo "Cleaning up existing containers..."

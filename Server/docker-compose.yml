@@ -42,11 +42,10 @@ services:
     ports:
       - "$FASTAPI_HOST_PORT_HTTP:$FASTAPI_CONTAINER_PORT_HTTP"
       - "$FASTAPI_HOST_PORT_HTTPS:$FASTAPI_CONTAINER_PORT_HTTPS"
-    depends_on:
-      service_redis:
-        condition: service_healthy
     restart: $RESTART_POLICY
 
+  # Enable NVIDIA runtime to grant host GPU access to the container, without installing drivers.
+  # Use `runtime: nvidia`
   service_celery_usecases:
     # To run multiple instances of a service, avoid specifying a container name.
     # By default, Docker Compose automatically generates container names in the format: <project>_<service>_<index>.
@@ -66,11 +65,14 @@ services:
     depends_on:
       - service_redis
       - service_fastapi
+    runtime: nvidia
     environment:
       RUN_TYPE: "usecases"
       DOMAIN_NAME: $DOMAIN_NAME
       CELERY_BROKER_URL: $BROKER_URL
       CELERY_RESULT_BACKEND: $BACKEND_URL
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
     restart: $RESTART_POLICY
 
   service_celery_ads:
@@ -87,9 +89,12 @@ services:
     depends_on:
       - service_redis
       - service_fastapi
+    runtime: nvidia
     environment:
       RUN_TYPE: "ads"
       DOMAIN_NAME: $DOMAIN_NAME
       CELERY_BROKER_URL: $BROKER_URL
       CELERY_RESULT_BACKEND: $BACKEND_URL
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
     restart: $RESTART_POLICY

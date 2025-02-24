@@ -59,7 +59,7 @@ def execute_binary(binary: str, uid: str, task_name: str) -> Dict:
     Raises:
         subprocess.CalledProcessError: Raised if the binary execution fails.
     """
-    commandline = [f"./{binary}", uid]
+    commandline = [f"./{binary}", uid, task_name]
 
     try:
         # Result is a subprocess.CompletedProcess object, and Celery can't store that in Redis.

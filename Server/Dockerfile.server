@@ -1,4 +1,6 @@
+# ===========================
 # Stage 1: Build Rust binaries (built separately with --rebuild-rust)
+# ===========================
 FROM rust:1.76 AS rust-builder
 
 # Set working directory
@@ -11,46 +13,66 @@ COPY tasks/ tasks/
 # Run the build script
 RUN ./build_tasks.sh
 
+# ===========================
 # Stage 2: Final image
-FROM python:3.9-slim as python-image
+# ===========================
+FROM ubuntu:22.04 AS python-image
 
-# Set environment variables
+# Set non-interactive mode for package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
+    # net-tools \           # ifconfig, netstat, route
+    # iproute2  \           # ip, ss, tc
+    # netcat-traditional \  # ports
+    # procps \              # ps, top, kill, free
     procps \
-    net-tools \
-    iproute2 \
-    gdown \
-    netcat-traditional \
+    curl \
+    wget \
+    unzip \
+    python3 \
+    python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# (Optional) Installation of the NVIDIA driver in the container is not recommended,
+# because the driver must be managed by the host via the NVIDIA Container Toolkit.
+# RUN apt-get update && apt-get install -y --no-install-recommends nvidia-driver-535
+
+# Install CUDA Toolkit + CUDA keyring for Ubuntu 22.04
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    rm cuda-keyring_1.1-1_all.deb && \
+    apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-12-8 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Add CUDA Toolkit to PATH (necessary for `nvcc` to be accessible to the container)
+# check: readlink /usr/local/cuda
+ENV PATH=/usr/local/cuda/bin:$PATH
 
 # Set working directory
 WORKDIR /project
+
 RUN mkdir -p /project/data
 
 # Copy Python dependencies, configuration files and Python server
 COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
 COPY tasks/ad_targeting/data/*.pkl /project/data/
 
-# Define environment variables for Google Drive file
-ENV FILE_ID="174lb6hdXM6iZDFlkL_OqECqaxj-1t1SO"
-ENV FILE_NAME="ads_numeric_representation.zip"
-
-# Download the file from Google Drive
-RUN gdown --id $FILE_ID -O /project/data/$FILE_NAME
-
-# Extract the .gz file inside /project/data/
-RUN gunzip /project/data/$FILE_NAME
-RUN unzip -o $FILE_PATH -d /project/data/ && rm -f $FILE_PATH
-
 # Install Python dependencies
-RUN pip install --no-cache-dir -r server_requirements.txt
+RUN pip3 install --no-cache-dir gdown -r server_requirements.txt
 
+# Set environment variables for Google Drive file
+ENV FILE_ID="1f2zf1bpl7rPQIxP4t1T-G7fFOqiptvGO"
+ENV FILE_PATH="/project/data/ads_numeric_representation.zip"
+
+# Download the file from Google Drive and extract required files
+RUN gdown "https://drive.google.com/uc?id=$FILE_ID" -O $FILE_PATH && \
+    unzip -o $FILE_PATH -d /project/data/ && rm -f $FILE_PATH
+
+# ===========================
 # Stage 3: Final image
+# ===========================
 FROM python-image
 
 # Copy Rust binaries from the rust-builder stage
