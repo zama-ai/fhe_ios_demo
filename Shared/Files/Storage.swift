@@ -8,10 +8,10 @@ final class Storage {
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
 
-        case matrixPrivateKey = "matrixPrivateKey"
-        case matrixCPUCompressionKey = "matrixCPUCompressionKey"
-        case matrixEncryptedProfile = "matrixProfile.fheencrypted"
-        case matrixEncryptedResult = "matrixResult.fheencrypted"
+        case concretePrivateKey = "concretePrivateKey"
+        case concreteCPUCompressionKey = "concreteCPUCompressionKey"
+        case concreteEncryptedProfile = "concreteProfile.fheencrypted"
+        case concreteEncryptedResult = "concreteResult.fheencryptedAd"
 
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
@@ -30,8 +30,8 @@ final class Storage {
             case .weightMin, .weightMax, .weightAvg:  .int16
                 
             case .clientKey, .publicKey, .serverKey: nil
-            case .matrixPrivateKey, .matrixCPUCompressionKey,
-                    .matrixEncryptedProfile, .matrixEncryptedResult: nil
+            case .concretePrivateKey, .concreteCPUCompressionKey,
+                    .concreteEncryptedProfile, .concreteEncryptedResult: nil
             }
         }
         

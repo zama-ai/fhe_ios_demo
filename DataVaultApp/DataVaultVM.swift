@@ -44,7 +44,7 @@ extension DataVaultView {
             try await refreshPermission()
             encryptedWeight = await Storage.read(.weightList)
             encryptedSleep = await Storage.read(.sleepList)
-            encryptedProfile = await Storage.read(.matrixEncryptedProfile)
+            encryptedProfile = await Storage.read(.concreteEncryptedProfile)
             try await fetchHealthData()
         }
         
@@ -170,7 +170,7 @@ extension DataVaultView.ViewModel {
     
     func deleteProfile() async throws {
         print(#function)
-        try await Storage.deleteFromDisk(.matrixEncryptedProfile)
+        try await Storage.deleteFromDisk(.concreteEncryptedProfile)
         try await loadFromDisk()
     }
 }

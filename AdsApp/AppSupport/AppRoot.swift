@@ -6,7 +6,7 @@ import SwiftUI
 struct AdsApp: App {
     var body: some Scene {
         WindowGroup {
-            AdsView()
+            SocialTimeline()
         }
     }
 }

@@ -53,7 +53,7 @@ final class ProfileVM: ObservableObject {
     }
     
     func persistEncryptedProfile(_ data: Data) async throws {
-        try await Storage.write(.matrixEncryptedProfile, data: data)
+        try await Storage.write(.concreteEncryptedProfile, data: data)
     }
     
     /// Load keys  (private + compression) from disk into memory (generating them if needed)
@@ -62,11 +62,11 @@ final class ProfileVM: ObservableObject {
             var tmpPK: PrivateKey? = nil
             var tmpCK: CpuCompressionKey? = nil
             
-            if let savedPK: Data = await Storage.read(.matrixPrivateKey) {
+            if let savedPK: Data = await Storage.read(.concretePrivateKey) {
                 tmpPK = await Self.deserializePrivateKey(from: savedPK)
             }
             
-            if let savedCK: Data = await Storage.read(.matrixCPUCompressionKey) {
+            if let savedCK: Data = await Storage.read(.concreteCPUCompressionKey) {
                 tmpCK = try await Self.deserializeCompressionKey(from: savedCK)
             }
             
@@ -109,8 +109,8 @@ extension ProfileVM {
             let keys = cpuCreatePrivateKey(cryptoParams: cryptoParams) // 23 sec
             let pk = keys.privateKey()
             let ck = keys.cpuCompressionKey()
-            try await Storage.write(.matrixPrivateKey, data: try await serializePrivateKey(pk)) // 33 KB, instant
-            try await Storage.write(.matrixCPUCompressionKey, data: try await serializeCompressionKey(ck)) // 67 MB, 2.5s
+            try await Storage.write(.concretePrivateKey, data: try await serializePrivateKey(pk)) // 33 KB, instant
+            try await Storage.write(.concreteCPUCompressionKey, data: try await serializeCompressionKey(ck)) // 67 MB, 2.5s
             return (pk, ck)
         }.value
     }
