@@ -12,6 +12,7 @@ final class Network {
         case weight_stats, sleep_quality, ad_targeting
     }
     
+    typealias UID = String
     typealias TaskID = String
     
     static let shared = Network()
@@ -20,7 +21,7 @@ final class Network {
     private let rootURL = URL(string: "https://api.zama.ai")!
     
     /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
-    func uploadServerKey(_ sk: Data, for task: ServerTask) async throws -> String {        
+    func uploadServerKey(_ sk: Data, for task: ServerTask) async throws -> UID {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
                                                        path: "/add_key",
                                                        json: ["task_name": task.rawValue],
@@ -35,7 +36,7 @@ final class Network {
     }
     
     // MARK: - GENERIC -
-    func startTask(_ task: ServerTask, uid: String, encrypted_input: Data) async throws -> TaskID {
+    func startTask(_ task: ServerTask, uid: UID, encrypted_input: Data) async throws -> TaskID {
         let res = try await sendRequest(.multipartPOST(root: rootURL,
                                                        path: "/start_task",
                                                        json: ["task_name": task.rawValue,
@@ -50,7 +51,7 @@ final class Network {
         return obj.task_id
     }
 
-    func getStatus(for task: ServerTask, id taskID: TaskID, uid: String) async throws -> String {
+    func getStatus(for task: ServerTask, id taskID: TaskID, uid: UID) async throws -> String {
         let res = try await sendRequest(.GET(root: rootURL,
                                              path: "/get_task_status",
                                              json: ["task_name": task.rawValue,
@@ -60,11 +61,20 @@ final class Network {
         return obj.status
     }
 
-    
+    func getTaskResult(for task: ServerTask, taskID: TaskID, uid: String) async throws -> Data {
+        let data = try await sendRequest(.GET(root: rootURL,
+                                              path: "/get_task_result",
+                                              json: ["task_name": task.rawValue,
+                                                     "task_id": taskID,
+                                                     "uid": uid]))
+        try validateStatus(for: data)
+        return data
+    }
+
 //     `get_task_status/_result` endpoints return up to 10 different statuses, sometimes in JSON body, sometimes in HTTP Headers.
 //
 //     Moreover, data returned comes in various shapes, is not type-safe:
-//     - StreamingResponse (when returning 1 encryptedOutput, ex: sleep)
+//     - StreamingResponse (when returning 1 encryptedOutput, ex: sleep or ads)
 //     - JSONResponse with status/min/max/avg (when returning multiple encrypted output, ex: weight)
 //     - JSONResponse with status/details (ex: when status = started or failed)
 //     - JSONResponse with details only (ex: Internal server error)
@@ -84,14 +94,9 @@ final class Network {
     // MARK: - SPECIALIZED -
     
     /// - Returns: FheUint16 min, max and avg of the list of weights. Clear values have to be divided by 10.
-    func getWeightResult(taskID: TaskID, uid: String) async throws -> (min: Data, max: Data, avg: Data) {
-        let data = try await sendRequest(.GET(root: rootURL,
-                                             path: "/get_task_result",
-                                             json: ["task_name": ServerTask.weight_stats.rawValue,
-                                                    "task_id": taskID,
-                                                    "uid": uid]))
-
-        try validateStatus(for: data)
+    func getWeightResult(taskID: TaskID, uid: UID) async throws -> (min: Data, max: Data, avg: Data) {
+        let data = try await getTaskResult(for: .weight_stats, taskID: taskID, uid: uid)
+        
         struct WeightResponse: Decodable {
             let min: Data?
             let max: Data?
@@ -106,17 +111,6 @@ final class Network {
         return (min: min, max: max, avg: avg)
     }
     
-    /// - Returns: FheUint8 score between 1 and 5. 1 is best, 5 is bad.
-    func getSleepResult(_ taskID: TaskID, uid: String) async throws -> Data {
-        let data = try await sendRequest(.GET(root: rootURL,
-                                             path: "/get_task_result",
-                                             json: ["task_name": ServerTask.sleep_quality.rawValue,
-                                                    "task_id": taskID,
-                                                    "uid": uid]))
-        try validateStatus(for: data)
-        return data
-    }
-
     // MARK: - Helpers -
     private func sendRequest(_ request: URLRequest, session: URLSession = .shared) async throws -> Data {
         print("🌐 \(request.httpMethod ?? "-") /\(request.url?.lastPathComponent ?? "-") ➡️ (\(request.url?.absoluteString ?? "-"))")

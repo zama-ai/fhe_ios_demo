@@ -100,7 +100,7 @@ extension HealthView {
             }
 
             do {
-                let quality = try await Network.shared.getSleepResult(taskID, uid: userID)
+                let quality = try await Network.shared.getTaskResult(for: .sleep_quality, taskID: taskID, uid: userID)
                 try await Storage.write(.sleepScore, data: quality)
                 sleepResultQuality = quality
             } catch let error as TaskError {

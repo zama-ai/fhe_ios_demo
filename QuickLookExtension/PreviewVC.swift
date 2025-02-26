@@ -36,12 +36,16 @@ final class PreviewVC: UIViewController, QLPreviewingController {
     // Perform any setup necessary in order to prepare the view.
     // Quick Look will display a loading spinner until this returns.
     func preparePreviewOfFile(at url: URL) async throws {
-        guard let data = await Storage.read(url),
-              let ck = try await ClientKey.readFromDisk(.clientKey) else {
-            print("QL: cannot read ClientKey or file at \(url)")
-            throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey or file at \(url)!"])
+        guard let data = await Storage.read(url) else {
+            print("QL: cannot read file at \(url)")
+            throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read file at \(url)"])
         }
-        
+
+        guard let ck = try await ClientKey.readFromDisk(.clientKey) else {
+            print("QL: cannot read ClientKey")
+            throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey"])
+        }
+
         let fileName = url.lastPathComponent
         guard let fileType = Storage.File(rawValue: fileName)?.decryptType else {
             throw NSError(domain: "App", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown file type at \(url)!"])

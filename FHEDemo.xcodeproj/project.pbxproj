@@ -99,6 +99,7 @@
 				FilePreview.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
+				Network.swift,
 				OpenAppButton.swift,
 				SleepModels.swift,
 			);
@@ -170,6 +171,7 @@
 				FilePreview.swift,
 				Files/Persistable.swift,
 				Files/Storage.swift,
+				Network.swift,
 				OpenAppButton.swift,
 			);
 			target = 328F5CB22D009CA800D7B219 /* Ads */;

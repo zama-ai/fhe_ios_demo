@@ -7,7 +7,7 @@ import SwiftUI
 }
 
 struct SocialTimeline: View {
-    @StateObject private var vm = ViewModel.preview
+    @StateObject private var vm = ViewModel()
     @Environment(\.openURL) private var openURL
     
     var body: some View {
@@ -15,21 +15,45 @@ struct SocialTimeline: View {
             titleBar
                 .padding(.top, 8)
             
-            ScrollView {
-                ForEach(vm.items) { item in
-                    switch item {
-                    case .post(let post): postView(post)
-                    case .ad(let index): adView(at: index)
+            if vm.dataVaultActionNeeded {
+                openDataVaultCard
+            } else {
+                ScrollView {
+                    ForEach(vm.items) { item in
+                        switch item {
+                        case .post(let post): postView(post)
+                        case .ad(let index): adView(at: index)
+                        }
                     }
+                    .padding(.horizontal, 8)
                 }
-                .padding(.horizontal, 8)
             }
         }
         .background(.orange)
+        .task(vm.onAppear)
+    }
+    
+    private var openDataVaultCard: some View {
+        GroupBox {
+            ContentUnavailableView {
+                Label("No Profile Info", systemImage: "person.crop.circle.badge.exclamationmark.fill")
+                    .customFont(.title3)
+            } description: {
+                Text("Import encrypted profile info from Zama Data Vault.")
+                    .customFont(.callout)
+            } actions: {
+                OpenAppButton(.fheDataVault)
+                    .customFont(.callout)
+                    .foregroundStyle(.black)
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.roundedRectangle)
+            }
+        }
+        .padding()
     }
     
     private var titleBar: some View {
-        HStack(spacing: 0) {
+        VStack(spacing: 4) {
             Text("FHE Ads")
                 .customFont(.largeTitle)
                 .frame(maxWidth: .infinity)
@@ -41,6 +65,21 @@ struct SocialTimeline: View {
                     .buttonStyle(.bordered)
                     .tint(.black)
                 }
+            
+            if let status = vm.operationStatus {
+                HStack(spacing: 2) {
+                    switch status {
+                    case .progress(let string):
+                        Text(string)
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        
+                    case .error(let string):
+                        Text("⚠️ " + string)
+                    }
+                }
+                .customFont(.footnote)
+            }
         }
     }
     

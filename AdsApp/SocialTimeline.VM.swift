@@ -1,83 +1,139 @@
 // Copyright © 2025 Zama. All rights reserved.
 
 import Foundation
-import SwiftUI
-
-struct Post: Identifiable {
-    let id = UUID()
-    let username: String
-    let handle: String
-    let content: String
-    let timestamp: String
-}
-
-enum TimelineItem: Identifiable {
-    case post(Post)
-    case ad(Int)
-
-    var id: String {
-        switch self {
-        case .post(let post): "post-\(post.id)"
-        case .ad(let ad): "ad-\(ad)"
-        }
-    }
-}
 
 extension SocialTimeline {
+    @MainActor
     final class ViewModel: ObservableObject {
         @Published var items: [TimelineItem]
-        static private let adFrequency = 2 // Show an ad every 3 posts
-        static private let adsLimit = 10
-
-        private static let initialize: Void = {
-            Task {
-                print("SocialTimeline initialize: This runs only once for all instances.")
-                try await writeAdsResults()
-            }
-        }()
-
-        init(posts: [Post]) {
-            _ = Self.initialize
-
-            var items: [TimelineItem] = []
-            var adIndex = 0
-
-            for (index, post) in posts.enumerated() {
-                items.append(.post(post))
-                
-                // Insert an ad after every `adFrequency` posts
-                if (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
-                    items.append(.ad(adIndex))
-                    adIndex += 1
-                }
-            }
-            self.items = items
-        }
-
+        @Published var operationStatus: OperationStatus?
+        @Published var dataVaultActionNeeded: Bool = false
         
-        static func writeAdsResults() async throws {
-            let serverResult = Data("Hello, World!".utf8)
-            for position in 0..<adsLimit {
-                try await Storage.write(.concreteEncryptedResult, data: serverResult, suffix: "\(position)")
+        private let adFrequency = 2 // Show an ad every 3 posts
+        private let adsLimit = 5 // Show top 5 ads
+        
+        var uid: String? {
+            get { return UserDefaults.standard.string(forKey: "uid") }
+            set { UserDefaults.standard.set(newValue, forKey: "uid") }
+        }
+
+        var taskID: String? {
+            get { return UserDefaults.standard.string(forKey: "taskID") }
+            set { UserDefaults.standard.set(newValue, forKey: "taskID") }
+        }
+        
+        init() {
+            self.items = Post.samples.map({ TimelineItem.post($0) })
+        }
+
+        @Sendable
+        func onAppear() async {
+            do {
+                try await startServerKeyUpload()
+            } catch CustomError.missingServerKey, CustomError.missingProfile {
+                dataVaultActionNeeded = true
+            } catch {
+                print(error.localizedDescription)
             }
         }
+        
+        func startServerKeyUpload() async throws {
+            if let uid {
+                try await startProfileUpload(uid: uid)
+                return
+            }
+            
+            guard let sk = await Storage.read(.concreteCPUCompressionKey) else {
+                throw CustomError.missingServerKey
+            }
+            
+            try await performActivity("Uploading ServerKey") {
+                let newUID = try await Network.shared.uploadServerKey(sk, for: .ad_targeting)
+                self.uid = newUID
+                try await startProfileUpload(uid: newUID)
+            }
+        }
+        
+        // TODO: profile uploaded every time ?
+        func startProfileUpload(uid: String) async throws {
+            guard let profile = await Storage.read(.concreteEncryptedProfile) else {
+                throw CustomError.missingServerKey
+            }
+
+            try await performActivity("Uploading Encrypted Profile") {
+                let newTaskID = try await Network.shared.startTask(.ad_targeting, uid: uid, encrypted_input: profile)
+                self.taskID = newTaskID
+                try await startPolling(every: 3, taskID: newTaskID, uid: uid)
+            }
+        }
+        
+        func startPolling(every interval: TimeInterval, taskID: String, uid: String) async throws {
+            while true {
+                do {
+                    if let data = try await getServerResult(taskID: taskID, uid: uid) {
+                        print("✅ Data received: \(data)")
+                        // Do something with Data
+                        // Then return
+                        return
+                    }
+                } catch {
+                    print("🚨 Error encountered: \(error)")
+                    throw error // Stop polling if getServerResult() throws
+                }
+
+                print("⏳ Waiting \(interval) seconds before retrying...")
+                try await Task.sleep(for: .seconds(interval))
+            }
+        }
+        
+        func getServerResult(taskID: String, uid: String) async throws -> Data? {
+            do {
+                let result = try await Network.shared.getTaskResult(for: .ad_targeting, taskID: taskID, uid: uid)
+                return result
+                // for position in 0..<adsLimit {
+                //     // We duplicate the result for each ad we want to display. Limitation of how QL works.
+                //     try await Storage.write(.concreteEncryptedResult, data: result, suffix: "\(position)")
+                // }
+
+            } catch TaskError.needToWait {
+                return nil
+            } catch {
+                throw error
+            }
+        }
+        
+        func performActivity(_ name: String, block: () async throws -> Void) async rethrows {
+            self.operationStatus = .progress("\(name)…")
+            do {
+                try await block()
+                self.operationStatus = nil
+            } catch {
+                self.operationStatus = .error(error.localizedDescription)
+                throw error
+            }
+        }
+        
+//        private static let initialize: Void = {
+//            Task {
+//                print("SocialTimeline initialize: This runs only once for all instances.")
+//                try await writeAdsResults()
+//            }
+//        }()
+
+//        static func generateItems() -> [TimelineItem] {
+//            var items: [TimelineItem] = []
+//            var adIndex = 0
+//
+//            for (index, post) in Post.samples.enumerated() {
+//                items.append(.post(post))
+//                
+//                 Insert an ad after every `adFrequency` posts
+//                if (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
+//                    items.append(.ad(adIndex))
+//                    adIndex += 1
+//                }
+//            }
+//            return items
+//        }
     }
 }
-
-extension SocialTimeline.ViewModel {
-    static let preview = SocialTimeline.ViewModel(
-        posts: [
-            Post(username: "UserA", handle:"@dataprivacy", content: "Privacy should be the default, not an option users have to search for.", timestamp: "3m"),
-            Post(username: "UserB", handle:"@cleanCoder", content: "Writing clean code is easy. Writing readable code that lasts? That’s the challenge.", timestamp: "10m"),
-            Post(username: "UserC", handle:"@debugmaster", content: "Every bug hides a lesson. Every fix is a step closer to mastery.", timestamp: "1h"),
-            Post(username: "UserD", handle:"@opensourcefan", content: "Open-source encryption libraries are essential. Trust, but verify.", timestamp: "2h"),
-            Post(username: "UserE", handle:"@uxmatters", content: "Good UX means protecting users’ data, not just their experience.", timestamp: "3h"),
-            Post(username: "UserF", handle:"@devthinking", content: "Learning a new programming language feels like unlocking a new way to think.", timestamp: "5h"),
-            Post(username: "UserG", handle:"@breachwatch", content: "Data breaches aren’t just technical failures—they're ethical ones too.", timestamp: "8h"),
-            Post(username: "UserH", handle:"@simplecoder", content: "Complex passwords protect data. Simple code protects developers.", timestamp: "12h"),
-            Post(username: "UserI", handle:"@privacyfirst", content: "In a world full of trackers, privacy is a power move.", timestamp: "1d"),
-            Post(username: "UserJ", handle:"@privacyguru", content: "Encryption isn't just for security—it’s about preserving freedom in the digital world.", timestamp: "2d")
-        ]
-    )
-}
-
