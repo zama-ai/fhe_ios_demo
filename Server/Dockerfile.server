@@ -23,10 +23,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # net-tools \           # ifconfig, netstat, route
-    # iproute2  \           # ip, ss, tc
-    # netcat-traditional \  # ports
-    # procps \              # ps, top, kill, free
     procps \
     curl \
     wget \
@@ -35,8 +31,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# (Optional) Installation of the NVIDIA driver in the container is not recommended,
-# because the driver must be managed by the host via the NVIDIA Container Toolkit.
+
+# The NVIDIA driver should be managed by the host via the NVIDIA Container Toolkit.
+# Installing it in the container is not recommended.
 # RUN apt-get update && apt-get install -y --no-install-recommends nvidia-driver-535
 
 # Install CUDA Toolkit + CUDA keyring for Ubuntu 22.04
@@ -52,7 +49,6 @@ ENV PATH=/usr/local/cuda/bin:$PATH
 
 # Set working directory
 WORKDIR /project
-
 RUN mkdir -p /project/data
 
 # Copy Python dependencies, configuration files and Python server

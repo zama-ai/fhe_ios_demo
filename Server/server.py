@@ -713,7 +713,6 @@ def get_logs(user: str = Depends(get_current_user), lines: int = 10) -> Response
                 </style>
                 <script>
                     let autoRefreshInterval;
-
                     function toggleAutoRefresh() {{
                         const checkbox = document.getElementById('autoRefresh');
                         if (checkbox.checked) {{
