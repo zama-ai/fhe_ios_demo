@@ -21,6 +21,9 @@ FROM ubuntu:22.04 AS python-image
 # Set non-interactive mode for package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Define a build argument to control CUDA installation
+ARG INSTALL_CUDA
+
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
@@ -36,16 +39,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Installing it in the container is not recommended.
 # RUN apt-get update && apt-get install -y --no-install-recommends nvidia-driver-535
 
+# Conditionally install CUDA if INSTALL_CUDA is set to "true"
 # Install CUDA Toolkit + CUDA keyring for Ubuntu 22.04
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
-    dpkg -i cuda-keyring_1.1-1_all.deb && \
-    rm cuda-keyring_1.1-1_all.deb && \
-    apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-12-8 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # Add CUDA Toolkit to PATH (necessary for `nvcc` to be accessible to the container)
 # check: readlink /usr/local/cuda
-ENV PATH=/usr/local/cuda/bin:$PATH
+RUN if [ "$INSTALL_CUDA" = "nvidia" ]; then \
+    wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    rm -f cuda-keyring_1.1-1_all.deb && \
+    apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-12-8 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    echo "CUDA installed" && \
+    echo 'export PATH=/usr/local/cuda/bin:$PATH' >> /etc/environment; \
+    else echo "Skipping CUDA installation"; \
+    fi
+
 
 # Set working directory
 WORKDIR /project

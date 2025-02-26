@@ -65,7 +65,7 @@ services:
     depends_on:
       - service_redis
       - service_fastapi
-    runtime: nvidia
+    runtime: "${DOCKER_RUNTIME}"
     environment:
       RUN_TYPE: "usecases"
       DOMAIN_NAME: $DOMAIN_NAME
@@ -89,7 +89,7 @@ services:
     depends_on:
       - service_redis
       - service_fastapi
-    runtime: nvidia
+    runtime: "${DOCKER_RUNTIME}"
     environment:
       RUN_TYPE: "ads"
       DOMAIN_NAME: $DOMAIN_NAME
