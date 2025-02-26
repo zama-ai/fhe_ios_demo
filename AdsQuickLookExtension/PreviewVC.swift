@@ -36,6 +36,10 @@ final class PreviewVC: UIViewController, QLPreviewingController {
     // Perform any setup necessary in order to prepare the view.
     // Quick Look will display a loading spinner until this returns.
     func preparePreviewOfFile(at url: URL) async throws {
+        let suffix = url.deletingPathExtension().lastPathComponent.split(separator: "-").last ?? "0"
+        let position = Int(suffix) ?? 0
+        print("Rendering ", url.lastPathComponent, suffix, position)
+        
 //        guard let data = await Storage.read(url),
 //              let ck = try await ClientKey.readFromDisk(.clientKey)
 //        else {
@@ -45,6 +49,6 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         
         // Decryption…
         
-        self.viewModel.ad = AdModel.fake
+        self.viewModel.adID = position
     }
 }

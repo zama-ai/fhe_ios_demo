@@ -26,10 +26,19 @@ enum TimelineItem: Identifiable {
 extension SocialTimeline {
     final class ViewModel: ObservableObject {
         @Published var items: [TimelineItem]
-        private let adFrequency = 2 // Show an ad every 3 posts
-        private let adsLimit = 10
+        static private let adFrequency = 2 // Show an ad every 3 posts
+        static private let adsLimit = 10
+
+        private static let initialize: Void = {
+            Task {
+                print("SocialTimeline initialize: This runs only once for all instances.")
+                try await writeAdsResults()
+            }
+        }()
 
         init(posts: [Post]) {
+            _ = Self.initialize
+
             var items: [TimelineItem] = []
             var adIndex = 0
 
@@ -37,7 +46,7 @@ extension SocialTimeline {
                 items.append(.post(post))
                 
                 // Insert an ad after every `adFrequency` posts
-                if (index + 1) % adFrequency == 0, adIndex < adsLimit {
+                if (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
                     items.append(.ad(adIndex))
                     adIndex += 1
                 }
@@ -45,6 +54,13 @@ extension SocialTimeline {
             self.items = items
         }
 
+        
+        static func writeAdsResults() async throws {
+            let serverResult = Data("Hello, World!".utf8)
+            for position in 0..<adsLimit {
+                try await Storage.write(.concreteEncryptedResult, data: serverResult, suffix: "\(position)")
+            }
+        }
     }
 }
 

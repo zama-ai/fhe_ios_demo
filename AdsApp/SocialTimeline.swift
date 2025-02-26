@@ -27,7 +27,7 @@ struct SocialTimeline: View {
         }
         .background(.orange)
     }
-        
+    
     private var titleBar: some View {
         HStack(spacing: 0) {
             Text("FHE Ads")
@@ -78,27 +78,19 @@ struct SocialTimeline: View {
         }
     }
     
+    @ViewBuilder
     private func adView(at index: Int) -> some View {
-        FilePreview(url: Storage.url(for: .concreteEncryptedResult))
-            .frame(minHeight: 155)
+        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(index)"))
+            .frame(minHeight: 175)
             .overlay {
                 Color.white.opacity(0.01) // Hack to allow scrolling from this view
             }
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(alignment: .topTrailing) {
-                Text("\(index)")
-                    .padding(8)
-                    .foregroundStyle(.white)
-                    .background {
-                        Circle().fill(Color.red)
-                    }
-            }
-            .task {
-                do {
-                    try await Storage.write(.concreteEncryptedResult, data: Data("Hello, World!".utf8))
-                } catch {
-                    print("Writing error: \(error)")
-                }
+            .overlay(alignment: .bottomTrailing) {
+                Text("Privately Targeted Ad")
+                    .customFont(.subheadline)
+                    .foregroundColor(.gray)
+                    .padding(4)
             }
     }
 }

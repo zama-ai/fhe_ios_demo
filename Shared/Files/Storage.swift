@@ -38,6 +38,17 @@ final class Storage {
         enum DecryptType {
             case int8, int16, array, cipherTextList
         }
+        
+        func withSuffix(_ suffix: String?) -> String {
+            guard let suffix, !suffix.isEmpty else { return self.rawValue }
+
+            let components = rawValue.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+            if components.count == 2 {
+                return "\(components[0])-\(suffix).\(components[1])"
+            } else {
+                return "\(rawValue)-\(suffix)"
+            }
+        }
     }
     
     private init() {
@@ -47,8 +58,9 @@ final class Storage {
     private static let singleton = Storage()
     
     /// Pass nil to delete file
-    static func write(_ file: File, data: Data?) async throws {
-        let fullURL = singleton.sharedFolder.appendingPathComponent(file.rawValue)
+    static func write(_ file: File, data: Data?, suffix: String? = nil) async throws {
+        let fileName = file.withSuffix(suffix)
+        let fullURL = singleton.sharedFolder.appendingPathComponent(fileName)
         try await singleton.write(at: fullURL, data: data)
     }
     
@@ -70,8 +82,9 @@ final class Storage {
         await singleton.read(at: url)
     }
     
-    static func url(for file: File) -> URL {
-        singleton.sharedFolder.appendingPathComponent(file.rawValue)
+    static func url(for file: File, suffix: String? = nil) -> URL {
+        let fileName = file.withSuffix(suffix)
+        return singleton.sharedFolder.appendingPathComponent(fileName)
     }
 }
 

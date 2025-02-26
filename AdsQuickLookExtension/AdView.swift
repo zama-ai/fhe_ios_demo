@@ -18,9 +18,11 @@ struct AdView: View {
             
         }
         .padding()
-        .background(.regularMaterial)
         .background {
             image
+                .scaledToFill()
+                .ignoresSafeArea()
+                .overlay(.thinMaterial)
         }
     }
     

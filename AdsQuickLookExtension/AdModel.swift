@@ -21,7 +21,7 @@ struct AdModel: Decodable, Identifiable {
                               details: "Atelier pour apprendre à jouer du darbuka. Prix : 1500 DZD par session. Sessions les samedis et mardis à 17h.",
                               imageName: "0fbfa1e096c0c87bfcc11c16c86a6f09f360f905.jpeg")
     
-    static func ads(from data: Data) throws -> [AdModel] {
+    static func allAds(from data: Data) throws -> [AdModel] {
         let decodedDictionary = try JSONDecoder().decode([Int: [DecodableValue]].self, from: data)
         let ads = try decodedDictionary.map { key, values in
             return AdModel(id: key,
@@ -57,6 +57,7 @@ struct AdModel: Decodable, Identifiable {
 
 fileprivate extension String {
     /// Returns a normalized version of the string: case-insensitive and diacritic-insensitive
+    /// Ex: Search for "ecol" => should match "école", "Ecole", "École", should NOT match "décoller"
     var searchNormalized: String {
         self.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
