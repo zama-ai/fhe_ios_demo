@@ -61,14 +61,35 @@ final class Network {
         return obj.status
     }
 
-    func getTaskResult(for task: ServerTask, taskID: TaskID, uid: String) async throws -> Data {
+    /// Returns:
+    /// - `Data` if result is available,
+    /// - `nil` if server is still processing,
+    /// - `TaskError.needToRetry` if an error occurred
+    private func getTaskResult_singleShot(for task: ServerTask, taskID: TaskID, uid: String) async throws -> Data? {
         let data = try await sendRequest(.GET(root: rootURL,
                                               path: "/get_task_result",
                                               json: ["task_name": task.rawValue,
                                                      "task_id": taskID,
                                                      "uid": uid]))
-        try validateStatus(for: data)
+        do {
+            try validateStatus(for: data)
+        } catch TaskError.needToWait {
+            return nil
+        }
+        
         return data
+    }
+
+    /// Polling variant. Repeatedly calls `getTaskResult` until a non nil result is returned, or an error is thrown.
+    private func getTaskResult_pollIfNeeded(every interval: TimeInterval, task: ServerTask, taskID: TaskID, uid: String) async throws -> Data {
+        while true {
+            if let result = try await getTaskResult_singleShot(for: task, taskID: taskID, uid: uid) {
+                return result
+            }
+            
+            print("  retrying in \(interval) seconds.")
+            try await Task.sleep(for: .seconds( interval))
+        }
     }
 
 //     `get_task_status/_result` endpoints return up to 10 different statuses, sometimes in JSON body, sometimes in HTTP Headers.
@@ -92,11 +113,18 @@ final class Network {
     }
         
     // MARK: - SPECIALIZED -
-    
+    func getAdTargetingResult(taskID: TaskID, uid: UID) async throws -> Data {
+        try await getTaskResult_pollIfNeeded(every: 2, task: .ad_targeting, taskID: taskID, uid: uid)
+    }
+
+    func getSleepResult(taskID: TaskID, uid: UID) async throws -> Data {
+        try await getTaskResult_pollIfNeeded(every: 5, task: .sleep_quality, taskID: taskID, uid: uid)
+    }
+
     /// - Returns: FheUint16 min, max and avg of the list of weights. Clear values have to be divided by 10.
     func getWeightResult(taskID: TaskID, uid: UID) async throws -> (min: Data, max: Data, avg: Data) {
-        let data = try await getTaskResult(for: .weight_stats, taskID: taskID, uid: uid)
-        
+        let data = try await getTaskResult_pollIfNeeded(every: 2, task: .weight_stats, taskID: taskID, uid: uid)
+
         struct WeightResponse: Decodable {
             let min: Data?
             let max: Data?
@@ -110,6 +138,8 @@ final class Network {
         
         return (min: min, max: max, avg: avg)
     }
+
+    
     
     // MARK: - Helpers -
     private func sendRequest(_ request: URLRequest, session: URLSession = .shared) async throws -> Data {
@@ -197,12 +227,12 @@ extension URLRequest {
 
 enum TaskError: LocalizedError {
     case needToWait
-    case needToRestart
+    case needToRetry
     
     var errorDescription: String? {
         switch self {
         case .needToWait: "Need to wait task completion"
-        case .needToRestart: "Need to restart task"
+        case .needToRetry: "Need to restart task"
         }
     }
     
@@ -220,7 +250,7 @@ enum TaskError: LocalizedError {
         switch status {
         case .success, .completed: return nil
         case .started, .reserved, .queued: self = .needToWait
-        case .pending, .failure, .revoked, .unknown, .error: self = .needToRestart
+        case .pending, .failure, .revoked, .unknown, .error: self = .needToRetry
         }
     }
 }

@@ -66,9 +66,9 @@ struct SocialTimeline: View {
                     .tint(.black)
                 }
             
-            if let status = vm.operationStatus {
+            if let report = vm.activityReport {
                 HStack(spacing: 2) {
-                    switch status {
+                    switch report {
                     case .progress(let string):
                         Text(string)
                         ProgressView()

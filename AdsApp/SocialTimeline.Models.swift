@@ -35,7 +35,7 @@ struct Post: Identifiable {
     ]
 }
 
-enum OperationStatus {
+enum ActivityReport {
     case progress(String)
     case error(String)
 }

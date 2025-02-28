@@ -42,12 +42,12 @@ extension HealthView {
                 throw NetworkingError.message("Encrypted sleep missing")
             }
             
-            let userID = try await getUserID(for: .sleep_quality)
+            let uid = try await getUserID(for: .sleep_quality)
             let taskID = try await Network.shared.startTask(.sleep_quality,
-                                                            uid: userID,
+                                                            uid: uid,
                                                             encrypted_input: input)
             
-            UserDefaults.standard.set(taskID, forKey: Self.sleepTaskIDKey)
+            try await getResultForSleep(taskID: taskID, uid: uid)
         }
         
         func uploadWeight() async throws {
@@ -55,29 +55,17 @@ extension HealthView {
                 throw NetworkingError.message("Encrypted weight missing")
             }
             
-            let userID = try await getUserID(for: .weight_stats)
+            let uid = try await getUserID(for: .weight_stats)
             let taskID = try await Network.shared.startTask(.weight_stats,
-                                                            uid: userID,
+                                                            uid: uid,
                                                             encrypted_input: input)
             
-            UserDefaults.standard.set(taskID, forKey: Self.weightTaskIDKey)
+            try await getResultForWeight(taskID: taskID, uid: uid)
         }
-        
-        func checkStatus(for task: Network.ServerTask) async throws {
-            guard let taskID = taskID(for: task) else { return }
-            let userID = try await getUserID(for: task)
-            let _ = try await Network.shared.getStatus(for: task, id: taskID, uid: userID)
-        }
-        
-        func getResultForWeight() async throws {
-            let task: Network.ServerTask = .weight_stats
-            let userID = try await getUserID(for: task)
-            guard let taskID = taskID(for: task) else {
-                return
-            }
-
+                
+        func getResultForWeight(taskID: String, uid: String) async throws {
             do {
-                let tuple = try await Network.shared.getWeightResult(taskID: taskID, uid: userID)
+                let tuple = try await Network.shared.getWeightResult(taskID: taskID, uid: uid)
                 
                 try await Storage.write(.weightMin, data: tuple.min)
                 try await Storage.write(.weightMax, data: tuple.max)
@@ -92,33 +80,14 @@ extension HealthView {
             }
         }
         
-        func getResultForSleep() async throws {
-            let task: Network.ServerTask = .sleep_quality
-            let userID = try await getUserID(for: task)
-            guard let taskID = taskID(for: task) else {
-                return
-            }
-
+        func getResultForSleep(taskID: String, uid: String) async throws {
             do {
-                let quality = try await Network.shared.getTaskResult(for: .sleep_quality, taskID: taskID, uid: userID)
+                let quality = try await Network.shared.getSleepResult(taskID: taskID, uid: uid)
                 try await Storage.write(.sleepScore, data: quality)
                 sleepResultQuality = quality
             } catch let error as TaskError {
                 print(error.localizedDescription)
             }
         }
-        
-        private func taskID(for task: Network.ServerTask) -> String? {
-            let key = switch task {
-            case .weight_stats: Self.weightTaskIDKey
-            case .sleep_quality: Self.sleepTaskIDKey
-            case .ad_targeting: Self.adsTaskIDKey
-            }
-            return UserDefaults.standard.string(forKey: key)
-        }
-        
-        static let weightTaskIDKey = "taskID.weightStats"
-        static let sleepTaskIDKey = "taskID.sleepQuality"
-        static let adsTaskIDKey = "taskID.adsTargeting"
     }
 }
