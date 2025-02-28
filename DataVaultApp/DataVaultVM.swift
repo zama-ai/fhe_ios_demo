@@ -8,8 +8,6 @@ extension DataVaultView {
     @MainActor
     final class ViewModel: ObservableObject {
         
-        @Published var editProfile: EditProfile = .init()
-
         @Published var weightGranted: Bool = false
         @Published var sleepGranted: Bool = false
         
@@ -25,7 +23,7 @@ extension DataVaultView {
 
         @Published var encryptedWeight: Data?
         @Published var encryptedSleep: Data?
-        @Published var encryptedProfile: Data?
+//        @Published var encryptedProfile: Data?
 
         private var ck: ClientKey?
         private var pk: PublicKeyCompact?
@@ -44,7 +42,7 @@ extension DataVaultView {
             try await refreshPermission()
             encryptedWeight = await Storage.read(.weightList)
             encryptedSleep = await Storage.read(.sleepList)
-            encryptedProfile = await Storage.read(.concreteEncryptedProfile)
+//            encryptedProfile = await Storage.read(.concreteEncryptedProfile)
             try await fetchHealthData()
         }
         
@@ -157,23 +155,26 @@ extension DataVaultView {
 
 //import concrete_ml_extensionsFFI
 // MARK: - Profile -
-extension DataVaultView.ViewModel {
-    func encryptProfile() async throws {
-        print(#function)
-        
-        if let profile = Profile(editProfile: editProfile) {
-            let text = "\(profile.oneHotBinary)"
-            print(profile.oneHotBinary)
-            UIPasteboard.general.string = text
-        }
-    }
-    
-    func deleteProfile() async throws {
-        print(#function)
-        try await Storage.deleteFromDisk(.concreteEncryptedProfile)
-        try await loadFromDisk()
-    }
-}
+//extension DataVaultView.ViewModel {
+//    func encryptProfile() async throws {
+//        
+//        guard let profile = Profile(editProfile: editProfile) else {
+//            return
+//        }
+//        
+//        let oneHot = profile.oneHotBinary
+//        print("\(profile.oneHotBinary)")
+//        
+//        let data = Data("hi".utf8)
+//        try await Storage.write(.concreteEncryptedProfile, data: data)
+//        encryptedProfile = data
+//    }
+//    
+//    func deleteProfile() async throws {
+//        try await Storage.deleteFromDisk(.concreteEncryptedProfile)
+//        try await loadFromDisk()
+//    }
+//}
 
 // MARK: - ENCRYPTION -
 extension DataVaultView.ViewModel {

@@ -23,7 +23,7 @@ struct DataVaultView: View {
     }
     
     @StateObject private var vm = ViewModel()
-    @State private var selectedTab: TabKind = .sleep
+    @State private var selectedTab: TabKind = .profile
     
     var body: some View {
         header
@@ -55,7 +55,6 @@ struct DataVaultView: View {
     }
     
     private var content: some View {
-        //ScrollView {
         TabView(selection: $selectedTab) {
             Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
               sleepSection
@@ -67,24 +66,20 @@ struct DataVaultView: View {
               profileSection
             }
         }
-//        .scrollBounceBehavior(.basedOnSize)
-//        .padding(8)
     }
     
     private var profileSection: some View {
-        section(for: .profile,
-                granted: true,
-                items: [12],
-                file: vm.encryptedProfile,
-                subtitle: "Once encrypted, other apps can't access your information",
-                encrypt: vm.encryptProfile,
-                delete: vm.deleteProfile,
-                openIn: .fheAdTargeting)
-        {
-            NavigationStack {
-                ProfileForm(vm: vm)
-            }
-            .frame(height: 300)
+        GroupBox {
+            ProfileForm()
+                .frame(maxHeight: .infinity, alignment: .top)
+        } label: {
+            Label(Metric.profile.name, systemImage: Metric.profile.icon)
+                .imageScale(.large)
+                .symbolRenderingMode(.multicolor)
+                .foregroundStyle(Metric.profile.color)
+                .customFont(.title3)
+            
+            Divider()
         }
     }
     

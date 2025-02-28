@@ -40,15 +40,51 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         let position = Int(suffix) ?? 0
         print("Rendering ", url.lastPathComponent, suffix, position)
         
-//        guard let data = await Storage.read(url),
-//              let ck = try await ClientKey.readFromDisk(.clientKey)
-//        else {
-//            print("QL: cannot read ClientKey or file at \(url)")
-//            throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey or file at \(url)!"])
-//        }
+        guard let resultData = await Storage.read(url),
+              let savedPK = await Storage.read(.concretePrivateKey),
+              let cryptoParams = ConcreteML.cryptoParams
+        else {
+            print("QL: cannot read ClientKey or file at \(url)")
+            throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey or file at \(url)!"])
+        }
         
         // Decryption…
-        
-        self.viewModel.adID = position
+        let privateKey = await ConcreteML.deserializePrivateKey(from: savedPK)
+        let compressedMatrix = try compressedResultEncryptedMatrixDeserialize(content: resultData)
+        let rawResult: [[UInt64]] = try decryptMatrix(compressedMatrix: compressedMatrix,
+                                                      privateKey: privateKey,
+                                                      cryptoParams: cryptoParams,
+                                                      numValidGlweValuesInLastCiphertext: 42) // Concrete ML hack
+
+        let clearResult: [Int64] = rawResult[0].compactMap {
+            let raw = Int64(truncatingIfNeeded: $0)
+            return raw <= 0 ? 0 : raw
+        }
+
+        print(clearResult)
+        print(position)
+        self.viewModel.adID = nthHighestScore(rank: position, in: clearResult)
+    }
+    
+    /// Returns the index of the `rank`th highest score in the given list.
+    ///
+    /// - Parameters:
+    ///   - rank: The position (0-based) of the desired item, where `0` is the highest.
+    ///   - scores: A list of numerical scores.
+    /// - Returns: The index of the `rank`th highest score.
+    ///
+    /// - Example:
+    ///   ```swift
+    ///   let scores: [UInt64] = [10, 50, 12, 32]
+    ///   nthHighestScore(rank: 0, in: scores) // → 1 (highest score: 50)
+    ///   nthHighestScore(rank: 1, in: scores) // → 3 (second highest: 32)
+    ///   nthHighestScore(rank: 2, in: scores) // → 2 (third highest: 12)
+    ///   nthHighestScore(rank: 3, in: scores) // → 0 (fourth highest: 10)
+    ///   ```
+    private func nthHighestScore(rank: Int, in scores: [Int64]) -> Int {
+        let positions = scores.enumerated()
+            .sorted { $0.element > $1.element } // highest scores first
+            .map { $0.offset }
+        return positions[rank]
     }
 }

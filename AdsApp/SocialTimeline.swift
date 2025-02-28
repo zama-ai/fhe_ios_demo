@@ -9,7 +9,8 @@ import SwiftUI
 struct SocialTimeline: View {
     @StateObject private var vm = ViewModel()
     @Environment(\.openURL) private var openURL
-    
+    @Environment(\.scenePhase) var scenePhase
+
     var body: some View {
         VStack {
             titleBar
@@ -30,7 +31,15 @@ struct SocialTimeline: View {
             }
         }
         .background(.orange)
-        .task(vm.onAppear)
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .active:
+                Task {
+                    await vm.onAppear()
+                }
+            case _: break
+            }
+        }
     }
     
     private var openDataVaultCard: some View {

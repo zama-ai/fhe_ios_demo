@@ -3,7 +3,8 @@
 import SwiftUI
 
 #Preview {
-    ProfileForm2()
+    Text("salut")
+    //ProfileForm2()
         .preferredColorScheme(.light)
 }
 
