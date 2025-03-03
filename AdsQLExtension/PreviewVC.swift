@@ -61,8 +61,6 @@ final class PreviewVC: UIViewController, QLPreviewingController {
             return raw <= 0 ? 0 : raw
         }
 
-        print(clearResult)
-        print(position)
         self.viewModel.adID = nthHighestScore(rank: position, in: clearResult)
     }
     
