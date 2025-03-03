@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1600"
+   LastUpgradeVersion = "1620"
    wasCreatedForAppExtension = "YES"
    version = "1.7">
    <BuildAction
@@ -16,9 +16,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "324F8E1C2CA43B2100F0BB11"
-               BuildableName = "FHE QuickLookExtension.appex"
-               BlueprintName = "QuickLookExtension"
+               BlueprintIdentifier = "322658942D6E20AD004BB59A"
+               BuildableName = "AdsQLExtension.appex"
+               BlueprintName = "AdsQLExtension"
                ReferencedContainer = "container:FHEDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -59,9 +59,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "32C9CC1F2CA565A100AEDA32"
-            BuildableName = "FHE Health.app"
-            BlueprintName = "Health"
+            BlueprintIdentifier = "328F5CB22D009CA800D7B219"
+            BuildableName = "FHE Ads.app"
+            BlueprintName = "Ads"
             ReferencedContainer = "container:FHEDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

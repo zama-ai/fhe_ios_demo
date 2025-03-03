@@ -23,7 +23,7 @@ struct SocialTimeline: View {
                     ForEach(vm.items) { item in
                         switch item {
                         case .post(let post): postView(post)
-                        case .ad(let index): adView(at: index)
+                        case .ad(let index): adView(position: index)
                         }
                     }
                     .padding(.horizontal, 8)
@@ -127,8 +127,8 @@ struct SocialTimeline: View {
     }
     
     @ViewBuilder
-    private func adView(at index: Int) -> some View {
-        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(index)"))
+    private func adView(position: Int) -> some View {
+        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(position)"))
             .frame(minHeight: 175)
             .overlay {
                 Color.white.opacity(0.01) // Hack to allow scrolling from this view

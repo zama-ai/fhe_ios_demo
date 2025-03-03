@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		322658962D6E20AD004BB59A /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32543D8C2D47EFA4007600B2 /* QuickLook.framework */; };
-		322658A22D6E20AD004BB59A /* AdsQuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 322658952D6E20AD004BB59A /* AdsQuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		322658A22D6E20AD004BB59A /* AdsQLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 322658952D6E20AD004BB59A /* AdsQLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3226D94C2D38168D00595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
 		3226D9512D3816A500595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
 		322B62012D7216C4009881A9 /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */; };
@@ -45,7 +45,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */,
-				322658A22D6E20AD004BB59A /* AdsQuickLookExtension.appex in Embed Foundation Extensions */,
+				322658A22D6E20AD004BB59A /* AdsQLExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -53,7 +53,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		322658952D6E20AD004BB59A /* AdsQuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AdsQuickLookExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		322658952D6E20AD004BB59A /* AdsQLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AdsQLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3226D94B2D38168D00595BBC /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TFHE.xcframework; path = Frameworks/TFHE.xcframework; sourceTree = "<group>"; };
 		3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ConcreteMLExtensions.xcframework; path = Frameworks/ConcreteMLExtensions.xcframework; sourceTree = "<group>"; };
 		3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = concrete_ml_extensions.swift; path = Frameworks/concrete_ml_extensions.swift; sourceTree = "<group>"; };
@@ -108,7 +108,7 @@
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
-		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */ = {
+		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "HealthQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				CustomFont/CustomFont.swift,
@@ -128,9 +128,9 @@
 				Files/Storage.swift,
 				SleepModels.swift,
 			);
-			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
+			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
 		};
-		3226597E2D6E2C8F004BB59A /* Exceptions for "AdsQuickLookExtension" folder in "AdsQuickLookExtension" target */ = {
+		3226597E2D6E2C8F004BB59A /* Exceptions for "AdsQLExtension" folder in "AdsQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: AppSupport/MainInterface.storyboard",
@@ -141,22 +141,22 @@
 				PreviewContent.swift,
 				PreviewVC.swift,
 			);
-			target = 322658942D6E20AD004BB59A /* AdsQuickLookExtension */;
+			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
 		};
-		322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQuickLookExtension" target */ = {
+		322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				ConcreteML.swift,
 				Files/Storage.swift,
 			);
-			target = 322658942D6E20AD004BB59A /* AdsQuickLookExtension */;
+			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
 		};
-		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */ = {
+		324F8E2E2CA43B2100F0BB11 /* Exceptions for "HealthQLExtension" folder in "HealthQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppSupport/Info.plist,
 			);
-			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
+			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
 		};
 		328F5CC22D009FB200D7B219 /* Exceptions for "AdsApp" folder in "Ads" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -206,8 +206,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "DataVault" target */,
-				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QuickLookExtension" target */,
-				322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQuickLookExtension" target */,
+				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "HealthQLExtension" target */,
+				322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQLExtension" target */,
 				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */,
 				328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */,
 			);
@@ -219,23 +219,23 @@
 			path = Server;
 			sourceTree = "<group>";
 		};
-		3226587F2D6E1EFE004BB59A /* AdsQuickLookExtension */ = {
+		3226587F2D6E1EFE004BB59A /* AdsQLExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3226597E2D6E2C8F004BB59A /* Exceptions for "AdsQuickLookExtension" folder in "AdsQuickLookExtension" target */,
+				3226597E2D6E2C8F004BB59A /* Exceptions for "AdsQLExtension" folder in "AdsQLExtension" target */,
 			);
 			explicitFolders = (
 				AdImages,
 			);
-			path = AdsQuickLookExtension;
+			path = AdsQLExtension;
 			sourceTree = "<group>";
 		};
-		324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */ = {
+		324F8E1F2CA43B2100F0BB11 /* HealthQLExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QuickLookExtension" folder in "QuickLookExtension" target */,
+				324F8E2E2CA43B2100F0BB11 /* Exceptions for "HealthQLExtension" folder in "HealthQLExtension" target */,
 			);
-			path = QuickLookExtension;
+			path = HealthQLExtension;
 			sourceTree = "<group>";
 		};
 		328F5CB42D009CA800D7B219 /* AdsApp */ = {
@@ -328,8 +328,8 @@
 				32079E3B2CAC3941004EC06A /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* DataVaultApp */,
 				32C9CC212CA565A100AEDA32 /* HealthApp */,
-				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
-				3226587F2D6E1EFE004BB59A /* AdsQuickLookExtension */,
+				324F8E1F2CA43B2100F0BB11 /* HealthQLExtension */,
+				3226587F2D6E1EFE004BB59A /* AdsQLExtension */,
 				328F5CB42D009CA800D7B219 /* AdsApp */,
 				320CFB212CAAC47500528366 /* Server */,
 				320C391A2CAAEE2900528366 /* Shared */,
@@ -345,7 +345,7 @@
 				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
 				32C9CC202CA565A100AEDA32 /* FHE Health.app */,
 				328F5CB32D009CA800D7B219 /* FHE Ads.app */,
-				322658952D6E20AD004BB59A /* AdsQuickLookExtension.appex */,
+				322658952D6E20AD004BB59A /* AdsQLExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -353,9 +353,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		322658942D6E20AD004BB59A /* AdsQuickLookExtension */ = {
+		322658942D6E20AD004BB59A /* AdsQLExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "AdsQuickLookExtension" */;
+			buildConfigurationList = 322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "AdsQLExtension" */;
 			buildPhases = (
 				322658912D6E20AD004BB59A /* Sources */,
 				322658922D6E20AD004BB59A /* Frameworks */,
@@ -365,16 +365,16 @@
 			);
 			dependencies = (
 			);
-			name = AdsQuickLookExtension;
+			name = AdsQLExtension;
 			packageProductDependencies = (
 			);
 			productName = TestQuickLookExtension;
-			productReference = 322658952D6E20AD004BB59A /* AdsQuickLookExtension.appex */;
+			productReference = 322658952D6E20AD004BB59A /* AdsQLExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */ = {
+		324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "QuickLookExtension" */;
+			buildConfigurationList = 324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "HealthQLExtension" */;
 			buildPhases = (
 				324F8E192CA43B2100F0BB11 /* Sources */,
 				324F8E1A2CA43B2100F0BB11 /* Frameworks */,
@@ -385,9 +385,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				324F8E1F2CA43B2100F0BB11 /* QuickLookExtension */,
+				324F8E1F2CA43B2100F0BB11 /* HealthQLExtension */,
 			);
-			name = QuickLookExtension;
+			name = HealthQLExtension;
 			packageProductDependencies = (
 			);
 			productName = QuickLookExtension;
@@ -510,8 +510,8 @@
 			projectRoot = "";
 			targets = (
 				32B258362C98693800538B23 /* DataVault */,
-				324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */,
-				322658942D6E20AD004BB59A /* AdsQuickLookExtension */,
+				324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */,
+				322658942D6E20AD004BB59A /* AdsQLExtension */,
 				32C9CC1F2CA565A100AEDA32 /* Health */,
 				328F5CB22D009CA800D7B219 /* Ads */,
 			);
@@ -599,12 +599,12 @@
 /* Begin PBXTargetDependency section */
 		322658A12D6E20AD004BB59A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 322658942D6E20AD004BB59A /* AdsQuickLookExtension */;
+			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
 			targetProxy = 322658A02D6E20AD004BB59A /* PBXContainerItemProxy */;
 		};
 		324F8E292CA43B2100F0BB11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 324F8E1C2CA43B2100F0BB11 /* QuickLookExtension */;
+			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
 			targetProxy = 324F8E282CA43B2100F0BB11 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -613,13 +613,13 @@
 		322658A42D6E20AD004BB59A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = AdsQuickLookExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = AdsQLExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AdsQuickLookExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AdsQuickLookExtension;
+				INFOPLIST_FILE = AdsQLExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AdsQLExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -639,13 +639,13 @@
 		322658A52D6E20AD004BB59A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = AdsQuickLookExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = AdsQLExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AdsQuickLookExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AdsQuickLookExtension;
+				INFOPLIST_FILE = AdsQLExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AdsQLExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -665,13 +665,13 @@
 		324F8E2C2CA43B2100F0BB11 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HealthQLExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = QuickLookExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = QuickLookExtension;
+				INFOPLIST_FILE = HealthQLExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HealthQLExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -691,13 +691,13 @@
 		324F8E2D2CA43B2100F0BB11 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HealthQLExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = QuickLookExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = QuickLookExtension;
+				INFOPLIST_FILE = HealthQLExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HealthQLExtension;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1030,7 +1030,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "AdsQuickLookExtension" */ = {
+		322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "AdsQLExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				322658A42D6E20AD004BB59A /* Debug */,
@@ -1039,7 +1039,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "QuickLookExtension" */ = {
+		324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "HealthQLExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				324F8E2C2CA43B2100F0BB11 /* Debug */,

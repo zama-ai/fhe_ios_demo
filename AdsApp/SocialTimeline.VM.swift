@@ -103,7 +103,7 @@ extension SocialTimeline {
                 
                 // Insert an ad after every `adFrequency` posts
                 if includeAds, (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
-                    items.append(.ad(adIndex))
+                    items.append(.ad(position: adIndex))
                     adIndex += 1
                 }
             }
