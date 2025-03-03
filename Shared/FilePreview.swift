@@ -13,6 +13,7 @@ struct FilePreview: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ vc: UIViewController, context _: Context) {
+        (vc as! QLPreviewController).reloadData()
     }
     
     func makeCoordinator() -> Coordinator {

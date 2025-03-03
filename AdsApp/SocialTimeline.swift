@@ -9,7 +9,7 @@ import SwiftUI
 struct SocialTimeline: View {
     @StateObject private var vm = ViewModel()
     @Environment(\.openURL) private var openURL
-    @Environment(\.scenePhase) var scenePhase
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         VStack {
@@ -23,7 +23,7 @@ struct SocialTimeline: View {
                     ForEach(vm.items) { item in
                         switch item {
                         case .post(let post): postView(post)
-                        case .ad(let index): adView(position: index)
+                        case .ad(let index, let hash): adView(position: index, profileHash: hash)
                         }
                     }
                     .padding(.horizontal, 8)
@@ -127,8 +127,8 @@ struct SocialTimeline: View {
     }
     
     @ViewBuilder
-    private func adView(position: Int) -> some View {
-        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(position)"))
+    private func adView(position: Int, profileHash: String) -> some View {
+        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(position)-\(profileHash)"))
             .frame(minHeight: 175)
             .overlay {
                 Color.white.opacity(0.01) // Hack to allow scrolling from this view

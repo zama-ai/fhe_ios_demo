@@ -4,12 +4,12 @@ import Foundation
 
 enum TimelineItem: Identifiable {
     case post(Post)
-    case ad(position: Int)
+    case ad(position: Int, profileHash: String)
     
     var id: String {
         switch self {
         case .post(let post): "post-\(post.id)"
-        case .ad(let position): "ad-\(position)"
+        case .ad(let position, let hash): "ad-\(position)-\(hash)"
         }
     }
 }
