@@ -8,10 +8,10 @@ final class Storage {
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
 
-        case matrixPrivateKey = "matrixPrivateKey"
-        case matrixCPUCompressionKey = "matrixCPUCompressionKey"
-        case matrixEncryptedProfile = "matrixProfile.fheencrypted"
-        case matrixEncryptedResult = "matrixResult.fheencrypted"
+        case concretePrivateKey = "concretePrivateKey"
+        case concreteCPUCompressionKey = "concreteCPUCompressionKey"
+        case concreteEncryptedProfile = "concreteProfile.fheencrypted"
+        case concreteEncryptedResult = "concreteResult.fheencryptedAd"
 
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
@@ -30,25 +30,59 @@ final class Storage {
             case .weightMin, .weightMax, .weightAvg:  .int16
                 
             case .clientKey, .publicKey, .serverKey: nil
-            case .matrixPrivateKey, .matrixCPUCompressionKey,
-                    .matrixEncryptedProfile, .matrixEncryptedResult: nil
+            case .concretePrivateKey, .concreteCPUCompressionKey,
+                    .concreteEncryptedProfile, .concreteEncryptedResult: nil
             }
         }
         
         enum DecryptType {
             case int8, int16, array, cipherTextList
         }
+        
+        // Whether this file should be shared with other apps via AppGroup, or stay private to current app
+        enum Confidentiality {
+            case groupShared, appPrivate
+        }
+        
+        // TODO:
+        var confidentiality: Confidentiality {
+            switch self {
+            case .sleepList, .sleepScore: .groupShared
+            case .weightList, .weightMin, .weightMax, .weightAvg: .groupShared
+            
+            case .clientKey : .groupShared // TODO: switch to .appPrivate once it includes QL extension too
+            case .publicKey, .serverKey: .groupShared
+                
+            case .concretePrivateKey: .groupShared // TODO: switch to .appPrivate once it includes QL extension too
+            case .concreteCPUCompressionKey, .concreteEncryptedProfile, .concreteEncryptedResult: .groupShared
+            }
+        }
+        
+        func withSuffix(_ suffix: String?) -> String {
+            guard let suffix, !suffix.isEmpty else { return self.rawValue }
+
+            let components = rawValue.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+            if components.count == 2 {
+                return "\(components[0])-\(suffix).\(components[1])"
+            } else {
+                return "\(rawValue)-\(suffix)"
+            }
+        }
     }
     
     private init() {
-        print("🗂️🗂️ Shared Folder: 🗂️🗂️\nopen \(sharedFolder)")
+        print("🗂️ Private Folder: \nopen \(appPrivateFolder)")
+        print("🗂️ Shared Folder: \nopen \(appGroupSharedFolder)")
     }
     
     private static let singleton = Storage()
-    
+    private let fileManager = FileManager.default
+    private let appGroupID = "group.ai.zama.fhedemo.shared"
+
     /// Pass nil to delete file
-    static func write(_ file: File, data: Data?) async throws {
-        let fullURL = singleton.sharedFolder.appendingPathComponent(file.rawValue)
+    static func write(_ file: File, data: Data?, suffix: String? = nil) async throws {
+        let fileName = file.withSuffix(suffix)
+        let fullURL = singleton.destinationFolder(for: file).appendingPathComponent(fileName)
         try await singleton.write(at: fullURL, data: data)
     }
     
@@ -62,7 +96,7 @@ final class Storage {
     
     /// Returns nil if file missing
     static func read(_ file: File) async -> Data? {
-        let fullURL = singleton.sharedFolder.appendingPathComponent(file.rawValue)
+        let fullURL = singleton.destinationFolder(for: file).appendingPathComponent(file.rawValue)
         return await singleton.read(at: fullURL)
     }
     
@@ -70,8 +104,9 @@ final class Storage {
         await singleton.read(at: url)
     }
     
-    static func url(for file: File) -> URL {
-        singleton.sharedFolder.appendingPathComponent(file.rawValue)
+    static func url(for file: File, suffix: String? = nil) -> URL {
+        let fileName = file.withSuffix(suffix)
+        return singleton.destinationFolder(for: file).appendingPathComponent(fileName)
     }
 }
 
@@ -92,7 +127,7 @@ extension Storage {
             }
         } else {
             print("❌ Deleting \(fileName)")
-            try FileManager.default.removeItem(at: url)
+            try fileManager.removeItem(at: url)
         }
     }
     
@@ -112,12 +147,32 @@ extension Storage {
         }
     }
     
-    private var sharedFolder: URL {
-        let appGroup = "group.ai.zama.fhedemo.shared"
-        guard let folder = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup) else {
-            fatalError("No shared folder - AppGroup misconfigured")
+    private func destinationFolder(for file: File) -> URL {
+        switch file.confidentiality {
+        case .appPrivate: return appPrivateFolder
+        case .groupShared: return appGroupSharedFolder
+        }
+    }
+        
+    private var appPrivateFolder: URL {
+        guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            fatalError("No private folder")
         }
         return folder
+    }
+
+    private var appAndExtensionFolder: URL {
+        guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            fatalError("No shared folder - AppGroup misconfigured")
+        }
+        return sharedFolder
+    }
+
+    private var appGroupSharedFolder: URL {
+        guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            fatalError("No shared folder - AppGroup misconfigured")
+        }
+        return sharedFolder
     }
 }
 

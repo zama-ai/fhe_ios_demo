@@ -6,7 +6,7 @@
 curl \
   -X POST "https://api.zama.ai/add_key" \
   -F "task_name=ad_targeting" \
-  -F "key=@matrixCPUCompressionKey"
+  -F "key=@concreteCPUCompressionKey"
 
 # {
 #     "uid": "906ead1d-1618-4f00-abbb-2850d6c0e3a9",
@@ -16,7 +16,7 @@ curl \
   -X POST "https://api.zama.ai/start_task" \
   -F "task_name=ad_targeting" \
   -F "uid=906ead1d-1618-4f00-abbb-2850d6c0e3a9" \
-  -F "encrypted_input=@matrixProfile.fheencrypted"
+  -F "encrypted_input=@concreteProfile.fheencrypted"
 
 # {
 #     "task_id": "51e63bae-c44c-4c53-82ea-0c7fb47400cf",

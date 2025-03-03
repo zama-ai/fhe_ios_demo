@@ -81,16 +81,16 @@ struct Profile {
 }
 
 extension Profile {
-    init?(editProfile edit: EditProfile) {
-        guard let g = edit.gender, let a = edit.age, let i = edit.interests else {
+    init?(from editProfile: EditProfile) {
+        guard let g = editProfile.gender, let a = editProfile.age, let i = editProfile.interests else {
             return nil
         }
         
         self = Profile(gender: g,
                        age: a,
-                       language: edit.language,
-                       country: edit.country,
-                       interestedInKids: edit.interestedInKids,
+                       language: editProfile.language,
+                       country: editProfile.country,
+                       interestedInKids: editProfile.interestedInKids,
                        interests: [i])
     }
 }
@@ -185,35 +185,35 @@ enum Country: String, PrettyNamable, OneHotable {
     }
 }
 
-enum Interest: PrettyNamable, OneHotable {
-    case animals,
-         art,
-         automobiles,
-         bicycle,
-         books,
-         comedy,
-         comics,
-         culture,
-         education,
-         family,
-         fashion,
-         food,
-         health,
-         journalism,
-         movies,
-         music,
-         nature,
-         news,
-         pets,
-         photography,
-         politics,
-         science,
-         smartphones,
-         software_dev,
-         sports,
-         tv,
-         tech,
-         travel,
-         video_games,
-         writers
+enum Interest: String, PrettyNamable, OneHotable {
+    case animals = "🐾"
+    case art = "🎨"
+    case automobiles = "🚗"
+    case bicycle = "🚴"
+    case books = "📚"
+    case comedy = "😂"
+    case comics = "🦸"
+    case culture = "🎭"
+    case education = "🎓"
+    case family = "👨‍👩‍👧‍👦"
+    case fashion = "👗"
+    case food = "🍽"
+    case health = "🏥"
+    case journalism = "🖊️"
+    case movies = "🎬"
+    case music = "🎵"
+    case nature = "🌿"
+    case news = "🗞"
+    case pets = "🐶"
+    case photography = "📸"
+    case politics = "🏛"
+    case science = "🔬"
+    case smartphones = "📱"
+    case software_dev = "💻"
+    case sports = "⚽️"
+    case tv = "📺"
+    case tech = "🖥"
+    case travel = "✈️"
+    case video_games = "🎮"
+    case writers = "✍️"
 }
