@@ -4,19 +4,19 @@ import SwiftUI
 import Charts
 
 #Preview {
-    let vm = SecureView.ViewModel(data: .gauge(value: 3, range: 1...5, title: "Sleep Quality", labels: ["Excellent", "Good", "Average", "Poor", "Awful"]))
-    SecureView(viewModel: vm)
+    let vm = PreviewContent.ViewModel(data: .gauge(value: 3, range: 1...5, title: "Sleep Quality", labels: ["Excellent", "Good", "Average", "Poor", "Awful"]))
+    PreviewContent(viewModel: vm)
         .border(.red)
         .border(.green)
 }
 
-struct SecureView: View {
+struct PreviewContent: View {
     @ObservedObject var viewModel = ViewModel()
     
     final class ViewModel: ObservableObject {
         @Published var data: Kind?
         
-        init(data: SecureView.Kind? = nil) {
+        init(data: PreviewContent.Kind? = nil) {
             self.data = data
         }
     }
@@ -29,24 +29,22 @@ struct SecureView: View {
     }
     
     var body: some View {
-        Group {
-            switch viewModel.data {
-            case let .gauge(value, range, title, labels):
-                gauge(value: value, range: range, title: title, labels: labels)
-                
-            case .text(let value):
-                text(value: value)
-                
-            case .simpleChart(let values):
-                simpleChart(values)
-                
-            case .sleepChart(let samples):
-                SleepChartView(samples: samples)
-                
-            case .none:
-                Color.red
-            }
-        }.privateDisplayRing()
+        switch viewModel.data {
+        case let .gauge(value, range, title, labels):
+            gauge(value: value, range: range, title: title, labels: labels)
+            
+        case .text(let value):
+            text(value: value)
+            
+        case .simpleChart(let values):
+            simpleChart(values)
+            
+        case .sleepChart(let samples):
+            SleepChartView(samples: samples)
+            
+        case .none:
+            Color.red
+        }
     }
     
     private func text(value: Double)  -> some View {
@@ -77,19 +75,42 @@ struct SecureView: View {
     }
     
     private func simpleChart(_ values: [Double])  -> some View {
-        Chart {
+        let minValue = values.min()!
+        let maxValue = values.max()!
+        let minY = roundDownToPowerOfTen(minValue - 10)
+        let maxY = roundUpToPowerOfTen(maxValue)
+
+        return Chart {
             ForEach(Array(values.enumerated()), id: \.offset) { index, value in
-                PointMark(
-                    x: .value("Index", index),
-                    y: .value("Value", value)
-                )
                 LineMark(
                     x: .value("Index", index),
                     y: .value("Value", value)
                 )
+                
+                PointMark(
+                    x: .value("Index", index),
+                    y: .value("Value", value)
+                )
+                .symbol {
+                    Rectangle()
+                        .fill(.black)
+                        .frame(width: 5, height: 5)
+                 }
             }
         }
+        .chartYScale(domain: minY...maxY)
         .chartXAxis(.hidden)
-        .foregroundStyle(.pink)
+        .foregroundStyle(Color.yellow)
+        .padding()
+    }
+    
+    private func roundDownToPowerOfTen(_ value: Double) -> Double {
+        let power = pow(10, floor(log10(value)))
+        return floor(value / power) * power
+    }
+
+    private func roundUpToPowerOfTen(_ value: Double) -> Double {
+        let power = pow(10, floor(log10(value)))
+        return ceil(value / power) * power
     }
 }

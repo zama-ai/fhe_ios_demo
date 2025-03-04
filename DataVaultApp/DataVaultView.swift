@@ -34,12 +34,7 @@ struct DataVaultView: View {
         VStack(spacing: 0) {
             Text("Data Vault")
                 .customFont(.largeTitle)
-                .padding(.bottom)
-            
-            Text("Encrypt your information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring these data.\n Powered by Zama (learn more on **[zama.ai](\(ZamaConfig.website.absoluteString)))**)")
-                .customFont(.subheadline)
-                .multilineTextAlignment(.center)
-                .tint(.white)
+                .padding(.bottom)            
         }.padding()
     }
     
