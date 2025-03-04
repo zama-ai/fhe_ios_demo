@@ -31,7 +31,7 @@ struct SleepTab: View {
             .padding()
             .navigationTitle("Sleep Analysis")
             .buttonStyle(.custom)
-            .background(.zamaBackgroundPage)
+            .background(Color.zamaYellowLight)
         }
     }
 }

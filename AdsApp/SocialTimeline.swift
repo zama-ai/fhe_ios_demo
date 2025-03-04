@@ -25,12 +25,15 @@ struct SocialTimeline: View {
                         case .post(let post): postView(post)
                         case .ad(let index, let hash): adView(position: index, profileHash: hash)
                         }
+                        Divider()
+                            .frame(height: 1)
+                            .background(.black)
                     }
                     .padding(.horizontal, 8)
                 }
             }
         }
-        .background(.orange)
+        .background(Color.zamaGreyBackground)
         .overlay(alignment: .topTrailing) {
             ZamaLink()
         }

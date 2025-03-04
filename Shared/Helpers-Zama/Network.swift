@@ -18,7 +18,7 @@ final class Network {
     static let shared = Network()
     private init() {}
     
-    private let rootURL = URL(string: "https://api.zama.ai")!
+    private let rootURL = ZamaConfig.rootAPI
     
     /// - Returns: uid of the server key, for server caching purposes. No need to re-upload it every time, since it is somewhat heavy (about 27 MB).
     func uploadServerKey(_ sk: Data, for task: ServerTask) async throws -> UID {

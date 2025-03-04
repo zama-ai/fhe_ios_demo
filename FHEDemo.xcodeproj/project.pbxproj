@@ -70,70 +70,72 @@
 		320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "DataVault" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				AsyncButton.swift,
-				ConcreteML.swift,
-				CustomFont/CustomFont.swift,
-				"CustomFont/Telegraf-Bold.ttf",
-				"CustomFont/Telegraf-Regular.ttf",
-				"CustomFont/Telegraf-UltraBold.ttf",
-				FHE/CompactCiphertextList.swift,
-				FHE/FHEHelpers.swift,
-				FHE/FHEUInt8.swift,
-				FHE/FHEUInt10.swift,
-				FHE/FHEUInt16.swift,
-				FHE/FHEUInt16Array.swift,
-				FHE/Keys/ClientKey.swift,
-				FHE/Keys/PublicKeyCompact.swift,
-				FHE/Keys/ServerKeyCompressed.swift,
-				Files/Persistable.swift,
-				Files/Storage.swift,
-				OpenAppButton.swift,
-				SharedAssets.xcassets,
-				SharedUI.swift,
-				SleepModels.swift,
-				TabModels.swift,
+				"Helpers-ConcreteML/ConcreteML.swift",
+				"Helpers-TFHE/CompactCiphertextList.swift",
+				"Helpers-TFHE/FHEHelpers.swift",
+				"Helpers-TFHE/FHEUInt8.swift",
+				"Helpers-TFHE/FHEUInt10.swift",
+				"Helpers-TFHE/FHEUInt16.swift",
+				"Helpers-TFHE/FHEUInt16Array.swift",
+				"Helpers-TFHE/Keys/ClientKey.swift",
+				"Helpers-TFHE/Keys/PublicKeyCompact.swift",
+				"Helpers-TFHE/Keys/ServerKeyCompressed.swift",
+				"Helpers-Zama/Files/Persistable.swift",
+				"Helpers-Zama/Files/Storage.swift",
+				"Helpers-Zama/SleepModels.swift",
+				ReusableUI/AsyncButton.swift,
+				ReusableUI/OpenAppButton.swift,
+				ZamaUI/CustomFont/CustomFont.swift,
+				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
+				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
+				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
+				ZamaUI/SharedAssets.xcassets,
+				ZamaUI/ZamaButtons.swift,
+				ZamaUI/ZamaConfig.swift,
+				ZamaUI/ZamaLink.swift,
 			);
 			target = 32B258362C98693800538B23 /* DataVault */;
 		};
 		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				AsyncButton.swift,
-				CustomFont/CustomFont.swift,
-				"CustomFont/Telegraf-Bold.ttf",
-				"CustomFont/Telegraf-Regular.ttf",
-				"CustomFont/Telegraf-UltraBold.ttf",
-				FilePreview.swift,
-				Files/Persistable.swift,
-				Files/Storage.swift,
-				Network.swift,
-				OpenAppButton.swift,
-				SharedAssets.xcassets,
-				SharedUI.swift,
-				SleepModels.swift,
-				TabModels.swift,
+				"Helpers-Zama/Files/Persistable.swift",
+				"Helpers-Zama/Files/Storage.swift",
+				"Helpers-Zama/Network.swift",
+				"Helpers-Zama/SleepModels.swift",
+				ReusableUI/AsyncButton.swift,
+				ReusableUI/FilePreview.swift,
+				ReusableUI/OpenAppButton.swift,
+				ZamaUI/CustomFont/CustomFont.swift,
+				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
+				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
+				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
+				ZamaUI/SharedAssets.xcassets,
+				ZamaUI/ZamaButtons.swift,
+				ZamaUI/ZamaConfig.swift,
+				ZamaUI/ZamaLink.swift,
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
 		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "HealthQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CustomFont/CustomFont.swift,
-				"CustomFont/Telegraf-Bold.ttf",
-				"CustomFont/Telegraf-Regular.ttf",
-				"CustomFont/Telegraf-UltraBold.ttf",
-				FHE/CompactCiphertextList.swift,
-				FHE/FHEHelpers.swift,
-				FHE/FHEUInt8.swift,
-				FHE/FHEUInt10.swift,
-				FHE/FHEUInt16.swift,
-				FHE/FHEUInt16Array.swift,
-				FHE/Keys/ClientKey.swift,
-				FHE/Keys/PublicKeyCompact.swift,
-				FHE/Keys/ServerKeyCompressed.swift,
-				Files/Persistable.swift,
-				Files/Storage.swift,
-				SleepModels.swift,
+				"Helpers-TFHE/CompactCiphertextList.swift",
+				"Helpers-TFHE/FHEHelpers.swift",
+				"Helpers-TFHE/FHEUInt8.swift",
+				"Helpers-TFHE/FHEUInt10.swift",
+				"Helpers-TFHE/FHEUInt16.swift",
+				"Helpers-TFHE/FHEUInt16Array.swift",
+				"Helpers-TFHE/Keys/ClientKey.swift",
+				"Helpers-TFHE/Keys/PublicKeyCompact.swift",
+				"Helpers-TFHE/Keys/ServerKeyCompressed.swift",
+				"Helpers-Zama/Files/Persistable.swift",
+				"Helpers-Zama/Files/Storage.swift",
+				"Helpers-Zama/SleepModels.swift",
+				ZamaUI/CustomFont/CustomFont.swift,
+				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
+				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
+				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
 		};
@@ -153,8 +155,8 @@
 		322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				ConcreteML.swift,
-				Files/Storage.swift,
+				"Helpers-ConcreteML/ConcreteML.swift",
+				"Helpers-Zama/Files/Storage.swift",
 			);
 			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
 		};
@@ -175,18 +177,20 @@
 		328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CustomFont/CustomFont.swift,
-				"CustomFont/Telegraf-Bold.ttf",
-				"CustomFont/Telegraf-Regular.ttf",
-				"CustomFont/Telegraf-UltraBold.ttf",
-				FilePreview.swift,
-				Files/Persistable.swift,
-				Files/Storage.swift,
-				Network.swift,
-				OpenAppButton.swift,
-				SharedAssets.xcassets,
-				SharedUI.swift,
-				TabModels.swift,
+				"Helpers-Zama/Files/Persistable.swift",
+				"Helpers-Zama/Files/Storage.swift",
+				"Helpers-Zama/Network.swift",
+				ReusableUI/AsyncButton.swift,
+				ReusableUI/FilePreview.swift,
+				ReusableUI/OpenAppButton.swift,
+				ZamaUI/CustomFont/CustomFont.swift,
+				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
+				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
+				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
+				ZamaUI/SharedAssets.xcassets,
+				ZamaUI/ZamaButtons.swift,
+				ZamaUI/ZamaConfig.swift,
+				ZamaUI/ZamaLink.swift,
 			);
 			target = 328F5CB22D009CA800D7B219 /* Ads */;
 		};
@@ -919,6 +923,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORKS = SwiftUI;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -982,6 +987,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORKS = SwiftUI;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;

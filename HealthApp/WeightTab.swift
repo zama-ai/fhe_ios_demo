@@ -33,7 +33,7 @@ struct WeightTab: View {
             .padding()
             .navigationTitle("Weight Analysis")
             .buttonStyle(.custom)
-            .background(.zamaBackgroundPage)
+            .background(Color.zamaYellowLight)
         }
     }
 }
