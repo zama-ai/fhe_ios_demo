@@ -13,6 +13,9 @@ struct DataVaultView: View {
     
     var body: some View {
         header
+            .overlay(alignment: .topTrailing) {
+                ZamaLink()
+            }
         
         content
             .buttonStyle(.borderedProminent)
@@ -33,7 +36,7 @@ struct DataVaultView: View {
                 .customFont(.largeTitle)
                 .padding(.bottom)
             
-            Text("Encrypt your information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring these data.\n Powered by Zama (learn more on **[zama.ai](https://zama.ai)**)")
+            Text("Encrypt your information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring these data.\n Powered by Zama (learn more on **[zama.ai](\(ZamaBrand.website.absoluteString)))**)")
                 .customFont(.subheadline)
                 .multilineTextAlignment(.center)
                 .tint(.white)

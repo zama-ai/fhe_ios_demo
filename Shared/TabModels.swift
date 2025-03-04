@@ -2,6 +2,10 @@
 
 import Foundation
 
+enum ZamaBrand {
+    static let website: URL = URL(string: "https://www.zama.ai")!
+}
+
 extension AppInfo {
     static let appleHealth = {
         AppInfo(name: "Apple Health",

@@ -30,6 +30,9 @@ struct MainTabs: View {
             }
         }
         .tint(.zamaOrange)
+        .overlay(alignment: .topTrailing) {
+            ZamaLink()
+        }
     }
 }
 

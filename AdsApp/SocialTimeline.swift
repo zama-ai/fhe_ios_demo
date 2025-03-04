@@ -31,6 +31,9 @@ struct SocialTimeline: View {
             }
         }
         .background(.orange)
+        .overlay(alignment: .topTrailing) {
+            ZamaLink()
+        }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
@@ -66,12 +69,14 @@ struct SocialTimeline: View {
             Text("FHE Ads")
                 .customFont(.largeTitle)
                 .frame(maxWidth: .infinity)
-                .overlay(alignment: .trailing) {
+                .overlay(alignment: .leading) {
                     OpenAppButton(.zamaDataVault(tab: .profile)) {
-                        Label("Profile", systemImage: "person.crop.circle.fill")
+                            Image(systemName: "pencil.circle.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 32, height: 32)
+                                .padding(8)
                     }
-                    .padding(6)
-                    .buttonStyle(.bordered)
                     .tint(.black)
                 }
             

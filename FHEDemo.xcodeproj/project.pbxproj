@@ -88,6 +88,8 @@
 				Files/Persistable.swift,
 				Files/Storage.swift,
 				OpenAppButton.swift,
+				SharedAssets.xcassets,
+				SharedUI.swift,
 				SleepModels.swift,
 				TabModels.swift,
 			);
@@ -106,6 +108,8 @@
 				Files/Storage.swift,
 				Network.swift,
 				OpenAppButton.swift,
+				SharedAssets.xcassets,
+				SharedUI.swift,
 				SleepModels.swift,
 				TabModels.swift,
 			);
@@ -180,6 +184,8 @@
 				Files/Storage.swift,
 				Network.swift,
 				OpenAppButton.swift,
+				SharedAssets.xcassets,
+				SharedUI.swift,
 				TabModels.swift,
 			);
 			target = 328F5CB22D009CA800D7B219 /* Ads */;
