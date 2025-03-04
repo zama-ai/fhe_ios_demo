@@ -29,6 +29,7 @@ struct MainTabs: View {
                     .toolbarBackground(.visible, for: .tabBar)
             }
         }
+        .tint(.zamaOrange)
     }
 }
 
@@ -38,13 +39,13 @@ struct HomeTab: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                metricSection(.sleep) {
+                customBox(goTo: .sleep) {
                     Text("No data found")
                         .foregroundStyle(.secondary)
                         .padding(.top, 8)
                 }
                 
-                metricSection(.weight) {
+                customBox(goTo: .weight) {
                     Text("2025/01/24")
                         .fontWeight(.semibold)
                         .foregroundStyle(.zamaYellow)
@@ -60,39 +61,9 @@ struct HomeTab: View {
         }
     }
     
-    private func metricSection<Content: View>(_ metric: Metric, @ViewBuilder content: @escaping () -> Content) -> some View {
-        CustomBox(label: { Label(metric.displayInfo.name, systemImage: metric.displayInfo.icon) },
-                  content: { content() },
-                  onTap: { selectedTab = HealthTab(metric: metric) })
-    }
-}
-
-enum HealthTab {
-    case home, sleep, weight
-    
-    var displayInfo: (name: String, icon: String) {
-        switch self {
-        case .home: ("Home", "house")
-        case .sleep: Metric.sleep.displayInfo
-        case .weight: Metric.weight.displayInfo
-        }
-    }
-    
-    init(metric: Metric) {
-        switch metric {
-        case .sleep: self = .sleep
-        case .weight: self = .weight
-        }
-    }
-}
-
-enum Metric {
-    case sleep, weight
-    
-    var displayInfo: (name: String, icon: String) {
-        switch self {
-        case .sleep: ("Sleep", "bed.double.fill")
-        case .weight: ("Weight", "scalemass.fill")
-        }
+    private func customBox<Content: View>(goTo tab: HealthTab, @ViewBuilder content: @escaping () -> Content) -> some View {
+        CustomBox(label: { Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon) },
+                  onTap: { selectedTab = tab },
+                  content: { content() })
     }
 }

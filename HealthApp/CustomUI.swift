@@ -15,8 +15,8 @@ import SwiftUI
         }.buttonStyle(.custom)
         
         CustomBox(label: { Text("Section Label") },
-                  content: { Text("Section Content") },
-                  onTap: { print("tapped") }
+                  onTap: { print("tapped") },
+                  content: { Text("Section Content") }
         )
         
         CustomBox(label: { Text("Section Label") },
@@ -38,7 +38,7 @@ struct CustomButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .fontWeight(.bold)
             .background(.zamaYellow)
-            .border(.black, width: config.isPressed ? 1 : 0)
+            .border(config.isPressed ? .black : .clear, width: 1)
             .animation(.none, value: config.isPressed)
     }
 }
@@ -72,19 +72,19 @@ extension ButtonStyle where Self == CustomButtonStyle {
 
 struct CustomBox<Label: View, Content: View>: View {
     let label: () -> Label
-    let content: () -> Content
     var onTap: (() -> Void)? = nil
+    let content: () -> Content
 
-    init(label: @escaping () -> Label, content: @escaping () -> Content, onTap: (() -> Void)? = nil) {
+    init(label: @escaping () -> Label, onTap: (() -> Void)? = nil, content: @escaping () -> Content) {
         self.label = label
-        self.content = content
         self.onTap = onTap
+        self.content = content
     }
 
-    init(_ title: String, content: @escaping () -> Content, onTap: (() -> Void)? = nil) where Label == Text {
+    init(_ title: String, onTap: (() -> Void)? = nil, content: @escaping () -> Content) where Label == Text {
         self.label = { Text(title) }
-        self.content = content
         self.onTap = onTap
+        self.content = content
     }
 
     var body: some View {
@@ -99,6 +99,7 @@ struct CustomBox<Label: View, Content: View>: View {
                         Image(systemName: "chevron.right")
                     }
                 }
+                .font(.title3)
                 .fontWeight(.heavy)
                 .foregroundStyle(.black)
                 

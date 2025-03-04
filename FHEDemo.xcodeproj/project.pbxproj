@@ -89,6 +89,7 @@
 				Files/Storage.swift,
 				OpenAppButton.swift,
 				SleepModels.swift,
+				TabModels.swift,
 			);
 			target = 32B258362C98693800538B23 /* DataVault */;
 		};
@@ -106,6 +107,7 @@
 				Network.swift,
 				OpenAppButton.swift,
 				SleepModels.swift,
+				TabModels.swift,
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
@@ -178,6 +180,7 @@
 				Files/Storage.swift,
 				Network.swift,
 				OpenAppButton.swift,
+				TabModels.swift,
 			);
 			target = 328F5CB22D009CA800D7B219 /* Ads */;
 		};

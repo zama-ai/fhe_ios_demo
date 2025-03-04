@@ -7,7 +7,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fhehealthapp</string>
+				<string>fhehealth</string>
 			</array>
 		</dict>
 	</array>

@@ -51,7 +51,7 @@ struct SocialTimeline: View {
                 Text("Import encrypted profile info from Zama Data Vault.")
                     .customFont(.callout)
             } actions: {
-                OpenAppButton(.fheDataVault)
+                OpenAppButton(.zamaDataVault(tab: .profile))
                     .customFont(.callout)
                     .foregroundStyle(.black)
                     .buttonStyle(.bordered)
@@ -67,7 +67,7 @@ struct SocialTimeline: View {
                 .customFont(.largeTitle)
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .trailing) {
-                    OpenAppButton(.fheDataVault) {
+                    OpenAppButton(.zamaDataVault(tab: .profile)) {
                         Label("Profile", systemImage: "person.crop.circle.fill")
                     }
                     .padding(6)
