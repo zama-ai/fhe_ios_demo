@@ -13,6 +13,7 @@ struct DataVaultView: View {
     
     var body: some View {
         header
+            .frame(maxWidth: .infinity)
             .overlay(alignment: .topTrailing) {
                 ZamaLink()
             }
