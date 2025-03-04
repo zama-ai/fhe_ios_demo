@@ -10,6 +10,10 @@ struct SleepTab: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
+                OpenAppButton(.zamaDataVault(tab: .sleep)) {
+                    Text("Import Encrypted Data")
+                }
+
                 AsyncButton("Select Encrypted Data") {
                     print("Show date picker")
                 }

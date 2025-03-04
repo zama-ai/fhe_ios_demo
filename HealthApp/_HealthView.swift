@@ -176,7 +176,7 @@ struct HealthView: View {
             Text("Generate encrypted \(name.lowercased()) records\nin Data Vault.")
                 .customFont(.callout)
         } actions: {
-            OpenAppButton(.fheDataVault)
+            OpenAppButton(.zamaDataVault(tab: .sleep)) // not just sleep
                 .foregroundStyle(.black)
                 .customFont(.callout)
         }

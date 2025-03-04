@@ -5,7 +5,7 @@ import StoreKit
 
 #Preview {
     @Previewable @State var showAlert: Bool = false
-    let uber = AppInfo(name: "Uber", scheme: "uber://", appStoreID: "123")
+    let uber = AppInfo(name: "Uber", deeplink: "uber://", appStoreID: "123")
     
     Group {
         OpenAppButton(uber)
@@ -23,13 +23,8 @@ import StoreKit
 
 struct AppInfo {
     let name: String
-    let scheme: String
+    let deeplink: String
     let appStoreID: String
-    
-    static let appleHealth = AppInfo(name: "Apple Health", scheme: "x-apple-health://", appStoreID: "1242545199")
-    static let fheDataVault = AppInfo(name: "FHE Data Vault", scheme: "fhedatavault://", appStoreID: "6738993762")
-    static let fheHealth = AppInfo(name: "FHE Health", scheme: "fhehealthapp://", appStoreID: "6738993713")
-    static let fheAdTargeting = AppInfo(name: "FHE Ad Targeting", scheme: "fheadsapp://", appStoreID: "6739003587")
 }
 
 struct OpenAppButton<Label: View>: View {
@@ -52,7 +47,7 @@ struct OpenAppButton<Label: View>: View {
     
     var body: some View {
         Button {
-            openURL(URL(string: app.scheme)!) { canOpen in
+            openURL(URL(string: app.deeplink)!) { canOpen in
                 if !canOpen {
                     showAlert = true
                 }
