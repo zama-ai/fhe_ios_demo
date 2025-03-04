@@ -3,37 +3,8 @@
 import SwiftUI
 
 #Preview {
-    MainTabs()
-}
-
-struct MainTabs: View {
-    @State private var selectedTab: HealthTab = .home
-
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            Tab("Home", systemImage: "house", value: .home) {
-                HomeTab(selectedTab: $selectedTab)
-                    .toolbarBackground(.zamaBackgroundTab, for: .tabBar)
-                    .toolbarBackground(.visible, for: .tabBar)
-            }
-            
-            Tab("Sleep", systemImage: "bed.double", value: .sleep) {
-                SleepTab()
-                    .toolbarBackground(.zamaBackgroundTab, for: .tabBar)
-                    .toolbarBackground(.visible, for: .tabBar)
-            }
-
-            Tab("Weight", systemImage: "scalemass", value: .weight) {
-                WeightTab()
-                    .toolbarBackground(.zamaBackgroundTab, for: .tabBar)
-                    .toolbarBackground(.visible, for: .tabBar)
-            }
-        }
-        .tint(.zamaOrange)
-        .overlay(alignment: .topTrailing) {
-            ZamaLink()
-        }
-    }
+    @Previewable @State var tab = HealthTab.home
+    HomeTab(selectedTab: $tab)
 }
 
 struct HomeTab: View {
@@ -60,7 +31,7 @@ struct HomeTab: View {
             }
             .padding()
             .navigationTitle("Health Report")
-            .background(.zamaBackgroundPage) // Set new background
+            .background(Color.zamaYellowLight)
         }
     }
     

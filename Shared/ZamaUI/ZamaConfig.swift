@@ -2,8 +2,9 @@
 
 import Foundation
 
-enum ZamaBrand {
-    static let website: URL = URL(string: "https://www.zama.ai")!
+enum ZamaConfig {
+    static let website = URL(string: "https://www.zama.ai")!
+    static let rootAPI = URL(string: "https://api.zama.ai")!
 }
 
 extension AppInfo {

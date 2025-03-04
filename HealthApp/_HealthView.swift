@@ -53,7 +53,7 @@ struct HealthView: View {
             
             Text("""
                 This app **cannot read** your health data, despite displaying and analyzing it.
-                Learn how **[Zama](\(ZamaBrand.website.absoluteString))** makes it possible using Fully Homomorphic Encryption (FHE).
+                Learn how **[Zama](\(ZamaConfig.website.absoluteString))** makes it possible using Fully Homomorphic Encryption (FHE).
                 """)
             .customFont(.subheadline)
             .multilineTextAlignment(.center)

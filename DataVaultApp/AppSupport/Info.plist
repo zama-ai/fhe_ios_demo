@@ -65,10 +65,5 @@
 			</dict>
 		</dict>
 	</array>
-	<key>UILaunchScreen</key>
-	<dict>
-		<key>UIColorName</key>
-		<string>zamaBackgroundPage</string>
-	</dict>
 </dict>
 </plist>

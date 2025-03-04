@@ -4,7 +4,7 @@ import SwiftUI
 
 struct ZamaLink: View {
     var body: some View {
-        Link(destination: ZamaBrand.website) {
+        Link(destination: ZamaConfig.website) {
             Image(.logoZamaZblack)
                 .resizable()
                 .aspectRatio(contentMode: .fill)

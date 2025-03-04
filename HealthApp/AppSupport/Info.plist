@@ -22,7 +22,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
-		<string>zamaBackgroundPage</string>
+		<string>zamaYellowLight</string>
 	</dict>
 </dict>
 </plist>
