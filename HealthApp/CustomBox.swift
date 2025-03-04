@@ -4,14 +4,21 @@ import SwiftUI
 
 #Preview {
     VStack {
-        CustomBox(label: { Text("Section Label") },
-                  onTap: { print("tapped") },
-                  content: { Text("Section Content") }
-        )
+        CustomBox(label: { Text("Label") },
+                  onTap: { print("tapped") }) {
+            Text("Content A")
+            Text("Content B")
+        }
         
-        CustomBox(label: { Text("Section Label") },
-                  content: { Text("Section Content") }
-        )
+        CustomBox("String") {
+            Text("Content")
+        }
+
+        CustomBox("String") {
+            Text("Content A")
+            Text("Content B")
+        }
+
         Spacer()
     }
     .padding()
@@ -23,13 +30,13 @@ struct CustomBox<Label: View, Content: View>: View {
     var onTap: (() -> Void)? = nil
     let content: () -> Content
 
-    init(label: @escaping () -> Label, onTap: (() -> Void)? = nil, content: @escaping () -> Content) {
+    init(label: @escaping () -> Label, onTap: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) {
         self.label = label
         self.onTap = onTap
         self.content = content
     }
 
-    init(_ title: String, onTap: (() -> Void)? = nil, content: @escaping () -> Content) where Label == Text {
+    init(_ title: String, onTap: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) where Label == Text {
         self.label = { Text(title) }
         self.onTap = onTap
         self.content = content

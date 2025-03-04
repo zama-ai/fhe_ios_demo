@@ -7,12 +7,12 @@ import QuickLook
 final class PreviewVC: UIViewController, QLPreviewingController {
     
     @IBOutlet private var container: UIView!
-    private var viewModel = SecureView.ViewModel()
+    private var viewModel = PreviewContent.ViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let swiftUIView = SecureView(viewModel: viewModel)
+        let swiftUIView = PreviewContent(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: swiftUIView)
         addChild(hostingController)
         

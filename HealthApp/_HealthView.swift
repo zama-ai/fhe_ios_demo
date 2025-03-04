@@ -49,15 +49,7 @@ struct HealthView: View {
         VStack(spacing: 0) {
             Text("FHE Health")
                 .padding(.bottom)
-                .customFont(.largeTitle)
-            
-            Text("""
-                This app **cannot read** your health data, despite displaying and analyzing it.
-                Learn how **[Zama](\(ZamaConfig.website.absoluteString))** makes it possible using Fully Homomorphic Encryption (FHE).
-                """)
-            .customFont(.subheadline)
-            .multilineTextAlignment(.center)
-            .tint(.black)            
+                .customFont(.largeTitle)            
         }
         .padding()
     }

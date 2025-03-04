@@ -7,21 +7,28 @@ import SwiftUI
 }
 
 struct WeightTab: View {
-    @StateObject var vm: ViewModel = .fake
-    
+    @StateObject var vm = ViewModel()
+    @Environment(\.scenePhase) var scenePhase
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                OpenAppButton(.zamaDataVault(tab: .weight)) {
-                    Text("Import Encrypted Data")
-                }
-
-                AsyncButton("Select Encrypted Data") {
-                    print("Show date picker")
+                if vm.samplesAvailable {
+                    AsyncButton("Select Encrypted Data") {
+                        vm.selectSample()
+                    }
+                } else {
+                    OpenAppButton(.zamaDataVault(tab: .weight)) {
+                        Text("Import Encrypted Data")
+                    }
                 }
 
                 CustomBox("Trend") {
-                    Text("No data found")
+                    if let url = vm.sampleSelected {
+                        FilePreview(url: url)
+                    } else {
+                        Text("No data found")
+                    }
                 }
                 
                 CustomBox("Statistics") {
@@ -35,19 +42,34 @@ struct WeightTab: View {
             .buttonStyle(.custom)
             .background(Color.zamaYellowLight)
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                vm.onAppActive()
+            }
+        }
     }
 }
 
 extension WeightTab {
     @MainActor final class ViewModel: ObservableObject {
-        @Published var selectedDates: Date?
-        @Published var isProcessing: Bool
+        @Published var samplesAvailable: Bool
+        @Published var sampleSelected: URL?
+                
+        init() {
+            self.samplesAvailable = false
+            self.sampleSelected = nil
+        }
         
-        static let fake = ViewModel(selectedDates: nil, isProcessing: false)
+        func onAppActive() {
+            Task {
+                let foundSamples = await Storage.read(.weightList)
+                self.samplesAvailable = foundSamples != nil
+                self.sampleSelected = nil
+            }
+        }
         
-        init(selectedDates: Date?, isProcessing: Bool) {
-            self.selectedDates = selectedDates
-            self.isProcessing = isProcessing
+        func selectSample() {
+            self.sampleSelected = Storage.url(for: .weightList)
         }
     }
 }
