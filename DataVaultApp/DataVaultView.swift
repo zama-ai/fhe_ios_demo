@@ -9,7 +9,7 @@ import SwiftUI
 struct DataVaultView: View {
         
     @StateObject private var vm = ViewModel()
-    @State private var selectedTab: DataVaultTab = .profile
+    @State private var selectedTab: DataVaultTab = .sleep
     
     var body: some View {
         header

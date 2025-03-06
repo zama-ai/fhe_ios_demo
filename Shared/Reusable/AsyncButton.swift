@@ -3,6 +3,27 @@
 import SwiftUI
 
 #Preview {
+    Color.yellow
+        .aspectRatio(contentMode: .fit)
+        .overlay {
+            VStack(spacing: -4) {
+                Text("55.1")
+                    .customFont(.largeTitle)
+                    .fontWeight(.bold)
+                Text("kg")
+            }
+        }
+        .frame(width: 100)
+    
+    Color.yellow
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 200)
+        .border(.red)
+    
+    Spacer()
+    
+
+    /*
     Group {
         AsyncButton("Try me!") {}
 
@@ -23,7 +44,7 @@ import SwiftUI
             throw NSError(domain: "Test", code: 1, userInfo: [NSLocalizedDescriptionKey: "Something went wrong!"])
         }
     }
-    .buttonStyle(.bordered)
+    .buttonStyle(.bordered)*/
 }
 
 struct AsyncButton<Label: View>: View {

@@ -29,11 +29,11 @@ struct AdView: View {
     private var texts: some View {
         VStack(alignment: .leading) {
             Text(ad.title)
-                .font(.headline)
+                .customFont(.headline)
                 .foregroundStyle(.primary)
             
             Text(ad.details)
-                .font(.subheadline)
+                .customFont(.subheadline)
                 .foregroundStyle(.secondary)
         }
     }

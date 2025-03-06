@@ -14,9 +14,7 @@ struct HomeTab: View {
         NavigationStack {
             VStack(spacing: 16) {
                 customBox(goTo: .sleep) {
-                    Text("No data found")
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 8)
+                    NoDataBadge()
                 }
                 
                 customBox(goTo: .weight) {

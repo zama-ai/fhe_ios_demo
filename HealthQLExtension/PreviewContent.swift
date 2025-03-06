@@ -48,7 +48,19 @@ struct PreviewContent: View {
     }
     
     private func text(value: Double)  -> some View {
-        Text("\(value.formatted(.number.precision(.fractionLength(1))))")
+        Color.zamaYellow
+            .aspectRatio(contentMode: .fit)
+            .overlay {
+                Text("\(value.formatted(.number.precision(.fractionLength(1))))")
+                    .customFont(.largeTitle)
+                    .fontWeight(.bold)
+                    .overlay(alignment: .bottom) {
+                        Text("kg")
+                            .customFont(.caption2)
+                            .fontWeight(.light)
+                            .offset(y: 12)
+                    }
+            }
     }
     
     private func gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String]) -> some View {
