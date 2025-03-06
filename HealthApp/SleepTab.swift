@@ -8,7 +8,6 @@ import SwiftUI
 
 struct SleepTab: View {
     @StateObject var vm = ViewModel()
-    @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -26,6 +25,7 @@ struct SleepTab: View {
                 CustomBox("Sleep Phase") {
                     if let url = vm.sampleSelected {
                         FilePreview(url: url)
+                            .frame(height: 160)
                         
                         Text("""
                             **Awake**: Often brief and unnoticed.
@@ -35,12 +35,12 @@ struct SleepTab: View {
                             """)
 
                     } else {
-                        Text("No data found")
+                        NoDataBadge()
                     }
                 }
                 
                 CustomBox("Sleep Quality") {
-                    Text("No data found")
+                    NoDataBadge()
                 }
                 
                 Spacer()
@@ -49,10 +49,8 @@ struct SleepTab: View {
             .navigationTitle("Sleep Analysis")
             .buttonStyle(.custom)
             .background(Color.zamaYellowLight)
-            .onChange(of: scenePhase) { _, newPhase in
-                if newPhase == .active {
-                    vm.onAppActive()
-                }
+            .onAppearAgain {
+                vm.refreshFromDisk()
             }
         }
     }
@@ -68,11 +66,11 @@ extension SleepTab {
             self.sampleSelected = nil
         }
         
-        func onAppActive() {
+        func refreshFromDisk() {
             Task {
                 let foundSamples = await Storage.read(.sleepList)
                 self.samplesAvailable = foundSamples != nil
-                self.sampleSelected = nil
+                // TODO: ensure current selection is present in samplesAvailable
             }
         }
         

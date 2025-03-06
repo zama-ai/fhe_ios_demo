@@ -54,13 +54,14 @@ struct CustomBox<Label: View, Content: View>: View {
                         Image(systemName: "chevron.right")
                     }
                 }
-                .font(.title3)
+                .customFont(.title3)
                 .fontWeight(.heavy)
                 .foregroundStyle(.black)
                 
                 Divider()
                     .frame(height: 2)
                     .background(.black)
+                    .padding(.vertical, 6)
                 
                 content()
             }

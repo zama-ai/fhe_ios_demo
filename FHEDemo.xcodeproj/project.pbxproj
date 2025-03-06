@@ -83,8 +83,10 @@
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
-				ReusableUI/AsyncButton.swift,
-				ReusableUI/OpenAppButton.swift,
+				Reusable/AsyncButton.swift,
+				"Reusable/Data+md5.swift",
+				Reusable/OnAppearAgain.swift,
+				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
@@ -103,9 +105,11 @@
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
 				"Helpers-Zama/SleepModels.swift",
-				ReusableUI/AsyncButton.swift,
-				ReusableUI/FilePreview.swift,
-				ReusableUI/OpenAppButton.swift,
+				Reusable/AsyncButton.swift,
+				"Reusable/Data+md5.swift",
+				Reusable/FilePreview.swift,
+				Reusable/OnAppearAgain.swift,
+				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
@@ -136,6 +140,7 @@
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
 				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
+				ZamaUI/SharedAssets.xcassets,
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
 		};
@@ -157,6 +162,10 @@
 			membershipExceptions = (
 				"Helpers-ConcreteML/ConcreteML.swift",
 				"Helpers-Zama/Files/Storage.swift",
+				ZamaUI/CustomFont/CustomFont.swift,
+				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
+				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
+				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
 			);
 			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
 		};
@@ -180,9 +189,11 @@
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
-				ReusableUI/AsyncButton.swift,
-				ReusableUI/FilePreview.swift,
-				ReusableUI/OpenAppButton.swift,
+				Reusable/AsyncButton.swift,
+				"Reusable/Data+md5.swift",
+				Reusable/FilePreview.swift,
+				Reusable/OnAppearAgain.swift,
+				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",

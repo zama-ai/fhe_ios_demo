@@ -8,7 +8,6 @@ import SwiftUI
 
 struct WeightTab: View {
     @StateObject var vm = ViewModel()
-    @Environment(\.scenePhase) var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -24,28 +23,54 @@ struct WeightTab: View {
                 }
 
                 CustomBox("Trend") {
-                    if let url = vm.sampleSelected {
-                        FilePreview(url: url)
-                    } else {
-                        Text("No data found")
+                    Group {
+                        if let url = vm.sampleSelected {
+                            FilePreview(url: url)
+                        } else {
+                            NoDataBadge()
+                        }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 
                 CustomBox("Statistics") {
-                    Text("No data found")
+                    let list = zip(["Min", "Max", "Average"], [vm.result?.min, vm.result?.max, vm.result?.avg])
+                    HStack(spacing: 16) {
+                        ForEach(Array(list), id: \.0) { label, value in
+                            statCell(url: value, name: label)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .overlay {
+                        if vm.result == nil {
+                            NoDataBadge()
+                        }
+                    }
                 }
-                
-                Spacer()
             }
             .padding()
             .navigationTitle("Weight Analysis")
             .buttonStyle(.custom)
             .background(Color.zamaYellowLight)
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
-                vm.onAppActive()
+            .onAppearAgain {
+                vm.refreshFromDisk()
             }
+        }
+    }
+
+    private func statCell(url: URL?, name: String) -> some View {
+        VStack(spacing: 12) {
+            if let url {
+                FilePreview(url: url)
+                    .frame(maxHeight: .infinity)
+            } else {
+                Color.clear
+                    .aspectRatio(contentMode: .fit)
+                    .hidden()
+            }
+            Text(name)
+                .customFont(.subheadline)
+                .opacity(url == nil ? 0 : 1)
         }
     }
 }
@@ -54,22 +79,38 @@ extension WeightTab {
     @MainActor final class ViewModel: ObservableObject {
         @Published var samplesAvailable: Bool
         @Published var sampleSelected: URL?
-                
+        @Published var result: (min: URL, max: URL, avg: URL)?
+
         init() {
             self.samplesAvailable = false
             self.sampleSelected = nil
         }
         
-        func onAppActive() {
+        func refreshFromDisk() {
             Task {
                 let foundSamples = await Storage.read(.weightList)
                 self.samplesAvailable = foundSamples != nil
-                self.sampleSelected = nil
+                // TODO: ensure current selection is present in samplesAvailable
+                
+                if let _ = await Storage.read(.weightMin),
+                   let _ = await Storage.read(.weightMax),
+                   let _ = await Storage.read(.weightAvg)
+                {
+                    result = (min: Storage.url(for: .weightMin),
+                              max: Storage.url(for: .weightMax),
+                              avg: Storage.url(for: .weightAvg))
+                }
             }
         }
         
         func selectSample() {
-            self.sampleSelected = Storage.url(for: .weightList)
+            let selectionURL = Storage.url(for: .weightList)
+            //let selectionMD5 = await Storage.read(.weightList)?.md5Identifier
+        }
+        
+        private var selectionMD5: String? {
+            get { return UserDefaults.standard.string(forKey: "selectionMD5") }
+            set { UserDefaults.standard.set(newValue, forKey: "selectionMD5") }
         }
     }
 }

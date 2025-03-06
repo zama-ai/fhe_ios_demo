@@ -2,6 +2,10 @@
 
 import SwiftUI
 
+#Preview {
+    ZamaLink()
+}
+
 struct ZamaLink: View {
     var body: some View {
         Link(destination: ZamaConfig.website) {

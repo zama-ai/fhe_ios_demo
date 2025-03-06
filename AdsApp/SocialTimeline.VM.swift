@@ -64,7 +64,7 @@ extension SocialTimeline {
                 throw CustomError.missingServerKey
             }
             
-            let profileHash = md5Identifier(for: profile)
+            let profileHash = profile.md5Identifier
             guard profileHash != Self.profileHash else {
                 print("Profile unchanged, skipping upload")
                 return
@@ -115,10 +115,4 @@ extension SocialTimeline {
             return items
         }
     }
-}
-
-import CryptoKit
-private func md5Identifier(for data: Data) -> String {
-    let digest = Insecure.MD5.hash(data: data)
-    return digest.map { String(format: "%02x", $0) }.joined()
 }
