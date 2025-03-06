@@ -6,11 +6,6 @@
 # 3. The response format (e.g., stream, JSON, base64).
 
 tasks:
-  add_42:
-    binary: add_42
-    output_files:
-      - filename: "{uid}.add_42.output.fheencrypted"
-    response_type: stream
 
   weight_stats:
     binary: weight_stats
@@ -37,3 +32,11 @@ tasks:
     output_files:
       - filename: "{uid}.ad_targeting.output.fheencrypted"
     response_type: stream
+
+  fetch_ad:
+    binary: fetch_ad.py
+    output_files:
+      - filename: "{uid}.fetch_ad.relevent_ad.output.fheencrypted"
+        key: relevent_ad
+        response_type: base64
+    response_type: json

@@ -5,7 +5,7 @@ import sys
 
 import concrete_ml_extensions as fhext
 import numpy as np
-
+import time
 
 def main():
     if len(sys.argv) < 2:
@@ -15,8 +15,13 @@ def main():
     uid = sys.argv[1]
 
     print("\n========\n")
-    print(f"CLI Args: {uid}")
+    print("fhext.is_cuda_enabled()", fhext.is_cuda_enabled())
+    print("fhext.is_cuda_available()", fhext.is_cuda_available())
+    device = "cuda" if fhext.is_cuda_enabled() and fhext.is_cuda_available() else "cpu" 
 
+    print("\n========\n")   
+    print(f"CLI Args: {uid} - {device=}")
+    
     sk_path = f"uploaded_files/{uid}.serverKey"
     input_path = f"uploaded_files/{uid}.ad_targeting.input.fheencrypted"
     output_path = f"uploaded_files/{uid}.ad_targeting.output.fheencrypted"
@@ -48,10 +53,14 @@ def main():
     b = b.astype(CRYPTO_DTYPE)
 
     # Perform matrix multiplication
+    start_time = time.time()
     encrypted_scores = fhext.matrix_multiplication(
         encrypted_matrix=deserialized_encrypted_a, data=b, compression_key=compression_key
     )
-
+    end_time = time.time() - start_time
+    print(f"Task 'ad_targeting': Server time: {end_time:.2f}s on {device.upper()}. ")
+    
+    
     # Save the encrypted result
     with open(output_path, "wb") as binary_file:
         binary_file.write(encrypted_scores.serialize())

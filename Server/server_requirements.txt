@@ -4,3 +4,6 @@ uvicorn
 PyYAML
 python-multipart
 concrete_ml_extensions
+celery[redis]
+redis
+python-dotenv

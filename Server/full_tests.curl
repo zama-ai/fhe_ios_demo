@@ -1,0 +1,356 @@
+#!/bin/bash
+
+ENV=${1:-"prod"}
+SELECTED_TASK=${2:-1}
+N_NEW_TASKS=${3:-5}
+
+if [ "$1" == "dev" ]; then
+    echo "🚀 Testing in the development environment..."
+    ENV_FILE=".env_dev"
+    LINK="http://localhost:444"
+elif [ "$1" == "prod" ]; then
+    echo "🚀 Testing in the production environment..."
+    ENV_FILE=".env_prod"
+    LINK="https://zapi.zama.ai:443"
+fi 
+
+# Load variables from '.env'
+if [ -f $ENV_FILE ]; then
+    set -o allexport  # Enables automatic export of variables
+    source $ENV_FILE  # Loads the .env file
+    set +o allexport  # Disables automatic export
+fi
+
+URL=$LINK
+echo "URL: $URL"
+GET_STATUS_ACTION="true"
+CANCEL_ACTION="true"
+GET_TASK_RESULT_ACTION="true"
+MONITORING_ACTION="false"
+ARCHIVE_TASK="false"
+FAKE_TASK="true"
+
+if [ "$SELECTED_TASK" -eq 1 ]; then
+  TASK_NAME="ad_targeting"
+  SERVER_KEY="@client_files/ad_targeting/727.serverKey"
+  ENCRYPTED_INPUT="@client_files/ad_targeting/727.user_profile.input.fheencrypted"
+  ENCRYPTED_OUTPUT="ad_targeting.output.fheencrypted"
+  timeout=$((60 * 2))
+  COMPLETED_TASK="ca25eaaa-c8f1-4853-b214-30db2bad0695"
+  COMPLETED_UID="9f196bb6-e93a-4753-9b7b-97e1ab88c014"
+elif [ "$SELECTED_TASK" -eq 2 ]; then
+  TASK_NAME="sleep_quality"
+  SERVER_KEY="@client_files/health/serverKeyCompressed"
+  ENCRYPTED_INPUT="@client_files/health/sleepList.fheencrypted"
+  ENCRYPTED_OUTPUT="sleep_quality.output.fheencrypted"
+  timeout=$((60 * 5))
+  COMPLETED_TASK="9bb35455-9cbd-4b7d-a803-67e69ff64c65"
+  COMPLETED_UID="acd38b1b-b3f3-4512-8901-7dd17ea2ef4f"
+elif [ "$SELECTED_TASK" -eq 3 ]; then
+  TASK_NAME="weight_stats"
+  SERVER_KEY="@client_files/health/serverKeyCompressed"
+  ENCRYPTED_INPUT="@client_files/health/weightList.fheencrypted"
+  ENCRYPTED_OUTPUT="weightList.output.fheencrypted"
+  timeout=$((60 * 5))
+  COMPLETED_TASK="ed5807b3-08f2-42d1-ad5d-dbd94c077c3b"
+  COMPLETED_UID="c7931ad4-6eeb-48a5-9daa-a2450726acd8"
+elif [ "$SELECTED_TASK" -eq 4 ]; then
+  TASK_NAME="fetch_ad"
+  SERVER_KEY="@client_files/ad_targeting/727.serverKey"
+  ENCRYPTED_INPUT="@client_files/ad_targeting/727.relevent_ad_index.input.fheencrypted"
+  ENCRYPTED_OUTPUT="fetch_ad.output.fheencrypted"
+  timeout=$((60 * 5))
+  COMPLETED_TASK="ed5807b3-08f2-42d1-ad5d-dbd94c077c3b"
+  COMPLETED_UID="c7931ad4-6eeb-48a5-9daa-a2450726acd8"
+else
+    echo "❌ Invalid use-case."
+    exit 1
+fi
+
+mkdir -p uploaded_files/$TASK_NAME
+
+# Get task result
+check_task_result() {
+    local task_id="$1"
+    local uid="$2"
+    local start_time=$(date +%s) 
+    local timeout=${3:-300}
+
+    while true; do
+        local current_time=$(date +%s)
+        local elapsed_time=$((current_time - start_time))
+
+        # Timeout condition
+        if [[ $elapsed_time -ge $timeout ]]; then
+            echo "Timeout reached after '$elapsed_time' seconds."
+            return 1
+        fi
+
+        sleep 5 
+        
+        # Fetch the response
+        local response=$(curl -i -s -X GET "$URL/get_task_result?task_name=$TASK_NAME&task_id=$task_id&uid=$uid" | tr -d '\0')
+
+        http_code=$(echo "$response" | grep -o "HTTP/1.1 [0-9]\{3\}" | awk '{print $2}')
+
+        if [[ "$http_code" =~ ^(4[0-9][0-9]|5[0-9][0-9])$ ]]; then
+            error_message=$(echo "$response" | sed -n 's/.*"detail":"\([^"]*\)".*/\1/p')
+
+            echo "❌ HTTP Error '$http_code': '$error_message'"
+            return 1
+        fi
+        local status=""
+        local worker=""
+        local stderr=""
+        local output_filename=""
+
+        # Extraction depuis les headers (texte brut)
+        status=$(echo "$response" | grep -i "^status:" | cut -d':' -f2 | tr -d '\r' | xargs)
+        worker=$(echo "$response" | grep -i "^worker:" | cut -d':' -f2 | tr -d '\r' | xargs)
+        stderr=$(echo "$response" | grep -i "^stderr:" | cut -d':' -f2 | tr -d '\r' | xargs)
+        output_filename=$(echo "$response" | grep -i "Content-Disposition:" | sed -E 's/.*filename="?([^"]+)"?.*/\1/')
+        # echo "DEBUG: status = '$status' - output_filename = '$output_filename'"
+
+        # Check if task is completed successfully
+        if [[ -z "$status" || "$status" == "success" ]]; then
+            # Download the output file
+            curl -s -X GET "$URL/get_task_result?task_name=$TASK_NAME&task_id=$task_id&uid=$EXTRACTED_UID" \
+                -o "uploaded_files/$TASK_NAME/${task_id}.$ENCRYPTED_OUTPUT"
+            # TODO: remove, just for the notebook demo
+            curl -s -X GET "$URL/get_task_result?task_name=$TASK_NAME&task_id=$task_id&uid=$EXTRACTED_UID" \
+                -o "uploaded_files/$ENCRYPTED_OUTPUT"
+
+            file_path="uploaded_files/$TASK_NAME/${task_id}.$ENCRYPTED_OUTPUT"
+            echo "✅ Task '$TASK_NAME' completed successfully by worker: '$worker'"
+            echo "   Output file -> '$file_path'"
+            [[ -f "$file_path" ]] || { echo "❌ Test failed: File not found - $file_path"; exit 1; }
+            return 0
+        elif [[ "$status" == "failure" ]]; then
+            echo "Task ID: $task_id lost"
+            exit 1
+        # Check if the task is in a failure state
+        elif [[ "$status" =~ ^(revoked|error|canceled|unknown)$ ]]; then
+            echo "❌ Task failed or canceled (Final status: '$status', stderr: '$stderr')"
+            return 1
+        fi
+        echo "Task is still running by '$worker'... (Current status: '$status') "
+    done
+}
+
+
+# Get the list of available tasks
+curl -X GET "$URL/get_use_cases"
+echo ""
+
+# Add key and store the returned UID
+YOUR_UID=$(curl -X POST "$URL/add_key" \
+              -F "key=$SERVER_KEY" \
+              -F "task_name=$TASK_NAME")
+
+EXTRACTED_UID=$(echo "$YOUR_UID" | jq -r '.uid')
+echo ""
+echo "-------> Received UID: '$EXTRACTED_UID'"
+echo ""
+
+TASK_IDS=()
+echo "-------> Starting $N_NEW_TASKS new '$TASK_NAME' tasks:"
+for i in $(seq 1 $N_NEW_TASKS); do
+
+  TASK_RESPONSE=$(curl -s -X POST "$URL/start_task" \
+    -F "uid=$EXTRACTED_UID" \
+    -F "task_name=$TASK_NAME" \
+    -F "encrypted_input=$ENCRYPTED_INPUT")
+  TASK_ID=$(echo "$TASK_RESPONSE" | jq -r '.task_id')
+  TASK_IDS+=("$TASK_ID")
+  echo "TASK_ID_$i='$TASK_ID'"
+done
+
+if [[ ${#TASK_IDS[@]} -ne $N_NEW_TASKS ]]; then
+  echo "❌ Assertion failed: Expected $N_NEW_TASKS task IDs, but got ${#TASK_IDS[@]}."
+  exit 1
+fi
+
+# Get the list of available task
+ALL_TASK_IDS=()
+response=$(curl -s "$URL/list_current_tasks")
+
+echo ""
+if [[ -n "$response" && "$response" != "[]" ]] && echo "$response" | jq empty 2>/dev/null; then
+    if echo "$response" | jq -e 'type == "array"' >/dev/null; then
+        mapfile -t ALL_TASK_IDS < <(jq -r '.[].task_id' <<< "$response")
+        num_tasks=${#ALL_TASK_IDS[@]}
+        echo "-------> List of all available tasks (\(${num_tasks} found\)):"
+        echo "$response" | jq -r '.[] | "📌 Task ID: \(.task_id)"'
+    else
+        ALL_TASK_IDS=($(jq -r '.task_id' <<< "$response"))
+        echo "-------> Single task found (1 task):"
+        echo "📌 Task ID: ${ALL_TASK_IDS[0]}"
+    fi
+else
+    echo "⚠️ No tasks available."
+    exit 1
+fi
+
+# Cancel task
+if [ "$CANCEL_ACTION" = "true" ]; then
+    echo ""
+    echo "-------> 🚫 Cancel a specific 'TASK_ID':"
+
+    ############## Test 1
+    response_v1=$(curl -s -X POST "$URL/cancel_task?task_id=${TASK_IDS[0]}&uid=$EXTRACTED_UID")
+
+    if echo "$response_v1" | grep -q '"status": *"revoked"'; then
+        echo "🎉 Ongoing task: $response_v1"
+    elif echo "$response_v1" | grep -q '"status": *"success"' && [[ "$SELECTED_TASK" -eq 3 ]]; then
+        echo "⚠️  Task '$SELECTED_TASK' is too fast for this test, please try with other tasks."
+    elif echo "$response_v1" | grep -q '"status": *"success"' && [[ "$SELECTED_TASK" -eq 1 || "$SELECTED_TASK" -eq 2 ]]; then
+        echo "❌  TASK_ID:'${TASK_IDS[0]}' already completed, for Task '$SELECTED_TASK', please try with other TASK_ID."
+    else
+        echo "❌ Assertion failed: Expected status to be 'revoked', but got:"
+        echo $response_v1
+        exit 1
+    fi
+
+    ############## Test 2
+    if [ "$FAKE_TASK" = "true" ]; then
+        response_v1=$(curl -s -X POST "$URL/cancel_task?task_id=xx&uid=$EXTRACTED_UID")
+        # v2=$(curl -s -X POST "$URL/cancel_task" -d "task_id=xx" -d "uid=$EXTRACTED_UID")
+
+        if echo "$response_v1" | grep -q '"status": *"unknown"'; then
+            echo "🎉 Fake task   : $response_v1"
+        else
+            echo "❌ Assertion failed: Expected status to be 'unknown', but got:"
+            echo $response_v1
+            exit 1
+        fi
+    fi
+fi
+
+# Get task status
+if [ "$GET_STATUS_ACTION" = "true" ]; then
+    echo ""
+    echo "-------> 🔍 Get status of a specific 'TASK_ID':"
+
+    ############## Test 1
+    if [ "$ARCHIVE_TASK" = "true" ]; then
+        response_v1=$(curl -s -X GET "$URL/get_task_status?task_id=$COMPLETED_TASK&uid=$COMPLETED_UID")
+        if echo "$response_v1" | grep -q '"status": *"completed"'; then
+            echo "🎉 Completed task: $response_v1"
+        else
+            echo "❌ Assertion failed: Expected status to be 'completed', but got:"
+            echo $response_v1
+            exit 1
+        fi
+    fi
+
+    ############## Test 2
+    response_v1=$(curl -s -X GET "$URL/get_task_status?task_id=${TASK_IDS[1]}&uid=$EXTRACTED_UID")
+    # v2=$(curl -s -X GET "$URL/get_task_status" -d "task_id=${TASK_IDS[0]}" -d "id=$EXTRACTED_UID")
+    if echo "$response_v1" | grep -q '"status": *"success"'; then
+        echo "⚠️  Task '$SELECTED_TASK' is too fast for this test, please try with other tasks."
+    elif echo "$response_v1" | grep -q '"status": *"active"\|"status": *"success"'; then
+        echo "❌ Test failed: Expected status to be 'active', but got:"
+        echo $response_v1
+        exit 1
+    else
+        echo "🎉 Ongoing task  : $response_v1"
+    fi
+
+    ############## Test 3
+    if [ "$FAKE_TASK" = "true" ]; then
+        response_v1=$(curl -s -X GET "$URL/get_task_status?task_id=xx&uid=$EXTRACTED_UID")
+        if echo "$response_v1" | grep -q '"status": *"unknown"'; then
+            echo "🎉 Fake task     : $response_v1"
+        else
+            echo "❌ Assertion failed: Expected status to be 'unknown', but got:"
+            echo $response_v1
+            exit 1
+        fi
+    fi
+fi
+
+# Get task result
+if [ "$GET_TASK_RESULT_ACTION" = "true" ]; then
+    echo ""
+    echo "--------> 📩 Get task result for a specific 'TASK_ID':"
+
+    ############## Test 1
+    if [ "$ARCHIVE_TASK" = "true" ]; then
+        echo "📩 Completed 'TASK_ID': '$COMPLETED_TASK'"
+        check_task_result "$COMPLETED_TASK" "$COMPLETED_UID"
+        if [[ $? -ne 0 ]]; then 
+            echo "❌ Test failed!"; 
+        else 
+            echo "🎉 Test passed";
+        fi
+    fi
+
+    ############## Test 2
+    echo ""
+    echo "📩 Ongoing 'TASK_ID'  : '${TASK_IDS[1]}'"
+    check_task_result "${TASK_IDS[1]}" "$EXTRACTED_UID"
+    if [[ $? -ne 0 ]]; then 
+        echo "❌ Test failed!"; 
+    else 
+        echo "🎉 Test passed";
+    fi
+
+    ############## Test 3
+    if [ "$FAKE_TASK" = "true" ]; then
+        echo ""
+        echo "📩 Fake 'TASK_ID': 'xxx'"
+        check_task_result "xxx" "$EXTRACTED_UID"
+        if [[ $? -ne 1 ]]; then 
+            echo "❌ Test failed!"; 
+        else 
+            echo "🎉 Test passed";
+        fi
+    
+        echo ""
+        echo "📩 Fake 'TASK_ID': ''"
+        check_task_result "" "$EXTRACTED_UID"
+        if [[ $? -ne 1 ]]; then 
+            echo "❌ Test failed!"; 
+        else 
+            echo "🎉 Test passed";
+        fi
+    fi
+fi
+
+# Monitoring 
+if [ "$MONITORING_ACTION" = "true" ]; then
+    echo ""
+    echo "⏳ Monitoring started..."
+    while true; do
+        echo ""
+        echo "🔍 Fetching current tasks at $(date +"%T")..."
+        
+        > /tmp/task_results.txt
+
+        for task_id in "${ALL_TASK_IDS[@]}"; do
+            (
+                RESPONSE=$(curl -s -X GET "$URL/get_task_status?task_id=$task_id&uid=$EXTRACTED_UID")
+                task_info=$(echo "$RESPONSE" | jq -r '"\(.task_id)|📌 Task ID: \(.task_id) - Status: \(.status) - Details: \(.details) - Worker: \(.worker // "unknown")"')
+
+                if ! grep -q "^${task_info}|" /tmp/task_results.txt; then
+                    echo "$task_info" >> /tmp/task_results.txt
+                fi
+            ) &
+        done
+
+        wait
+
+        if [[ -s /tmp/task_results.txt ]]; then
+            sort -t '|' -k1,1 /tmp/task_results.txt | awk '!seen[$0]++' | cut -d '|' -f2-
+            rm /tmp/task_results.txt
+        else
+            echo "⚠️ No tasks available."
+        fi
+
+        read -r -t 2 -n 1 key
+        if [[ "$key" == "q" ]]; then
+            echo "❌ Stopping the task fetching loop."
+            break
+        fi
+    done
+fi

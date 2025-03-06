@@ -1,108 +1,113 @@
-"""Deployment server with individual routes for each task.
+"""Deployment server.
+
+We use Celery for asynchronous processing (polling approach).
 
 Routes:
     - /add_key
-    - /tasks
-    - /{task_name}
-    - /logs
+    - /get_use_cases
+    - /start_task  
+    - /get_task_status
+    - /get_task_result
+    - /cancel_task
 """
-
-import asyncio
+import re
 import base64
+import datetime
 import io
-import logging
 import os
-import subprocess
 import time
 import uuid
-from contextlib import contextmanager
-from pathlib import Path
-from typing import Any, Callable, Dict
+import secrets
 
-import uvicorn
-import yaml
-from fastapi import FastAPI, Form, HTTPException, UploadFile, Response
-from fastapi.responses import JSONResponse, StreamingResponse
+from glob import glob
+from typing import List
+from pprint import pformat
 
-# Configure logging
-LOG_FILE = Path(__file__).parent / "server.log"
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_FILE),
-        logging.StreamHandler(),  # Also log to stderr for Docker logs
-    ],
+from celery.result import AsyncResult
+from fastapi import (
+    Depends,
+    FastAPI,
+    Form,
+    HTTPException,
+    Response,
+    UploadFile,
+    status,
 )
-logger = logging.getLogger(__name__)
+from fastapi.responses import JSONResponse, StreamingResponse, HTMLResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import redis
+import json
 
+from utils import * 
+from tasks import *
+
+# Instanciate FastAPI app
 app = FastAPI(debug=False)
+logger.info("🚀 FastAPI server running at `%s`: `%s`", URL, CONTAINER_PORT)
 
-FILES_FOLDER = Path(__file__).parent / "uploaded_files"
-FILES_FOLDER.mkdir(exist_ok=True)  # Ensure the directory exists
+security = HTTPBasic()
 
-# Load task configuration
-CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
+def get_current_user(
+    credentials: HTTPBasicCredentials = Depends(security)
+) -> str:
+    """Verify HTTP Basic credentials against env vars API_USERNAME/PASSWORD, raising 401 if invalid."""
+    expected_username = os.getenv("API_USERNAME")
+    expected_password = os.getenv("API_PASSWORD")
+    
+    # Assert expected credentials are set and non-empty
+    assert expected_username, "API_USERNAME environment variable must be set and non-empty"
+    assert expected_password, "API_PASSWORD environment variable must be set and non-empty"
+
+    is_correct_username = secrets.compare_digest(credentials.username, expected_username)
+    is_correct_password = secrets.compare_digest(credentials.password, expected_password)
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+# Tasks that cannot be canceled
+NON_CANCELLABLE_STATUSES: List = [
+    "success",
+    "completed",
+    "failure",
+    "revoked",
+    "pending",
+    "unknown",
+    "error",
+]
+   
+# Instanciate Redis data-base
 try:
-    with open(CONFIG_FILE, "r") as file:
-        config = yaml.safe_load(file)
-    logger.info("Loaded task configuration from tasks.yaml")
-except Exception as e:
-    logger.error(f"Failed to load configuration file: {e}")
-    raise e
+    redis_bd = redis.Redis(
+        host=PARSED_URL.hostname,
+        port=PARSED_URL.port,
+        db=int(PARSED_URL.path.lstrip('/')),
+        decode_responses=True,
+    )
+    redis_bd.ping()
+    logger.info("🔥 Successfully connected to Redis!")
 
-tasks = config.get("tasks", {})
-PORT = os.environ.get("PORT", "5000")
-
-class TaskLogger:
-    def __init__(self, logger):
-        self._logger = logger
-        self._task_name = None
-
-    @contextmanager
-    def task_context(self, task_name):
-        old_task_name = self._task_name
-        self._task_name = task_name
-        try:
-            yield self
-        finally:
-            self._task_name = old_task_name
-
-    def _log(self, level, msg, *args, **kwargs):
-        if self._task_name:
-            msg = f"[{self._task_name}] {msg}"
-        return getattr(self._logger, level)(msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        return self._log("info", msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        return self._log("error", msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        return self._log("warning", msg, *args, **kwargs)
-
-    def debug(self, msg, *args, **kwargs):
-        return self._log("debug", msg, *args, **kwargs)
-
-
-# Replace the existing logger with our wrapped version
-task_logger = TaskLogger(logger)
+except redis.ConnectionError:
+    redis_bd = None
+    logger.error("❌ Failed to connect to Redis!")
 
 
 @app.post("/add_key")
-async def add_key(key: UploadFile):
-    """Save the evaluation key.
+async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name)) -> Dict:
+    """Save the evaluation key on the server side.
 
-    Arguments:
-        key (UploadFile): evaluation key
+    Args:
+        key (UploadFile): The evaluation key.
+        task_name (str): The name of the task.
 
     Returns:
         Dict[str, str]
-            - uid: a unique identifier
+            - uid: a unique identifier.
     """
     uid = str(uuid.uuid4())
-    logger.info(f"Received new key upload. Assigned UID: {uid}")
 
     # Write uploaded ServerKey to disk
     try:
@@ -111,207 +116,518 @@ async def add_key(key: UploadFile):
         with open(file_path, "wb") as f:
             f.write(file_content)
         file_size = file_path.stat().st_size  # Get file size in bytes
-        logger.info(f"Saved server key to {file_path} (Size: {file_size} bytes)")
+        logger.info("🔐 Successfully received new key upload (Size: `%s` bytes). Assigned UID: `%s`", file_size, uid)
     except Exception as e:
-        logger.error(f"Error saving server key: {e}")
-        raise HTTPException(status_code=500, detail="Failed to save server key.")
+        error_message = f"❌ Failed to store the server key: `{e}`"
+        task_logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
 
     return {"uid": uid}
 
 
-@app.get("/tasks")
-def get_tasks():
-    """List available tasks based on configuration.
+@app.get("/get_use_cases")
+def get_use_cases() -> Dict:
+    """List available use-cases based on configuration.
 
     Returns:
-        Dict[str, List[str]]: Available task names
+        Dict[str, List[str]]: Available use-case names.
     """
-    logger.info("Fetching list of available tasks.")
-    return {"tasks": list(tasks.keys())}
+    use_cases_list = list(use_cases.keys())
+    logger.info("💡 List of available use-cases: %s", use_cases_list)
+    return {"Use-cases": use_cases_list}
 
 
-def create_task_endpoint(task_name: str, task_config: Dict[str, Any]) -> Callable:
-    """Creates an endpoint function for a given task.
+@app.post("/start_task")
+async def start_task(
+    uid: str = Form(...),
+    task_name: str = Form(...),
+    encrypted_input: UploadFile = Form(...)
+) -> JSONResponse:
+    """Starts a Celery task by processing an encrypted input file.
+
+    Args:
+        uid (str): The unique key identifier.
+        task_name (str): The name of the task to be executed.
+        encrypted_input (UploadFile): The encrypted input file.
+
+    Returns:
+        JSONResponse: A JSON object containing the `task_id` if the task starts successfully.
+
+    Raises:
+        HTTPException: Raised with status code 400 if the `task_name` is invalid.
+        HTTPException: Raised with status code 500 if saving the file or starting the task fails.
+    """
+    if task_name not in use_cases:
+        error_message = f"❌ Invalid task name: `{task_name}`"
+        task_logger.error(error_message)
+        raise HTTPException(status_code=400, detail=error_message)
+
+    binary = use_cases[task_name]["binary"]
+
+    # Get the `input_filename` as specified in the yaml configuration
+    input_filename = generate_filename(
+        config=use_cases[task_name], file_type="input", args={"uid": uid, "task_name": task_name}
+    )
+    input_file_path = FILES_FOLDER / input_filename
+    task_logger.debug(f"Input file path: `{input_file_path}`")
+
+    try:
+        file_content = await encrypted_input.read()
+        with open(input_file_path, "wb") as f:
+            f.write(file_content)
+        file_size = input_file_path.stat().st_size  # Get file size in bytes
+    except Exception as e:
+        error_message = f"❌ Failed to save the input file `{input_file_path}`: {e}."
+        task_logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+    # Start the Celery task
+    try:
+        # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue.
+        task = run_binary_task.delay(binary, uid, task_name)
+        task_logger.info(
+            f"🚀 Task started [task_id=`{task.id}`] for task_name=`{task_name}` and UID=`{uid}`"
+        )
+        task_logger.debug(
+            f"📁 Saved encrypted input file to `{input_file_path} `(Size: `{file_size}` bytes)"
+        )
+        return JSONResponse({"task_id": task.id})
+
+    except Exception as e:
+        error_message = f"❌ Failed to start task `{task_name}` with UID `{uid}`: {e}"
+        task_logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+
+@app.get("/list_current_tasks")
+def list_current_tasks() -> List[Dict]:
+    """Lists all Celery tasks, including pending ones in the queue.
+
+    For workers, tasks may be active, reserved, queued, or scheduled.
+    If the worker is full, the tasks are queued in Radis and wait to be pickup.
+    With option `worker_prefetch_multiplier`, the worker is allowed to prefetch N task before
+    starting the execution.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing task details (task_id, status, worker).
+    """
+    all_tasks: List[Dict] = []
+
+    inspector = celery_app.control.inspect()
+
+    if not inspector:
+        task_logger.error(
+            "❌ Failed to inspect Celery. Inspector returned `None`. No workers may be available."
+        )
+        return []
+
+    task_states = {
+        # Show the tasks that are currently active
+        "active": inspector.active() or {},
+        # Show the tasks that have been claimed by `workers`
+        "reserved": inspector.reserved() or {},
+        # Show tasks that have an ETA or are scheduled for later processing
+        "scheduled": inspector.scheduled() or {},
+    }
+
+    for state, tasks_data in task_states.items():
+        for worker_name, tasks_list in tasks_data.items():
+            for t in tasks_list:
+                task_info = {
+                    "task_id": t.get("id"),
+                    "status": state,
+                    "worker": worker_name,
+                    # "name": t.get("name"),
+                    # "args": t.get("args"),
+                }
+                if state == "scheduled":
+                    request_info = t.get("request", {})
+                    task_info.update(
+                        {
+                            "task_id": request_info.get("id"),
+                            # "name": request_info.get("name"),
+                            # "args": request_info.get("args"),
+                        }
+                    )
+                all_tasks.append(task_info)
+
+    # Retrieving pending tasks from the Redis queue
+    try:
+        pending_tasks = redis_bd.lrange("celery", 0, -1)
+        for task in pending_tasks:
+            task_data = json.loads(task)
+            task_info = {
+                "task_id": task_data["headers"]["id"],
+                "status": "queued",
+                "worker": "queue",
+                "details": "The task is currently in the Redis queue, waiting to be picked up by a worker."
+            }
+            all_tasks.append(task_info)
+    except Exception as e:
+        error_message =  f"❌ Failed to retrieve pending tasks from REDIS: {e}"
+        logger.error(error_message)
+
+    logger.info("📝 List of all tasks:\n%s", pformat(all_tasks))
+
+    return all_tasks
+
+@app.get("/get_task_status")
+def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)) -> Dict:
+    """Retrieves the status of a Celery task by its task ID.
+
+    If no valid `task_id` and `uid` are provided, returns an "unknown" status with details.
+
+    Args:
+        task_id (str): The ID of the task to check.
+        uid (str): The unique key identifier of the task.
+
+    Returns:
+        Dict: A dictionary containing the task ID, status, worker name (if applicable), and additional details.
+
+    Raises:
+        HTTPException: Raised if an unexpected error occurs while retrieving the task status.
+    """
+
+    response: Dict = None
+    worker_name: str = "unknown"
+    
+    if not task_id or task_id.strip() == "":
+        logger.error("❌ [task_id=`%s`] is None or Empty. Please retry with a valid task ID.", task_id)
+        logger.debug(list_current_tasks())
+        return {
+            "task_id": "none",
+            "status": "unknown",
+            "details": "Task ID is None or Empty.",
+            "worker": worker_name,
+        }
+    if not uid or uid.strip() == "":
+        logger.error("❌ [uid=`%s`] is None or Empty. Please retry with a valid UID.", uid)
+        logger.debug(list_current_tasks())
+        return {
+            "task_id": task_id,
+            "uid": "unknown",
+            "status": "unknown",
+            "details": "Key uid is None or Empty.",
+            "worker": worker_name,
+        }
+    try:
+        queued_tasks = redis_bd.lrange("celery", 0, -1)
+        queued_tasks_text = " ".join(queued_tasks)
+
+        if re.search(rf'"id"\s*:\s*"{re.escape(task_id)}"', queued_tasks_text):
+            response = {
+                "task_id": task_id,
+                "status": "queued",
+                "details": "The task is currently in the Redis queue, waiting to be picked up by a worker.",
+                "worker": "TBD"
+            }
+    except Exception as e:
+        logger.error("❌ Failed to check REDIS queue: %s", str(e))
+
+    result = AsyncResult(task_id, app=celery_app)
+    status = result.state.lower()
+    
+    logger.info(f"------> Current status = {status}")
+
+    if status in ["started"]:
+        task_meta = result.backend.get_task_meta(task_id) or {}
+        worker_name = task_meta.get("result", {}).get("hostname", "unknown")
+
+    if not response or status == "success":
+        status_mapping = {
+            "started": {
+                "task_id": task_id,
+                "uid": uid,
+                "status": "started",
+                "details": "Task is still in progress.",
+                "worker": worker_name,
+            },
+            "success": {
+                "task_id": task_id,
+                "uid": uid,
+                "status": "success",
+                "details": "Task successfully completed.",
+                "worker": "not tracked",
+            },
+            "failure": {
+                "task_id": task_id,
+                "uid": uid,
+                "status": "failure",
+                "details": str(result.info or "This task might be lost."),
+                "worker": worker_name,
+            },
+            "reserved": {
+                "task_id": task_id,
+                "uid": uid,
+                "status": "reserved",
+                "details": "This task will start soon.",
+                "worker": worker_name,
+            },
+            "unknown": {
+                "task_id": task_id,
+                "uid": uid,
+                "status": "unknown",
+                "details": "Task may not exist, you may need to restart it.",
+                "worker": worker_name or "unknown",
+            },
+            "completed": {
+                "task_id": task_id,
+                "uid": uid,
+                "status": "completed",
+                "worker": "not tracked",
+            },
+        }
+
+        if status in ["pending"]:
+            file_pattern = f"{BACKUP_FOLDER}/backup.{task_id}.{uid}.*output*.fheencrypted"
+            matching_files = glob(file_pattern)
+
+            # If the task is "PENDING" but a saved output file exists, treat it as "completed"
+            if matching_files:
+                file_path = Path(matching_files[0])
+                file_date = file_path.stat().st_mtime  # Get file's last modified time
+                date = datetime.datetime.fromtimestamp(file_date).strftime("%Y-%m-%d %H:%M:%S")
+
+                response = status_mapping.get("completed")
+                response['details'] = f"Task completed on `{date}`. The result is stored."
+                response['output_file_path'] = [str(file) for file in matching_files]
+            else:
+                response = status_mapping.get("unknown")
+        else:
+            response = status_mapping.get(
+                status,
+                {
+                    "task_id": task_id,
+                    "uid": uid,
+                    "status": status,
+                    "details": str(result.info or "No additional details available."),
+                    "worker": worker_name,
+                },
+            )
+
+    logger.info(
+        f"🔍 Status [task_id=`{response['task_id']}`]: {response['status'].upper()} | {response['details']} | {response['worker']}"
+    )
+
+    return response
+
+
+@app.post("/cancel_task")
+def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)) -> Dict:
+    """Attempts to cancel a running task by ID, if possible.
+
+    Args:
+        task_id (str): The ID of the task to cancel.
+        uid (str): The unique key identifier of the task.
+
+    Returns:
+        Dict: A dictionary containing the task ID, its status, and details about the cancellation.
+
+    Raises:
+        HTTPException: Raised with status code 500 if revoking the task fails.
+    """
+
+    # Get the current task status
+    initial_overall_info = get_task_status(task_id, uid)
+    initial_status = initial_overall_info.get("status", "unknown").lower()
+
+    if initial_status in NON_CANCELLABLE_STATUSES:
+        logger.warning(
+            "⚠️ Cannot cancel task ID [task_id=`%s`] (already finished or unknown).", task_id
+        )
+        return {
+            "task_id": task_id,
+            "uid": uid,
+            "status": initial_status,
+            "worker": (initial_overall_info or {}).get("worker"),
+            "details": f"Cannot cancel this task (already finished or unknown). Additional info: {initial_overall_info.get('details', '')}",
+
+        }
+
+    # Attempt to revoke the task
+    try:
+        celery_app.control.revoke(task_id, terminate=True, signal="SIGKILL")
+    except Exception as e:
+        error_message = f"❌ Failed to revoke TASK_ID `{task_id}`: {e}."
+        task_logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+    # Wait for the state to update
+    time.sleep(2)
+
+    # Fetch the new state of the task
+    new_result = AsyncResult(task_id, app=celery_app)
+    new_status = new_result.state.lower()
+    
+    updated_status = {
+        "task_id": task_id,
+        "uid": uid,
+        "status": new_status,
+        "details": "Successfully cancelled the task.",
+    }
+    
+    logger.info(f"🚫 Task Cancelled: [task_id=`{task_id}`] | Previous Status=`{initial_status}` → New Status=`{new_status}` | Details: {updated_status['details']}")
+
+    return updated_status
+
+
+def get_output_filename(config, history, index, uid: str, backup: bool) -> str:
+    """Returns the name of the output file according to the configuration."""
+    if backup:
+        return generate_filename(config, file_type="output", args={"uid": uid})
+    else:
+        backup_file = history.get("output_file_path", [])
+        if len(backup_file) >= index:
+            return backup_file[index]
+        else:
+            return backup_file
+
+
+def process_task_status(task_id: str, uid: str) -> dict:
+
+    status = get_task_status(task_id, uid)
+
+    if status.get("status")  == "started":
+        logger.info("📩 [task_id=`%s`] is still in progress. Please wait before attempting to retrieve the result.", task_id)
+        return status
+    if status.get("status") in ["pending", "failure", "revoked", "unknown", "error", "queue", "queued"]:
+        logger.info("📩 [task_id=`%s`] not started.", task_id)
+        return status
+    if status.get("status") == "completed":
+        logger.info("🎉 Task [ID=%s] is already completed and stored in the backup folder.", task_id)
+        return status
+    if status.get("status") == "success":
+        logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+        return status
+
+    error_message = f"🚨 [task_id=`{task_id}`] has an undefined state (`{status}`)."
+    logger.info(error_message)
+    raise HTTPException(status_code=500, detail=error_message)
+
+
+def is_backup_needed(status: dict, task_id: str):
+    """Determines whether to generate a backup based on status."""
+    if status.get("status") == "completed":
+        return False, ""
+    if status.get("status") == "success":
+        celery_result = AsyncResult(task_id, app=celery_app)
+        outcome_celery = celery_result.result
+        stderr_output = outcome_celery.get("stderr", "")
+        return True, stderr_output
+    return False, ""
+
+
+def build_stream_response(
+    task_id: str, uid: str, task_name: str, output_files: list,
+    backup: bool, stderr_output: str, status: dict
+    ) -> StreamingResponse:
+
+    output_filename = get_output_filename(output_files[0], status, 0, uid, backup)
+    output_file_path = FILES_FOLDER / output_filename
+    data = fetch_file_content(output_file_path, task_id, backup=backup)
+
+    headers = {
+        "Content-Disposition": f"attachment; filename={output_filename}",
+        "status": "success" if backup else status.get("status"),
+        "job_id": task_id,
+        "stderr": stderr_output,
+        "task_name": task_name,
+        "worker": status.get("worker"),
+    }
+    task_logger.debug(f"Returning STREM response for task '{task_name}'")
+    return StreamingResponse(io.BytesIO(data), media_type="application/octet-stream", headers=headers)
+
+
+def build_json_response(task_id: str, uid: str, task_name: str, output_files: list,
+                        backup: bool, stderr_output: str, status: dict) -> JSONResponse:
+    response_data = {
+        "job_id": task_id,
+        "stderr": stderr_output,
+        "task_name": task_name,
+        "output_file_path": [],
+        "worker": status.get("worker"),
+        "radix": str(RADIX),
+    }
+    for index, file_config in enumerate(output_files):
+        response_format = file_config.get("response_type", "base64")
+        output_filename = get_output_filename(file_config, status, index, uid, backup)
+        response_data["output_file_path"].append(output_filename)
+
+        key = file_config.get("key", output_filename)
+        output_file_path = FILES_FOLDER / output_filename
+        data = fetch_file_content(output_file_path, task_id, backup=backup)
+
+        response_data[key] = (
+            base64.b64encode(data).decode("utf-8")
+            if response_format == "base64"
+            else data.decode("utf-8")
+        )
+
+    response_data["status"] = "success" if backup else "completed"
+    task_logger.debug(f"Returning JSON response for task '{task_name}'")
+    return JSONResponse(content=response_data)
+
+
+@app.get("/get_task_result")
+async def get_task_result(
+    task_name: str = Depends(get_task_name),
+    task_id: str = Depends(get_task_id),
+    uid: str = Depends(get_uid),
+):
+    """Retrieves the final result of a completed task, returning it based on configuration.
 
     Args:
         task_name (str): The name of the task.
-        task_config (Dict[str, Any]): The configuration for the task.
+        task_id (str): The ID of the task to retrieve the result for.
+        uid (str): The unique key identifier.
 
     Returns:
-        Callable: The endpoint function.
+        StreamingResponse: If `response_type` is set to "stream".
+        JSONResponse: If `response_type` is set to "json".
+
+    Raises:
+        HTTPException: Raised with a 400 status code if the task name is invalid.
+        HTTPException: Raised with a 500 status code for unsupported response types or other errors.
     """
-    binary = task_config["binary"]
+    if task_name not in use_cases:
+        task_logger.error("❌ Invalid task name: `{%s}`. See available options at [GET /get_use_cases]", task_name)
+        raise HTTPException(status_code=400, detail=f"Task `{task_name}` does not exist.")
+
+    # Check task configuration
+    task_config = use_cases.get(task_name, {})
+    # Defines whether the response will be in stream or JSON format
     response_type = task_config.get("response_type", "stream")
+    # Output name file as specified in the yaml task file
     output_files = task_config.get("output_files", [])
 
-    async def task_endpoint(input: UploadFile, uid: str = Form(...)):
-        """Handle the specific task.
+    # Check task status
+    status = process_task_status(task_id, uid)
 
-        Arguments:
-            input (UploadFile): Input file for the task.
-            uid (str): UID of the public key to use.
+    if status.get('status') in ['started', "pending", "failure", "revoked", "unknown", "error", "queue", "queued"]:
+        headers = {
+            "status": status.get("status"),
+            "job_id": status.get("task_id"),
+            "uid": uid,
+            "stderr": status.get("details", ""),
+            "worker": status.get("worker"),
+        }
+        return JSONResponse(content=status, status_code=200, headers=headers)
 
-        Returns:
-            StreamingResponse or JSONResponse: Result of the task.
-        """
-        with task_logger.task_context(task_name):
-            task_logger.info(f"Received request from UID: {uid}")
+    backup, stderr_output = is_backup_needed(status, task_id)
 
-            # Use input_filename from task_config if specified, otherwise default
-            input_filename_template = task_config.get(
-                "input_filename", "{uid}.{task}.input.fheencrypted"
-            )
-            input_filename = input_filename_template.format(uid=uid, task=task_name)
-            input_file_path = FILES_FOLDER / input_filename
-            task_logger.debug(f"Input file path: {input_file_path}")
+    # Handle outputs based on the configuration
+    if response_type == "stream":
+        return build_stream_response(task_id, uid, task_name, output_files, backup, stderr_output, status)
+    if response_type == "json":
+        return build_json_response(task_id, uid, task_name, output_files, backup, stderr_output, status)
 
-            # Save the input file
-            try:
-                file_content = await input.read()
-                with open(input_file_path, "wb") as f:
-                    f.write(file_content)
-                file_size = input_file_path.stat().st_size  # Get file size in bytes
-                task_logger.info(f"Saved input file to {input_file_path} (Size: {file_size} bytes)")
-            except Exception as e:
-                task_logger.error(f"Error saving input file: {e}")
-                raise HTTPException(status_code=500, detail="Failed to save input file.")
-
-            # Execute the corresponding Rust binary using subprocess
-            task_logger.info(f"Executing {task_name}")
-            try:
-                start_time = time.time()
-                process = await asyncio.create_subprocess_exec(
-                    f"./{binary}",
-                    uid,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
-                stdout, stderr = await process.communicate()
-                execution_time = time.time() - start_time
-
-                if process.returncode != 0:
-                    task_logger.error(f"Error executing {binary}: {stderr.decode()}")
-                    raise HTTPException(
-                        status_code=500, detail=f"Error executing {binary}: {stderr.decode()}"
-                    )
-
-                task_logger.info(
-                    f"FHE execution of {task_name} completed in {execution_time:.2f} seconds"
-                )
-                if stderr:
-                    task_logger.warning(f"Error output from {binary}:\n{stderr.decode()}")
-            except subprocess.CalledProcessError as e:
-                task_logger.error(f"Error executing {binary}: {e.stderr}")
-                raise HTTPException(status_code=500, detail=f"Error executing {binary}: {e.stderr}")
-
-            # Handle outputs based on the configuration
-            if response_type == "stream":
-                # Expect a single output file
-                if not output_files:
-                    task_logger.error("No output files defined for streaming response.")
-                    raise HTTPException(
-                        status_code=500, detail="No output files defined for streaming response."
-                    )
-
-                output_file_config = output_files[0]
-                output_filename_template = output_file_config["filename"]
-                output_filename = output_filename_template.format(uid=uid, task=task_name)
-                output_file_path = FILES_FOLDER / output_filename
-                task_logger.debug(f"Output file path: {output_file_path}")
-
-                if not output_file_path.exists():
-                    task_logger.error(f"Output file {output_filename} not found.")
-                    raise HTTPException(
-                        status_code=500, detail=f"Output file {output_filename} not found."
-                    )
-
-                try:
-                    file_size = output_file_path.stat().st_size  # Get file size in bytes
-                    with open(output_file_path, "rb") as f:
-                        data = f.read()
-                    task_logger.info(
-                        f"Streaming output file {output_filename} to client (Size: {file_size} bytes)"
-                    )
-                    return StreamingResponse(
-                        io.BytesIO(data),
-                        media_type="application/octet-stream",
-                        headers={"Content-Disposition": f"attachment; filename={output_filename}"},
-                    )
-                except Exception as e:
-                    task_logger.error(f"Error reading output file: {e}")
-                    raise HTTPException(status_code=500, detail="Failed to read output file.")
-
-            elif response_type == "json":
-                response_data = {}
-                for output_file_config in output_files:
-                    filename_template = output_file_config["filename"]
-                    output_filename = filename_template.format(uid=uid, task=task_name)
-                    key = output_file_config.get("key", output_filename)
-                    response_format = output_file_config.get("response_type", "base64")
-
-                    output_file_path = FILES_FOLDER / output_filename
-                    task_logger.debug(f"Processing output file: {output_file_path}")
-
-                    if not output_file_path.exists():
-                        task_logger.error(f"Output file {output_filename} not found.")
-                        raise HTTPException(
-                            status_code=500, detail=f"Output file {output_filename} not found."
-                        )
-
-                    try:
-                        file_size = output_file_path.stat().st_size  # Get file size in bytes
-                        with open(output_file_path, "rb") as f:
-                            data = f.read()
-
-                        if response_format == "base64":
-                            encoded_data = base64.b64encode(data).decode("utf-8")
-                            response_data[key] = encoded_data
-                            task_logger.info(
-                                f"Processed output file {output_filename} (Size: {file_size} bytes) as base64."
-                            )
-                        else:
-                            response_data[key] = data.decode("utf-8")
-                            task_logger.info(
-                                f"Processed output file {output_filename} (Size: {file_size} bytes) as UTF-8 string."
-                            )
-                    except Exception as e:
-                        task_logger.error(f"Error processing output file {output_filename}: {e}")
-                        raise HTTPException(
-                            status_code=500,
-                            detail=f"Error processing output file {output_filename}.",
-                        )
-
-                task_logger.info(f"Returning JSON response for task '{task_name}'")
-                return JSONResponse(content=response_data)
-            else:
-                task_logger.error(f"Unsupported response type: {response_type}")
-                raise HTTPException(
-                    status_code=500, detail=f"Unsupported response type: {response_type}"
-                )
-
-    return task_endpoint
+    error_message = f"❌ Unsupported response type: `{response_type}`"
+    task_logger.error(error_message)
+    raise HTTPException(status_code=500, detail=error_message)
 
 
-# Dynamically create routes for each task
-for task_name, task_config in tasks.items():
-    # Define the endpoint path
-    endpoint_path = f"/{task_name}"
-    # Create the endpoint function
-    endpoint_func = create_task_endpoint(task_name, task_config)
-    # Add the route to the FastAPI app
-    app.add_api_route(
-        endpoint_path,
-        endpoint_func,
-        methods=["POST"],
-        name=task_name,
-        summary=f"Execute the {task_name} task",
-        description=f"Process input data using the {task_name} task.",
-    )
-    logger.info(f"Added endpoint for task '{task_name}' at '{endpoint_path}'")
-
-
-@app.get("/logs")
-def get_logs(lines: int = 10):
+@app.get("/logs", response_class=HTMLResponse)
+def get_logs(user: str = Depends(get_current_user), lines: int = 10) -> Response:
     """Serve the server log file with the specified number of last lines.
 
     Args:
@@ -322,7 +638,7 @@ def get_logs(lines: int = 10):
     """
     try:
         # Read last N lines efficiently
-        with open(LOG_FILE, "r") as log_file:
+        with open(LOG_FILE, "r", encoding="utf-8") as log_file:
             # Use deque with maxlen for memory efficiency
             from collections import deque
 
@@ -397,7 +713,6 @@ def get_logs(lines: int = 10):
                 </style>
                 <script>
                     let autoRefreshInterval;
-                    
                     function toggleAutoRefresh() {{
                         const checkbox = document.getElementById('autoRefresh');
                         if (checkbox.checked) {{
@@ -451,12 +766,12 @@ def get_logs(lines: int = 10):
         """
         return Response(content=html, media_type="text/html")
     except FileNotFoundError:
-        logger.warning("Log file not found when attempting to fetch logs.")
+        logger.warning("⚠️ Log file not found when attempting to fetch logs.")
         return Response(
             content="Log file not found. Logs might not have been generated yet.", status_code=404
         )
     except Exception as e:
-        logger.error(f"Error serving logs: {e}")
+        logger.error("❌ Error serving logs: `%s`", e)
         return Response(content="An error occurred while fetching logs.", status_code=500)
 
 
@@ -464,13 +779,3 @@ def get_logs(lines: int = 10):
 def robots():
     content = "User-agent: *\nDisallow: /"
     return Response(content=content, media_type="text/plain")
-
-if __name__ == "__main__":
-    logger.info(f"Starting server on port {PORT}")
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=int(PORT),
-        ssl_keyfile="/project/key.pem",
-        ssl_certfile="/project/cert.pem",
-    )

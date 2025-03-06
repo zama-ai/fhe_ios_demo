@@ -1,4 +1,6 @@
+# ===========================
 # Stage 1: Build Rust binaries (built separately with --rebuild-rust)
+# ===========================
 FROM rust:1.76 AS rust-builder
 
 # Set working directory
@@ -11,31 +13,70 @@ COPY tasks/ tasks/
 # Run the build script
 RUN ./build_tasks.sh
 
+# ===========================
 # Stage 2: Final image
-FROM python:3.9-slim as python-image
+# ===========================
+FROM ubuntu:22.04 AS python-image
 
-# Set environment variables
+# Set non-interactive mode for package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Define a build argument to control CUDA installation
+ARG INSTALL_CUDA
+
 # Install necessary packages
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    procps \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    wget \
+    unzip \
+    python3 \
+    python3-pip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+# The NVIDIA driver should be managed by the host via the NVIDIA Container Toolkit.
+# Installing it in the container is not recommended.
+# RUN apt-get update && apt-get install -y --no-install-recommends nvidia-driver-535
+
+# Conditionally install CUDA if INSTALL_CUDA is set to "true"
+# Install CUDA Toolkit + CUDA keyring for Ubuntu 22.04
+# Add CUDA Toolkit to PATH (necessary for `nvcc` to be accessible to the container)
+# check: readlink /usr/local/cuda
+RUN if [ "$INSTALL_CUDA" = "nvidia" ]; then \
+    wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    rm -f cuda-keyring_1.1-1_all.deb && \
+    apt-get update && apt-get install -y --no-install-recommends cuda-toolkit-12-8 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    echo "CUDA installed" && \
+    echo 'export PATH=/usr/local/cuda/bin:$PATH' >> /etc/environment; \
+    else echo "Skipping CUDA installation"; \
+    fi
+
 
 # Set working directory
 WORKDIR /project
 RUN mkdir -p /project/data
 
-
 # Copy Python dependencies, configuration files and Python server
-COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
-COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
+COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
+COPY tasks/ad_targeting/data/*.pkl /project/data/
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r server_requirements.txt
+RUN pip3 install --no-cache-dir gdown -r server_requirements.txt
 
+# Set environment variables for Google Drive file
+ENV FILE_ID="1f2zf1bpl7rPQIxP4t1T-G7fFOqiptvGO"
+ENV FILE_PATH="/project/data/ads_numeric_representation.zip"
+
+# Download the file from Google Drive and extract required files
+RUN gdown "https://drive.google.com/uc?id=$FILE_ID" -O $FILE_PATH && \
+    unzip -o $FILE_PATH -d /project/data/ && rm -f $FILE_PATH
+
+# ===========================
 # Stage 3: Final image
+# ===========================
 FROM python-image
 
 # Copy Rust binaries from the rust-builder stage
@@ -44,9 +85,19 @@ COPY --from=rust-builder /build/bin/* ./
 # Make binaries and entrypoint script executable
 RUN chmod +x ./* && chmod +x /project/entrypoint.sh
 
+# Add a non-root user and group
+# Ensure that the mounted volumes have the correct permissions
+# sudo chown -R 10000:10001 backup_files uploaded_files
+RUN groupadd -g 10001 grp02 && \
+    useradd -u 10000 -g grp02 usr01 && \
+    chown -R usr01:grp02 /project
+
 # Expose necessary ports
 EXPOSE 80
 EXPOSE 5000
+
+# Switch to the non-root user
+USER usr01:grp02
 
 # Set the entrypoint
 ENTRYPOINT ["/project/entrypoint.sh"]
