@@ -24,7 +24,7 @@ struct WeightTab: View {
 
                 CustomBox("Trend") {
                     Group {
-                        if let url = vm.sampleSelected {
+                        if let url = vm.selectedSample {
                             FilePreview(url: url)
                         } else {
                             NoDataBadge()
@@ -78,12 +78,12 @@ struct WeightTab: View {
 extension WeightTab {
     @MainActor final class ViewModel: ObservableObject {
         @Published var samplesAvailable: Bool
-        @Published var sampleSelected: URL?
+        @Published var selectedSample: URL?
         @Published var result: (min: URL, max: URL, avg: URL)?
 
         init() {
             self.samplesAvailable = false
-            self.sampleSelected = nil
+            self.selectedSample = nil
         }
         
         func refreshFromDisk() {
@@ -104,7 +104,7 @@ extension WeightTab {
         }
         
         func selectSample() {
-            let selectionURL = Storage.url(for: .weightList)
+            self.selectedSample = Storage.url(for: .weightList)
             //let selectionMD5 = await Storage.read(.weightList)?.md5Identifier
         }
         
