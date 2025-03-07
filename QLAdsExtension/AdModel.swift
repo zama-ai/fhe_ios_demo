@@ -31,36 +31,6 @@ struct AdModel: Decodable, Identifiable {
         }.sorted(by: { $0.id < $1.id })
         return ads
     }
-
-    static func filtered(_ allAds: [AdModel], with query: String) -> [AdModel] {
-        guard !query.isEmpty else {
-            return allAds
-        }
-        
-        if let matchID = Int(query) {
-            // Match by ID
-            return allAds.first(where: { $0.id == matchID }).map { [$0] } ?? []
-            
-        } else if query.count >= 3 {
-            // Match by text
-            let betterQuery = query.searchNormalized
-            
-            return allAds.filter {
-                $0.title.searchNormalized.contains(betterQuery) ||
-                $0.details.searchNormalized.contains(betterQuery)
-            }
-        } else {
-            return []
-        }
-    }
-}
-
-fileprivate extension String {
-    /// Returns a normalized version of the string: case-insensitive and diacritic-insensitive
-    /// Ex: Search for "ecol" => should match "école", "Ecole", "École", should NOT match "décoller"
-    var searchNormalized: String {
-        self.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-    }
 }
 
 // Helper struct to handle mixed types

@@ -84,7 +84,9 @@
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
 				Reusable/AsyncButton.swift,
+				Reusable/CopyableText.swift,
 				"Reusable/Data+md5.swift",
+				Reusable/MeasureDuration.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
@@ -106,8 +108,10 @@
 				"Helpers-Zama/Network.swift",
 				"Helpers-Zama/SleepModels.swift",
 				Reusable/AsyncButton.swift,
+				Reusable/CopyableText.swift,
 				"Reusable/Data+md5.swift",
 				Reusable/FilePreview.swift,
+				Reusable/MeasureDuration.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
@@ -144,7 +148,7 @@
 			);
 			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
 		};
-		3226597E2D6E2C8F004BB59A /* Exceptions for "AdsQLExtension" folder in "AdsQLExtension" target */ = {
+		3226597E2D6E2C8F004BB59A /* Exceptions for "QLAdsExtension" folder in "AdsQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: AppSupport/MainInterface.storyboard",
@@ -169,7 +173,7 @@
 			);
 			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
 		};
-		324F8E2E2CA43B2100F0BB11 /* Exceptions for "HealthQLExtension" folder in "HealthQLExtension" target */ = {
+		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QLHealthExtension" folder in "HealthQLExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppSupport/Info.plist,
@@ -190,8 +194,10 @@
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
 				Reusable/AsyncButton.swift,
+				Reusable/CopyableText.swift,
 				"Reusable/Data+md5.swift",
 				Reusable/FilePreview.swift,
+				Reusable/MeasureDuration.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
@@ -244,23 +250,23 @@
 			path = Server;
 			sourceTree = "<group>";
 		};
-		3226587F2D6E1EFE004BB59A /* AdsQLExtension */ = {
+		3226587F2D6E1EFE004BB59A /* QLAdsExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3226597E2D6E2C8F004BB59A /* Exceptions for "AdsQLExtension" folder in "AdsQLExtension" target */,
+				3226597E2D6E2C8F004BB59A /* Exceptions for "QLAdsExtension" folder in "AdsQLExtension" target */,
 			);
 			explicitFolders = (
 				AdImages,
 			);
-			path = AdsQLExtension;
+			path = QLAdsExtension;
 			sourceTree = "<group>";
 		};
-		324F8E1F2CA43B2100F0BB11 /* HealthQLExtension */ = {
+		324F8E1F2CA43B2100F0BB11 /* QLHealthExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				324F8E2E2CA43B2100F0BB11 /* Exceptions for "HealthQLExtension" folder in "HealthQLExtension" target */,
+				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QLHealthExtension" folder in "HealthQLExtension" target */,
 			);
-			path = HealthQLExtension;
+			path = QLHealthExtension;
 			sourceTree = "<group>";
 		};
 		328F5CB42D009CA800D7B219 /* AdsApp */ = {
@@ -360,8 +366,8 @@
 				32079E3B2CAC3941004EC06A /* Docs */,
 				32C9CC3D2CA566DC00AEDA32 /* DataVaultApp */,
 				32C9CC212CA565A100AEDA32 /* HealthApp */,
-				324F8E1F2CA43B2100F0BB11 /* HealthQLExtension */,
-				3226587F2D6E1EFE004BB59A /* AdsQLExtension */,
+				324F8E1F2CA43B2100F0BB11 /* QLHealthExtension */,
+				3226587F2D6E1EFE004BB59A /* QLAdsExtension */,
 				328F5CB42D009CA800D7B219 /* AdsApp */,
 				320CFB212CAAC47500528366 /* Server */,
 				320C391A2CAAEE2900528366 /* Shared */,
@@ -437,7 +443,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				324F8E1F2CA43B2100F0BB11 /* HealthQLExtension */,
+				324F8E1F2CA43B2100F0BB11 /* QLHealthExtension */,
 			);
 			name = HealthQLExtension;
 			packageProductDependencies = (
