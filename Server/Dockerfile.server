@@ -18,18 +18,21 @@ FROM python:3.9-slim as python-image
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    procps \
+    net-tools \
+    iproute2 \
+    netcat-traditional \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # Set working directory
 WORKDIR /project
 RUN mkdir -p /project/data
 
-
 # Copy Python dependencies, configuration files and Python server
-COPY server_requirements.txt tasks.yaml server.py entrypoint.sh ./
+COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
 COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
 
 # Install Python dependencies
@@ -44,9 +47,19 @@ COPY --from=rust-builder /build/bin/* ./
 # Make binaries and entrypoint script executable
 RUN chmod +x ./* && chmod +x /project/entrypoint.sh
 
+# Add a non-root user and group
+# Ensure that the mounted volumes have the correct permissions
+# sudo chown -R 10000:10001 backup_files uploaded_files
+RUN groupadd -g 10001 grp02 && \
+    useradd -u 10000 -g grp02 usr01 && \
+    chown -R usr01:grp02 /project
+
 # Expose necessary ports
 EXPOSE 80
 EXPOSE 5000
+
+# Switch to the non-root user
+USER usr01:grp02
 
 # Set the entrypoint
 ENTRYPOINT ["/project/entrypoint.sh"]

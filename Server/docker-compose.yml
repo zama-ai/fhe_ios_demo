@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+
+  # Redis raised a warning, for a potentiel "Out of Memory" issue
+  # To get rid of potentiel failures and the warning, allow memory overcommitment:
+  # - Use `sudo sysctl vm.overcommit_memory=1` for a temporary change
+  # - Use `echo "vm.overcommit_memory=1" | sudo tee -a /etc/sysctl.conf` for a permanent change
+  # On this machine, the setting is permanent in `sysctl.conf`
+  service_redis:
+    container_name: $REDIS_CONTAINER_NAME
+    image: redis:latest
+    ports:
+      - "$REDIS_HOST_PORT:$REDIS_CONTAINER_PORT"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: $RESTART_POLICY
+
+  service_fastapi:
+    container_name: $FASTAPI_CONTAINER_NAME
+    env_file:
+      - $ENV_FILE # Load the environment variables
+    build:
+      context: $DOCKERFILE_LOCATION
+      dockerfile: $DOCKERFILE_NAME
+    image: $FINAL_IMAGE
+    depends_on:
+      service_redis:
+        condition: service_healthy
+    # No need because we have it in entrypoint.sh
+    # command: python server.py
+    environment:
+      RUN_TYPE: "fastapi"
+      DOMAIN_NAME: $DOMAIN_NAME
+    volumes:
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./$SHARED_DIR:/project/$SHARED_DIR
+      - ./$BACKUP_DIR:/project/$BACKUP_DIR
+    ports:
+      - "$FASTAPI_HOST_PORT_HTTP:$FASTAPI_CONTAINER_PORT_HTTP"
+      - "$FASTAPI_HOST_PORT_HTTPS:$FASTAPI_CONTAINER_PORT_HTTPS"
+    depends_on:
+      service_redis:
+        condition: service_healthy
+    restart: $RESTART_POLICY
+
+  service_celery_usecases:
+    # To run multiple instances of a service, avoid specifying a container name.
+    # By default, Docker Compose automatically generates container names in the format: <project>_<service>_<index>.
+    env_file:
+      - $ENV_FILE # Load the environment variables
+    build:
+      context: $DOCKERFILE_LOCATION
+      dockerfile: $DOCKERFILE_NAME
+    image: $FINAL_IMAGE
+    # No need because we have it in entrypoint.sh
+    # command: celery -A server.celery_app worker --loglevel=$CELERY_LOGLEVEL --concurrency=$CELERY_CONCURRENCY
+    volumes:
+      # Docker Compose allows mounting directories, but not individual files, to containers
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./$SHARED_DIR:/project/$SHARED_DIR
+      - ./$BACKUP_DIR:/project/$BACKUP_DIR
+    depends_on:
+      - service_redis
+      - service_fastapi
+    environment:
+      RUN_TYPE: "usecases"
+      DOMAIN_NAME: $DOMAIN_NAME
+      CELERY_BROKER_URL: $BROKER_URL
+      CELERY_RESULT_BACKEND: $BACKEND_URL
+    restart: $RESTART_POLICY
+
+  service_celery_ads:
+    container_name: $CELERY_ADS_CONTAINER_NAME
+    env_file:
+      - $ENV_FILE # Load the environment variables
+    build:
+      context: $DOCKERFILE_LOCATION
+      dockerfile: $DOCKERFILE_NAME
+    image: $FINAL_IMAGE
+    volumes:
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./$SHARED_DIR:/project/$SHARED_DIR
+    depends_on:
+      - service_redis
+      - service_fastapi
+    environment:
+      RUN_TYPE: "ads"
+      DOMAIN_NAME: $DOMAIN_NAME
+      CELERY_BROKER_URL: $BROKER_URL
+      CELERY_RESULT_BACKEND: $BACKEND_URL
+    restart: $RESTART_POLICY

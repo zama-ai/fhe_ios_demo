@@ -1,0 +1,185 @@
+"""Utility functions for Celery, FastAPI server and Radis data-base."""
+
+import os
+import logging
+import yaml 
+
+from pathlib import Path
+from urllib.parse import urlparse
+from contextlib import contextmanager
+from typing import Dict
+
+from fastapi import Form, Query, Request, HTTPException
+from dotenv import load_dotenv, dotenv_values
+
+# Load environment variables from 'ENV_FILE' file
+ENV_FILE = os.getenv("ENV_FILE")
+load_dotenv(dotenv_path=ENV_FILE)
+
+env_values = dotenv_values(ENV_FILE)
+
+URL = os.getenv("URL")
+CONTAINER_PORT = os.getenv("FASTAPI_CONTAINER_PORT_HTTPS")
+PORT = os.getenv("PORT")
+BROKER_URL = os.getenv("BROKER_URL")
+PARSED_URL = urlparse(BROKER_URL)
+
+SHARED_DIR = os.getenv("SHARED_DIR")
+FILES_FOLDER = Path(__file__).parent / SHARED_DIR
+FILES_FOLDER.mkdir(exist_ok=True)
+
+BACKUP_DIR = os.getenv("BACKUP_DIR")
+BACKUP_FOLDER = Path(__file__).parent / BACKUP_DIR
+BACKUP_FOLDER.mkdir(exist_ok=True)
+
+LOG_FILE = Path(__file__).parent / "server.log"
+CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
+
+
+class TaskLogger:
+    def __init__(self, logger):
+        self._logger = logger
+        self._task_name = None
+
+    @contextmanager
+    def task_context(self, task_name):
+        old_task_name = self._task_name
+        self._task_name = task_name
+        try:
+            yield self
+        finally:
+            self._task_name = old_task_name
+
+    def _log(self, level, msg, *args, **kwargs):
+        if self._task_name:
+            msg = f"[{self._task_name}] {msg}"
+        return getattr(self._logger, level)(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        return self._log("info", msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        return self._log("error", msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        return self._log("warning", msg, *args, **kwargs)
+
+    def debug(self, msg, *args, **kwargs):
+        return self._log("debug", msg, *args, **kwargs)
+
+
+async def get_task_id(request: Request, task_id: str = Query(None), task_id_form: str = Form(None)):
+    """Retieve the `task_id` from Query, Form, or Request Body."""
+    form_data = await request.form()
+    return task_id or task_id_form or form_data.get("task_id")
+
+
+async def get_task_name(request: Request, task_name: str = Query(None), task_name_form: str = Form(None)):
+    """Retieve the `task_name` from Query, Form, or Request Body."""
+    form_data = await request.form()
+    return task_name or task_name_form or form_data.get("task_name")
+
+
+async def get_uid(request: Request, uid: str = Query(None), uid_form: str = Form(None)):
+    """Retrieve the `uid` from Query, Form, or Request Body."""
+    form_data = await request.form()
+    return uid or uid_form or form_data.get("uid")
+
+
+def generate_filename(config: Dict, file_type: str, args: Dict) -> str:
+    """Generates a filename based on a given configuration.
+
+    Args:
+        config (dict): Configuration dictionary containing filename templates.
+        file_type (str): Type of file, either "output" or "input".
+        args (dict): Dictionary with formatting arguments (e.g., uid, task_name).
+
+    Returns:
+        str: The generated filename based on the template.
+    """
+    assert file_type in ["input", "output"], f"`{file_type}` not supported."
+    template = "{uid}" if file_type == "output" else "{uid}.{task_name}"
+    filename_template = config.get("filename", f"{template}.{file_type}.fheencrypted")
+    return filename_template.format(**args)
+
+
+def ensure_file_exists(file_path: Path, error_message: str) -> None:
+    """Ensures that the specified file exists; otherwise, logs an error and raises an exception.
+
+    Args:
+        file_path (Path): The path of the file to check.
+        error_message (str): The error message to log and include in the exception.
+
+    Raises:
+        HTTPException: Raised with status code 500 if the file does not exist.
+    """
+    if not file_path.exists():
+        logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+    else:
+        logger.debug(f"📁 Output file path: `{file_path}` exists.")
+
+
+def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
+    """Reads a file, optionally saves a backup, and returns its content.
+
+    Args:
+        output_file_path (Path): The path of the file to read.
+        task_id (str): The task id used for backup naming.
+        backup (bool): Whether to save a backup of the file.
+
+    Returns:
+        bytes: The content of the file.
+
+    Raises:
+        HTTPException: Raised with status code 500 if the file cannot be read.
+    """
+    ensure_file_exists(
+        output_file_path, error_message=f"📁 Output file `{output_file_path.name}` not found."
+    )
+    try:
+        data = output_file_path.read_bytes()
+        logger.info(
+            f"📁 Successfully read output file `{output_file_path}` (Size: `{len(data)}` bytes)"
+        )
+    except Exception as e:
+        error_message=f"❌ Failed to read output file `{output_file_path.name}`: `{e}`."
+        logger.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+    if backup:
+        backup_path = BACKUP_FOLDER / f"backup.{task_id}.{output_file_path.name}"
+        try:
+            backup_path.write_bytes(data)
+            logger.debug(f"💾 Successfully saved backup file at `{backup_path}`.")
+        except Exception as e:
+            logger.warning(f"🚨 Failed to create backup `{backup_path}`: {e}.")
+
+    return data
+
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE),
+        logging.StreamHandler(),  # Also log to stderr for Docker logs
+    ],
+)
+
+
+logger = logging.getLogger(__name__)
+
+# Replace the existing logger with our wrapped version
+task_logger = TaskLogger(logger)
+
+# Load task configuration
+try:
+    with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+        use_cases = config.get("tasks", {})
+    logger.debug("📁 Successfully loaded configuration from `%s`", CONFIG_FILE)
+except Exception as e:
+    logger.error("❌ Failed to load configuration file `%s`: `%s`", CONFIG_FILE, e)
+    raise e
