@@ -33,18 +33,16 @@ for task in $TASKS; do
         cp "target/release/$BINARY_NAME" "$BIN_DIR/"
         
     # Python task
-    elif [ -f "src/main.py" ]; then
-       
-        echo "Python task: $task"
-
-        # Make the Python file executable
-        PYTHON_FILE="src/main.py"
-        chmod +x "$PYTHON_FILE"
-
-        # Copy the binary to the bin directory
-        cp "$PYTHON_FILE" "$BIN_DIR/$task.py"
+    elif ls src/*.py >/dev/null 2>&1; then
+        for python_file in src/*.py; do
+            filename=$(basename "$python_file" .py)
+            echo "Python task: $task.$filename"
+            # Make the Python file executable
+            chmod +x "$python_file"
+            # Copy the binary to the bin directory
+            cp "$python_file" "$BIN_DIR/$filename.py"
+        done
     else
         echo "Unknown task type for: $task. Skipping."
     fi
-    
 done
