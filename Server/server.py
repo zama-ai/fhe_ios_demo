@@ -248,7 +248,7 @@ def list_current_tasks() -> List[Dict]:
 
 @app.get("/get_task_status")
 def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)) -> Dict:
-    """Retrieves the status of a Celery task by its task ID.
+    """Retrieves the status of a Celery task by its task ID and UID.
 
     If no valid `task_id` and `uid` are provided, returns an "unknown" status with details.
 
@@ -453,7 +453,7 @@ async def get_task_result(
     task_id: str = Depends(get_task_id),
     uid: str = Depends(get_uid),
 ):
-    """Retrieves the final result of a completed task, returning it based on configuration.
+    """Retrieves the final result of a completed task.
 
     Args:
         task_name (str): The name of the task.

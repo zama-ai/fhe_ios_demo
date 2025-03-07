@@ -18,22 +18,22 @@ echo "=============="
 for task in $TASKS; do
     cd "/build/$TASKS_DIR/$task"
 
-    # # Rust task
-    # if [ -f "Cargo.toml" ]; then
+    # Rust task
+    if [ -f "Cargo.toml" ]; then
 
-    #     echo "Building Rust task: $task"
+        echo "Building Rust task: $task"
 
-    #     # Build the Rust task
-    #     cargo build --release
+        # Build the Rust task
+        cargo build --release
 
-    #     # Determine binary name from the task directory name
-    #     BINARY_NAME="$task"
+        # Determine binary name from the task directory name
+        BINARY_NAME="$task"
         
-    #     # Copy the binary to the bin directory
-    #     cp "target/release/$BINARY_NAME" "$BIN_DIR/"
+        # Copy the binary to the bin directory
+        cp "target/release/$BINARY_NAME" "$BIN_DIR/"
         
     # Python task
-    if ls src/*.py >/dev/null 2>&1; then
+    elif ls src/*.py >/dev/null 2>&1; then
         for python_file in src/*.py; do
             filename=$(basename "$python_file" .py)
             echo "Python task: $task.$filename"
