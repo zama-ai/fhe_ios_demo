@@ -12,20 +12,14 @@ extension SocialTimeline {
         static private let adFrequency = 2 // Show an ad every 3 posts
         static private let adsLimit = 5 // Show top 5 ads
         
-        private var uid: String? {
-            get { return UserDefaults.standard.string(forKey: "uid") }
-            set { UserDefaults.standard.set(newValue, forKey: "uid") }
-        }
+        @UserDefaultsStorage(key: "uid", defaultValue: nil)
+        private var uid: String?
 
-        private var taskID: String? {
-            get { return UserDefaults.standard.string(forKey: "taskID") }
-            set { UserDefaults.standard.set(newValue, forKey: "taskID") }
-        }
+        @UserDefaultsStorage(key: "taskID", defaultValue: nil)
+        private var taskID: String?
 
-        static private var profileHash: String? {
-            get { return UserDefaults.standard.string(forKey: "profileHash") }
-            set { UserDefaults.standard.set(newValue, forKey: "profileHash") }
-        }
+        @UserDefaultsStorage(key: "profileHash", defaultValue: nil)
+        static private var profileHash: String?
 
         init() {
             self.items = Self.generateItems(profileHash: Self.profileHash)
@@ -88,7 +82,7 @@ extension SocialTimeline {
             self.items = Self.generateItems(profileHash: profileHash)
         }
                 
-        func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
+        private func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
             self.activityReport = .progress("\(name)…")
             do {
                 try await block()

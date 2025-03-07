@@ -3,11 +3,11 @@
 import SwiftUI
 
 #Preview {
-    MainTabs()
+    HealthRoot()
 }
 
-struct MainTabs: View {
-    @State private var selectedTab: HealthTab = .home
+struct HealthRoot: View {
+    @State private var selectedTab: HealthTab = .sleep
 
     var body: some View {
         TabView(selection: $selectedTab) {

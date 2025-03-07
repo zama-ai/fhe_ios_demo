@@ -10,13 +10,13 @@
 		3217EE212D75E6FC002EB4E6 /* ConcreteMLExtensions.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */; };
 		3217EE242D75E707002EB4E6 /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */; };
 		322658962D6E20AD004BB59A /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32543D8C2D47EFA4007600B2 /* QuickLook.framework */; };
-		322658A22D6E20AD004BB59A /* AdsQLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 322658952D6E20AD004BB59A /* AdsQLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		322658A22D6E20AD004BB59A /* QLAdsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 322658952D6E20AD004BB59A /* QLAdsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3226D94C2D38168D00595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
 		3226D9512D3816A500595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
 		322B62082D72210F009881A9 /* ConcreteMLExtensions.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */; };
 		322B62092D72210F009881A9 /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */; };
 		322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 322E72BA2CC9A636009B2530 /* Algorithms */; };
-		324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		324F8E2A2CA43B2100F0BB11 /* QLHealthExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* QLHealthExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		32543D8D2D47EFA4007600B2 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32543D8C2D47EFA4007600B2 /* QuickLook.framework */; };
 /* End PBXBuildFile section */
 
@@ -44,8 +44,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				324F8E2A2CA43B2100F0BB11 /* FHE QuickLookExtension.appex in Embed Foundation Extensions */,
-				322658A22D6E20AD004BB59A /* AdsQLExtension.appex in Embed Foundation Extensions */,
+				324F8E2A2CA43B2100F0BB11 /* QLHealthExtension.appex in Embed Foundation Extensions */,
+				322658A22D6E20AD004BB59A /* QLAdsExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -53,12 +53,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		320AC0A52D75E7E00009AA20 /* DesignPlayground.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DesignPlayground.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		322658952D6E20AD004BB59A /* AdsQLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AdsQLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		322658952D6E20AD004BB59A /* QLAdsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLAdsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3226D94B2D38168D00595BBC /* TFHE.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TFHE.xcframework; path = Frameworks/TFHE.xcframework; sourceTree = "<group>"; };
 		3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ConcreteMLExtensions.xcframework; path = Frameworks/ConcreteMLExtensions.xcframework; sourceTree = "<group>"; };
 		3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = concrete_ml_extensions.swift; path = Frameworks/concrete_ml_extensions.swift; sourceTree = "<group>"; };
-		324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "FHE QuickLookExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		324F8E1D2CA43B2100F0BB11 /* QLHealthExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLHealthExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		32543D8C2D47EFA4007600B2 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 		328F5CB32D009CA800D7B219 /* FHE Ads.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FHE Ads.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B258372C98693800538B23 /* ZAMA Data Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ZAMA Data Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -114,6 +113,7 @@
 				Reusable/MeasureDuration.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
+				Reusable/UserDefaultsStorage.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
@@ -125,7 +125,7 @@
 			);
 			target = 32C9CC1F2CA565A100AEDA32 /* Health */;
 		};
-		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "HealthQLExtension" target */ = {
+		3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QLHealthExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Helpers-TFHE/CompactCiphertextList.swift",
@@ -146,9 +146,9 @@
 				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
 				ZamaUI/SharedAssets.xcassets,
 			);
-			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
+			target = 324F8E1C2CA43B2100F0BB11 /* QLHealthExtension */;
 		};
-		3226597E2D6E2C8F004BB59A /* Exceptions for "QLAdsExtension" folder in "AdsQLExtension" target */ = {
+		3226597E2D6E2C8F004BB59A /* Exceptions for "QLAdsExtension" folder in "QLAdsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: AppSupport/MainInterface.storyboard",
@@ -159,9 +159,9 @@
 				PreviewContent.swift,
 				PreviewVC.swift,
 			);
-			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
+			target = 322658942D6E20AD004BB59A /* QLAdsExtension */;
 		};
-		322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQLExtension" target */ = {
+		322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "QLAdsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Helpers-ConcreteML/ConcreteML.swift",
@@ -171,14 +171,14 @@
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
 				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
 			);
-			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
+			target = 322658942D6E20AD004BB59A /* QLAdsExtension */;
 		};
-		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QLHealthExtension" folder in "HealthQLExtension" target */ = {
+		324F8E2E2CA43B2100F0BB11 /* Exceptions for "QLHealthExtension" folder in "QLHealthExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AppSupport/Info.plist,
 			);
-			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
+			target = 324F8E1C2CA43B2100F0BB11 /* QLHealthExtension */;
 		};
 		328F5CC22D009FB200D7B219 /* Exceptions for "AdsApp" folder in "Ads" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -200,6 +200,7 @@
 				Reusable/MeasureDuration.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
+				Reusable/UserDefaultsStorage.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
@@ -237,8 +238,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				320C391B2CAAEEA200528366 /* Exceptions for "Shared" folder in "DataVault" target */,
-				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "HealthQLExtension" target */,
-				322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "AdsQLExtension" target */,
+				3211F7F32CAAFC4900DC496A /* Exceptions for "Shared" folder in "QLHealthExtension" target */,
+				322659832D6E2F50004BB59A /* Exceptions for "Shared" folder in "QLAdsExtension" target */,
 				320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */,
 				328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */,
 			);
@@ -253,7 +254,7 @@
 		3226587F2D6E1EFE004BB59A /* QLAdsExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3226597E2D6E2C8F004BB59A /* Exceptions for "QLAdsExtension" folder in "AdsQLExtension" target */,
+				3226597E2D6E2C8F004BB59A /* Exceptions for "QLAdsExtension" folder in "QLAdsExtension" target */,
 			);
 			explicitFolders = (
 				AdImages,
@@ -264,7 +265,7 @@
 		324F8E1F2CA43B2100F0BB11 /* QLHealthExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QLHealthExtension" folder in "HealthQLExtension" target */,
+				324F8E2E2CA43B2100F0BB11 /* Exceptions for "QLHealthExtension" folder in "QLHealthExtension" target */,
 			);
 			path = QLHealthExtension;
 			sourceTree = "<group>";
@@ -296,13 +297,6 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		320AC0A22D75E7E00009AA20 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		322658922D6E20AD004BB59A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -380,11 +374,10 @@
 			isa = PBXGroup;
 			children = (
 				32B258372C98693800538B23 /* ZAMA Data Vault.app */,
-				324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */,
+				324F8E1D2CA43B2100F0BB11 /* QLHealthExtension.appex */,
 				32C9CC202CA565A100AEDA32 /* FHE Health.app */,
 				328F5CB32D009CA800D7B219 /* FHE Ads.app */,
-				322658952D6E20AD004BB59A /* AdsQLExtension.appex */,
-				320AC0A52D75E7E00009AA20 /* DesignPlayground.app */,
+				322658952D6E20AD004BB59A /* QLAdsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -392,28 +385,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		320AC0A42D75E7E00009AA20 /* DesignPlayground */ = {
+		322658942D6E20AD004BB59A /* QLAdsExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 320AC0B32D75E7E10009AA20 /* Build configuration list for PBXNativeTarget "DesignPlayground" */;
-			buildPhases = (
-				320AC0A12D75E7E00009AA20 /* Sources */,
-				320AC0A22D75E7E00009AA20 /* Frameworks */,
-				320AC0A32D75E7E00009AA20 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = DesignPlayground;
-			packageProductDependencies = (
-			);
-			productName = DesignPlayground;
-			productReference = 320AC0A52D75E7E00009AA20 /* DesignPlayground.app */;
-			productType = "com.apple.product-type.application";
-		};
-		322658942D6E20AD004BB59A /* AdsQLExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "AdsQLExtension" */;
+			buildConfigurationList = 322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "QLAdsExtension" */;
 			buildPhases = (
 				322658912D6E20AD004BB59A /* Sources */,
 				322658922D6E20AD004BB59A /* Frameworks */,
@@ -423,16 +397,16 @@
 			);
 			dependencies = (
 			);
-			name = AdsQLExtension;
+			name = QLAdsExtension;
 			packageProductDependencies = (
 			);
 			productName = TestQuickLookExtension;
-			productReference = 322658952D6E20AD004BB59A /* AdsQLExtension.appex */;
+			productReference = 322658952D6E20AD004BB59A /* QLAdsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */ = {
+		324F8E1C2CA43B2100F0BB11 /* QLHealthExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "HealthQLExtension" */;
+			buildConfigurationList = 324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "QLHealthExtension" */;
 			buildPhases = (
 				324F8E192CA43B2100F0BB11 /* Sources */,
 				324F8E1A2CA43B2100F0BB11 /* Frameworks */,
@@ -445,11 +419,11 @@
 			fileSystemSynchronizedGroups = (
 				324F8E1F2CA43B2100F0BB11 /* QLHealthExtension */,
 			);
-			name = HealthQLExtension;
+			name = QLHealthExtension;
 			packageProductDependencies = (
 			);
 			productName = QuickLookExtension;
-			productReference = 324F8E1D2CA43B2100F0BB11 /* FHE QuickLookExtension.appex */;
+			productReference = 324F8E1D2CA43B2100F0BB11 /* QLHealthExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		328F5CB22D009CA800D7B219 /* Ads */ = {
@@ -533,9 +507,6 @@
 				LastUpgradeCheck = 1620;
 				ORGANIZATIONNAME = Zama;
 				TargetAttributes = {
-					320AC0A42D75E7E00009AA20 = {
-						CreatedOnToolsVersion = 16.2;
-					};
 					322658942D6E20AD004BB59A = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -571,23 +542,15 @@
 			projectRoot = "";
 			targets = (
 				32B258362C98693800538B23 /* DataVault */,
-				324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */,
-				322658942D6E20AD004BB59A /* AdsQLExtension */,
+				324F8E1C2CA43B2100F0BB11 /* QLHealthExtension */,
+				322658942D6E20AD004BB59A /* QLAdsExtension */,
 				32C9CC1F2CA565A100AEDA32 /* Health */,
 				328F5CB22D009CA800D7B219 /* Ads */,
-				320AC0A42D75E7E00009AA20 /* DesignPlayground */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		320AC0A32D75E7E00009AA20 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		322658932D6E20AD004BB59A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -626,13 +589,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		320AC0A12D75E7E00009AA20 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		322658912D6E20AD004BB59A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -675,107 +631,27 @@
 /* Begin PBXTargetDependency section */
 		322658A12D6E20AD004BB59A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 322658942D6E20AD004BB59A /* AdsQLExtension */;
+			target = 322658942D6E20AD004BB59A /* QLAdsExtension */;
 			targetProxy = 322658A02D6E20AD004BB59A /* PBXContainerItemProxy */;
 		};
 		324F8E292CA43B2100F0BB11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 324F8E1C2CA43B2100F0BB11 /* HealthQLExtension */;
+			target = 324F8E1C2CA43B2100F0BB11 /* QLHealthExtension */;
 			targetProxy = 324F8E282CA43B2100F0BB11 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		320AC0B12D75E7E10009AA20 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = DesignPlayground/DesignPlayground.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"DesignPlayground/Preview Content\"";
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.DesignPlayground;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 2.2;
-			};
-			name = Debug;
-		};
-		320AC0B22D75E7E10009AA20 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = DesignPlayground/DesignPlayground.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"DesignPlayground/Preview Content\"";
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
-				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.DesignPlayground;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 2.2;
-			};
-			name = Release;
-		};
 		322658A42D6E20AD004BB59A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = AdsQLExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QLAdsExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AdsQLExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AdsQLExtension;
+				INFOPLIST_FILE = QLAdsExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -795,13 +671,13 @@
 		322658A52D6E20AD004BB59A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = AdsQLExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QLAdsExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AdsQLExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AdsQLExtension;
+				INFOPLIST_FILE = QLAdsExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -821,14 +697,14 @@
 		324F8E2C2CA43B2100F0BB11 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = HealthQLExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QLHealthExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HealthQLExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HealthQLExtension;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Zama. All rights reserved.";
+				INFOPLIST_FILE = QLHealthExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -836,7 +712,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault.quickLookExtension;
-				PRODUCT_NAME = "FHE QuickLookExtension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -847,14 +723,14 @@
 		324F8E2D2CA43B2100F0BB11 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = HealthQLExtension/AppSupport/Entitlements.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QLHealthExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = HealthQLExtension/AppSupport/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HealthQLExtension;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Zama. All rights reserved.";
+				INFOPLIST_FILE = QLHealthExtension/AppSupport/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Zama. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -862,7 +738,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.datavault.quickLookExtension;
-				PRODUCT_NAME = "FHE QuickLookExtension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1192,16 +1068,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		320AC0B32D75E7E10009AA20 /* Build configuration list for PBXNativeTarget "DesignPlayground" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				320AC0B12D75E7E10009AA20 /* Debug */,
-				320AC0B22D75E7E10009AA20 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "AdsQLExtension" */ = {
+		322658A32D6E20AD004BB59A /* Build configuration list for PBXNativeTarget "QLAdsExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				322658A42D6E20AD004BB59A /* Debug */,
@@ -1210,7 +1077,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "HealthQLExtension" */ = {
+		324F8E2B2CA43B2100F0BB11 /* Build configuration list for PBXNativeTarget "QLHealthExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				324F8E2C2CA43B2100F0BB11 /* Debug */,

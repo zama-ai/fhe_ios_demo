@@ -10,7 +10,7 @@ struct OnAppearAgainModifier: ViewModifier {
         content
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {
-                    action() // When coming back from background
+                    action() // When coming back from background (or inactive state)
                 }
             }
             .onAppear()

@@ -23,16 +23,19 @@ extension HealthView {
             weightResultAvg = await Storage.read(.weightAvg)
         }
         
+        @UserDefaultsStorage(key: "uid", defaultValue: nil)
+        private var uid: String?
+
         func getUserID(for task: Network.ServerTask) async throws -> String {
             guard let serverKey = await Storage.read(.serverKey) else {
                 throw NetworkingError.message("Server key missing")
             }
             
-            if let uid = UserDefaults.standard.string(forKey: "uid") {
+            if let uid {
                 return uid
             } else {
                 let new = try await Network.shared.uploadServerKey(serverKey, for: task)
-                UserDefaults.standard.set(new, forKey: "uid")
+                self.uid = new
                 return new
             }
         }

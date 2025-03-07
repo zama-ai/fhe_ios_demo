@@ -55,10 +55,7 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         case .int8:
             let encrypted = try FHEUInt8(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
-            viewModel.data = .gauge(value: clearInt,
-                                    range: 1...5,
-                                    title: "Sleep Quality",
-                                    labels: ["Excellent", "Good", "Average", "Poor", "Awful"])
+            viewModel.data = .gauge(value: clearInt)
             
         case .int16:
             let encrypted = try FHEUInt16(fromData: data)
