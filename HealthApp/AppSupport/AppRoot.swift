@@ -6,8 +6,7 @@ import SwiftUI
 struct HealthApp: App {
     var body: some Scene {
         WindowGroup {
-            //HealthView()
-            MainTabs()
+            HealthRoot()
         }
     }
 }

@@ -17,8 +17,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "322658942D6E20AD004BB59A"
-               BuildableName = "AdsQLExtension.appex"
-               BlueprintName = "AdsQLExtension"
+               BuildableName = "QLAdsExtension.appex"
+               BlueprintName = "QLAdsExtension"
                ReferencedContainer = "container:FHEDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

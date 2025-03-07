@@ -4,7 +4,7 @@ import SwiftUI
 import Charts
 
 #Preview {
-    let vm = PreviewContent.ViewModel(data: .gauge(value: 3, range: 1...5, title: "Sleep Quality", labels: ["Excellent", "Good", "Average", "Poor", "Awful"]))
+    let vm = PreviewContent.ViewModel(data: .gauge(value: 3))
     PreviewContent(viewModel: vm)
         .border(.red)
         .border(.green)
@@ -23,15 +23,15 @@ struct PreviewContent: View {
     
     enum Kind {
         case text(value: Double)
-        case gauge(value: Int, range: ClosedRange<Int>, title: String, labels: [String])
+        case gauge(value: Int)
         case simpleChart([Double])
         case sleepChart([Sleep.Sample])
     }
     
     var body: some View {
         switch viewModel.data {
-        case let .gauge(value, range, title, labels):
-            gauge(value: value, range: range, title: title, labels: labels)
+        case let .gauge(value):
+            SleepQualityView(quality: SleepQuality(rawValue: value)!)
             
         case .text(let value):
             text(value: value)
