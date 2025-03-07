@@ -3,6 +3,7 @@
 We use Celery for asynchronous processing (polling approach).
 
 Routes:
+    - /logs
     - /add_key
     - /get_use_cases
     - /start_task  

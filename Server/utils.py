@@ -17,7 +17,6 @@ ENV_FILE = os.getenv("ENV_FILE")
 load_dotenv(dotenv_path=ENV_FILE)
 
 env_values = dotenv_values(ENV_FILE)
-print(f"📜 Loaded values: {env_values}")
 
 URL = os.getenv("URL")
 CONTAINER_PORT = os.getenv("FASTAPI_CONTAINER_PORT_HTTPS")
@@ -180,7 +179,7 @@ try:
     with open(CONFIG_FILE, "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
         use_cases = config.get("tasks", {})
-    logger.info("📁 Successfully loaded configuration from `%s`", CONFIG_FILE)
+    logger.debug("📁 Successfully loaded configuration from `%s`", CONFIG_FILE)
 except Exception as e:
     logger.error("❌ Failed to load configuration file `%s`: `%s`", CONFIG_FILE, e)
     raise e
