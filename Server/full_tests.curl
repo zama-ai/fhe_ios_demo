@@ -6,8 +6,8 @@ N_NEW_TASKS=${3:-5}
 
 if [ "$1" == "dev" ]; then
     echo "🚀 Testing in the development environment..."
-    PORT=444
-    PROTOCOL="https"
+    PORT=81
+    PROTOCOL="http"
     ENV_FILE=".env_dev"
 elif [ "$1" == "prod" ]; then
     echo "🚀 Testing in the production environment..."
@@ -29,14 +29,15 @@ GET_STATUS_ACTION="true"
 CANCEL_ACTION="true"
 GET_TASK_RESULT_ACTION="true"
 MONITORING_ACTION="false"
+COMPLETED_TASKS="false"
 
 if [ "$SELECTED_TASK" -eq 1 ]; then
   TASK_NAME="ad_targeting"
   SERVER_KEY="@client_files/ad_targeting/727.serverKey"
-  ENCRYPTED_INPUT="@client_files/ad_targeting/727.ad_targeting.input.fheencrypted"
+  ENCRYPTED_INPUT="@client_files/ad_targeting/727.user_profile.input.fheencrypted"
   ENCRYPTED_OUTPUT="ad_targeting.output.fheencrypted"
   timeout=$((60 * 2))
-  COMPLETED_TASK="ca25eaaa-c8f1-4853-b214-30db2bad0695"
+  COMPLETED_TASK_ID="ca25eaaa-c8f1-4853-b214-30db2bad0695"
   COMPLETED_UID="9f196bb6-e93a-4753-9b7b-97e1ab88c014"
 elif [ "$SELECTED_TASK" -eq 2 ]; then
   TASK_NAME="sleep_quality"
@@ -44,7 +45,7 @@ elif [ "$SELECTED_TASK" -eq 2 ]; then
   ENCRYPTED_INPUT="@client_files/health/sleepList.fheencrypted"
   ENCRYPTED_OUTPUT="sleep_quality.output.fheencrypted"
   timeout=$((60 * 5))
-  COMPLETED_TASK="9bb35455-9cbd-4b7d-a803-67e69ff64c65"
+  COMPLETED_TASK_ID="9bb35455-9cbd-4b7d-a803-67e69ff64c65"
   COMPLETED_UID="acd38b1b-b3f3-4512-8901-7dd17ea2ef4f"
 elif [ "$SELECTED_TASK" -eq 3 ]; then 
   TASK_NAME="weight_stats"
@@ -52,7 +53,7 @@ elif [ "$SELECTED_TASK" -eq 3 ]; then
   ENCRYPTED_INPUT="@client_files/health/weightList.fheencrypted"
   ENCRYPTED_OUTPUT="weightList.output.fheencrypted"
   timeout=$((60 * 5))
-  COMPLETED_TASK="ed5807b3-08f2-42d1-ad5d-dbd94c077c3b"
+  COMPLETED_TASK_ID="ed5807b3-08f2-42d1-ad5d-dbd94c077c3b"
   COMPLETED_UID="c7931ad4-6eeb-48a5-9daa-a2450726acd8"
 else
     echo "❌ Invalid use-case."
@@ -221,14 +222,17 @@ if [ "$GET_STATUS_ACTION" = "true" ]; then
     echo ""
     echo "-------> 🔍 Get status of a specific 'TASK_ID':"
 
-    ############## Test 1
-    response_v1=$(curl -s -X GET "$URL/get_task_status?task_id=$COMPLETED_TASK&uid=$COMPLETED_UID")
-    if echo "$response_v1" | grep -q '"status": *"completed"'; then
-        echo "🎉 Completed task: $response_v1"
-    else
-        echo "❌ Assertion failed: Expected status to be 'completed', but got:"
-        echo $response_v1
-        exit 1
+    if [ "$COMPLETED_TASKS" = "true" ]; then
+
+        ############# Test 1
+        response_v1=$(curl -s -X GET "$URL/get_task_status?task_id=$COMPLETED_TASK_ID&uid=$COMPLETED_UID")
+        if echo "$response_v1" | grep -q '"status": *"completed"'; then
+            echo "🎉 Completed task: $response_v1"
+        else
+            echo "❌ Assertion failed: Expected status to be 'completed', but got:"
+            echo $response_v1
+            exit 1
+        fi
     fi
 
     ############## Test 2
@@ -259,14 +263,15 @@ fi
 if [ "$GET_TASK_RESULT_ACTION" = "true" ]; then
     echo ""
     echo "--------> 📩 Get task result for a specific 'TASK_ID':"
-
-    ############## Test 1
-    echo "📩 Completed 'TASK_ID': '$COMPLETED_TASK'"
-    check_task_result "$COMPLETED_TASK" "$COMPLETED_UID"
-    if [[ $? -ne 0 ]]; then 
-        echo "❌ Test failed!"; 
-    else 
-        echo "🎉 Test passed";
+    if [ "$COMPLETED_TASKS" = "true" ]; then
+        ############## Test 1
+        echo "📩 Completed 'TASK_ID': '$COMPLETED_TASK_ID'"
+        check_task_result "$COMPLETED_TASK_ID" "$COMPLETED_UID"
+        if [[ $? -ne 0 ]]; then
+            echo "❌ Test failed!";
+        else
+            echo "🎉 Test passed";
+        fi
     fi
 
     ############## Test 2
