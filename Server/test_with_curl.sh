@@ -4,23 +4,15 @@ ENV=${1:-"prod"}
 SELECTED_TASK=${2:-2}
 N_NEW_TASKS=${3:-5}
 
-if [ "$1" == "dev" ]; then
-    echo "🚀 Testing in the development environment..."
-    PORT=81
-    PROTOCOL="http"
-    ENV_FILE=".env_dev"
-elif [ "$1" == "prod" ]; then
-    echo "🚀 Testing in the production environment..."
-    PORT=443
-    PROTOCOL="https"
-    ENV_FILE=".env_prod"
-fi 
+# Setup environment depending on the first argument
+source setup_env.sh
 
-# Load variables from '.env'
-if [ -f $ENV_FILE ]; then
-    set -o allexport  # Enables automatic export of variables
-    source $ENV_FILE  # Loads the .env file
-    set +o allexport  # Disables automatic export
+if [ "$USE_TLS" = "true" ]; then
+    PROTOCOL="https"
+    PORT=$FASTAPI_HOST_PORT_HTTPS
+else
+    PROTOCOL="http"
+    PORT=$FASTAPI_HOST_PORT_HTTP
 fi
 
 URL="$PROTOCOL://$DOMAIN_NAME:$PORT"
@@ -181,7 +173,7 @@ if [[ -n "$response" && "$response" != "[]" ]] && echo "$response" | jq empty 2>
     fi
 else
     echo "⚠️ No tasks available."
-    return 1
+    exit 1
 fi
 
 # Cancel task

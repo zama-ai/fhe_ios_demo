@@ -4,7 +4,6 @@ on: [pull_request]
 
 env:
   CARGO_TERM_COLOR: always
-  SLAB_PROFILE: single-t4-gpu
 
 jobs:
   build-ios:
@@ -24,3 +23,30 @@ jobs:
       - name: Install Swift Rust targets
         run: |
           ./setup_tfhe_xcframework.sh
+
+  build-server:
+    name: Build server docker
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Setup docker build config
+        run: |
+          cd Server
+          source common.env
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          context: Server
+          file: Server/Dockerfile.server
+          tags: zama-ios-apps:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
