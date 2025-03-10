@@ -23,17 +23,11 @@ if [ -f $ENV_FILE ]; then
     set +o allexport  # Disables automatic export
 fi
 
-for arg in "$@"; do
-    case "$arg" in
-        --rebuild-rust)
-            REBUILD_RUST=true
-            ;;
-    esac
-done
-
 # Check for certbot
 if ! command -v certbot &> /dev/null; then
     echo "Certbot is not installed. Please install it and try again."
+    echo "sudo apt-get update"
+    echo "sudo apt install certbot"
     exit 1
 fi
 
@@ -83,6 +77,28 @@ else
     echo "SSL Certificates for '$DOMAIN_NAME' already exist in '$HOST_CERTS_PATH'."
 fi
 
+# Check permissions on the directory
+if [ ! -r "$HOST_CERTS_PATH" ] || [ ! -x "$HOST_CERTS_PATH" ]; then
+    echo "Error: Insufficient permissions on '$HOST_CERTS_PATH'."
+    echo "Try running:"
+    echo "sudo chmod -R 755 $HOST_CERTS_PATH"
+fi
+
+# Check for docker-compose
+if ! command -v docker-compose &> /dev/null; then
+    echo "docker-compose is not installed. Please install it and try again."
+    echo "sudo apt update"
+    echo "sudo apt install docker-compose"
+    exit 1
+fi
+
+# Ensure necessary directories exist on the host before launching Docker
+for dir in "$SHARED_DIR" "$BACKUP_DIR"; do
+    mkdir -p "$dir"
+    sudo chown -R 10000:10001 "$dir"
+    echo "Set correct permissions to '$dir' directory."
+done
+
 # Clean up existing containers
 echo "Cleaning up existing containers..."
 # With `docker-compose down,` Docker Compose tries to delete the network associated with 
@@ -94,13 +110,16 @@ docker system prune -a -f
 # Build the Rust stage if needed
 if $REBUILD_RUST; then
     echo "Building Rust stage..."
-    docker build --target rust-builder -t $RUST_IMAGE_NAME -f $DOCKERFILE_NAME .
+    docker build --target rust-builder -t "$RUST_IMAGE_NAME" -f "$DOCKERFILE_NAME" .
+
 fi
 
 # Build the Docker image and starting the Docker containers
 echo "Building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_FILENAME'..."
-docker-compose -p "$COMPOSE_PROJECT_NAME" build --no-cache
+docker build -t "$FINAL_IMAGE:latest" -f "$DOCKERFILE_NAME" "$DOCKERFILE_LOCATION" --no-cache
+
 docker-compose -p "$COMPOSE_PROJECT_NAME" up -d \
-  --scale service_celery_usecases=$CELERY_WORKER_COUNT_USECASE_QUEUE \
-  --scale service_celery_ads=$CELERY_WORKER_COUNT_AD_QUEUE
-docker-compose -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f
+    --scale service_celery_usecases="$CELERY_WORKER_COUNT_USECASE_QUEUE" \
+    --scale service_celery_ads="$CELERY_WORKER_COUNT_AD_QUEUE"
+
+docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f
