@@ -1,0 +1,26 @@
+name: iOS App tests
+
+on: [pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+  SLAB_PROFILE: single-t4-gpu
+
+jobs:
+  build-ios:
+    name: Build For iOS on macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Install latest stable
+        uses: dtolnay/rust-toolchain@315e265cd78dad1e1dcf3a5074f6d6c47029d5aa
+        with:
+          toolchain: stable
+
+      - name: Install Swift Rust targets
+        run: |
+          ./setup_tfhe_xcframework.sh
