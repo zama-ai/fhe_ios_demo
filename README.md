@@ -85,7 +85,7 @@ Instead of building the `TFHE.xcframework` from scratch, you can use a previousl
 
 # Compiling the Data Vault and end-user application
 
-TODO
+Now you can open your Xcode IDE, open this directory and start building the apps.
 
 # End-user Application Server
 This repo also contains the backend implementations of the end-user applications. See the [server readme](Server/README.md) for more details on how to run these backends. 
