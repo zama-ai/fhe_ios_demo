@@ -158,6 +158,17 @@ def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
     return data
 
 
+def get_id_prefix(_id: str) -> str:
+    """Returns the first part of an identifier.
+
+    Args:
+        _id (str): A hyphen-separated identifier.
+
+    Returns:
+        str: The first segment of `_id` before the first hyphen.
+    """
+    return _id.split('-')[0] if _id is not None else None
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
