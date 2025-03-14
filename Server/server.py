@@ -162,7 +162,7 @@ async def start_task(
         # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue.
         task = run_binary_task.delay(binary, uid, task_name)
         task_logger.info(
-            f"🚀 Task started [task_id=`{task.id}`] for task_name=`{task_name}` and UID=`{uid}`"
+            f"🚀 Task started [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`"
         )
         task_logger.debug(
             f"📁 Saved encrypted input file to `{input_file_path} `(Size: `{file_size}` bytes)"
@@ -213,16 +213,12 @@ def list_current_tasks() -> List[Dict]:
                     "task_id": t.get("id"),
                     "status": state,
                     "worker": worker_name,
-                    # "name": t.get("name"),
-                    # "args": t.get("args"),
                 }
                 if state == "scheduled":
                     request_info = t.get("request", {})
                     task_info.update(
                         {
                             "task_id": request_info.get("id"),
-                            # "name": request_info.get("name"),
-                            # "args": request_info.get("args"),
                         }
                     )
                 all_tasks.append(task_info)
@@ -303,7 +299,6 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     result = AsyncResult(task_id, app=celery_app)
     status = result.state.lower()
     
-    print(f"------> Current status = {status}")
     logger.debug(f"------> Current status = {status}")
 
     if status in ["started"]:
@@ -383,7 +378,7 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
             )
 
     logger.info(
-        f"🔍 Status [task_id=`{response['task_id']}`]: {response['status'].upper()} | {response['details']} | {response['worker']}"
+        f"🔍 Status [task_id=`{get_id_prefix(response['task_id'])}` - uid=`{get_id_prefix(response['uid'])}` ]: {response['status'].upper()} | {response['details']} | {response['worker']}"
     )
 
     return response
@@ -410,7 +405,7 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
 
     if initial_status in NON_CANCELLABLE_STATUSES:
         logger.warning(
-            "⚠️ Cannot cancel task ID [task_id=`%s`] (already finished or unknown).", task_id
+            "⚠️ Cannot cancel task ID [task_id=`%s` - uid=`%s`] (already finished or unknown).", task_id, uid,
         )
         return {
             "task_id": task_id,
@@ -425,7 +420,7 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
     try:
         celery_app.control.revoke(task_id, terminate=True, signal="SIGKILL")
     except Exception as e:
-        error_message = f"❌ Failed to revoke TASK_ID `{task_id}`: {e}."
+        error_message = f"❌ Failed to revoke TASK_ID `{task_id}` - uid `{uid}`: {e}."
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
@@ -443,7 +438,7 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
         "details": "Successfully cancelled the task.",
     }
     
-    logger.info(f"🚫 Task Cancelled: [task_id=`{task_id}`] | Previous Status=`{initial_status}` → New Status=`{new_status}` | Details: {updated_status['details']}")
+    logger.info(f"🚫 Task Cancelled: [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] | Previous Status=`{initial_status}` → New Status=`{new_status}` | Details: {updated_status['details']}")
 
     return updated_status
 
@@ -485,7 +480,7 @@ async def get_task_result(
     status = get_task_status(task_id, uid)
 
     if status.get("status") == "started":
-        logger.info("📩 [task_id=`%s`] is still in progress. Please wait before attempting to retrieve the result.", task_id)
+        logger.info("📩 [task_id=`%s` - uid=`%s`] is still in progress. Please wait before attempting to retrieve the result.", get_id_prefix(task_id), get_id_prefix(uid))
         return JSONResponse(
             content=status,
             status_code=200,
@@ -493,7 +488,7 @@ async def get_task_result(
         )
 
     if status.get("status") in ["pending", "failure", "revoked", "unknown", "error", "queue", "queued"]:
-        logger.info("📩 [task_id=`%s`] not started.", task_id) 
+        logger.info("📩 [task_id=`%s` - uid=`%s`] not started.", get_id_prefix(task_id), get_id_prefix(uid))
         return JSONResponse(
             content=status,
             status_code=200,
@@ -507,17 +502,17 @@ async def get_task_result(
         )
 
     if status.get("status") == "completed":
-        logger.info("🎉 [task_id=`%s`] already completed.", task_id)
+        logger.info("🎉 [task_id=`%s` - uid=`%s`] already completed.", get_id_prefix(task_id), get_id_prefix(uid))
         backup = False  # No need for a backup if already completed
 
     elif status.get("status") == "success":
-        logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+        logger.info("🎉 [task_id=`%s` - uid=`%s`] successfully completed.", get_id_prefix(task_id), get_id_prefix(uid))
         celery_result = AsyncResult(task_id, app=celery_app)
         outcome_celery = celery_result.result
         stderr_output = outcome_celery.get("stderr", "")
         backup = True
     else:
-        error_message = f"🚨 [task_id=`{task_id}`] has an undefined state (`{status}`)."
+        error_message = f"🚨 [task_id=`{task_id}` - uid=`{uid}`] has an undefined state (`{status}`)."
         logger.info(error_message)
         raise HTTPException(status_code=500, detail=error_message)
     
@@ -533,9 +528,9 @@ async def get_task_result(
         data = fetch_file_content(output_file_path, task_id, backup=backup)
         
         if backup:
-            task_logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+            task_logger.info("🎉 [task_id=`%s` - uid=`%s`] successfully completed.", get_id_prefix(task_id), get_id_prefix(uid))
         else:
-            task_logger.info("📜 [task_id=`%s`] already complete (Size: `%s`)", task_id, len(data))
+            task_logger.info("📜 [task_id=`%s` - uid=`%s`] already complete (Size: `%s`)", get_id_prefix(task_id), get_id_prefix(uid), len(data))
 
         task_logger.debug(f"Returning STREM response for task '{task_name}'")
 
@@ -580,9 +575,9 @@ async def get_task_result(
             )
 
         if backup:
-            task_logger.info("🎉 [task_id=`%s`] successfully completed.", task_id)
+            task_logger.info("🎉 [task_id=`%s` - uid=`%s`] successfully completed.", task_id, ui)
         else:
-            task_logger.info("📜 [task_id=`%s`] already complete (Size: `%s`)", task_id, len(data))
+            task_logger.info("📜 [task_id=`%s` - uid=`%s`] already complete (Size: `%s`)", task_id, uid, len(data))
 
         task_logger.debug(f"Returning JSON response for task '{task_name}'")
         

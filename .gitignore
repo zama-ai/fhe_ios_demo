@@ -64,3 +64,4 @@ Server/client_files/*
 Server/uploaded_files/*.serverKey
 Server/tasks/add_42/target
 Server/tasks/weight_stats/target
+Server/secrets.env
