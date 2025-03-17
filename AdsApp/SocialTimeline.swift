@@ -16,7 +16,12 @@ struct SocialTimeline: View {
                 .padding(.top, 8)
             
             if vm.dataVaultActionNeeded {
-                openDataVaultCard
+                OpenAppButton(.zamaDataVault(tab: .profile)) {
+                    Text("Import Infos from Zama Data Vault")
+                }
+                .buttonStyle(.zama)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
                     ForEach(vm.items) { item in
@@ -34,30 +39,13 @@ struct SocialTimeline: View {
         }
         .background(Color.zamaGreyBackground)
         .overlay(alignment: .topTrailing) {
-            ZamaLink()
+            if !vm.dataVaultActionNeeded {
+                ZamaLink()
+            }
         }
         .onAppearAgain {
             vm.refreshFromDisk()
         }
-    }
-    
-    private var openDataVaultCard: some View {
-        GroupBox {
-            ContentUnavailableView {
-                Label("No Profile Info", systemImage: "person.crop.circle.badge.exclamationmark.fill")
-                    .customFont(.title3)
-            } description: {
-                Text("Import encrypted profile info from Zama Data Vault.")
-                    .customFont(.callout)
-            } actions: {
-                OpenAppButton(.zamaDataVault(tab: .profile))
-                    .customFont(.callout)
-                    .foregroundStyle(.black)
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.roundedRectangle)
-            }
-        }
-        .padding()
     }
     
     private var titleBar: some View {
@@ -66,14 +54,16 @@ struct SocialTimeline: View {
                 .customFont(.largeTitle)
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .leading) {
-                    OpenAppButton(.zamaDataVault(tab: .profile)) {
+                    if !vm.dataVaultActionNeeded {
+                        OpenAppButton(.zamaDataVault(tab: .profile)) {
                             Image(systemName: "pencil.circle.fill")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 32, height: 32)
                                 .padding(8)
+                        }
+                        .tint(.black)
                     }
-                    .tint(.black)
                 }
             
             if let report = vm.activityReport {

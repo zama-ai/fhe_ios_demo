@@ -4,15 +4,15 @@ import SwiftUI
 
 #Preview {
     VStack {
-        Button("Foo") {}.buttonStyle(.custom)
-        Button("Foo") {}.buttonStyle(.custom).disabled(true)
+        Button("Foo") {}.buttonStyle(.zama)
+        Button("Foo") {}.buttonStyle(.zama).disabled(true)
 
         Button("Foo") {}.buttonStyle(.blackHighlight())
         Button("Foo") {}.buttonStyle(.blackHighlight()).disabled(true)
 
         AsyncButton(action: {}) {
             Label("Import Health Information", systemImage: "heart.text.clipboard")
-        }.buttonStyle(.custom)
+        }.buttonStyle(.zama)
         
         Spacer()
     }
@@ -20,7 +20,7 @@ import SwiftUI
     .background(Color.zamaYellowLight)
 }
 
-struct CustomButtonStyle: ButtonStyle {
+struct ZamaButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration config: Configuration) -> some View {
@@ -52,9 +52,9 @@ struct BlackHighlightButtonStyle: ButtonStyle {
 }
 
 
-extension ButtonStyle where Self == CustomButtonStyle {
-    static var custom: CustomButtonStyle {
-        CustomButtonStyle()
+extension ButtonStyle where Self == ZamaButtonStyle {
+    static var zama: ZamaButtonStyle {
+        ZamaButtonStyle()
     }
     
     static func blackHighlight(disabled: Bool = false) -> BlackHighlightButtonStyle {
