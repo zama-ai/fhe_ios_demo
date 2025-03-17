@@ -136,7 +136,7 @@ struct SocialTimeline: View {
     
     @ViewBuilder
     private func adView(position: Int, profileHash: String) -> some View {
-        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(position)-\(profileHash)"))
+        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(profileHash)-\(position)"))
             .frame(minHeight: 175)
             .overlay {
                 Color.white.opacity(0.01) // Hack to allow scrolling from this view
