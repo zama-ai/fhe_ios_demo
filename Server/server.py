@@ -575,7 +575,7 @@ async def get_task_result(
             )
 
         if backup:
-            task_logger.info("🎉 [task_id=`%s` - uid=`%s`] successfully completed.", task_id, ui)
+            task_logger.info("🎉 [task_id=`%s` - uid=`%s`] successfully completed.", task_id, uid)
         else:
             task_logger.info("📜 [task_id=`%s` - uid=`%s`] already complete (Size: `%s`)", task_id, uid, len(data))
 
