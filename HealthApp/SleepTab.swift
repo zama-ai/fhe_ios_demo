@@ -59,7 +59,7 @@ struct SleepTab: View {
             }
             .padding()
             .navigationTitleView("Sleep Analysis", icon: "bed.double.fill")
-            .buttonStyle(.custom)
+            .buttonStyle(.zama)
             .background(Color.zamaYellowLight)
             .onAppearAgain {
                 vm.refreshFromDisk()

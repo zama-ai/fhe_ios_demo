@@ -52,7 +52,7 @@ struct WeightTab: View {
             }
             .padding()
             .navigationTitleView("Weight Analysis", icon: "scalemass.fill")
-            .buttonStyle(.custom)
+            .buttonStyle(.zama)
             .background(Color.zamaYellowLight)
             .onAppearAgain {
                 vm.refreshFromDisk()
