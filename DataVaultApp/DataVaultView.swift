@@ -7,30 +7,13 @@ import SwiftUI
 }
 
 struct DataVaultView: View {
-    
-    struct Metric: Equatable {
-        let name: String
-        let icon: String
-        let color: Color
         
-        static let sleep: Metric = .init(name: "Sleep", icon: "bed.double.fill", color: .mint)
-        static let weight: Metric = .init(name: "Weight", icon: "figure", color: .purple)
-        static let profile: Metric = .init(name: "Profile", icon: "person.text.rectangle.fill", color: .teal)
-    }
-    
-    enum TabKind {
-        case sleep, weight, profile
-    }
-    
     @StateObject private var vm = ViewModel()
-    @State private var selectedTab: TabKind = .profile
+    @State private var selectedTab: DataVaultTab = .home
     
     var body: some View {
-        header
-        
         content
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.roundedRectangle)
+            .buttonStyle(.zama)
             .tint(.orange)
             .task {
                 do {
@@ -40,31 +23,38 @@ struct DataVaultView: View {
                 }
             }
     }
-    
-    private var header: some View {
-        VStack(spacing: 0) {
-            Text("Data Vault")
-                .customFont(.largeTitle)
-                .padding(.bottom)
-            
-            Text("Encrypt your information using Fully Homomorphic Encryption (FHE), to protect it when using other apps requiring these data.\n Powered by Zama (learn more on **[zama.ai](https://zama.ai)**)")
-                .customFont(.subheadline)
-                .multilineTextAlignment(.center)
-                .tint(.white)
-        }.padding()
-    }
-    
+        
     private var content: some View {
         TabView(selection: $selectedTab) {
-            Tab(Metric.sleep.name, systemImage: Metric.sleep.icon, value: TabKind.sleep) {
+            Tab(DataVaultTab.home.displayInfo.name, systemImage: DataVaultTab.home.displayInfo.icon, value: .home) {
+                HomeTab(selectedTab: $selectedTab)
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
+            }
+            
+            Tab(DataVaultTab.sleep.displayInfo.name, systemImage: DataVaultTab.sleep.displayInfo.icon, value: .sleep) {
               sleepSection
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
             }
-            Tab(Metric.weight.name, systemImage: Metric.weight.icon, value: TabKind.weight) {
+            Tab(DataVaultTab.weight.displayInfo.name, systemImage: DataVaultTab.weight.displayInfo.icon, value: .weight) {
               weightSection
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
             }
-            Tab(Metric.profile.name, systemImage: Metric.profile.icon, value: TabKind.profile) {
+            Tab(DataVaultTab.profile.displayInfo.name, systemImage: DataVaultTab.profile.displayInfo.icon, value: .profile) {
               profileSection
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
             }
+        }
+        .tint(.zamaYellow)
+        .background(Color.zamaGreyBackground)
+        .overlay(alignment: .topTrailing) {
+            ZamaLink()
+        }
+        .onOpenURL { url in
+            selectedTab = DataVaultTab(url: url) ?? .home
         }
     }
     
@@ -73,10 +63,9 @@ struct DataVaultView: View {
             ProfileForm()
                 .frame(maxHeight: .infinity, alignment: .top)
         } label: {
-            Label(Metric.profile.name, systemImage: Metric.profile.icon)
+            Label(DataVaultTab.profile.displayInfo.name, systemImage: DataVaultTab.profile.displayInfo.icon)
                 .imageScale(.large)
                 .symbolRenderingMode(.multicolor)
-                .foregroundStyle(Metric.profile.color)
                 .customFont(.title3)
             
             Divider()
@@ -91,7 +80,7 @@ struct DataVaultView: View {
                 subtitle: "Select Night",
                 encrypt: vm.encryptSleep,
                 delete: vm.deleteSleep,
-                openIn: .fheHealth)
+                openIn: .fheHealth(tab: .sleep))
         {
             let nights = vm.sleep.count == 1 ? "night" : "nights"
             Text("\(vm.sleep.count) \(nights) found")
@@ -116,7 +105,7 @@ struct DataVaultView: View {
                 subtitle: vm.weightDateRange,
                 encrypt: vm.encryptWeight,
                 delete: vm.deleteWeight,
-                openIn: .fheHealth)
+                openIn: .fheHealth(tab: .weight))
         {
             Text("\(vm.weight.count) records found")
                 .customFont(.title)
@@ -124,7 +113,7 @@ struct DataVaultView: View {
     }
     
     @ViewBuilder
-    private func section<Content: View, Element: Any>(for metric: Metric,
+    private func section<Content: View, Element: Any>(for tab: DataVaultTab,
                                                       granted: Bool,
                                                       items: Array<Element>,
                                                       file: Data?,
@@ -135,9 +124,9 @@ struct DataVaultView: View {
                                                       @ViewBuilder content: () -> Content) -> some View {
         GroupBox {
             if !granted {
-                permissionMissing(for: metric)
+                permissionMissing(for: tab)
             } else if items.isEmpty {
-                contentMissing(for: metric)
+                contentMissing(for: tab)
             } else {
                 VStack {
                     content()
@@ -148,7 +137,7 @@ struct DataVaultView: View {
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 24)
                         
-                        AsyncButton("Encrypt \(metric.name)") {
+                        AsyncButton("Encrypt \(tab.displayInfo.name)") {
                             try await encrypt()
                         }
                         .foregroundStyle(.black)
@@ -160,7 +149,9 @@ struct DataVaultView: View {
                             .overlay(alignment: .trailing) {
                                 AsyncButton(action: delete) {
                                     Image(systemName: "trash").imageScale(.small)
-                                }.tint(.red)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.red)
                             }
                             .padding(.bottom, 24)
                         
@@ -174,26 +165,24 @@ struct DataVaultView: View {
                 .padding(.vertical)
             }
         } label: {
-            Label(metric.name, systemImage: metric.icon)
+            Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon)
                 .imageScale(.large)
                 .symbolRenderingMode(.multicolor)
-                .foregroundStyle(metric.color)
                 .customFont(.title3)
             
             Divider()
         }
     }
     
-    private func permissionMissing(for metric: Metric) -> some View {
+    private func permissionMissing(for tab: DataVaultTab) -> some View {
         GroupBox {
             ContentUnavailableView {
                 Label {
-                    Text("\(metric.name) Permission Needed")
+                    Text("\(tab.displayInfo.name) Permission Needed")
                         .customFont(.title3)
                 } icon: {
-                    Image(systemName: metric.icon)
+                    Image(systemName: tab.displayInfo.icon)
                         .symbolRenderingMode(.multicolor)
-                        .foregroundStyle(metric.color)
                         .overlay(alignment: .bottomTrailing) {
                             Image(systemName: "exclamationmark.circle.fill")
                                 .resizable()
@@ -204,12 +193,12 @@ struct DataVaultView: View {
                         }
                 }
             } description: {
-                Text("Your \(metric.name.lowercased()) data will be FHE-encrypted for privacy-preserving use in other apps.")
+                Text("Your \(tab.displayInfo.name.lowercased()) data will be FHE-encrypted for privacy-preserving use in other apps.")
                     .customFont(.callout)
                 
             } actions: {
-                AsyncButton(action: metric == .weight ? vm.requestWeightPermission : vm.requestSleepPermission) {
-                    Text("Allow \(metric.name)")
+                AsyncButton(action: tab == .weight ? vm.requestWeightPermission : vm.requestSleepPermission) {
+                    Text("Allow \(tab.displayInfo.name)")
                 }
                 .customFont(.callout)
                 .foregroundStyle(.black)
@@ -217,13 +206,13 @@ struct DataVaultView: View {
         }
     }
     
-    private func contentMissing(for metric: Metric) -> some View {
+    private func contentMissing(for tab: DataVaultTab) -> some View {
         GroupBox {
             ContentUnavailableView {
-                Text("No \(metric.name) Data on Device")
+                Text("No \(tab.displayInfo.name) Data on Device")
                     .customFont(.title3)
             } description: {
-                Text("Use Apple Health or another app to record your \(metric.name.lowercased()).")
+                Text("Use Apple Health or another app to record your \(tab.displayInfo.name.lowercased()).")
                     .customFont(.callout)
                 
                 VStack(spacing: 10) {
@@ -237,17 +226,17 @@ struct DataVaultView: View {
                         VStack { Divider() }
                     }
                     
-                    if metric == .sleep {
+                    if tab == .sleep {
                         Menu {
                             Button("Regular Sample", action: vm.useFakeSleep)
                             Button("Bad Sample", action: vm.useFakeBadSleep)
                             Button("Large Dataset (100 samples)", action: vm.useLargeFakeSleep)
                         } label: {
-                            Text("Simulate \(metric.name) Data")
+                            Text("Simulate \(tab.displayInfo.name) Data")
                                 .foregroundStyle(.black)
                         }
                     } else {
-                        Button("Simulate \(metric.name) Data", action: vm.useFakeWeight)
+                        Button("Simulate \(tab.displayInfo.name) Data", action: vm.useFakeWeight)
                             .foregroundStyle(.black)
                     }
                 }

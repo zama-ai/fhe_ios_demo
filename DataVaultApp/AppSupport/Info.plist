@@ -7,7 +7,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fhedatavault</string>
+				<string>zamadatavault</string>
 			</array>
 		</dict>
 	</array>
@@ -45,25 +45,25 @@
 				<string>application/x-fheencrypted</string>
 			</dict>
 		</dict>
-        <dict>
-            <key>UTTypeConformsTo</key>
-            <array>
-                <string>public.data</string>
-            </array>
-            <key>UTTypeDescription</key>
-            <string>Zama FHE Encrypted Ad</string>
-            <key>UTTypeIdentifier</key>
-            <string>com.zama.fhe.encryptedAd</string>
-            <key>UTTypeTagSpecification</key>
-            <dict>
-                <key>public.filename-extension</key>
-                <array>
-                    <string>fheencryptedAd</string>
-                </array>
-                <key>public.mime-type</key>
-                <string>application/x-fheencrypted-ad</string>
-            </dict>
-        </dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Zama FHE Encrypted Ad</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.zama.fhe.encryptedAd</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>fheencryptedAd</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>application/x-fheencrypted-ad</string>
+			</dict>
+		</dict>
 	</array>
 </dict>
 </plist>

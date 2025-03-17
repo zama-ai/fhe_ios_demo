@@ -9,7 +9,6 @@ import SwiftUI
 struct SocialTimeline: View {
     @StateObject private var vm = ViewModel()
     @Environment(\.openURL) private var openURL
-    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         VStack {
@@ -17,7 +16,12 @@ struct SocialTimeline: View {
                 .padding(.top, 8)
             
             if vm.dataVaultActionNeeded {
-                openDataVaultCard
+                OpenAppButton(.zamaDataVault(tab: .profile)) {
+                    Text("Import Infos from Zama Data Vault")
+                }
+                .buttonStyle(.zama)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
                     ForEach(vm.items) { item in
@@ -25,40 +29,23 @@ struct SocialTimeline: View {
                         case .post(let post): postView(post)
                         case .ad(let index, let hash): adView(position: index, profileHash: hash)
                         }
+                        Divider()
+                            .frame(height: 1)
+                            .background(.black)
                     }
                     .padding(.horizontal, 8)
                 }
             }
         }
-        .background(.orange)
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .active:
-                Task {
-                    await vm.onAppear()
-                }
-            case _: break
+        .background(Color.zamaGreyBackground)
+        .overlay(alignment: .topTrailing) {
+            if !vm.dataVaultActionNeeded {
+                ZamaLink()
             }
         }
-    }
-    
-    private var openDataVaultCard: some View {
-        GroupBox {
-            ContentUnavailableView {
-                Label("No Profile Info", systemImage: "person.crop.circle.badge.exclamationmark.fill")
-                    .customFont(.title3)
-            } description: {
-                Text("Import encrypted profile info from Zama Data Vault.")
-                    .customFont(.callout)
-            } actions: {
-                OpenAppButton(.fheDataVault)
-                    .customFont(.callout)
-                    .foregroundStyle(.black)
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.roundedRectangle)
-            }
+        .onAppearAgain {
+            vm.refreshFromDisk()
         }
-        .padding()
     }
     
     private var titleBar: some View {
@@ -66,13 +53,17 @@ struct SocialTimeline: View {
             Text("FHE Ads")
                 .customFont(.largeTitle)
                 .frame(maxWidth: .infinity)
-                .overlay(alignment: .trailing) {
-                    OpenAppButton(.fheDataVault) {
-                        Label("Profile", systemImage: "person.crop.circle.fill")
+                .overlay(alignment: .leading) {
+                    if !vm.dataVaultActionNeeded {
+                        OpenAppButton(.zamaDataVault(tab: .profile)) {
+                            Image(systemName: "pencil.circle.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 32, height: 32)
+                                .padding(8)
+                        }
+                        .tint(.black)
                     }
-                    .padding(6)
-                    .buttonStyle(.bordered)
-                    .tint(.black)
                 }
             
             if let report = vm.activityReport {
@@ -128,7 +119,7 @@ struct SocialTimeline: View {
     
     @ViewBuilder
     private func adView(position: Int, profileHash: String) -> some View {
-        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(position)-\(profileHash)"))
+        FilePreview(url: Storage.url(for: .concreteEncryptedResult, suffix: "\(profileHash)-\(position)"))
             .frame(minHeight: 175)
             .overlay {
                 Color.white.opacity(0.01) // Hack to allow scrolling from this view

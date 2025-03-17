@@ -7,7 +7,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fheadsapp</string>
+				<string>fheads</string>
 			</array>
 		</dict>
 	</array>
@@ -22,7 +22,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
-		<string>LaunchScreenColor</string>
+		<string>zamaGreyBackground</string>
 	</dict>
 </dict>
 </plist>
