@@ -51,7 +51,7 @@ struct WeightTab: View {
                 }
             }
             .padding()
-            .navigationTitle("Weight Analysis")
+            .navigationTitleView("Weight Analysis", icon: "scalemass.fill")
             .buttonStyle(.custom)
             .background(Color.zamaYellowLight)
             .onAppearAgain {
@@ -121,6 +121,7 @@ extension WeightTab {
                     try await Storage.deleteFromDisk(.weightAvg)
                     self.uploadedSampleMD5 = nil
                     self.uploadedSampleTaskID = nil
+                    self.status = nil
                     result = nil
                 }
             }

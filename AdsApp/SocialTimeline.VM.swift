@@ -25,15 +25,17 @@ extension SocialTimeline {
             self.items = Self.generateItems(profileHash: Self.profileHash)
         }
 
-        @Sendable
-        func onAppear() async {
+        func refreshFromDisk() {
+            Task {
             do {
+                    dataVaultActionNeeded = false
                 try await startServerKeyUpload()
             } catch CustomError.missingServerKey, CustomError.missingProfile {
                 dataVaultActionNeeded = true
             } catch {
                 print(error.localizedDescription)
             }
+        }
         }
         
         private func startServerKeyUpload() async throws {

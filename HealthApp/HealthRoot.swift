@@ -7,7 +7,7 @@ import SwiftUI
 }
 
 struct HealthRoot: View {
-    @State private var selectedTab: HealthTab = .sleep
+    @State private var selectedTab: HealthTab = .home
 
     var body: some View {
         TabView(selection: $selectedTab) {

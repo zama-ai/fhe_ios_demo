@@ -46,18 +46,19 @@ struct SleepTab: View {
                     if let url = vm.result {
                         FilePreview(url: url)
                             .frame(height: 120)
-                            //.fixedSize(horizontal: false, vertical: true)
                     } else {
                         if let status = vm.status {
                             AsyncStatus(status)
+                                .frame(maxWidth: .infinity, minHeight: 120)
                         } else if vm.result == nil {
                             NoDataBadge()
+                                .frame(maxWidth: .infinity, minHeight: 120)
                         }
                     }
                 }
             }
             .padding()
-            .navigationTitle("Sleep Analysis")
+            .navigationTitleView("Sleep Analysis", icon: "bed.double.fill")
             .buttonStyle(.custom)
             .background(Color.zamaYellowLight)
             .onAppearAgain {
@@ -105,6 +106,7 @@ extension SleepTab {
                     try await Storage.deleteFromDisk(output)
                     self.uploadedSampleMD5 = nil
                     self.uploadedSampleTaskID = nil
+                    self.status = nil
                     result = nil
                 }
             }
