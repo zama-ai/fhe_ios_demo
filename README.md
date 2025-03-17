@@ -47,8 +47,9 @@ For these demo end-user applications, analysis and processing of the encrypted i
 
 The **Data Vault** uses [TFHE-rs](https://github.com/zama-ai/tfhe-rs) and  [Concrete ML Extensions](https://github.com/zama-ai/concrete-ml-extensions) to encrypt and decrypt data.
 
-# Installation Steps
+## Installation Steps
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 ## Install Apple Tools
 - macOS 15 Sequoia
@@ -59,14 +60,17 @@ The **Data Vault** uses [TFHE-rs](https://github.com/zama-ai/tfhe-rs) and  [Conc
 - Simply unzip `QLAdsExtension/AdImages.zip' in place.
 =======
 ## Apple Tool Prerequisites
+=======
+### Apple Tool Prerequisites
+>>>>>>> f188baf (chore: indenting of readme sections)
 - macOS 15 Sequoia (or 14 Sonoma, whatever runs Xcode 16)
 - Xcode 16 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
 - iOS 18 SDK (additional download from Xcode)
 >>>>>>> 50ccef1 (chore: update readme)
 
-## Compiling app dependencies for iOS and Mac simulator
+### Compiling app dependencies for iOS and Mac simulator
 
-### Building libraries
+#### Building libraries
 
 The easiest way to build all dependencies is to execute [the dedicated script](./setup_tfhe_xcframework.sh). 
 
@@ -76,21 +80,21 @@ To manually build the libraries follow the instructions in the [compilation guid
 1. [Compile TFHE-rs](COMPILING.md#2-compile-tfhe-rs-for-use-in-swift) 
 1. [Compile Concrete ML Extensions](COMPILING.md#3-compile-concrete-ml-extensions-for-use-in-swift)
 
-### Using pre-built TFHE-rs libraries
+#### Using pre-built TFHE-rs libraries
 
 Instead of building the `TFHE.xcframework` from scratch, you can use a previously built version. Simply save `TFHE.xcframework` in the root directory. Inside this framework, there should be:
 - `Info.plist`
 - `ios-arm64`
 - `ios-arm64-simulator`
 
-# Compiling the Data Vault and end-user application
+## Compiling the Data Vault and end-user application
 
 Now you can open your Xcode IDE, open this directory and start building the apps.
 
-# End-user Application Server
+## End-user Application Server
 This repo also contains the backend implementations of the end-user applications. See the [server readme](Server/README.md) for more details on how to run these backends. 
 
-# Useful References
+## Useful References
 - [Tutorial: Calling a Rust library from Swift](https://medium.com/@kennethyoel/a-swiftly-oxidizing-tutorial-44b86e8d84f5)
 - [Minimize Rust binary size](https://github.com/johnthagen/min-sized-rust)
 - [Using imported C APIs in Swift](https://developer.apple.com/documentation/swift/imported-c-and-objective-c-apis)
