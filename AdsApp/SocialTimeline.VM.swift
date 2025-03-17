@@ -75,7 +75,7 @@ extension SocialTimeline {
             let result = try await Network.shared.getAdTargetingResult(taskID: taskID, uid: uid)
             for position in 0..<Self.adsLimit {
                 // Duplicating result for each ad to display. Limitation of how QL works.
-                try await Storage.write(.concreteEncryptedResult, data: result, suffix: "\(position)-\(profileHash)")
+                try await Storage.write(.concreteEncryptedResult, data: result, suffix: "\(profileHash)-\(position)")
                 Self.profileHash = profileHash
             }
             self.taskID = nil
