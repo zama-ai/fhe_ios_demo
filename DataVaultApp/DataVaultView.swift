@@ -9,18 +9,11 @@ import SwiftUI
 struct DataVaultView: View {
         
     @StateObject private var vm = ViewModel()
-    @State private var selectedTab: DataVaultTab = .sleep
+    @State private var selectedTab: DataVaultTab = .home
     
     var body: some View {
-        header
-            .frame(maxWidth: .infinity)
-            .overlay(alignment: .topTrailing) {
-                ZamaLink()
-            }
-        
         content
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.roundedRectangle)
+            .buttonStyle(.zama)
             .tint(.orange)
             .task {
                 do {
@@ -30,27 +23,37 @@ struct DataVaultView: View {
                 }
             }
     }
-    
-    private var header: some View {
-        VStack(spacing: 0) {
-            Text("Data Vault")
-                .customFont(.largeTitle)
-                .padding(.bottom)            
-        }.padding()
-    }
-    
+        
     private var content: some View {
         TabView(selection: $selectedTab) {
-            Tab(DataVaultTab.sleep.displayInfo.name, systemImage: DataVaultTab.sleep.displayInfo.icon, value: DataVaultTab.sleep) {
+            Tab(DataVaultTab.home.displayInfo.name, systemImage: DataVaultTab.home.displayInfo.icon, value: .home) {
+                HomeTab(selectedTab: $selectedTab)
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
+            }
+            
+            Tab(DataVaultTab.sleep.displayInfo.name, systemImage: DataVaultTab.sleep.displayInfo.icon, value: .sleep) {
               sleepSection
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
             }
-            Tab(DataVaultTab.weight.displayInfo.name, systemImage: DataVaultTab.weight.displayInfo.icon, value: DataVaultTab.weight) {
+            Tab(DataVaultTab.weight.displayInfo.name, systemImage: DataVaultTab.weight.displayInfo.icon, value: .weight) {
               weightSection
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
             }
-            Tab(DataVaultTab.profile.displayInfo.name, systemImage: DataVaultTab.profile.displayInfo.icon, value: DataVaultTab.profile) {
+            Tab(DataVaultTab.profile.displayInfo.name, systemImage: DataVaultTab.profile.displayInfo.icon, value: .profile) {
               profileSection
+                    .toolbarBackground(Color.zamaBlackTabBar, for: .tabBar)
+                    .toolbarBackground(.visible, for: .tabBar)
             }
-        }.onOpenURL { url in
+        }
+        .tint(.zamaYellow)
+        .background(Color.zamaGreyBackground)
+        .overlay(alignment: .topTrailing) {
+            ZamaLink()
+        }
+        .onOpenURL { url in
             selectedTab = DataVaultTab(url: url) ?? .home
         }
     }
@@ -146,7 +149,9 @@ struct DataVaultView: View {
                             .overlay(alignment: .trailing) {
                                 AsyncButton(action: delete) {
                                     Image(systemName: "trash").imageScale(.small)
-                                }.tint(.red)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.red)
                             }
                             .padding(.bottom, 24)
                         

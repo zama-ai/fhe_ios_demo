@@ -8,7 +8,7 @@ import SwiftUI
 
 struct ZamaLink: View {
     var body: some View {
-        Link(destination: ZamaConfig.website) {
+        Link(destination: ZamaConfig.websiteLandingPage) {
             Image(.logoZamaZblack)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
@@ -16,6 +16,6 @@ struct ZamaLink: View {
                 .opacity(0.095)
                 .padding(.trailing, 16)
                 .padding(.top, -4)
-        }
+        }.buttonStyle(.plain)
     }
 }
