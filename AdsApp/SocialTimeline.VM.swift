@@ -12,34 +12,30 @@ extension SocialTimeline {
         static private let adFrequency = 2 // Show an ad every 3 posts
         static private let adsLimit = 5 // Show top 5 ads
         
-        private var uid: String? {
-            get { return UserDefaults.standard.string(forKey: "uid") }
-            set { UserDefaults.standard.set(newValue, forKey: "uid") }
-        }
+        @UserDefaultsStorage(key: "uid", defaultValue: nil)
+        private var uid: String?
 
-        private var taskID: String? {
-            get { return UserDefaults.standard.string(forKey: "taskID") }
-            set { UserDefaults.standard.set(newValue, forKey: "taskID") }
-        }
+        @UserDefaultsStorage(key: "taskID", defaultValue: nil)
+        private var taskID: String?
 
-        static private var profileHash: String? {
-            get { return UserDefaults.standard.string(forKey: "profileHash") }
-            set { UserDefaults.standard.set(newValue, forKey: "profileHash") }
-        }
+        @UserDefaultsStorage(key: "profileHash", defaultValue: nil)
+        static private var profileHash: String?
 
         init() {
             self.items = Self.generateItems(profileHash: Self.profileHash)
         }
 
-        @Sendable
-        func onAppear() async {
+        func refreshFromDisk() {
+            Task {
             do {
+                    dataVaultActionNeeded = false
                 try await startServerKeyUpload()
             } catch CustomError.missingServerKey, CustomError.missingProfile {
                 dataVaultActionNeeded = true
             } catch {
                 print(error.localizedDescription)
             }
+        }
         }
         
         private func startServerKeyUpload() async throws {
@@ -64,7 +60,7 @@ extension SocialTimeline {
                 throw CustomError.missingServerKey
             }
             
-            let profileHash = md5Identifier(for: profile)
+            let profileHash = profile.md5Identifier
             guard profileHash != Self.profileHash else {
                 print("Profile unchanged, skipping upload")
                 return
@@ -81,14 +77,14 @@ extension SocialTimeline {
             let result = try await Network.shared.getAdTargetingResult(taskID: taskID, uid: uid)
             for position in 0..<Self.adsLimit {
                 // Duplicating result for each ad to display. Limitation of how QL works.
-                try await Storage.write(.concreteEncryptedResult, data: result, suffix: "\(position)-\(profileHash)")
+                try await Storage.write(.concreteEncryptedResult, data: result, suffix: "\(profileHash)-\(position)")
                 Self.profileHash = profileHash
             }
             self.taskID = nil
             self.items = Self.generateItems(profileHash: profileHash)
         }
                 
-        func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
+        private func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
             self.activityReport = .progress("\(name)…")
             do {
                 try await block()
@@ -115,10 +111,4 @@ extension SocialTimeline {
             return items
         }
     }
-}
-
-import CryptoKit
-private func md5Identifier(for data: Data) -> String {
-    let digest = Insecure.MD5.hash(data: data)
-    return digest.map { String(format: "%02x", $0) }.joined()
 }

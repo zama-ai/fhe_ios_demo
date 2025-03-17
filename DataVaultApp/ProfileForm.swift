@@ -103,7 +103,7 @@ struct ProfileForm: View {
         
         Section {
             if vm.profileOnDisk {
-                OpenAppButton(.fheAdTargeting)
+                OpenAppButton(.fheAds)
                     .buttonStyle(.borderedProminent)
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity, alignment: .center)
