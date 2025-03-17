@@ -3,9 +3,9 @@
 Implements 3 iOS apps:
 1. **Zama Data Vault**: Encrypts sensitive user data (sleep, weight, profile info) using [TFHE-rs](https://github.com/zama-ai/tfhe-rs), and stores encrypted result in a shared folder for consumption by other apps. Clear, sensitive data never leaves device.
 2. **FHE Health**: Analyzes encrypted sleep & weight, producing graphs and insights, without ever accessing the clear data.
-3. **FHE Ads**: Displays targeted ads based on encrypted profile info, without ever accessing the clear data.
+3. **FHE Health**: Displays targeted ads based on encrypted profile info, without ever accessing the clear data.
 
-In app #2 and #3, analysis and targeting is done privately on Zama's servers; you can monitor its activity at [https://api.zama.ai/logs](https://api.zama.ai/logs).
+In app **FHE Health** and **FHE Health**, analysis and targeting is done privately on Zama's servers; you can monitor its activity at [https://api.zama.ai/logs](https://api.zama.ai/logs).
 
 # Useful Links
 - [Miro flow](https://miro.com/app/board/uXjVLpwDx3c=/)
@@ -28,10 +28,13 @@ In app #2 and #3, analysis and targeting is done privately on Zama's servers; yo
 
 # Installation Steps
 
-## Apple Tools
-- macOS 15 Sequoia (or 14 Sonoma, whatever runs Xcode 16)
-- Xcode 16 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
-- iOS 18 SDK (additional download from Xcode)
+## Install Apple Tools
+- macOS 15 Sequoia
+- Xcode 16.2 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
+- iOS 18.2 SDK (additional download from Xcode)
+
+## Install AdImages
+- Simply unzip `QLAdsExtension/AdImages.zip' in place.
 
 ## Having TFHE libraries for iOS and mac simulator
 

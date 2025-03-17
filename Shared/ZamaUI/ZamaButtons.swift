@@ -1,0 +1,63 @@
+// Copyright © 2025 Zama. All rights reserved.
+
+import SwiftUI
+
+#Preview {
+    VStack {
+        Button("Foo") {}.buttonStyle(.zama)
+        Button("Foo") {}.buttonStyle(.zama).disabled(true)
+
+        Button("Foo") {}.buttonStyle(.blackHighlight())
+        Button("Foo") {}.buttonStyle(.blackHighlight()).disabled(true)
+
+        AsyncButton(action: {}) {
+            Label("Import Health Information", systemImage: "heart.text.clipboard")
+        }.buttonStyle(.zama)
+        
+        Spacer()
+    }
+    .padding()
+    .background(Color.zamaYellowLight)
+}
+
+struct ZamaButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration config: Configuration) -> some View {
+        config.label
+            .opacity(isEnabled ? 1 : 0.5)
+            .padding(12)
+            .frame(maxWidth: .infinity)
+            .fontWeight(.bold)
+            .background(.zamaYellow)
+            .border(config.isPressed ? .black : .clear, width: 1)
+            .animation(.none, value: config.isPressed)
+    }
+}
+
+struct BlackHighlightButtonStyle: ButtonStyle {
+    var disabled: Bool
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration config: Configuration) -> some View {
+        if disabled {
+            config.label
+        } else {
+            config.label
+                .opacity(isEnabled ? 1 : 0.5)
+                .border(.black, width: config.isPressed ? 1 : 0)
+                .animation(.none, value: config.isPressed)
+        }
+    }
+}
+
+
+extension ButtonStyle where Self == ZamaButtonStyle {
+    static var zama: ZamaButtonStyle {
+        ZamaButtonStyle()
+    }
+    
+    static func blackHighlight(disabled: Bool = false) -> BlackHighlightButtonStyle {
+        BlackHighlightButtonStyle(disabled: disabled)
+    }
+}
