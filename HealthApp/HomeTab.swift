@@ -18,11 +18,12 @@ struct HomeTab: View {
                 }
                 
                 customBox(goTo: .weight) {
-                    Text("2025/01/24")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.zamaYellow)
-                    
-                    Text("Min: **55** kg\nMax: **55** kg\nAverage: **55** kg")
+                    NoDataBadge()
+//                    Text("2025/01/24")
+//                        .fontWeight(.semibold)
+//                        .foregroundStyle(.zamaYellow)
+//                    
+//                    Text("Min: **55** kg\nMax: **55** kg\nAverage: **55** kg")
                 }
                 
                 Spacer()

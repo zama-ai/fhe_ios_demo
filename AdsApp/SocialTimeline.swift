@@ -9,7 +9,6 @@ import SwiftUI
 struct SocialTimeline: View {
     @StateObject private var vm = ViewModel()
     @Environment(\.openURL) private var openURL
-    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         VStack {
@@ -37,14 +36,8 @@ struct SocialTimeline: View {
         .overlay(alignment: .topTrailing) {
             ZamaLink()
         }
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .active:
-                Task {
-                    await vm.onAppear()
-                }
-            case _: break
-            }
+        .onAppearAgain {
+            vm.refreshFromDisk()
         }
     }
     
