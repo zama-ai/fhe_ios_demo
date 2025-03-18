@@ -60,7 +60,7 @@ struct DataVaultView: View {
     
     private var profileSection: some View {
         GroupBox {
-            ProfileForm()
+            ProfileTab()
                 .frame(maxHeight: .infinity, alignment: .top)
         } label: {
             Label(DataVaultTab.profile.displayInfo.name, systemImage: DataVaultTab.profile.displayInfo.icon)

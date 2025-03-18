@@ -17,7 +17,7 @@ import SwiftUI
         Spacer()
     }
     .padding()
-    .background(Color.zamaYellowLight)
+    .background(Color.white)
 }
 
 struct ZamaButtonStyle: ButtonStyle {
@@ -29,7 +29,7 @@ struct ZamaButtonStyle: ButtonStyle {
             .padding(12)
             .frame(maxWidth: .infinity)
             .fontWeight(.bold)
-            .background(.zamaYellow)
+            .background(.zamaYellow.opacity(isEnabled ? 1 : 0.2))
             .border(config.isPressed ? .black : .clear, width: 1)
             .animation(.none, value: config.isPressed)
     }

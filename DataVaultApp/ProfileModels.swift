@@ -3,10 +3,10 @@
 import SwiftUI
 
 #Preview {
-    let me = Profile(gender: .male,
-                     age: .middle_adult,
-                     language: .french,
+    let me = Profile(age: .middle_adult,
+                     gender: .male,
                      country: .france,
+                     language: .french,
                      interestedInKids: false,
                      interests: [.art, .photography, .sports, .writers])
     Text("\(me.oneHotBinary)")
@@ -31,36 +31,12 @@ extension OneHotable {
     }
 }
 
-struct EditProfile {
-    var gender: Gender?
-    var age: AgeGroup?
-    var language: Language
-    var country: Country
-    
-    var interestedInKids: Bool
-    var interests: Interest?
-    
-    init() {
-        self.gender = nil
-        self.age = nil
-        
-        let deviceLanguage = Locale.preferredLanguages.first?.split(separator: "-").first.flatMap(String.init) // e.g., "en-US"
-        let deviceCountry = Locale.current.region?.identifier // e.g., "US"
-        
-        self.language = deviceLanguage.flatMap(Language.init(rawValue:)) ?? .english
-        self.country = deviceCountry.flatMap(Country.init(rawValue:)) ?? .united_states
-        
-        self.interestedInKids = false
-        self.interests = nil
-    }
-}
-
 struct Profile {
-    let gender: Gender
     let age: AgeGroup
-    let language: Language
+    let gender: Gender
     let country: Country
-    
+    let language: Language
+
     let interestedInKids: Bool
     let interests: Set<Interest>
     
@@ -81,17 +57,17 @@ struct Profile {
 }
 
 extension Profile {
-    init?(from editProfile: EditProfile) {
-        guard let g = editProfile.gender, let a = editProfile.age, let i = editProfile.interests else {
+    init?(age: Int?, gender: Gender?, country: Country?, language: Language?, interests: Set<Interest>) {
+        guard let age, let gender, let country, let language else {// FIXME: }, !interests.isEmpty else {
             return nil
         }
         
-        self = Profile(gender: g,
-                       age: a,
-                       language: editProfile.language,
-                       country: editProfile.country,
-                       interestedInKids: editProfile.interestedInKids,
-                       interests: [i])
+        self = Profile(age: AgeGroup(age: age),
+                       gender: gender,
+                       country: country,
+                       language: language,
+                       interestedInKids: false, // TODO: FIXME
+                       interests: interests)
     }
 }
 
@@ -110,21 +86,17 @@ enum AgeGroup: Int, OneHotable {
     case middle_adult = 60
     case senior = 999
     
-    var range: ClosedRange<Int> {
-        switch self {
-        case .child:        0...self.rawValue
-        case .teen:         (AgeGroup.child.rawValue + 1)...self.rawValue
-        case .young_adult:   (AgeGroup.teen.rawValue + 1)...self.rawValue
-        case .middle_adult:  (AgeGroup.young_adult.rawValue + 1)...self.rawValue
-        case .senior:       (AgeGroup.middle_adult.rawValue + 1)...Int.max
-        }
-    }
-    
-    var displayName: String {
-        if range.upperBound == Int.max {
-            "\(range.lowerBound)+"
+    init(age: Int) {
+        if age <= AgeGroup.child.rawValue {
+            self = .child
+        } else if age <= AgeGroup.teen.rawValue {
+            self = .teen
+        } else if age <= AgeGroup.young_adult.rawValue {
+            self = .young_adult
+        } else if age <= AgeGroup.middle_adult.rawValue {
+            self = .middle_adult
         } else {
-            "\(range.lowerBound)-\(range.upperBound)"
+            self = .senior
         }
     }
 }
@@ -142,7 +114,7 @@ enum Language: String, PrettyNamable, OneHotable {
     case tamazight = "ber"
     case tamil = "ta"
 
-    var languageNames: (native: String, translated: String) {
+    var names: (native: String, translated: String) {
         let native = Locale(identifier: rawValue).localizedString(forLanguageCode: rawValue)?.localizedCapitalized
         let clear = Locale.current.localizedString(forLanguageCode: rawValue)?.localizedCapitalized
         return (native: native ?? prettyTypeName, translated: clear ?? prettyTypeName)

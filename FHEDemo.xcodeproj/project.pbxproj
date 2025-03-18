@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3217EE212D75E6FC002EB4E6 /* ConcreteMLExtensions.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */; };
-		3217EE242D75E707002EB4E6 /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */; };
 		322658962D6E20AD004BB59A /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32543D8C2D47EFA4007600B2 /* QuickLook.framework */; };
 		322658A22D6E20AD004BB59A /* QLAdsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 322658952D6E20AD004BB59A /* QLAdsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3226D94C2D38168D00595BBC /* TFHE.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94B2D38168D00595BBC /* TFHE.xcframework */; };
@@ -18,6 +16,8 @@
 		322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 322E72BA2CC9A636009B2530 /* Algorithms */; };
 		324F8E2A2CA43B2100F0BB11 /* QLHealthExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 324F8E1D2CA43B2100F0BB11 /* QLHealthExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		32543D8D2D47EFA4007600B2 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32543D8C2D47EFA4007600B2 /* QuickLook.framework */; };
+		32738D232D89D7870040C27A /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3226D9532D3816DD00595BBC /* concrete_ml_extensions.swift */; };
+		32738D242D89D78C0040C27A /* ConcreteMLExtensions.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3226D94E2D38169A00595BBC /* ConcreteMLExtensions.xcframework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,10 +83,7 @@
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
 				Reusable/AsyncButton.swift,
-				Reusable/CopyableText.swift,
 				"Reusable/Data+md5.swift",
-				Reusable/MeasureDuration.swift,
-				Reusable/NavigationTitleView.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
@@ -108,10 +105,8 @@
 				"Helpers-Zama/Network.swift",
 				"Helpers-Zama/SleepModels.swift",
 				Reusable/AsyncButton.swift,
-				Reusable/CopyableText.swift,
 				"Reusable/Data+md5.swift",
 				Reusable/FilePreview.swift,
-				Reusable/MeasureDuration.swift,
 				Reusable/NavigationTitleView.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
@@ -196,11 +191,8 @@
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
 				Reusable/AsyncButton.swift,
-				Reusable/CopyableText.swift,
 				"Reusable/Data+md5.swift",
 				Reusable/FilePreview.swift,
-				Reusable/MeasureDuration.swift,
-				Reusable/NavigationTitleView.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				Reusable/UserDefaultsStorage.swift,
@@ -331,7 +323,7 @@
 			files = (
 				3226D94C2D38168D00595BBC /* TFHE.xcframework in Frameworks */,
 				322E72BB2CC9A636009B2530 /* Algorithms in Frameworks */,
-				3217EE212D75E6FC002EB4E6 /* ConcreteMLExtensions.xcframework in Frameworks */,
+				32738D242D89D78C0040C27A /* ConcreteMLExtensions.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -618,7 +610,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3217EE242D75E707002EB4E6 /* concrete_ml_extensions.swift in Sources */,
+				32738D232D89D7870040C27A /* concrete_ml_extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
