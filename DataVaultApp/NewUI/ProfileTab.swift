@@ -130,8 +130,8 @@ struct ProfileTab: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .customFont(.title3)
             
-            TagsGrid(items: Interest.allCases.map(\.prettyTypeName), chunkedBy: 4, selection: $vm.interests) { word, isSelected in
-                Text(word)
+            TagsGrid(items: Interest.allCases, chunkedBy: 4, selection: $vm.interests) { interest, isSelected in
+                Text(interest.prettyTypeName)
                     .bold()
                     .padding(6)
                     .background(isSelected ? .black : .gray.opacity(0.2))
@@ -196,7 +196,7 @@ extension ProfileTab {
         @Published var gender: Gender?
         @Published var country: Country?
         @Published var language: Language?
-        @Published var interests: Set<String> // TODO: add Kids
+        @Published var interests: Set<Interest>
         @Published var completedProfile: Profile?
         
         @Published var profileOnDisk: Bool
@@ -242,7 +242,7 @@ extension ProfileTab {
             self.gender = .female
             self.country = .france
             self.language = .english
-            self.interests = ["Health", "Nature", "Video Games", "Sports"] // FIXME String // Interest
+            self.interests = [.health, .nature, .video_games, .sports]
         }
         
         func validateProfile() {
@@ -250,7 +250,7 @@ extension ProfileTab {
                                        gender: self.gender,
                                        country: self.country,
                                        language: self.language,
-                                       interests: Set(self.interests.compactMap { Interest(rawValue: $0.lowercased().replacingOccurrences(of: " ", with: "_")) })) // FIXME: convert to/from displayed value
+                                       interests: self.interests)
         }
         
         func encryptData() async throws {

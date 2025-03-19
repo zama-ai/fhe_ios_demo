@@ -7,7 +7,6 @@ import SwiftUI
                      gender: .male,
                      country: .france,
                      language: .french,
-                     interestedInKids: false,
                      interests: [.art, .photography, .sports, .writers])
     Text("\(me.oneHotBinary)")
 }
@@ -36,18 +35,19 @@ struct Profile {
     let gender: Gender
     let country: Country
     let language: Language
-
-    let interestedInKids: Bool
     let interests: Set<Interest>
     
     var oneHot: [Bool] {
-        [
+        let nonKidsInterests = interests.filter {$0 != .kids}
+        let interestedInKids = interests.contains(.kids)
+        
+        return [
             gender.oneHot,
             age.oneHot,
             language.oneHot,
             [interestedInKids],
             country.oneHot,
-            Interest.allCases.map { interests.contains($0) }
+            Interest.allCases.filter({$0 != .kids}).map { nonKidsInterests.contains($0) }
         ].flatMap(\.self)
     }
     
@@ -66,7 +66,6 @@ extension Profile {
                        gender: gender,
                        country: country,
                        language: language,
-                       interestedInKids: false, // TODO: FIXME
                        interests: interests)
     }
 }
@@ -172,6 +171,7 @@ enum Interest: String, PrettyNamable, OneHotable {
     case food
     case health
     case journalism
+    case kids // Added as an Interest, it is a feature of its own actually for the server (like Gender, Language…)
     case movies
     case music
     case nature

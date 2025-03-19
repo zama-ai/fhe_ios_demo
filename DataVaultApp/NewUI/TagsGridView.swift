@@ -4,11 +4,11 @@ import Algorithms
 import SwiftUI
 
 #Preview {
-    @Previewable @State var selection: Set<String> = []
-    let words = ["Swift", "UIKit", "SwiftUI", "Combine", "CoreDataAndFriends", "ARKit", "SceneKit", "Metal", "SwiftPM", "CocoaPods"]
+    @Previewable @State var selection: Set<DogBreed> = []
+    let dogs = DogBreed.allCases
     
-    TagsGrid(items: words, chunkedBy: 4, selection: $selection) { word, isSelected in
-        Text(word)
+    TagsGrid(items: dogs, chunkedBy: 4, selection: $selection) { item, isSelected in
+        Text(item.rawValue)
             .bold()
             .padding(8)
             .background(isSelected ? .black : .gray.opacity(0.2))
@@ -19,11 +19,11 @@ import SwiftUI
     Text("selection: \(selection)")
 }
 
-struct TagsGrid<Cell: View>: View {
-    let items: [String]
+struct TagsGrid<Cell: View, Item: Hashable>: View {
+    let items: [Item]
     let chunkedBy: Int
-    let selection: Binding<Set<String>>
-    let content: (String, Bool) -> Cell
+    let selection: Binding<Set<Item>>
+    let content: (Item, Bool) -> Cell
     
     var body: some View {
         VStack {
@@ -44,4 +44,17 @@ struct TagsGrid<Cell: View>: View {
             }
         }
     }
+}
+
+enum DogBreed: String, CaseIterable {
+    case goldenRetriever = "Golden Retriever"
+    case germanShepherd = "German Shepherd"
+    case labrador = "Labrador"
+    case bulldog = "Bulldog"
+    case poodle = "Poodle"
+    case beagle = "Beagle"
+    case rottweiler = "Rottweiler"
+    case dachshund = "Dachshund"
+    case boxer = "Boxer"
+    case husky = "Husky"
 }
