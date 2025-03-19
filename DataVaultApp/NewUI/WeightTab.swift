@@ -53,6 +53,9 @@ struct WeightTab: View {
         .buttonStyle(.zama)
         .customFont(.body)
         .padding(.horizontal, 30)
+        .onAppearAgain {
+            vm.refreshFromDisk()
+        }
     }
 }
 
@@ -68,15 +71,13 @@ extension WeightTab {
         init() {
             self.dataAvailable = false
             self.consoleOutput = "No data to encrypt."
-            
-            Task {
-                await refreshFromDisk()
-            }
         }
         
-        func refreshFromDisk() async {
-            let data = await Storage.read(fileType)
-            self.dataAvailable = data != nil
+        func refreshFromDisk() {
+            Task {
+                let data = await Storage.read(fileType)
+                self.dataAvailable = data != nil
+            }
         }
     }
 }

@@ -27,15 +27,15 @@ extension SocialTimeline {
 
         func refreshFromDisk() {
             Task {
-            do {
+                do {
                     dataVaultActionNeeded = false
-                try await startServerKeyUpload()
-            } catch CustomError.missingServerKey, CustomError.missingProfile {
-                dataVaultActionNeeded = true
-            } catch {
-                print(error.localizedDescription)
+                    try await startServerKeyUpload()
+                } catch CustomError.missingServerKey, CustomError.missingProfile {
+                    dataVaultActionNeeded = true
+                } catch {
+                    print(error.localizedDescription)
+                }
             }
-        }
         }
         
         private func startServerKeyUpload() async throws {

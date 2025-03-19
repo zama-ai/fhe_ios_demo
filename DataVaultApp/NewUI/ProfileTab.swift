@@ -9,14 +9,15 @@ import SwiftUI
 struct ProfileTab: View {
     @StateObject private var vm = ViewModel()
     @State private var justSaved: Bool = false
+    @State private var showConsole: Bool = true
     private let tabType: DataVaultTab = .profile
-
+    
     var body: some View {
         VStack(spacing: 0) {
             header()
                 .padding(.horizontal, 30)
                 .padding(.bottom, 30)
-
+            
             ScrollView {
                 VStack(spacing: 24) {
                     topInstructions()
@@ -37,6 +38,9 @@ struct ProfileTab: View {
         .onChange(of: vm.country, vm.validateProfile)
         .onChange(of: vm.language, vm.validateProfile)
         .onChange(of: vm.interests, vm.validateProfile)
+        .onAppearAgain {
+            vm.refreshFromDisk()
+        }
     }
     
     @ViewBuilder
@@ -60,7 +64,7 @@ struct ProfileTab: View {
             Text("Demographics")
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .customFont(.title3)
-
+            
             LabeledContent("Age:") {
                 TextField("", text: $vm.age)
                     .keyboardType(.numberPad)
@@ -96,7 +100,7 @@ struct ProfileTab: View {
                 }
             }
             .menuStyle(.borderlessButton)
-
+            
             LabeledContent("Language:") {
                 Menu {
                     let sorted = Language.allCases.sorted(by: { $0.names.native < $1.names.native })
@@ -140,10 +144,9 @@ struct ProfileTab: View {
     private func encryptExportArea() -> some View {
         VStack {
             AsyncButton("Encrypt data") {
+                justSaved = false
                 try await vm.encryptData()
                 justSaved = true
-                try await Task.sleep(for: .seconds(3))
-                justSaved = false
             }
             .disabled(vm.completedProfile == nil)
             
@@ -159,27 +162,30 @@ struct ProfileTab: View {
                 OpenAppButton(.fheAds) {
                     Text("Export data on FHE Ads")
                 }
-                
-//                AsyncButton(action: vm.delete) {
-//                    Image(systemName: "trash")
-//                }
-//                .foregroundStyle(.red)
             }
         }
     }
-
+    
     @ViewBuilder
     private func consoleArea() -> some View {
         VStack {
-            Text("FHE Encryption")
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .customFont(.title3)
+            HStack {
+                Text("FHE Encryption")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .customFont(.title3)
+                Spacer()
+                Toggle("Show", isOn: $showConsole)
+                    .labelsHidden()
+            }
             
-            TextEditor(text: $vm.consoleOutput)
-                .padding(8)
-                .scrollContentBackground(.hidden)
-                .background(Color.zamaGreyConsole)
-                .frame(minHeight: 200)
+            if showConsole {
+                Text(vm.consoleOutput)
+                    .customFont(.caption2)
+                    .fontDesign(.monospaced)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, minHeight: 200, alignment: .topLeading)
+                    .background(Color.zamaGreyConsole)
+            }
         }
     }
 }
@@ -196,22 +202,21 @@ extension ProfileTab {
         @Published var profileOnDisk: Bool
         @Published var consoleOutput: String = "No data to encrypt."
         private var pk: PrivateKey?
-
+        
         init() {
             let deviceLanguage = Locale.preferredLanguages.first?.split(separator: "-").first.flatMap(String.init) // e.g., "en-US"
             let deviceCountry = Locale.current.region?.identifier // e.g., "US"
-
+            
             self.age = ""
             self.gender = nil
             self.country = deviceCountry.flatMap(Country.init(rawValue:)) ?? .united_states
             self.language = deviceLanguage.flatMap(Language.init(rawValue:)) ?? .english
             self.interests = []
             self.completedProfile = nil
-                        
+            
             self.profileOnDisk = false
             
             Task {
-                await refreshFromDisk()
                 try await loadKeys()
             }
         }
@@ -224,10 +229,12 @@ extension ProfileTab {
                 self.pk = newPK
             }
         }
-
-        func refreshFromDisk() async {
-            let data = await Storage.read(.concreteEncryptedProfile)
-            self.profileOnDisk = data != nil
+        
+        func refreshFromDisk() {
+            Task {
+                let data = await Storage.read(.concreteEncryptedProfile)
+                self.profileOnDisk = data != nil
+            }
         }
         
         func generateDataSample() {
@@ -243,27 +250,43 @@ extension ProfileTab {
                                        gender: self.gender,
                                        country: self.country,
                                        language: self.language,
-                                       interests: Set(self.interests.compactMap { Interest(rawValue: $0) })) // FIXME: convert to/from displayed value
+                                       interests: Set(self.interests.compactMap { Interest(rawValue: $0.lowercased().replacingOccurrences(of: " ", with: "_")) })) // FIXME: convert to/from displayed value
         }
         
         func encryptData() async throws {
+            self.consoleOutput = ""
+            self.consoleOutput += "Encrypting profile...\n\n"
+            
             guard let pk, let cryptoParams = ConcreteML.cryptoParams, let completedProfile else {
                 throw NSError(domain: "Cannot encrypt profile", code: 0, userInfo: nil)
             }
             
+            let profileLogged = String(describing: completedProfile)
+                .replacingOccurrences(of: "ZAMA_Data_Vault.", with: "")
+                .replacingOccurrences(of: "Interests.", with: "")
+                .replacingOccurrences(of: ", ", with: ",\n  ")
+            
+            self.consoleOutput += "\(profileLogged)\n\n"
+            self.consoleOutput += "Crypto Params: \(ConcreteML.cryptoParamsString ?? "nil")\n\n"
+            
             let oneHot = [completedProfile.oneHotBinary]
+            self.consoleOutput += "OneHot: \(oneHot)\n\n"
+            
             let encryptedMatrix: EncryptedMatrix = try encryptMatrix(pkey: pk, cryptoParams: cryptoParams, data: oneHot)
             let data = try encryptedMatrix.serialize() // 8 Kb
             
+            self.consoleOutput += "Encrypted Profile: \(data.formattedSize)\n\n"
+            
             try await Storage.write(.concreteEncryptedProfile, data: data)
             profileOnDisk = true
+            
+            self.consoleOutput += "Saved at \(Storage.url(for: .concreteEncryptedProfile))\n"
         }
         
-//        func delete() async throws {
-//            try await Storage.deleteFromDisk(.concreteEncryptedProfile)
-//            profileOnDisk = false
-//            editProfile = EditProfile()
-//        }
+        func delete() async throws {
+            try await Storage.deleteFromDisk(.concreteEncryptedProfile)
+            profileOnDisk = false
+            completedProfile = nil
+        }
     }
 }
-

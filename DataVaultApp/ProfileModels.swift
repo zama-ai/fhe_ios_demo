@@ -58,7 +58,7 @@ struct Profile {
 
 extension Profile {
     init?(age: Int?, gender: Gender?, country: Country?, language: Language?, interests: Set<Interest>) {
-        guard let age, let gender, let country, let language else {// FIXME: }, !interests.isEmpty else {
+        guard let age, let gender, let country, let language, !interests.isEmpty else {
             return nil
         }
         
@@ -158,34 +158,34 @@ enum Country: String, PrettyNamable, OneHotable {
 }
 
 enum Interest: String, PrettyNamable, OneHotable {
-    case animals = "🐾"
-    case art = "🎨"
-    case automobiles = "🚗"
-    case bicycle = "🚴"
-    case books = "📚"
-    case comedy = "😂"
-    case comics = "🦸"
-    case culture = "🎭"
-    case education = "🎓"
-    case family = "👨‍👩‍👧‍👦"
-    case fashion = "👗"
-    case food = "🍽"
-    case health = "🏥"
-    case journalism = "🖊️"
-    case movies = "🎬"
-    case music = "🎵"
-    case nature = "🌿"
-    case news = "🗞"
-    case pets = "🐶"
-    case photography = "📸"
-    case politics = "🏛"
-    case science = "🔬"
-    case smartphones = "📱"
-    case software_dev = "💻"
-    case sports = "⚽️"
-    case tv = "📺"
-    case tech = "🖥"
-    case travel = "✈️"
-    case video_games = "🎮"
-    case writers = "✍️"
+    case animals
+    case art
+    case automobiles
+    case bicycle
+    case books
+    case comedy
+    case comics
+    case culture
+    case education
+    case family
+    case fashion
+    case food
+    case health
+    case journalism
+    case movies
+    case music
+    case nature
+    case news
+    case pets
+    case photography
+    case politics
+    case science
+    case smartphones
+    case software_dev
+    case sports
+    case tv
+    case tech
+    case travel
+    case video_games
+    case writers
 }

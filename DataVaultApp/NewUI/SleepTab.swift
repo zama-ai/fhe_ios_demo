@@ -51,6 +51,9 @@ struct SleepTab: View {
         .buttonStyle(.zama)
         .customFont(.body)
         .padding(.horizontal, 30)
+        .onAppearAgain {
+            vm.refreshFromDisk()
+        }
     }
 }
 
@@ -61,16 +64,14 @@ extension SleepTab {
         
         init() {
             self.dataAvailable = false
-            self.consoleOutput = "No data to encrypt."
-            
-            Task {
-                await refreshFromDisk()
-            }
+            self.consoleOutput = "No data to encrypt."            
         }
         
-        func refreshFromDisk() async {
-            let data = await Storage.read(.sleepList)
-            self.dataAvailable = data != nil
+        func refreshFromDisk() {
+            Task {
+                let data = await Storage.read(.sleepList)
+                self.dataAvailable = data != nil
+            }
         }
     }
 }
