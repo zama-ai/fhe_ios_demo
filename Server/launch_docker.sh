@@ -13,7 +13,7 @@ else
     exit 1
 fi
 
-if [ "$USE_TLS" -eq "true" ]; then
+if [ "$USE_TLS" = "true" ]; then
     # Check for certbot
     if ! command -v certbot &> /dev/null; then
         echo "Certbot is not installed. Please install it and try again."

@@ -6,7 +6,7 @@
 REBUILD_RUST=false
 
 # Setup environment depending on the first argument
-source common.env
+source .common_env
 
 for arg in "$@"; do
     case "$arg" in
