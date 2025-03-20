@@ -51,6 +51,9 @@ fastlane/test_output
 # 3rd party Frameworks (TFHE.xcframework, ConcreteMLExtensions.xcframework)
 Frameworks/
 
+# AdImages (cf README)
+QLAdsExtension/AdImages
+
 # Server
 Server/url.txt
 Server/.venv
