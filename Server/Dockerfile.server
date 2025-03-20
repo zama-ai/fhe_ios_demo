@@ -1,7 +1,7 @@
 # ===========================
 # Stage 1: Build Rust binaries (built separately with --rebuild-rust)
 # ===========================
-FROM rust:1.76 AS rust-builder
+FROM rust:1.84 AS rust-builder
 
 # Set working directory
 WORKDIR /build

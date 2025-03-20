@@ -21,3 +21,7 @@ crate-type = ["cdylib"]
 [[bin]]
 name = "sleep_quality"
 path = "src/main.rs"
+
+[[bin]]
+name = "sleep_analysis_test"
+path = "src/test.rs"

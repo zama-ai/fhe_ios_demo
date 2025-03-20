@@ -11,7 +11,6 @@ use tfhe::{set_server_key, CompressedServerKey, CompactCiphertextList, FheUint4,
 use tfhe::prelude::*;
 
 pub mod sleep_analysis;
-pub mod run_sleep;
 
 // Compiles and installs the Rust project as a Python module, using maturin
 // with release optimizations, and the manifest is located at tasks/sleep_quality/Cargo.toml.

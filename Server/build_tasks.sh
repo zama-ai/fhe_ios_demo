@@ -31,6 +31,11 @@ for task in $TASKS; do
         
         # Copy the binary to the bin directory
         cp "target/release/$BINARY_NAME" "$BIN_DIR/"
+
+        echo "Generate random data"
+        cargo run --release --bin lib.rs
+
+        
         
     # Python task
     elif ls src/*.py >/dev/null 2>&1; then
