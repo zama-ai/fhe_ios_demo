@@ -39,7 +39,7 @@ jobs:
       - name: Setup docker build config
         run: |
           cd Server
-          source common.env
+          source .common_env
 
       - name: Build and push
         uses: docker/build-push-action@v6
