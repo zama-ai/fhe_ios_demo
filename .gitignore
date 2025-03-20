@@ -65,6 +65,14 @@ Server/rust_array_stats/target
 Server/rust_array_stats/Cargo.lock
 Server/client_files/*
 Server/uploaded_files/*.serverKey
-Server/tasks/add_42/target
 Server/tasks/weight_stats/target
 Server/secrets.env
+Server/project/uploaded_files/*
+Server/uploaded_files/*
+Server/.venvclient
+Server/.venvserver
+
+Server/tasks/sleep_quality/Cargo.lock
+Server/tasks/weight_stats/Cargo.lock
+
+**/__pycache__/
