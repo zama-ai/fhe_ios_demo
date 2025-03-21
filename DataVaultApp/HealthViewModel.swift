@@ -84,7 +84,7 @@ final class HealthViewModel: ObservableObject {
         
         let nights = process(sleepSamples: sleep)
         Task {
-            if let lastNight = nights.last {
+            if let lastNight = nights.randomElement() {
                 try await encrypt(night: lastNight)
             }
         }
