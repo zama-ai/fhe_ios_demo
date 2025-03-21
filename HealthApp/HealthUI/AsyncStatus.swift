@@ -31,8 +31,11 @@ struct AsyncStatus: View {
             switch status {
             case .progress(let string):
                 Text(string)
-                ProgressView()
-                    .tint(nil)
+                Spacer().overlay {
+                    ProgressView()
+                        .tint(nil)
+                }
+                Text("This process might take some time.")
                 
             case .error(let string):
                 Text("⚠️ " + string)

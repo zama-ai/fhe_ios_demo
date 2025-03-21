@@ -3,27 +3,25 @@
 import SwiftUI
 
 #Preview {
-    WeightTab()
+    SleepTab(vm: .init())
 }
 
-struct WeightTab: View {
-    @StateObject private var vm = ViewModel()
-    private let tabType: DataVaultTab = .weight
-    private let targetTab: HealthTab = .weight
-
+struct SleepTab: View {
+    @ObservedObject var vm: HealthViewModel
+    
     var body: some View {
         VStack(spacing: 34) {
-            Label(tabType.displayInfo.name, systemImage: tabType.displayInfo.icon)
+            Label(DataVaultTab.sleep.displayInfo.name, systemImage: DataVaultTab.sleep.displayInfo.icon)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .customFont(.largeTitle)
             
-            if vm.dataAvailable {
+            if vm.sleepGranted && vm.encryptedSleep != nil {
                 let icon2 = Image(systemName: "checkmark.circle.fill")
                 Text("\(icon2)\nYour data was successfully encrypted")
                     .customFont(.title3)
                     .multilineTextAlignment(.center)
                 
-                OpenAppButton(.fheHealth(tab: targetTab)) {
+                OpenAppButton(.fheHealth(tab: .sleep)) {
                     Text("Analyze data on FHE Health")
                 }
             } else {
@@ -33,9 +31,15 @@ struct WeightTab: View {
                     .multilineTextAlignment(.center)
                 
                 VStack(spacing: 10) {
-                    Button("Allow Apple Health", action: {})
+                    AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
                     Text("or")
-                    Button("Generate data sample", action: {})
+                    Menu {
+                        AsyncButton("Regular Sample", action: { try await vm.encrypt(night: .fake) })
+                        AsyncButton("Bad Sample", action: { try await vm.encrypt(night: .fakeBad) })
+                        AsyncButton("Large Dataset (100 samples)", action: { try await vm.encrypt(night: .fakeLarge) })
+                    } label: {
+                        Text("Generate data sample")
+                    }
                 }
             }
             
@@ -44,7 +48,7 @@ struct WeightTab: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .customFont(.title3)
                 
-                TextEditor(text: $vm.consoleOutput)
+                TextEditor(text: $vm.sleepConsoleOutput)
                     .padding(8)
                     .scrollContentBackground(.hidden)
                     .background(Color.zamaGreyConsole)
@@ -54,29 +58,8 @@ struct WeightTab: View {
         .customFont(.body)
         .padding(.horizontal, 30)
         .onAppearAgain {
-            vm.refreshFromDisk()
-        }
-    }
-}
-
-import HealthKit
-
-extension WeightTab {
-    @MainActor final class ViewModel: ObservableObject {
-        @Published var dataAvailable: Bool
-        @Published var consoleOutput: String
-
-        private let fileType: Storage.File = .weightList
-
-        init() {
-            self.dataAvailable = false
-            self.consoleOutput = "No data to encrypt."
-        }
-        
-        func refreshFromDisk() {
             Task {
-                let data = await Storage.read(fileType)
-                self.dataAvailable = data != nil
+                try await vm.loadFromDisk()
             }
         }
     }

@@ -179,12 +179,13 @@ struct ProfileTab: View {
             }
             
             if showConsole {
-                Text(vm.consoleOutput)
+                CopyableText(vm.consoleOutput)
                     .customFont(.caption2)
                     .fontDesign(.monospaced)
                     .padding(8)
                     .frame(maxWidth: .infinity, minHeight: 200, alignment: .topLeading)
                     .background(Color.zamaGreyConsole)
+                    .tint(.black)
             }
         }
     }

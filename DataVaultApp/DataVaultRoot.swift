@@ -8,6 +8,7 @@ import SwiftUI
 
 struct DataVaultRoot: View {
     @State private var selectedTab: DataVaultTab = .home
+    @StateObject private var healthVM = HealthViewModel()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -16,11 +17,11 @@ struct DataVaultRoot: View {
             }
             
             tabItem(value: .sleep) {
-                SleepTab()
+                SleepTab(vm: healthVM)
             }
             
             tabItem(value: .weight) {
-                WeightTab()
+                WeightTab(vm: healthVM)
             }
             
             tabItem(value: .profile) {
