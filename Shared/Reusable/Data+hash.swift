@@ -4,14 +4,13 @@ import CryptoKit
 import Foundation
 
 extension Data {
-    var md5Identifier: String {
-        let digest = Insecure.MD5.hash(data: self)
-        return digest.map { String(format: "%02x", $0) }.joined()
+    /// Replacements for `Data.hashValue`, which is not designed for persistence or cryptographic use.
+    var persistantHashValue: String {
+        sha256Identifier
     }
-}
-
-extension Data {
-    var sha256Identifier: String {
+    
+    // Secure and stable across launches (Always produces the same output for the same input)
+    private var sha256Identifier: String {
         let digest = SHA256.hash(data: self)
         return digest.map { String(format: "%02x", $0) }.joined()
     }

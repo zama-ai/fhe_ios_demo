@@ -102,7 +102,7 @@ extension SleepTab {
                     // Input might have been deleted in DataVault.
                     print("nil input, deleting output")
                     try await Storage.deleteFromDisk(output)
-                    self.uploadedSampleMD5 = nil
+                    self.uploadedSampleHash = nil
                     self.uploadedSampleTaskID = nil
                     self.status = nil
                     result = nil
@@ -140,29 +140,29 @@ extension SleepTab {
                 throw CustomError.missingServerKey
             }
             
-            let md5 = keyToUpload.md5Identifier
-            if md5 == self.uploadedKeyMD5, let uid = self.uploadedKeyUID {
+            let hash = keyToUpload.persistantHashValue
+            if hash == self.uploadedKeyHash, let uid = self.uploadedKeyUID {
                 return uid // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
 
             let newUID = try await Network.shared.uploadServerKey(keyToUpload, for: serverTask)
-            self.uploadedKeyMD5 = md5
+            self.uploadedKeyHash = hash
             self.uploadedKeyUID = newUID
             return newUID
         }
         
         private func uploadSample(_ sampleToUpload: Data, uid: Network.UID) async throws -> Network.TaskID {
-            let md5 = sampleToUpload.md5Identifier
-            if md5 == self.uploadedSampleMD5, let taskID = self.uploadedSampleTaskID {
+            let hash = sampleToUpload.persistantHashValue
+            if hash == self.uploadedSampleHash, let taskID = self.uploadedSampleTaskID {
                 return taskID // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
 
             let taskID = try await Network.shared.startTask(serverTask, uid: uid, encrypted_input: sampleToUpload)
-            self.uploadedSampleMD5 = md5
+            self.uploadedSampleHash = hash
             self.uploadedSampleTaskID = taskID
             return taskID
         }
@@ -173,15 +173,15 @@ extension SleepTab {
             return Storage.url(for: output)
         }
         
-        // Note: ServerKey md5 and uid are SHARED between Sleep and Weight Tabs
-        @UserDefaultsStorage(key: "SHARED.uploadedKeyMD5", defaultValue: nil)
-        private var uploadedKeyMD5: String?
+        // Note: ServerKey hash and uid are SHARED between Sleep and Weight Tabs
+        @UserDefaultsStorage(key: "SHARED.uploadedKeyHash", defaultValue: nil)
+        private var uploadedKeyHash: String?
         
         @UserDefaultsStorage(key: "SHARED.uploadedKeyUID", defaultValue: nil)
         private var uploadedKeyUID: Network.UID?
         
-        @UserDefaultsStorage(key: "SLEEP.uploadedSampleMD5", defaultValue: nil)
-        private var uploadedSampleMD5: String?
+        @UserDefaultsStorage(key: "SLEEP.uploadedSampleHash", defaultValue: nil)
+        private var uploadedSampleHash: String?
 
         @UserDefaultsStorage(key: "SLEEP.uploadedSampleTaskID", defaultValue: nil)
         private var uploadedSampleTaskID: Network.TaskID?

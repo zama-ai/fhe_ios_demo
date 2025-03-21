@@ -255,7 +255,8 @@ extension ProfileTab {
             let data = try encryptedMatrix.serialize() // 8 Kb
             
             self.consoleOutput += "Encrypted Profile: \(data.formattedSize)\n\n"
-            
+            self.consoleOutput += "Encrypted Profile hash: \(data.persistantHashValue)\n\n"
+
             try await Storage.write(.concreteEncryptedProfile, data: data)
             profileOnDisk = true
             

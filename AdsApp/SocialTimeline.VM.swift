@@ -60,7 +60,7 @@ extension SocialTimeline {
                 throw CustomError.missingServerKey
             }
             
-            let profileHash = profile.md5Identifier
+            let profileHash = profile.persistantHashValue
             guard profileHash != Self.profileHash else {
                 print("Profile unchanged, skipping upload")
                 return
