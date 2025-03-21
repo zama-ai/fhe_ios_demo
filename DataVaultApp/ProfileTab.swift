@@ -2,14 +2,13 @@
 
 import SwiftUI
 
-#Preview {
-    ProfileTab()
-}
+//#Preview {
+//    ProfileTab()
+//}
 
 struct ProfileTab: View {
     @StateObject private var vm = ViewModel()
     @State private var justSaved: Bool = false
-    @State private var showConsole: Bool = true
     private let tabType: DataVaultTab = .profile
     
     var body: some View {
@@ -24,7 +23,7 @@ struct ProfileTab: View {
                     demographics()
                     interestsGrid()
                     encryptExportArea()
-                    consoleArea()
+                    ConsoleSection(title: "FHE Encryption", output: vm.consoleOutput)
                     Spacer()
                 }
                 .padding(.horizontal, 30)
@@ -162,31 +161,7 @@ struct ProfileTab: View {
                 OpenAppButton(.fheAds)
             }
         }
-    }
-    
-    @ViewBuilder
-    private func consoleArea() -> some View {
-        VStack {
-            HStack {
-                Text("FHE Encryption")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .customFont(.title3)
-                Spacer()
-                Toggle("Show", isOn: $showConsole)
-                    .labelsHidden()
-            }
-            
-            if showConsole {
-                CopyableText(vm.consoleOutput)
-                    .customFont(.caption2)
-                    .fontDesign(.monospaced)
-                    .padding(8)
-                    .frame(maxWidth: .infinity, minHeight: 200, alignment: .topLeading)
-                    .background(Color.zamaGreyConsole)
-                    .tint(.black)
-            }
-        }
-    }
+    }    
 }
 
 extension ProfileTab {

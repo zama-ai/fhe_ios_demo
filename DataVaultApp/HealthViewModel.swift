@@ -163,6 +163,14 @@ final class HealthViewModel: ObservableObject {
     
     // MARK: - ENCRYPTION -
     func encrypt(night: Sleep.Night) async throws {
+        let nightLogged = String(describing: night)
+            .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep", with: "")
+
+        self.sleepConsoleOutput = ""
+        self.sleepConsoleOutput += "Encrypting night...\n\n"
+        self.sleepConsoleOutput += "\(nightLogged)\n\n"
+        self.sleepConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
+
         try await ensureKeysExist()
         
         let example: [[Int]] = night.samples.map {
@@ -172,8 +180,13 @@ final class HealthViewModel: ObservableObject {
         if let pk {
             let list = try CompactCiphertextList(encrypting: example, publicKey: pk)
             let listData = try list.toData()
+            
+
             try await Storage.write(.sleepList, data: listData)
             encryptedSleep = listData
+            
+            self.sleepConsoleOutput += "Encrypted night: \(listData.formattedSize)\n\n"
+            self.sleepConsoleOutput += "Saved at \(Storage.url(for: .sleepList))\n"
         }
     }
     
@@ -191,6 +204,11 @@ final class HealthViewModel: ObservableObject {
     }
     
     func encryptWeight() async throws {
+        self.weightConsoleOutput = ""
+        self.weightConsoleOutput += "Encrypting weights...\n\n"
+        self.weightConsoleOutput += "\(weight)\n\n"
+        self.weightConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
+        
         try await ensureKeysExist()
         
         if let pk {
@@ -199,6 +217,9 @@ final class HealthViewModel: ObservableObject {
             let arrayData = try array.toData()
             try await Storage.write(.weightList, data: arrayData)
             encryptedWeight = arrayData
+            
+            self.weightConsoleOutput += "Encrypted weights: \(arrayData.formattedSize)\n\n"
+            self.weightConsoleOutput += "Saved at \(Storage.url(for: .weightList))\n"
         }
     }
     
