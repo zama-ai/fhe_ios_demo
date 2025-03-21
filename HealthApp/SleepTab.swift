@@ -170,6 +170,7 @@ extension SleepTab {
         private func getServerResult(uid: Network.UID, taskID: Network.TaskID) async throws -> URL {
             let result = try await Network.shared.getSleepResult(taskID: taskID, uid: uid)
             try await Storage.write(output, data: result)
+            try await Storage.write(output, data: result, suffix: "preview")
             return Storage.url(for: output)
         }
         

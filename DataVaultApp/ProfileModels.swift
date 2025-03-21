@@ -11,15 +11,6 @@ import SwiftUI
     Text("\(me.oneHotBinary)")
 }
 
-protocol PrettyNamable {}
-extension PrettyNamable {
-    var prettyTypeName: String {
-        String(describing: self)
-            .replacingOccurrences(of: "_", with: " ")
-            .localizedCapitalized
-    }
-}
-
 protocol OneHotable: CaseIterable where Self: Equatable {
     var oneHot: [Bool] { get }
 }
@@ -99,7 +90,7 @@ extension Profile {
     }
 }
 
-enum Gender: PrettyNamable, OneHotable {
+enum Gender: PrettyTypeNamable, OneHotable {
     case female, male
 }
 
@@ -135,7 +126,7 @@ enum AgeGroup: Int, OneHotable {
     }
 }
 
-enum Language: String, PrettyNamable, OneHotable {
+enum Language: String, PrettyTypeNamable, OneHotable {
     case arabic = "ar"
     case english = "en"
     case french = "fr"
@@ -155,7 +146,7 @@ enum Language: String, PrettyNamable, OneHotable {
     }
 }
 
-enum Country: String, PrettyNamable, OneHotable {
+enum Country: String, PrettyTypeNamable, OneHotable {
     case united_arab_emirates = "AE",
          united_states = "US",
          france = "FR",
@@ -191,7 +182,7 @@ enum Country: String, PrettyNamable, OneHotable {
     }
 }
 
-enum Interest: String, PrettyNamable, CaseIterable {
+enum Interest: String, PrettyTypeNamable, CaseIterable {
     
     static var allCasesPlusKids: [Interest] {
         Self.allCases

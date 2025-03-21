@@ -187,6 +187,11 @@ extension WeightTab {
             try await Storage.write(.weightMin, data: result.min)
             try await Storage.write(.weightMax, data: result.max)
             try await Storage.write(.weightAvg, data: result.avg)
+
+            try await Storage.write(.weightMin, data: result.min, suffix: "preview")
+            try await Storage.write(.weightMax, data: result.max, suffix: "preview")
+            try await Storage.write(.weightAvg, data: result.avg, suffix: "preview")
+
             return Result(min: Storage.url(for: .weightMin),
                           max: Storage.url(for: .weightMax),
                           avg: Storage.url(for: .weightAvg))

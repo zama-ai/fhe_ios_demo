@@ -39,7 +39,7 @@ struct SleepQualityView: View {
     }
 }
 
-enum SleepQuality: Int, CaseIterable {
+enum SleepQuality: Int, CaseIterable, PrettyTypeNamable {
     case excellent = 1
     case good = 2
     case moderate = 3

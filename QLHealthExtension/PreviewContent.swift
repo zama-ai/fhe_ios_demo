@@ -26,6 +26,10 @@ struct PreviewContent: View {
         case gauge(value: Int)
         case simpleChart([Double])
         case sleepChart([Sleep.Sample])
+        
+        case previewSleepQuality(quality: SleepQuality)
+        case previewSleepDuration(duration: TimeInterval)
+        case previewText(value: Double)
     }
     
     var body: some View {
@@ -44,9 +48,41 @@ struct PreviewContent: View {
             
         case .none:
             Color.red
+            
+        case .previewSleepQuality(let quality):
+            previewSleepQuality(quality)
+            
+        case .previewSleepDuration(let duration):
+            previewSleepDuration(duration)
+
+        case .previewText(let value):
+            previewText(value: value)
         }
     }
     
+    private func previewSleepDuration(_ duration: TimeInterval)  -> some View {
+        let totalMinutes = Int(duration) / 60
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+        return Text("**\(hours.formatted())** Hours **\(minutes.formatted())** Minutes")
+            .fontWeight(.regular)
+            .font(.custom("Telegraf-Bold", size: 22))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func previewSleepQuality(_ quality: SleepQuality)  -> some View {
+        Text("Sleep Quality: **\(quality.prettyTypeName)**")
+            .fontWeight(.regular)
+            .font(.custom("Telegraf-Bold", size: 22))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func previewText(value: Double)  -> some View {
+        Text("\(value.formatted(.number.precision(.fractionLength(1))))")
+            .font(.custom("Telegraf-Bold", size: 22))
+            .fontWeight(.bold)
+    }
+
     private func text(value: Double)  -> some View {
         Color.zamaYellow
             .aspectRatio(contentMode: .fit)

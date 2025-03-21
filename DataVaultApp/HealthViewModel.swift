@@ -183,6 +183,7 @@ final class HealthViewModel: ObservableObject {
             
 
             try await Storage.write(.sleepList, data: listData)
+            try await Storage.write(.sleepList, data: listData, suffix: "preview")
             encryptedSleep = listData
             
             self.sleepConsoleOutput += "Encrypted night: \(listData.formattedSize)\n\n"
