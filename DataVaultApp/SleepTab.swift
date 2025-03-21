@@ -39,9 +39,9 @@ struct SleepTab: View {
                             AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
                             Text("or")
                             Menu {
-                                AsyncButton("Regular Sample", action: { try await vm.encrypt(night: .fake) })
-                                AsyncButton("Bad Sample", action: { try await vm.encrypt(night: .fakeBad) })
-                                AsyncButton("Large Dataset (100 samples)", action: { try await vm.encrypt(night: .fakeLarge) })
+                                AsyncButton("Regular Night", action: { try await vm.encrypt(night: .fakeRegular) })
+                                AsyncButton("Bad Night", action: { try await vm.encrypt(night: .fakeBad) })
+                                AsyncButton("Long Night (100 samples)", action: { try await vm.encrypt(night: .fakeLarge) })
                             } label: {
                                 Text("Generate data sample")
                             }
@@ -54,6 +54,7 @@ struct SleepTab: View {
                 .padding(.horizontal, 30)
             }
             .scrollDismissesKeyboard(.immediately)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .customFont(.body)
         .buttonStyle(.zama)

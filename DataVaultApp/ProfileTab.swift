@@ -22,13 +22,14 @@ struct ProfileTab: View {
                     topInstructions()
                     demographics()
                     interestsGrid()
-                    encryptExportArea()
+                    buttonsArea()
                     ConsoleSection(title: "FHE Encryption", output: vm.consoleOutput)
                     Spacer()
                 }
                 .padding(.horizontal, 30)
             }
             .scrollDismissesKeyboard(.immediately)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .customFont(.body)
         .buttonStyle(.zama)
@@ -129,7 +130,7 @@ struct ProfileTab: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .customFont(.title3)
             
-            TagsGrid(items: Interest.allCases, chunkedBy: 4, selection: $vm.interests) { interest, isSelected in
+            TagsGrid(items: Interest.allCasesPlusKids, chunkedBy: 4, selection: $vm.interests) { interest, isSelected in
                 Text(interest.prettyTypeName)
                     .bold()
                     .padding(6)
@@ -140,7 +141,7 @@ struct ProfileTab: View {
     }
     
     @ViewBuilder
-    private func encryptExportArea() -> some View {
+    private func buttonsArea() -> some View {
         VStack {
             AsyncButton("Encrypt data") {
                 justSaved = false
@@ -187,7 +188,6 @@ extension ProfileTab {
             self.language = deviceLanguage.flatMap(Language.init(rawValue:)) ?? .english
             self.interests = []
             self.completedProfile = nil
-            
             self.profileOnDisk = false
             
             Task {
@@ -212,7 +212,7 @@ extension ProfileTab {
         }
         
         func generateDataSample() {
-            self.age = "35" // FIXME String // Int
+            self.age = "35"
             self.gender = .female
             self.country = .france
             self.language = .english
@@ -220,7 +220,12 @@ extension ProfileTab {
         }
         
         func validateProfile() {
-            completedProfile = Profile(age: Int(self.age),
+            guard let age = Int(self.age)  else {
+                completedProfile = nil
+                return
+            }
+            
+            completedProfile = Profile(ageGroup: AgeGroup(age: age),
                                        gender: self.gender,
                                        country: self.country,
                                        language: self.language,

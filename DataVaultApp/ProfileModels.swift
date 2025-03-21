@@ -40,14 +40,14 @@ struct Profile {
     var oneHot: [Bool] {
         let nonKidsInterests = interests.filter {$0 != .kids}
         let interestedInKids = interests.contains(.kids)
-        
+                
         return [
             gender.oneHot,
             age.oneHot,
             language.oneHot,
             [interestedInKids],
             country.oneHot,
-            Interest.allCases.filter({$0 != .kids}).map { nonKidsInterests.contains($0) }
+            Interest.allCasesExcludingKids.map { nonKidsInterests.contains($0) }
         ].flatMap(\.self)
     }
     
@@ -57,21 +57,46 @@ struct Profile {
 }
 
 extension Profile {
-    init?(age: Int?, gender: Gender?, country: Country?, language: Language?, interests: Set<Interest>) {
-        guard let age, let gender, let country, let language, !interests.isEmpty else {
+    init?(ageGroup: AgeGroup?, gender: Gender?, country: Country?, language: Language?, interests: Set<Interest>) {
+        guard let ageGroup, let gender, let country, let language, !interests.isEmpty else {
             return nil
         }
         
-        self = Profile(age: AgeGroup(age: age),
+        self = Profile(age: ageGroup,
                        gender: gender,
                        country: country,
                        language: language,
                        interests: interests)
     }
-}
+    
+    init?(from oneHot: [UInt64]) {
+        var oneHot = oneHot
+        guard !oneHot.isEmpty else { return nil }
+        let (genderHot, ageHot, languageHot, kidsHot, countryHot, interestsHot) = (
+            oneHot.popFirst(Gender.allCases.count),
+            oneHot.popFirst(AgeGroup.allCases.count),
+            oneHot.popFirst(Language.allCases.count),
+            oneHot.removeFirst(),
+            oneHot.popFirst(Country.allCases.count),
+            oneHot.popFirst(Interest.allCases.count - 1)
+        )
 
-enum MaritalStatus: PrettyNamable, CaseIterable {
-    case single, engaged
+        let ageGroup = zip(ageHot, AgeGroup.allCases).first(where: { $0.0 == 1 })?.1
+        let gender = zip(genderHot, Gender.allCases).first(where: { $0.0 == 1 })?.1
+        let country = zip(countryHot, Country.allCases).first(where: { $0.0 == 1 })?.1
+        let language = zip(languageHot, Language.allCases).first(where: { $0.0 == 1 })?.1
+        let interestsTMP = zip(interestsHot, Interest.allCasesExcludingKids).filter({ $0.0 == 1 }).map { $0.1 }
+        var interests = Set(interestsTMP)
+        if kidsHot == 1 {
+            interests.insert(.kids)
+        }
+        
+        if let p = Profile(ageGroup: ageGroup, gender: gender, country: country, language: language, interests: interests) {
+            self = p
+        } else {
+            return nil
+        }
+    }
 }
 
 enum Gender: PrettyNamable, OneHotable {
@@ -96,6 +121,16 @@ enum AgeGroup: Int, OneHotable {
             self = .middle_adult
         } else {
             self = .senior
+        }
+    }
+    
+    var exampleAge: Int {
+        switch self {
+        case .child: 2
+        case .teen: AgeGroup.child.rawValue + 2
+        case .young_adult: AgeGroup.teen.rawValue + 2
+        case .middle_adult: AgeGroup.young_adult.rawValue + 2
+        case .senior: AgeGroup.middle_adult.rawValue + 2
         }
     }
 }
@@ -156,7 +191,16 @@ enum Country: String, PrettyNamable, OneHotable {
     }
 }
 
-enum Interest: String, PrettyNamable, OneHotable {
+enum Interest: String, PrettyNamable, CaseIterable {
+    
+    static var allCasesPlusKids: [Interest] {
+        Self.allCases
+    }
+    
+    static var allCasesExcludingKids: [Interest] {
+        Self.allCases.filter { $0 != .kids}
+    }
+    
     case animals
     case art
     case automobiles
@@ -188,4 +232,10 @@ enum Interest: String, PrettyNamable, OneHotable {
     case travel
     case video_games
     case writers
+}
+
+fileprivate extension Array {
+    mutating func popFirst(_ n: Int) -> [Element] {
+        return (0..<Swift.min(n, count)).map { _ in removeFirst() }
+    }
 }

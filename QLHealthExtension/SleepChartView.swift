@@ -4,7 +4,7 @@ import SwiftUI
 import Charts
 
 #Preview {
-    SleepChartView(samples: Sleep.Night.fake.samples)
+    SleepChartView(samples: Sleep.Night.fakeRegular.samples)
         .padding()
 }
 

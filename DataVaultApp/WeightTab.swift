@@ -48,6 +48,7 @@ struct WeightTab: View {
                 .padding(.horizontal, 30)
             }
             .scrollDismissesKeyboard(.immediately)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .customFont(.body)
         .buttonStyle(.zama)
