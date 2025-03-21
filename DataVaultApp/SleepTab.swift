@@ -21,9 +21,7 @@ struct SleepTab: View {
                     .customFont(.title3)
                     .multilineTextAlignment(.center)
                 
-                OpenAppButton(.fheHealth(tab: .sleep)) {
-                    Text("Analyze data on FHE Health")
-                }
+                OpenAppButton(.fheHealth(tab: .sleep))
             } else {
                 let icon = Image(systemName: "exclamationmark.triangle.fill")
                 Text("\(icon)\nNo data found")

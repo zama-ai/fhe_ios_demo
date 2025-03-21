@@ -159,9 +159,7 @@ struct ProfileTab: View {
                         .multilineTextAlignment(.center)
                 }
                 
-                OpenAppButton(.fheAds) {
-                    Text("Export data on FHE Ads")
-                }
+                OpenAppButton(.fheAds)
             }
         }
     }

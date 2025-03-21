@@ -23,9 +23,7 @@ struct WeightTab: View {
                     .customFont(.title3)
                     .multilineTextAlignment(.center)
                 
-                OpenAppButton(.fheHealth(tab: targetTab)) {
-                    Text("Analyze data on FHE Health")
-                }
+                OpenAppButton(.fheHealth(tab: targetTab))
             } else {
                 let icon = Image(systemName: "exclamationmark.triangle.fill")
                 Text("\(icon)\nNo data found")

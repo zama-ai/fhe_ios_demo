@@ -17,9 +17,7 @@ struct SleepTab: View {
                         await vm.selectSample()
                     }
                 } else {
-                    OpenAppButton(.zamaDataVault(tab: .sleep)) {
-                        Text("Import Encrypted Data")
-                    }
+                    OpenAppButton(.zamaDataVault(tab: .sleep))
                 }
 
                 CustomBox("Sleep Phase") {
