@@ -2,16 +2,20 @@
 
 # Deployment Script for fhe_ios_demo Server
 
-# Parse command line arguments
-REBUILD_RUST=false
-
 # Setup environment depending on the first argument
 source .common_env
+
+# Parse command line arguments
+REBUILD_RUST=false
+NO_CACHE=false
 
 for arg in "$@"; do
     case "$arg" in
         --rebuild-rust)
             REBUILD_RUST=true
+            ;;
+        --no-cache)
+            NO_CACHE=true
             ;;
     esac
 done
@@ -25,19 +29,31 @@ if ! command -v docker-compose &> /dev/null; then
 fi
 
 # Clean up existing containers
-#echo "Cleaning up existing containers..."
+echo "🧹 Cleaning up existing containers..."
 # With `docker-compose down,` Docker Compose tries to delete the network associated with 
 # the services. If no network exists, it displays this warning: 
 # `WARNING: Network server_default not found.`
-#docker-compose -p "$COMPOSE_PROJECT_NAME" down --rmi all
-#docker system prune -a -f
+if [[ $NO_CACHE == true ]]; then
+    echo "WARNING: Cache is disabled! Performing a full cleanup..."
+    docker-compose -p "$COMPOSE_PROJECT_NAME" down --rmi all
+    docker system prune -a -f
+else
+    echo "WARNING: Cache is enabled! Performing a standard cleanup..."
+    docker-compose -p "$COMPOSE_PROJECT_NAME" down
+fi
 
 # Build the Rust stage if needed
-if $REBUILD_RUST; then
-    echo "Building Rust stage..."
+if [[ $REBUILD_RUST == true ]]; then
+    echo "🔨 Building Rust stage..."
     docker build --target rust-builder -t "$RUST_IMAGE_NAME" -f "$DOCKERFILE_NAME" .
 fi
 
-# Build the Docker image and starting the Docker containers
-echo "In $COMPOSE_PROJECT_NAME: building the image '$FINAL_IMAGE_NAME' and starting the Docker containers using '$DOCKER_COMPOSE_NAME'..."
-docker build -t "$FINAL_IMAGE_NAME:latest" -f "$DOCKERFILE_NAME" "$DOCKERFILE_LOCATION"
+# # Build the Docker image and starting the Docker containers
+echo "🔨 [$COMPOSE_PROJECT_NAME]: building the image '$FINAL_IMAGE_NAME'..."
+if [[ $NO_CACHE == true ]]; then
+    echo "WARNING: Cache is disabled. Performing a full rebuild of the image $FINAL_IMAGE_NAME'..."
+    docker build -t "$FINAL_IMAGE_NAME:latest" -f "$DOCKERFILE_NAME" "$DOCKERFILE_LOCATION" --no-cache
+else
+    echo "WARNING: Cache is enabled. Building the image $FINAL_IMAGE_NAME' using available cached layers..."
+    docker build -t "$FINAL_IMAGE_NAME:latest" -f "$DOCKERFILE_NAME" "$DOCKERFILE_LOCATION"
+fi
