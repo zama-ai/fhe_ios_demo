@@ -54,7 +54,7 @@ struct HomeTab: View {
                 
                 Spacer()
             }
-            .padding(30)
+            .padding(.horizontal, 30)
             
             .customFont(.body)
         }

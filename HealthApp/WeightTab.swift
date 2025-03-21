@@ -17,9 +17,7 @@ struct WeightTab: View {
                         await vm.selectSample()
                     }
                 } else {
-                    OpenAppButton(.zamaDataVault(tab: .weight)) {
-                        Text("Import Encrypted Data")
-                    }
+                    OpenAppButton(.zamaDataVault(tab: .weight))
                 }
 
                 CustomBox("Trend") {

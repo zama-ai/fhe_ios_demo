@@ -6,7 +6,7 @@ import SwiftUI
 struct DataVaultApp: App {
     var body: some Scene {
         WindowGroup {
-            DataVaultView()
+            DataVaultRoot()
         }
     }
 }
