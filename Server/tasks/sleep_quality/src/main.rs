@@ -19,9 +19,9 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let uid = &args[1];
 
     // Construct paths
-    let sk_path = format!("./project/uploaded_files/{}.serverKey", uid);
-    let input_path = format!("./project/uploaded_files/{}.sleep_quality.input.fheencrypted", uid);
-    let output_final_score_path = format!("./project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
+    let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
+    let input_path = format!("/project/uploaded_files/{}.sleep_quality.input.fheencrypted", uid);
+    let output_final_score_path = format!("/project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
 
     // Deserialize and set server key
     let compressed_sk = deserialize_compressed_server_key(&sk_path);

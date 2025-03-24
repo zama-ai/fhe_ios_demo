@@ -8,3 +8,4 @@ celery[redis]
 redis
 python-dotenv
 pytest
+requests

@@ -13,29 +13,16 @@ use tfhe::prelude::*;
 pub mod sleep_analysis;
 
 // Compiles and installs the Rust project as a Python module, using maturin
-// with release optimizations, and the manifest is located at tasks/sleep_quality/Cargo.toml.
+// with release optimizations, and the manifest is located at tasks/sleep_quality/Cargo.toml:
 // maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml
+
+const UPLOAD_FOLDER: &str = "./project/uploaded_files";
 
 #[derive(Serialize, Deserialize)]
 pub struct EncryptedRecord {
     pub stage_id: FheUint4,
     pub slot_start: FheUint10,
     pub slot_end: FheUint10,
-}
-
-
-pub fn encrypt_brut_data(
-    clear_data: &[(u8, u16, u16)],
-    client_key: &ClientKey,
-) -> Vec<EncryptedRecord> {
-    clear_data
-        .iter()
-        .map(|&(stage_id, slot_start, slot_end)| EncryptedRecord {
-            stage_id: FheUint4::encrypt(stage_id, client_key),
-            slot_start: FheUint10::encrypt(slot_start, client_key),
-            slot_end: FheUint10::encrypt(slot_end, client_key),
-        })
-        .collect()
 }
 
 
@@ -69,45 +56,61 @@ fn serialize_compactciphertextlist(encrypted_data: &CompactCiphertextList, path:
     fs::write(path_ct, &encrypted_data).expect("Failed to write serialized encrypted data to file.");
 }
 
+
 fn deserialize_fheuint8(path: &str) -> FheUint8 {
     // Read and deserializes the encrypted output as `FheUint8` from a binary file.
     let serialized_ct = fs::read(path).unwrap();
     bincode::deserialize(&serialized_ct).unwrap()
 }
 
-// Sleep data: (stage_id, slot_start, slot_end)
-// inBed = 0
-// asleepUnspecified = 1
-// awake = 2
-// asleepCore = 3
-// asleepDeep = 4
-// asleepREM = 5
+
+pub fn encrypt_brut_data(
+    clear_data: &[(u8, u16, u16)],
+    client_key: &ClientKey,
+) -> Vec<EncryptedRecord> {
+    // Sleep data: (stage_id, slot_start, slot_end)
+    // stage_id:
+        // inBed = 0
+        // asleepUnspecified = 1
+        // awake = 2
+        // asleepCore = 3
+        // asleepDeep = 4
+        // asleepREM = 5
+    clear_data
+        .iter()
+        .map(|&(stage_id, slot_start, slot_end)| EncryptedRecord {
+            stage_id: FheUint4::encrypt(stage_id, client_key),
+            slot_start: FheUint10::encrypt(slot_start, client_key),
+            slot_end: FheUint10::encrypt(slot_end, client_key),
+        })
+        .collect()
+}
+
 
 #[pyfunction]
 pub fn generate_files(clear_data: Vec<(u8, u16, u16)>, uid: &str) -> PyResult<u8> {
 
     let current_dir = env::current_dir().unwrap();
-    println!("Starting sleep quality test with rust... from directory: {}", current_dir.display());
+    println!("\n [TFHE-RS generate_files] Starting sleep quality test with rust... from directory: {}", current_dir.display());
 
-    let sk_path = format!("./project/uploaded_files/{}.serverKey", uid);
-    let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
+    let sk_path = format!("{}/{}.serverKey", UPLOAD_FOLDER, uid);
+    let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
+    let input_path = format!("{}/{}.sleep_quality.input.fheencrypted", UPLOAD_FOLDER, uid);
     
-    let input_path = format!("./project/uploaded_files/{}.sleep_quality.input.fheencrypted", uid);
-
-    println!("sk_path    : {}", sk_path);
-    println!("ck_path    : {}", ck_path);
-    println!("input_path : {}", input_path);
+    println!("[TFHE-RS generate_files] sk_path    : {}", sk_path);
+    println!("[TFHE-RS generate_files] ck_path    : {}", ck_path);
+    println!("[TFHE-RS generate_files] input_path : {}", input_path);
 
     let config = ConfigBuilder::default().build();
     let client_key = ClientKey::generate(config);
 
     let compressed_server_key = CompressedServerKey::new(&client_key);
     let compressed_size = bincode::serialize(&compressed_server_key).unwrap().len();
-    println!("Server key generated (compressed size: {} bytes)", compressed_size);
+    println!("[TFHE-RS generate_files] Server key generated (compressed size: {} bytes)", compressed_size);
 
     let sks = compressed_server_key.decompress();
     let decompressed_size = bincode::serialize(&sks).unwrap().len();
-    println!("Server key (decompressed size: {} bytes)", decompressed_size);
+    println!("[TFHE-RS generate_files] Server key (decompressed size: {} bytes)", decompressed_size);
 
     set_server_key(sks.clone());
 
@@ -115,9 +118,9 @@ pub fn generate_files(clear_data: Vec<(u8, u16, u16)>, uid: &str) -> PyResult<u8
     let mut builder = CompactCiphertextList::builder(&public_key);
     
     for (val_u4, val_u10_1, val_u10_2) in clear_data {
-        builder.push_with_num_bits(val_u4 as u8, 4);
-        builder.push_with_num_bits(val_u10_1 as u16, 10);
-        builder.push_with_num_bits(val_u10_2 as u16, 10);
+        let _ = builder.push_with_num_bits(val_u4 as u8, 4);
+        let _ = builder.push_with_num_bits(val_u10_1 as u16, 10);
+        let _ = builder.push_with_num_bits(val_u10_2 as u16, 10);
     }
     let compact_list = builder.build();
     
@@ -152,19 +155,19 @@ pub fn decrypt(uid: &str) -> PyResult<u8> {
     let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
     let output_path = format!("./project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
     
-    println!("ck_path: {}", ck_path);
-    println!("output_path: {}", output_path);
+    println!("[TFHE-RS decrypt] ck_path: {}", ck_path);
+    println!("[TFHE-RS decrypt] output_path: {}", output_path);
 
     let deserialize_ck = deserialize_client_key(&ck_path);
 
     // Retrive the encrypted result
     let encrypted_output = deserialize_fheuint8(&output_path);
     let file_size = fs::metadata(&output_path).unwrap().len();
-    println!("Final score retieved at: {} (size: {})\n", output_path, file_size);
+    println!("[TFHE-RS decrypt] Final score retieved at: {} (size: {})\n", output_path, file_size);
 
     // Decrypt the output
     let decrypted_response: u8 = encrypted_output.decrypt(&deserialize_ck);
-    println!("Final score: {}", decrypted_response);
+    println!("[TFHE-RS decrypt] Final score: {}", decrypted_response);
 
     // Return the result
     Ok(decrypted_response)

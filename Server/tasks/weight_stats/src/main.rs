@@ -15,11 +15,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let uid = &args[1];
 
-    let sk_path = format!("./project/uploaded_files/{}.serverKey", uid);
-    let input_path = format!("./project/uploaded_files/{}.weight_stats.input.fheencrypted", uid);
-    let output_avg_path = format!("./project/uploaded_files/{}.outputAvg.weight_stats.fheencrypted", uid);
-    let output_min_path = format!("./project/uploaded_files/{}.outputMin.weight_stats.fheencrypted", uid);
-    let output_max_path = format!("./project/uploaded_files/{}.outputMax.weight_stats.fheencrypted", uid);
+    let sk_path = format!("/project/uploaded_files/{}.serverKey", uid);
+    let input_path = format!("/project/uploaded_files/{}.weight_stats.input.fheencrypted", uid);
+    let output_avg_path = format!("/project/uploaded_files/{}.outputAvg.weight_stats.fheencrypted", uid);
+    let output_min_path = format!("/project/uploaded_files/{}.outputMin.weight_stats.fheencrypted", uid);
+    let output_max_path = format!("/project/uploaded_files/{}.outputMax.weight_stats.fheencrypted", uid);
 
     let compressed = deserialize_compressed_server_key(&sk_path);
     let decompressed = compressed.decompress();

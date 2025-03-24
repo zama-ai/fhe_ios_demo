@@ -5,36 +5,33 @@ import numpy as np
 
 import weight_stats
 
+from utils import *
+
+
 def test_weight_stats():
-    print("\nweight_stats module loaded, calling compute_stats()...")
+    print("\n Run test_weight_stats")
     
     weights_list = [68.0, 65.0, 69.0, 70.0, 70.5]
     
     uid = "test_weight_stats"
     
-    ck_path = f"./project/uploaded_files/{uid}.clientKey"
-    sk_path = f"./project/uploaded_files/{uid}.serverKey"
-
-    input_path = f"./project/uploaded_files/{uid}.weight_stats.input.fheencrypted"
-    
-    output_avg_path = f"./project/uploaded_files/{uid}.outputAvg.weight_stats.fheencrypted"
-    output_min_path = f"./project/uploaded_files/{uid}.outputMin.weight_stats.fheencrypted"
-    output_max_path = f"./project/uploaded_files/{uid}.outputMax.weight_stats.fheencrypted"
+    ck_path = f"{UPLOAD_FOLDER}/{uid}.clientKey"
+    serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
+    input_path = f"{UPLOAD_FOLDER}/{uid}.weight_stats.input.fheencrypted"
+    output_path = f"{UPLOAD_FOLDER}/{uid}.weightList.output.fheencrypted"
     
     start_time = time.time()
     
     weight_stats.generate_files(weights_list, uid)
 
-    assert os.path.exists(sk_path), f"Missing file: {sk_path=}"
+    assert os.path.exists(serverkey_path), f"Missing file: {serverkey_path=}"
     assert os.path.exists(ck_path), f"Missing file: {ck_path=}"
     assert os.path.exists(input_path), f"Missing file: {input_path=}"
     
-    weight_stats.run(uid)
-
-    assert os.path.exists(output_avg_path), f"Missing file: {output_avg_path=}"
-    assert os.path.exists(output_min_path), f"Missing file: {output_min_path=}"
-    assert os.path.exists(output_max_path), f"Missing file: {output_max_path=}"
-
+    # weight_stats.run(uid)
+    
+    run_task_on_server("weight_stats", serverkey_path, input_path, output_path)
+    
     # Decrypt and check results
     decrypted_avg, decrypted_min, decrypted_max = weight_stats.decrypt(uid)
 

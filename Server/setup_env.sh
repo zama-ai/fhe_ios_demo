@@ -5,6 +5,12 @@ if [ "$1" == "dev" ]; then
     export ENV_FILE=".env_dev"
     export MODE="dev"
     export COMPOSE_PROJECT_NAME="fhe_ios_demo_dev"
+elif [ "$1" == "ci" ]; then
+    echo "🚀 Testing in the development environment..."
+    export ENV_FILE=".env_dev"
+    export MODE="ci"
+    export COMPOSE_PROJECT_NAME="fhe_ios_demo_dev"
+
 elif [ "$1" == "staging" ]; then
     echo "🚀 Testing in the staging environment..."
     export ENV_FILE=".env_staging"
