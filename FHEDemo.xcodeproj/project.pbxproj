@@ -107,6 +107,7 @@
 				"Helpers-Zama/Network.swift",
 				"Helpers-Zama/SleepModels.swift",
 				Reusable/AsyncButton.swift,
+				Reusable/CustomizableCalendar.swift,
 				"Reusable/Data+hash.swift",
 				Reusable/FilePreview.swift,
 				Reusable/NavigationTitleView.swift,
@@ -120,6 +121,7 @@
 				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
 				ZamaUI/SharedAssets.xcassets,
 				ZamaUI/ZamaButtons.swift,
+				ZamaUI/ZamaCalendar.swift,
 				ZamaUI/ZamaConfig.swift,
 				ZamaUI/ZamaLink.swift,
 			);
@@ -840,7 +842,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -905,7 +907,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

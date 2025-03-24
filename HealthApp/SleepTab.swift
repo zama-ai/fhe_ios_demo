@@ -8,10 +8,19 @@ import SwiftUI
 
 struct SleepTab: View {
     @StateObject private var vm = ViewModel()
+    @State private var selectedDate: Date?
+    @State private var path: [Destination] = []
 
+    enum Destination {
+        case calendar
+    }
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 16) {
+                Button("Select Date") {
+                    path.append(.calendar)
+                }
                 if vm.samplesAvailable {
                     AsyncButton("Select Encrypted Data") {
                         await vm.selectSample()
@@ -55,14 +64,38 @@ struct SleepTab: View {
                     }
                 }
             }
+            .navigationDestination(for: Destination.self) { value in
+                switch value {
+                case .calendar:
+                    VStack(spacing: 0) {
+                        Text("\(Image(systemName: "bed.double.fill")) Historical Data")
+                            .font(.largeTitle)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                        
+                        ZamaCalendar(covering: Calendar.current.dateInterval(of: .year, for: .now)!,
+                                     selection: $selectedDate,
+                                     canSelect: { _ in true })
+                    }
+                    .background(Color.zamaYellowLight)
+                    .onChange(of: selectedDate) {
+                        Task {
+                            try await Task.sleep(for: .seconds(0.1))
+                            path = []
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Sleep Analysis")
             .padding()
-            .navigationTitleView("Sleep Analysis", icon: "bed.double.fill")
             .buttonStyle(.zama)
             .background(Color.zamaYellowLight)
             .onAppearAgain {
                 vm.refreshFromDisk()
             }
         }
+        .tint(.black)
     }
 }
 

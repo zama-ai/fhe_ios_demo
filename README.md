@@ -9,7 +9,7 @@ In app **FHE Health** and **FHE Health**, analysis and targeting is done private
 
 # Useful Links
 - [Miro flow](https://miro.com/app/board/uXjVLpwDx3c=/)
-- [Canva mockups](https://www.canva.com/design/DAGdBWLkdRE/UGMKBeI8vSnK1R-O5NFH2Q/edit)
+- [Canva screens](https://www.canva.com/design/DAGdBWLkdRE/UGMKBeI8vSnK1R-O5NFH2Q/edit)
 - [GitHub iOS Demo](https://github.com/zama-ai/fhe_ios_demo)
 - [GitHub DEAI](https://github.com/zama-ai/deai-dot-products)
 - [ Developer](https://developer.apple.com/account/)
