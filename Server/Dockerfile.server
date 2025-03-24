@@ -1,7 +1,7 @@
 # ===========================
 # Stage 1: Build Rust binaries (built separately with --rebuild-rust)
 # ===========================
-FROM rust:1.76 AS rust-builder
+FROM rust:1.84 AS rust-builder
 
 # Set working directory
 WORKDIR /build
@@ -24,16 +24,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
+    python3 \
     python3-pip \
+    python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /project
 RUN mkdir -p /project/data
+RUN mkdir -p /project/tests
 
 # Copy Python dependencies, configuration files and Python server
 COPY server_requirements.txt tasks.yaml server.py entrypoint.sh utils.py tasks.py ./
 COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
+COPY tasks/ /project/tests/
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r server_requirements.txt
