@@ -47,13 +47,27 @@ fn serialize_compressed_key(compressed_server_key: &CompressedServerKey, path: &
 }
 
 
+fn serialize_client_key(compressed_server_key: &ClientKey, path: &str) {
+    // Serializes a compressed server key and saves it to a file.
+    let serialized_ct = bincode::serialize(compressed_server_key).expect("Failed to serialize key.");
+    let path_ct = Path::new(path);
+    fs::write(path_ct, &serialized_ct).expect("Failed to write serialized key to file.");
+}
+
+
+fn deserialize_client_key(path: &str) -> ClientKey {
+    let path_ct = Path::new(path);
+    let serialized_ct = fs::read(path_ct).expect("Failed to read serialized key file.");
+    bincode::deserialize(&serialized_ct).expect("Failed to deserialize client key.")
+}
+
+
 fn serialize_compactciphertextlist(encrypted_data: &CompactCiphertextList, path: &str) {
     // Serializes an encrypted `CompactCiphertextList` and saves it to a file.
     let encrypted_data = bincode::serialize(encrypted_data).expect("Failed to serialize encrypted data.");
     let path_ct = Path::new(path);
     fs::write(path_ct, &encrypted_data).expect("Failed to write serialized encrypted data to file.");
 }
-
 
 fn deserialize_fheuint8(path: &str) -> FheUint8 {
     // Read and deserializes the encrypted output as `FheUint8` from a binary file.
@@ -70,48 +84,24 @@ fn deserialize_fheuint8(path: &str) -> FheUint8 {
 // asleepREM = 5
 
 #[pyfunction]
-pub fn test_good_sleep() -> PyResult<u8> {
-    // Good night scenario.
-    let clear_data = vec![
-        (3, 0, 150),   // asleepCore
-        (4, 150, 710), // asleepDeep
-        (5, 710, 800), // asleepREM
-    ];
-    run_sleep("good_night", clear_data)
-}
-
-
-#[pyfunction]
-pub fn test_bad_sleep() -> PyResult<u8> {
-    // Bad sleep scenario.
-    let clear_data = vec![
-        // (0, 0, 100),   // inBed (but not sleeping)
-        (0,   0, 120),
-        (3, 120, 150),
-        (0, 150, 210),
-        (4, 210, 240),
-        (0, 240, 300)
-    ];
-    run_sleep("bad_night", clear_data)
-}
-
-fn run_sleep(uid: &str, clear_data: Vec<(u8, u16, u16)>) -> PyResult<u8> {
+pub fn generate_files(clear_data: Vec<(u8, u16, u16)>, uid: &str) -> PyResult<u8> {
 
     let current_dir = env::current_dir().unwrap();
-    println!("Starting sleep quality test... from directory: {}", current_dir.display());
+    println!("Starting sleep quality test with rust... from directory: {}", current_dir.display());
 
-    let sk_path = format!("project/uploaded_files/{}.serverKey", uid);
-    let input_path = format!("project/uploaded_files/{}.sleep_quality.input.fheencrypted", uid);
-    let output_path = format!("project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
+    let sk_path = format!("./project/uploaded_files/{}.serverKey", uid);
+    let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
+    
+    let input_path = format!("./project/uploaded_files/{}.sleep_quality.input.fheencrypted", uid);
 
     println!("sk_path    : {}", sk_path);
+    println!("ck_path    : {}", ck_path);
     println!("input_path : {}", input_path);
-    println!("output_path: {}", output_path);
 
     let config = ConfigBuilder::default().build();
     let client_key = ClientKey::generate(config);
-    let compressed_server_key = CompressedServerKey::new(&client_key);
 
+    let compressed_server_key = CompressedServerKey::new(&client_key);
     let compressed_size = bincode::serialize(&compressed_server_key).unwrap().len();
     println!("Server key generated (compressed size: {} bytes)", compressed_size);
 
@@ -120,7 +110,6 @@ fn run_sleep(uid: &str, clear_data: Vec<(u8, u16, u16)>) -> PyResult<u8> {
     println!("Server key (decompressed size: {} bytes)", decompressed_size);
 
     set_server_key(sks.clone());
-    serialize_compressed_key(&compressed_server_key, &sk_path);
 
     let public_key = CompactPublicKey::new(&client_key);
     let mut builder = CompactCiphertextList::builder(&public_key);
@@ -132,7 +121,16 @@ fn run_sleep(uid: &str, clear_data: Vec<(u8, u16, u16)>) -> PyResult<u8> {
     }
     let compact_list = builder.build();
     
+    serialize_compressed_key(&compressed_server_key, &sk_path);
+    serialize_client_key(&client_key, &ck_path);
     serialize_compactciphertextlist(&compact_list, &input_path);
+
+    Ok(1)
+}
+
+
+#[pyfunction]
+pub fn run(uid: &str) -> PyResult<u8> {
 
     // Call main.rs
     let _status = Command::new("cargo")
@@ -143,14 +141,29 @@ fn run_sleep(uid: &str, clear_data: Vec<(u8, u16, u16)>) -> PyResult<u8> {
         .stderr(Stdio::inherit())
         .status()
         .expect("Failed to test sleep_analysis use-case.");
-        
+
+    Ok(1)
+}
+
+
+#[pyfunction]
+pub fn decrypt(uid: &str) -> PyResult<u8> { 
+
+    let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
+    let output_path = format!("./project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
+    
+    println!("ck_path: {}", ck_path);
+    println!("output_path: {}", output_path);
+
+    let deserialize_ck = deserialize_client_key(&ck_path);
+
     // Retrive the encrypted result
     let encrypted_output = deserialize_fheuint8(&output_path);
     let file_size = fs::metadata(&output_path).unwrap().len();
     println!("Final score retieved at: {} (size: {})\n", output_path, file_size);
 
     // Decrypt the output
-    let decrypted_response: u8 = encrypted_output.decrypt(&client_key);
+    let decrypted_response: u8 = encrypted_output.decrypt(&deserialize_ck);
     println!("Final score: {}", decrypted_response);
 
     // Return the result
@@ -161,7 +174,8 @@ fn run_sleep(uid: &str, clear_data: Vec<(u8, u16, u16)>) -> PyResult<u8> {
 
 #[pymodule]
 fn sleep_quality(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(test_good_sleep, m)?)?;
-    m.add_function(wrap_pyfunction!(test_bad_sleep, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_files, m)?)?;
+    m.add_function(wrap_pyfunction!(run, m)?)?;
+    m.add_function(wrap_pyfunction!(decrypt, m)?)?;
     Ok(())
 }

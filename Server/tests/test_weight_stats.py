@@ -36,7 +36,7 @@ def test_weight_stats():
     assert os.path.exists(output_max_path), f"Missing file: {output_max_path=}"
 
     # Decrypt and check results
-    decrypted_avg, decrypted_min, decrypted_max = weight_stats.decrypt_weight_stats(uid)
+    decrypted_avg, decrypted_min, decrypted_max = weight_stats.decrypt(uid)
 
     assert np.mean(weights_list) * 10 == decrypted_avg, f"Expected avg: {np.mean(weights_list)}, got: {decrypted_avg}"
     assert np.min(weights_list) * 10 == decrypted_min, f"Expected min: {np.min(weights_list)}, got: {decrypted_min}"

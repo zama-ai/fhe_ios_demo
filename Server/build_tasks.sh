@@ -28,15 +28,13 @@ for task in $TASKS; do
 
         # Determine binary name from the task directory name
         BINARY_NAME="$task"
-        
+
         # Copy the binary to the bin directory
-        cp "target/release/$BINARY_NAME" "$BIN_DIR/"
+        cp -r "target/release/$BINARY_NAME" "$BIN_DIR/"
 
-        echo "Generate random data"
-        cargo run --release --bin lib.rs
+        # echo "Testing $task Python module"
+        # maturin develop --release --manifest-path tasks/$task/Cargo.toml
 
-        
-        
     # Python task
     elif ls src/*.py >/dev/null 2>&1; then
         for python_file in src/*.py; do

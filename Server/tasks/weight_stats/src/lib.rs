@@ -88,7 +88,7 @@ fn min(data: &[u16]) -> u16 {
 pub fn generate_files(clear_data: Vec<f64>, uid: String) -> PyResult<u8> {
 
     let current_dir = env::current_dir().unwrap();
-    println!("Starting weight stats test... from directory: {}", current_dir.display());
+    println!("Starting weight stats test with rust... from directory: {}", current_dir.display());
 
     let sk_path = format!("./project/uploaded_files/{}.serverKey", uid);
     let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
@@ -150,7 +150,7 @@ pub fn run(uid: String) -> PyResult<u8> {
 }
     
 #[pyfunction]
-pub fn decrypt_weight_stats(uid: String) -> PyResult<(u16, u16, u16)> {
+pub fn decrypt(uid: String) -> PyResult<(u16, u16, u16)> {
 
     let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
     let output_avg_path = format!("./project/uploaded_files/{}.outputAvg.weight_stats.fheencrypted", uid);
@@ -192,7 +192,7 @@ pub fn decrypt_weight_stats(uid: String) -> PyResult<(u16, u16, u16)> {
 fn weight_stats(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_files, m)?)?;
     m.add_function(wrap_pyfunction!(run, m)?)?;
-    m.add_function(wrap_pyfunction!(decrypt_weight_stats, m)?)?;
+    m.add_function(wrap_pyfunction!(decrypt, m)?)?;
     Ok(())
 }
 
