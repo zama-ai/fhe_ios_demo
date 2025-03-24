@@ -28,7 +28,6 @@ for task in $TASKS; do
 
         # Determine binary name from the task directory name
         BINARY_NAME="$task"
-
         # Copy the binary to the bin directory
         cp -r "target/release/$BINARY_NAME" "$BIN_DIR/"
 
