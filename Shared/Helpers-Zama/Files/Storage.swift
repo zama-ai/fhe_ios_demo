@@ -73,6 +73,16 @@ final class Storage {
     private init() {
         print("🗂️ Private Folder: \nopen \(appPrivateFolder)")
         print("🗂️ Shared Folder: \nopen \(appGroupSharedFolder)")
+        
+        do {
+            for folder in [appPrivateFolder, appAndExtensionFolder, appGroupSharedFolder] {
+                if !fileManager.fileExists(atPath: folder.path) {
+                    try fileManager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
+                }
+            }
+        } catch {
+            print(error)
+        }
     }
     
     private static let singleton = Storage()
@@ -116,6 +126,7 @@ final class Storage {
         let pattern = file.rawValue.components(separatedBy: ".")
         let result = fileURLs.filter {
             $0.pathExtension == pattern.last
+            && !$0.deletingPathExtension().lastPathComponent.hasSuffix("-preview")
             && $0.lastPathComponent.hasPrefix(pattern.first!)
         }
         
@@ -171,21 +182,21 @@ extension Storage {
         guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("No private folder")
         }
-        return folder
+        return folder.appending(component: "v9")
     }
 
     private var appAndExtensionFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder
+        return sharedFolder.appending(component: "v9")
     }
 
     private var appGroupSharedFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder
+        return sharedFolder.appending(component: "v9")
     }
 }
 
@@ -196,6 +207,28 @@ extension Data {
 }
 
 extension Storage {
+    // MARK: - Date (eg, for nights) -
+    //
+    static func suffix(for date: Date) -> String {
+        date.formatted(date: .numeric, time: .omitted)
+            .replacingOccurrences(of: "/", with: "-")
+    }
+
+    // Ex: sleepList-23-03-2025.fheencrypted
+    static func date(from fileName: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX") // Ensures consistent parsing
+        
+        let text = fileName
+            .replacingOccurrences(of: "sleepList-", with: "")
+            .replacingOccurrences(of: ".fheencrypted", with: "")
+        
+        return formatter.date(from: text)
+    }
+
+    // MARK: - DateInterval (eg, for weights) -
+
     static func suffix(for interval: DateInterval) -> String {
         let start = interval.start
             .formatted(date: .numeric, time: .omitted)
@@ -208,9 +241,10 @@ extension Storage {
         return "\(start)_\(end)"
     }
 
-    static func dateInterval(for fileName: String) -> DateInterval? {
+    // Ex: weightList-25-09-2024_25-03-2025.fheencrypted
+    static func dateInterval(from fileName: String) -> DateInterval? {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd-MM-yyyy" // Matches the input format
+        formatter.dateFormat = "dd-MM-yyyy"
         formatter.locale = Locale(identifier: "en_US_POSIX") // Ensures consistent parsing
         
         let comps = fileName

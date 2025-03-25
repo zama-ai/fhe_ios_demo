@@ -54,10 +54,7 @@ struct ZamaCalendar: View {
                     }
                 }
         } monthHeader: { month in
-            let component = calendar.component(.month, from: month)
-            // Append year for any January, any December, and the month the calendar starts at
-            let showYear = component == 1 || calendar.isDate(month, equalTo: interval.start, toGranularity: .month)
-            Text(month.formatted(.dateTime.month(.wide).year(showYear ? .defaultDigits : .omitted).locale(locale)).capitalized)
+            Text(month.formatted(.dateTime.month(.wide).year(.defaultDigits).locale(locale)).capitalized)
                 .font(.title)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 16)

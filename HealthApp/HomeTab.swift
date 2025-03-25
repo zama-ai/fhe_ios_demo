@@ -12,6 +12,7 @@ struct HomeTab: View {
     @State private var sleepInput: URL?
     @State private var sleepResult: URL?
 
+    @State private var weightInterval: DateInterval?
     @State private var weightMin: URL?
     @State private var weightMax: URL?
     @State private var weightAvg: URL?
@@ -39,11 +40,18 @@ struct HomeTab: View {
                 }
                 
                 customBox(goTo: .weight) {
-                    if weightAvg == nil && weightMax == nil && weightMin == nil{
+                    if weightAvg == nil && weightMax == nil && weightMin == nil && weightInterval == nil {
                         NoDataBadge()
                     } else {
                         VStack(alignment: .leading, spacing: 0) {
-                            
+                            if let weightInterval {
+                                Text("\(weightInterval.start.formatted(date: .numeric, time: .omitted)) - \(weightInterval.end.formatted(date: .numeric, time: .omitted))")
+                                    .customFont(.body)
+                                    .bold()
+                                    .foregroundStyle(Color.zamaYellow)
+                                    .padding(.bottom, 8)
+                            }
+
                             if let weightMin {
                                 HStack {
                                     Text("Min: ")
@@ -70,6 +78,8 @@ struct HomeTab: View {
                                     Text(" kg")
                                 }
                             }
+                        }.overlay {
+                            Color.white.opacity(0.01) // Hack to make hit testing work over QL/FilePreview areas
                         }
                     }
                 }
@@ -85,24 +95,31 @@ struct HomeTab: View {
             Task {
                 let sleepInputURL = Storage.url(for: .sleepList, suffix: "preview")
                 let sleepResultURL = Storage.url(for: .sleepScore, suffix: "preview")
-
+                
+                if let weightListURL = try Storage.listEncryptedFiles(matching: .weightList).first,
+                   let interval = Storage.dateInterval(from: weightListURL.lastPathComponent) {
+                    weightInterval = interval
+                } else {
+                    weightInterval = nil
+                }
+                
                 let weightMinURL = Storage.url(for: .weightMin, suffix: "preview")
                 let weightMaxURL = Storage.url(for: .weightMax, suffix: "preview")
                 let weightAvgURL = Storage.url(for: .weightAvg, suffix: "preview")
-
+                
                 // Sleep
                 if let _ = await Storage.read(sleepInputURL) {
                     sleepInput = sleepInputURL
                 } else {
                     sleepInput = nil
                 }
-
+                
                 if let _ = await Storage.read(sleepResultURL) {
                     sleepResult = sleepResultURL
                 } else {
                     sleepResult = nil
                 }
-
+                
                 // Weight
                 if let _ = await Storage.read(weightMinURL) {
                     weightMin = weightMinURL
@@ -115,7 +132,7 @@ struct HomeTab: View {
                 } else {
                     weightMax = nil
                 }
-
+                
                 if let _ = await Storage.read(weightAvgURL) {
                     weightAvg = weightAvgURL
                 } else {
@@ -124,15 +141,7 @@ struct HomeTab: View {
             }
         }
     }
-    
-    func formattedDuration(from timeInterval: TimeInterval) -> Text {
-        let totalMinutes = Int(timeInterval) / 60
-        let hours = totalMinutes / 60
-        let minutes = totalMinutes % 60
         
-        return Text("**\(hours.formatted())** Hours **\(minutes.formatted())** Minutes")
-    }
-    
     private func customBox<Content: View>(goTo tab: HealthTab, @ViewBuilder content: @escaping () -> Content) -> some View {
         CustomBox(label: { Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon) },
                   onTap: { selectedTab = tab },

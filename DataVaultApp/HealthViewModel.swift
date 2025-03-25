@@ -37,7 +37,7 @@ final class HealthViewModel: ObservableObject {
         
         if let weightListURL = try Storage.listEncryptedFiles(matching: .weightList).first {
             encryptedWeight = await Storage.read(weightListURL)
-            weightDateRange = Storage.dateInterval(for: weightListURL.lastPathComponent)
+            weightDateRange = Storage.dateInterval(from: weightListURL.lastPathComponent)
         } else {
             encryptedWeight = nil
             weightDateRange = nil
@@ -92,7 +92,7 @@ final class HealthViewModel: ObservableObject {
         let nights = process(sleepSamples: sleep)
         Task {
             if let lastNight = nights.randomElement() {
-                try await encrypt(night: lastNight)
+                try await encrypt(night: lastNight, reset: true)
             }
         }
     }
@@ -175,17 +175,19 @@ final class HealthViewModel: ObservableObject {
         let nightBefore = Calendar.current.date(byAdding: .day, value: -2, to: yesterdayNight)!
         let evenBefore = Calendar.current.date(byAdding: .day, value: -3, to: nightBefore)!
         
-        try await encrypt(night: .fakeRegular(date: yesterdayNight))
-        try await encrypt(night: .fakeBad(date: nightBefore))
-        try await encrypt(night: .fakeLarge(date: evenBefore))
+        try await encrypt(night: .fakeRegular(date: yesterdayNight), reset: true)
+        try await encrypt(night: .fakeBad(date: nightBefore), reset: false)
+        try await encrypt(night: .fakeLarge(date: evenBefore), reset: false)
     }
         
-    func encrypt(night: Sleep.Night) async throws {
+    func encrypt(night: Sleep.Night, reset: Bool) async throws {
         let nightLogged = String(describing: night)
-            .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep", with: "")
+            .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep.", with: "")
 
-        self.sleepConsoleOutput = ""
-        self.sleepConsoleOutput += "Encrypting night...\n\n"
+        if reset {
+            self.sleepConsoleOutput = ""
+        }
+        self.sleepConsoleOutput += "Encrypting night…\n\n"
         self.sleepConsoleOutput += "\(nightLogged)\n\n"
         self.sleepConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
 
@@ -199,9 +201,7 @@ final class HealthViewModel: ObservableObject {
             let list = try CompactCiphertextList(encrypting: example, publicKey: pk)
             let listData = try list.toData()
             
-            let suffix = night.date.formatted(date: .numeric, time: .omitted)
-                .replacingOccurrences(of: "/", with: "_")
-
+            let suffix = Storage.suffix(for: night.date)
             try await Storage.write(.sleepList, data: listData, suffix: suffix)
             try await Storage.write(.sleepList, data: listData, suffix: "\(suffix)-preview")
             encryptedSleep = listData
@@ -237,7 +237,7 @@ final class HealthViewModel: ObservableObject {
     
     func encryptWeight() async throws {
         self.weightConsoleOutput = ""
-        self.weightConsoleOutput += "Encrypting weights...\n\n"
+        self.weightConsoleOutput += "Encrypting weights…\n\n"
         
         guard !weight.isEmpty else {
             self.weightConsoleOutput += "No weight data in Apple Health. Use 'Generate data sample' to generate mock data.\n\n"

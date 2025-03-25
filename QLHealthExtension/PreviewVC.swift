@@ -50,8 +50,12 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         let fileNameForDeterminingType = fileName.replacingOccurrences(of: "-preview", with: "")
         var fileType = Storage.File(rawValue: fileNameForDeterminingType)?.decryptType
         
-        if fileType == nil, fileName.starts(with: "weightList"){
-            fileType = Storage.File.weightList.decryptType
+        if fileType == nil {
+            if fileName.starts(with: "weightList") {
+                fileType = Storage.File.weightList.decryptType
+            } else if fileName.starts(with: "sleepList") {
+                fileType = Storage.File.sleepList.decryptType
+            }
         }
         
         guard let fileType else {

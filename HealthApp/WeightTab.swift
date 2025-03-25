@@ -98,7 +98,7 @@ extension WeightTab {
         private func readSamplesFromDisk() async throws {
             if let fileURL = try Storage.listEncryptedFiles(matching: .weightList).first,
                let data = await Storage.read(fileURL),
-               let interval = Storage.dateInterval(for: fileURL.lastPathComponent) {
+               let interval = Storage.dateInterval(from: fileURL.lastPathComponent) {
                 samples = (fileURL, data, interval)
             } else {
                 samples = nil
@@ -201,16 +201,16 @@ extension WeightTab {
         }
         
         // Note: ServerKey hash and uid are SHARED between Sleep and Weight Tabs
-        @UserDefaultsStorage(key: "SHARED.uploadedKeyHash", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyHash", defaultValue: nil)
         private var uploadedKeyHash: String?
         
-        @UserDefaultsStorage(key: "SHARED.uploadedKeyUID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyUID", defaultValue: nil)
         private var uploadedKeyUID: Network.UID?
         
-        @UserDefaultsStorage(key: "WEIGHT.uploadedSampleHash", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_WEIGHT.uploadedSampleHash", defaultValue: nil)
         private var uploadedSampleHash: String?
 
-        @UserDefaultsStorage(key: "WEIGHT.uploadedSampleTaskID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_WEIGHT.uploadedSampleTaskID", defaultValue: nil)
         private var uploadedSampleTaskID: Network.TaskID?
     }
 }

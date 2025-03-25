@@ -234,7 +234,7 @@ extension ProfileTab {
         
         func encryptData() async throws {
             self.consoleOutput = ""
-            self.consoleOutput += "Encrypting profile...\n\n"
+            self.consoleOutput += "Encrypting profile…\n\n"
             
             guard let pk, let cryptoParams = ConcreteML.cryptoParams, let completedProfile else {
                 throw NSError(domain: "Cannot encrypt profile", code: 0, userInfo: nil)

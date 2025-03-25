@@ -7,7 +7,7 @@ import SwiftUI
     @Previewable @State var calendar = Calendar.current
     @Previewable @State var locale = Locale.current
     
-    let currentYear: DateInterval = calendar.dateInterval(of: .year, for: Date())!
+    let currentYear: DateInterval = calendar.dateInterval(of: .year, for: Date().addingTimeInterval(-3600 * 24 * 300))!
     let samples: [Date] = calendar.generateDates(in: currentYear, matching: DateComponents(day: 5))
     
     VStack {
@@ -80,7 +80,11 @@ struct CalendarView<DayCell, MonthHeader, WeekdayHeader>: View where DayCell: Vi
          @ViewBuilder monthHeader: @escaping (Date) -> MonthHeader,
          @ViewBuilder weekdayHeader: @escaping (String) -> WeekdayHeader
     ) {
-        self.interval = interval
+        // Account for small input interval (eg just a few days in the middle of the month)
+        let extendedStart = Calendar.current.dateInterval(of: .month, for: interval.start)!
+        let extendedEnd = Calendar.current.dateInterval(of: .month, for: interval.end)!
+        self.interval = DateInterval(start: extendedStart.start, end: extendedEnd.end)
+        
         self._selection = selection
         self.canSelect = canSelect
         self.dayCell = dayCell
@@ -102,6 +106,7 @@ struct CalendarView<DayCell, MonthHeader, WeekdayHeader>: View where DayCell: Vi
                               dayCell: dayCell,
                               monthHeader: monthHeader,
                               weekdayHeader: weekdayHeader)
+                    .id("month_view_\(month)")
                 }
                 .padding()
             }
@@ -149,7 +154,7 @@ struct MonthView<DayCell, MonthHeader, WeekdayHeader>: View where DayCell: View,
     }
     
     private var weekdaySymbols: [String] {
-        let symbols = calendar.weekdaySymbols // "Sun", "Mon", "Tue"...
+        let symbols = calendar.weekdaySymbols // "Sun", "Mon", "Tue"…
         let firstWeekdayIndex = calendar.firstWeekday - 1 // Convert to 0-based index
         return Array(symbols[firstWeekdayIndex...] + symbols[..<firstWeekdayIndex])
     }
@@ -161,7 +166,7 @@ struct MonthView<DayCell, MonthHeader, WeekdayHeader>: View where DayCell: View,
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
                 ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { index, name in
                     self.weekdayHeader(name)
-                        .id(index)
+                        .id("weekdayHeader_\(index)")
                 }
                 
                 ForEach(days, id: \.self) { date in

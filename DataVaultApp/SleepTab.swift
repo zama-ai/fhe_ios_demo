@@ -22,7 +22,7 @@ struct SleepTab: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    if vm.sleepGranted && vm.encryptedSleep != nil {
+                    if vm.encryptedSleep != nil {
                         let icon2 = Image(systemName: "checkmark.circle.fill")
                         Text("\(icon2)\nYour data was successfully encrypted")
                             .customFont(.title3)
@@ -36,8 +36,10 @@ struct SleepTab: View {
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
-                            AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
-                            Text("or")
+                            if !vm.sleepGranted {
+                                AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
+                                Text("or")
+                            }
                             AsyncButton("Generate data sample", action: vm.generateFakeNights)
                         }
                     }
