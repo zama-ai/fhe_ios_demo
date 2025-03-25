@@ -12,17 +12,16 @@ struct WeightTab: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                if vm.samplesAvailable {
-                    AsyncButton("Select Encrypted Data") {
-                        await vm.selectSample()
-                    }
+                if let samples = vm.samples {
+                    Button("\(samples.interval.start.formatted(date: .numeric, time: .omitted)) - \(samples.interval.end.formatted(date: .numeric, time: .omitted))") {}
+                        .allowsHitTesting(false)
                 } else {
                     OpenAppButton(.zamaDataVault(tab: .weight))
                 }
 
                 CustomBox("Trend") {
                     Group {
-                        if let url = vm.selection?.url {
+                        if let url = vm.samples?.url {
                             FilePreview(url: url)
                         } else {
                             NoDataBadge()
@@ -32,7 +31,7 @@ struct WeightTab: View {
                 }
                 
                 CustomBox("Statistics") {
-                    let list = zip(["Min", "Max", "Average"], [vm.result?.min, vm.result?.max, vm.result?.avg])
+                    let list = zip(["Min", "Max", "Average"], [vm.results?.min, vm.results?.max, vm.results?.avg])
                     HStack(spacing: 16) {
                         ForEach(Array(list), id: \.0) { label, value in
                             statCell(url: value, name: label)
@@ -42,7 +41,7 @@ struct WeightTab: View {
                     .overlay {
                         if let status = vm.status {
                             AsyncStatus(status)
-                        } else if vm.result == nil {
+                        } else if vm.results == nil {
                             NoDataBadge()
                         }
                     }
@@ -76,71 +75,75 @@ struct WeightTab: View {
 
 extension WeightTab {
     @MainActor final class ViewModel: ObservableObject {
-        typealias Selection = (url: URL, data: Data)
-        typealias Result = (min: URL, max: URL, avg: URL)
-        private let input: Storage.File = .weightList
-        private let output: [Storage.File] = [.weightMin, .weightMax, .weightAvg]
+        typealias Samples = (url: URL, data: Data, interval: DateInterval)
+        typealias Results = (min: URL, max: URL, avg: URL)
         private let serverTask: Network.ServerTask = .weight_stats
 
-        @Published var samplesAvailable: Bool
-        @Published var selection: Selection?
-        @Published var result: Result?
+        @Published var samples: Samples?
+        @Published var results: Results?
         @Published var status: ActivityStatus?
 
-        init() {
-            self.samplesAvailable = false
-            self.selection = nil
-        }
-        
         func refreshFromDisk() {
             Task {
-                let foundSamples = await Storage.read(input)
-                self.samplesAvailable = foundSamples != nil
-                // TODO: ensure current selection is present in samplesAvailable
-                
-                let input = await loadSelection()
-                
-                if input != nil,
-                   let _ = await Storage.read(.weightMin),
-                   let _ = await Storage.read(.weightMax),
-                   let _ = await Storage.read(.weightAvg)
-                {
-                    result = (min: Storage.url(for: .weightMin),
-                              max: Storage.url(for: .weightMax),
-                              avg: Storage.url(for: .weightAvg))
-                }
-                
-                if input == nil {
-                    // Cleanup. Input == nil and Output != nil means corruption;
-                    // Input might have been deleted in DataVault.
-                    print("nil input, deleting output")
-                    try await Storage.deleteFromDisk(.weightMin)
-                    try await Storage.deleteFromDisk(.weightMax)
-                    try await Storage.deleteFromDisk(.weightAvg)
-                    self.uploadedSampleHash = nil
-                    self.uploadedSampleTaskID = nil
-                    self.status = nil
-                    result = nil
+                do {
+                    try await readSamplesFromDisk()
+                    try await readResultsFromDisk()
+                    await startUploadProcess()
+                } catch {
+                    status = .error(error.localizedDescription)
                 }
             }
         }
         
-        func selectSample() async {
-            guard let data = await Storage.read(input) else {
-                return
+        private func readSamplesFromDisk() async throws {
+            if let fileURL = try Storage.listEncryptedFiles(matching: .weightList).first,
+               let data = await Storage.read(fileURL),
+               let interval = Storage.dateInterval(for: fileURL.lastPathComponent) {
+                samples = (fileURL, data, interval)
+            } else {
+                samples = nil
             }
+        }
+        
+        private func readResultsFromDisk() async throws {
+            if samples != nil,
+               let _ = await Storage.read(.weightMin),
+               let _ = await Storage.read(.weightMax),
+               let _ = await Storage.read(.weightAvg)
+            {
+                results = (min: Storage.url(for: .weightMin),
+                          max: Storage.url(for: .weightMax),
+                          avg: Storage.url(for: .weightAvg))
+            }
+        }
+        
+        private func cleanupResults() async throws {
+            print("Deleting weight results")
+            try await Storage.deleteFromDisk(.weightMin)
+            try await Storage.deleteFromDisk(.weightMax)
+            try await Storage.deleteFromDisk(.weightAvg)
+            try await Storage.deleteFromDisk(.weightMin, suffix: "preview")
+            try await Storage.deleteFromDisk(.weightMax, suffix: "preview")
+            try await Storage.deleteFromDisk(.weightAvg, suffix: "preview")
             
-            self.selection = (Storage.url(for: input), data)
-            
+            self.uploadedSampleHash = nil
+            self.uploadedSampleTaskID = nil
+            self.status = nil
+            self.results = nil
+        }
+
+        
+        private func startUploadProcess() async {
+            guard let samples, results == nil else { return }
             do {
                 self.status = .progress("Uploading Server Key…")
                 let uid = try await uploadServerKey()
                 
                 self.status = .progress("Uploading Encrypted Data…")
-                let taskID = try await uploadSample(data, uid: uid)
+                let taskID = try await uploadSample(samples.data, uid: uid)
                 
                 self.status = .progress("Analyzing weight statistics…")
-                self.result = try await getServerResult(uid: uid, taskID: taskID)
+                self.results = try await getServerResult(uid: uid, taskID: taskID)
                 
                 self.status = nil
             } catch {
@@ -182,7 +185,7 @@ extension WeightTab {
             return taskID
         }
         
-        private func getServerResult(uid: Network.UID, taskID: Network.TaskID) async throws -> Result {
+        private func getServerResult(uid: Network.UID, taskID: Network.TaskID) async throws -> Results {
             let result = try await Network.shared.getWeightResult(taskID: taskID, uid: uid)
             try await Storage.write(.weightMin, data: result.min)
             try await Storage.write(.weightMax, data: result.max)
@@ -192,9 +195,9 @@ extension WeightTab {
             try await Storage.write(.weightMax, data: result.max, suffix: "preview")
             try await Storage.write(.weightAvg, data: result.avg, suffix: "preview")
 
-            return Result(min: Storage.url(for: .weightMin),
-                          max: Storage.url(for: .weightMax),
-                          avg: Storage.url(for: .weightAvg))
+            return Results(min: Storage.url(for: .weightMin),
+                           max: Storage.url(for: .weightMax),
+                           avg: Storage.url(for: .weightAvg))
         }
         
         // Note: ServerKey hash and uid are SHARED between Sleep and Weight Tabs
@@ -209,15 +212,5 @@ extension WeightTab {
 
         @UserDefaultsStorage(key: "WEIGHT.uploadedSampleTaskID", defaultValue: nil)
         private var uploadedSampleTaskID: Network.TaskID?
-                
-        private func loadSelection() async -> Selection? {
-            let data = await Storage.read(input)
-            if let data {
-                self.selection = (url: Storage.url(for: input), data: data)
-            } else {
-                self.selection = nil
-            }
-            return self.selection
-        }
     }
 }

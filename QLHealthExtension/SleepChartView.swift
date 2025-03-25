@@ -3,11 +3,6 @@
 import SwiftUI
 import Charts
 
-#Preview {
-    SleepChartView(samples: Sleep.Night.fakeRegular.samples)
-        .padding()
-}
-
 struct SleepChartView: View {
     let samples: [Sleep.Sample]
     

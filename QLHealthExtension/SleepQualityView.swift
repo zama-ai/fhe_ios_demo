@@ -2,11 +2,6 @@
 
 import SwiftUI
 
-#Preview {
-    SleepQualityView(quality: .excellent)
-        .padding(50)
-}
-
 struct SleepQualityView: View {
     let quality: SleepQuality
     

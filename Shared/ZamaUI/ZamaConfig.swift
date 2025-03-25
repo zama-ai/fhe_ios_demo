@@ -3,7 +3,7 @@
 import Foundation
 
 enum ZamaConfig {
-    static let rootAPI = URL(string: "https://api.zama.ai")!
+    static let rootAPI = URL(string: "https://api.zama.ai:443")!
     static let websiteLandingPage = URL(string: "https://www.zama.ai")!
     static let websiteFHEIntro = URL(string: "https://www.zama.ai/introduction-to-homomorphic-encryption")!
 }

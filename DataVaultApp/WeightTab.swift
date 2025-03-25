@@ -22,7 +22,7 @@ struct WeightTab: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    if vm.weightGranted && vm.encryptedWeight != nil {
+                    if vm.encryptedWeight != nil {
                         let icon2 = Image(systemName: "checkmark.circle.fill")
                         Text("\(icon2)\nYour data was successfully encrypted")
                             .customFont(.title3)
@@ -36,9 +36,11 @@ struct WeightTab: View {
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
-                            AsyncButton("Allow Apple Health", action: vm.requestWeightPermission)
-                            Text("or")
-                            AsyncButton("Generate data sample", action: vm.useFakeWeight)
+                            if !vm.weightGranted {
+                                AsyncButton("Allow Apple Health", action: vm.requestWeightPermission)
+                                Text("or")
+                            }
+                            AsyncButton("Generate data sample", action: vm.generateFakeWeights)
                         }
                     }
                     

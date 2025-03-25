@@ -3,13 +3,6 @@
 import SwiftUI
 import Charts
 
-#Preview {
-    let vm = PreviewContent.ViewModel(data: .gauge(value: 3))
-    PreviewContent(viewModel: vm)
-        .border(.red)
-        .border(.green)
-}
-
 struct PreviewContent: View {
     @ObservedObject var viewModel = ViewModel()
     
@@ -125,8 +118,8 @@ struct PreviewContent: View {
     private func simpleChart(_ values: [Double])  -> some View {
         let minValue = values.min()!
         let maxValue = values.max()!
-        let minY = roundDownToPowerOfTen(minValue - 10)
-        let maxY = roundUpToPowerOfTen(maxValue)
+        let minY = minValue - 3
+        let maxY = maxValue + 2
 
         return Chart {
             ForEach(Array(values.enumerated()), id: \.offset) { index, value in
@@ -150,15 +143,5 @@ struct PreviewContent: View {
         .chartXAxis(.hidden)
         .foregroundStyle(Color.yellow)
         .padding()
-    }
-    
-    private func roundDownToPowerOfTen(_ value: Double) -> Double {
-        let power = pow(10, floor(log10(value)))
-        return floor(value / power) * power
-    }
-
-    private func roundUpToPowerOfTen(_ value: Double) -> Double {
-        let power = pow(10, floor(log10(value)))
-        return ceil(value / power) * power
     }
 }

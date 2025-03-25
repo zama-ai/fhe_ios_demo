@@ -1,10 +1,6 @@
 
 import SwiftUI
 
-#Preview {
-    AdView(ad: .fake)
-}
-
 struct AdView: View {
     @State var ad: AdModel
     

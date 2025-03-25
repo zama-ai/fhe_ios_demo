@@ -48,7 +48,13 @@ final class PreviewVC: UIViewController, QLPreviewingController {
 
         let fileName = url.lastPathComponent
         let fileNameForDeterminingType = fileName.replacingOccurrences(of: "-preview", with: "")
-        guard let fileType = Storage.File(rawValue: fileNameForDeterminingType)?.decryptType else {
+        var fileType = Storage.File(rawValue: fileNameForDeterminingType)?.decryptType
+        
+        if fileType == nil, fileName.starts(with: "weightList"){
+            fileType = Storage.File.weightList.decryptType
+        }
+        
+        guard let fileType else {
             throw NSError(domain: "App", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown file type at \(url)!"])
         }
         

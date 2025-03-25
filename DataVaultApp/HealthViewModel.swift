@@ -10,7 +10,7 @@ final class HealthViewModel: ObservableObject {
     @Published var sleepGranted: Bool = false
     
     @Published var weight: [Double] = []
-    @Published var weightDateRange: String = ""
+    @Published var weightDateRange: DateInterval?
     @Published var sleep: [Sleep.Night] = []
     
     @Published var encryptedWeight: Data?
@@ -35,7 +35,14 @@ final class HealthViewModel: ObservableObject {
     func loadFromDisk() async throws {
         try await refreshPermission()
         
-        encryptedWeight = await Storage.read(.weightList)
+        if let weightListURL = try Storage.listEncryptedFiles(matching: .weightList).first {
+            encryptedWeight = await Storage.read(weightListURL)
+            weightDateRange = Storage.dateInterval(for: weightListURL.lastPathComponent)
+        } else {
+            encryptedWeight = nil
+            weightDateRange = nil
+        }
+        
         encryptedSleep = await Storage.read(.sleepList)
     }
     
@@ -93,13 +100,12 @@ final class HealthViewModel: ObservableObject {
     private func process(weightSamples: [HKDiscreteQuantitySample]) {
         let cleanedWeight: [Double] = weightSamples.map { $0.quantity.doubleValue(for: .gramUnit(with: .kilo)) }
         
-        let dateInterval: String = {
+        let dateInterval: DateInterval? = {
             if let start = weightSamples.first?.startDate,
                let end = weightSamples.last?.endDate {
-                return "\(start.formatted(.dateTime.day().month().year())) - \(end.formatted(.dateTime.day().month().year()))"
-                
+                return DateInterval(start: start, end: end)
             }
-            return ""
+            return nil
         }()
                 
         Task {
@@ -162,6 +168,18 @@ final class HealthViewModel: ObservableObject {
     }
     
     // MARK: - ENCRYPTION -
+    func generateFakeNights() async throws {
+        // Go to bed at 11pm
+        let today = Calendar.current.startOfDay(for: Date())
+        let yesterdayNight = Calendar.current.date(byAdding: .hour, value: -25, to: today)!
+        let nightBefore = Calendar.current.date(byAdding: .day, value: -2, to: yesterdayNight)!
+        let evenBefore = Calendar.current.date(byAdding: .day, value: -3, to: nightBefore)!
+        
+        try await encrypt(night: .fakeRegular(date: yesterdayNight))
+        try await encrypt(night: .fakeBad(date: nightBefore))
+        try await encrypt(night: .fakeLarge(date: evenBefore))
+    }
+        
     func encrypt(night: Sleep.Night) async throws {
         let nightLogged = String(describing: night)
             .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep", with: "")
@@ -181,9 +199,11 @@ final class HealthViewModel: ObservableObject {
             let list = try CompactCiphertextList(encrypting: example, publicKey: pk)
             let listData = try list.toData()
             
+            let suffix = night.date.formatted(date: .numeric, time: .omitted)
+                .replacingOccurrences(of: "/", with: "_")
 
-            try await Storage.write(.sleepList, data: listData)
-            try await Storage.write(.sleepList, data: listData, suffix: "preview")
+            try await Storage.write(.sleepList, data: listData, suffix: suffix)
+            try await Storage.write(.sleepList, data: listData, suffix: "\(suffix)-preview")
             encryptedSleep = listData
             
             self.sleepConsoleOutput += "Encrypted night: \(listData.formattedSize)\n\n"
@@ -198,41 +218,51 @@ final class HealthViewModel: ObservableObject {
         try await loadFromDisk()
     }
     
-    func useFakeWeight() async throws {
-        weight = [63, 70, 73, 68, 71]
-        weightDateRange = "Fake weights"
+    /// Generates random weights in the range [60, 67]
+    func generateFakeWeights() async throws {
+        let pattern = (1...5).map { _ in
+            Double.random(in: 62...65)
+        }
+        
+        let weights: [Double] = Array(repeating: pattern, count: Int.random(in: 1...6))
+            .flatMap({ $0 })
+            .map({ $0 + Double.random(in: -2...2) })
+
+        let weightsRounded = weights.map { Double(Int($0 * 10.0)) / 10 } // rounds to 1 decimal
+        
+        weight = weightsRounded
+        weightDateRange = DateInterval(start: Calendar.current.date(byAdding: .month, value: -6, to: .now)!, end: .now)
         try await encryptWeight()
     }
     
     func encryptWeight() async throws {
         self.weightConsoleOutput = ""
         self.weightConsoleOutput += "Encrypting weights...\n\n"
+        
+        guard !weight.isEmpty else {
+            self.weightConsoleOutput += "No weight data in Apple Health. Use 'Generate data sample' to generate mock data.\n\n"
+            return
+        }
+        
         self.weightConsoleOutput += "\(weight)\n\n"
         self.weightConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
         
         try await ensureKeysExist()
         
-        if let pk {
+        if let pk, let weightDateRange {
             let biggerInts = weight.map { Int( $0 * 10) } // 10x so as to have 1 fractional digit precision
             let array = try FHEUInt16Array(encrypting: biggerInts, publicKey: pk)
             let arrayData = try array.toData()
-            try await Storage.write(.weightList, data: arrayData)
+            
+            let suffix = Storage.suffix(for: weightDateRange)
+            try await Storage.write(.weightList, data: arrayData, suffix: suffix)
             encryptedWeight = arrayData
             
             self.weightConsoleOutput += "Encrypted weights: \(arrayData.formattedSize)\n\n"
-            self.weightConsoleOutput += "Saved at \(Storage.url(for: .weightList))\n"
+            self.weightConsoleOutput += "Saved at \(Storage.url(for: .weightList, suffix: suffix))\n"
         }
     }
-    
-    func deleteWeight() async throws {
-        try await Storage.deleteFromDisk(.weightList)
-        try? await Storage.deleteFromDisk(.weightAvg)
-        try? await Storage.deleteFromDisk(.weightMin)
-        try? await Storage.deleteFromDisk(.weightMax)
         
-        try await loadFromDisk()
-    }
-    
     private func ensureKeysExist() async throws {
         if ck == nil {
             if let saved = try? await ClientKey.readFromDisk(.clientKey) {

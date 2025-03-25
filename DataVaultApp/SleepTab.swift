@@ -38,13 +38,7 @@ struct SleepTab: View {
                         VStack(spacing: 10) {
                             AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
                             Text("or")
-                            Menu {
-                                AsyncButton("Regular Night", action: { try await vm.encrypt(night: .fakeRegular) })
-                                AsyncButton("Bad Night", action: { try await vm.encrypt(night: .fakeBad) })
-                                AsyncButton("Long Night (100 samples)", action: { try await vm.encrypt(night: .fakeLarge) })
-                            } label: {
-                                Text("Generate data sample")
-                            }
+                            AsyncButton("Generate data sample", action: vm.generateFakeNights)
                         }
                     }
                     

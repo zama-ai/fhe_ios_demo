@@ -62,6 +62,9 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         }
 
         self.viewModel.adID = nthHighestScore(rank: position, in: clearResult)
+        
+        print(clearResult)
+        print("For Ad at position \(position), display ad \(self.viewModel.adID!)")
     }
     
     /// Returns the index of the `rank`th highest score in the given list.

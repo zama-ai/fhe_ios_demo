@@ -8,7 +8,7 @@ enum ConcreteML {
         do {
             let jsonString = defaultParams()
             var asJSON = try JSONSerialization.jsonObject(with: jsonString.data(using: .utf8)!, options: []) as! [String: Any]
-            asJSON["bits_reserved_for_computation"] = 8
+            asJSON["bits_reserved_for_computation"] = 11
             let asData = try JSONSerialization.data(withJSONObject: asJSON, options: [.prettyPrinted])
             let newParams = String(data: asData, encoding: .utf8)!
             return newParams
