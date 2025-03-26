@@ -4,22 +4,33 @@ import Foundation
 
 /// ConcreteML keygen and encryption utilities, used by both `DataVault` app and `AdsQuickLook` extension binaries
 enum ConcreteML {
-    static var cryptoParams: MatmulCryptoParameters? = {
+    static var cryptoParamsString: String? = {
         do {
             let jsonString = defaultParams()
             var asJSON = try JSONSerialization.jsonObject(with: jsonString.data(using: .utf8)!, options: []) as! [String: Any]
-            asJSON["bits_reserved_for_computation"] = 8
+            asJSON["bits_reserved_for_computation"] = 11
             let asData = try JSONSerialization.data(withJSONObject: asJSON, options: [.prettyPrinted])
             let newParams = String(data: asData, encoding: .utf8)!
-
-            let cryptoParams: MatmulCryptoParameters = try matmulCryptoParametersDeserialize(content: newParams)
-            return cryptoParams
+            return newParams
         } catch {
             print("Error: \(error)")
             return nil
         }
     }()
-    
+
+    static var cryptoParams: MatmulCryptoParameters? = {
+        do {
+            if let cryptoParamsString {
+                let cryptoParams: MatmulCryptoParameters = try matmulCryptoParametersDeserialize(content: cryptoParamsString)
+                return cryptoParams
+            }
+            return nil
+        } catch {
+            print("Error: \(error)")
+            return nil
+        }
+    }()
+
     static func generateAndPersistKeys() async throws -> (PrivateKey, CpuCompressionKey) {
         try await Task.detached(priority: .high) {
             guard let cryptoParams = Self.cryptoParams else {

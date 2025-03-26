@@ -73,6 +73,16 @@ final class Storage {
     private init() {
         print("🗂️ Private Folder: \nopen \(appPrivateFolder)")
         print("🗂️ Shared Folder: \nopen \(appGroupSharedFolder)")
+        
+        do {
+            for folder in [appPrivateFolder, appAndExtensionFolder, appGroupSharedFolder] {
+                if !fileManager.fileExists(atPath: folder.path) {
+                    try fileManager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
+                }
+            }
+        } catch {
+            print(error)
+        }
     }
     
     private static let singleton = Storage()
@@ -90,10 +100,10 @@ final class Storage {
         try await singleton.write(at: url, data: data)
     }
     
-    static func deleteFromDisk(_ file: Storage.File) async throws {
-        try await Storage.write(file, data: nil)
+    static func deleteFromDisk(_ file: Storage.File, suffix: String? = nil) async throws {
+        try await Storage.write(file, data: nil, suffix: suffix)
     }
-    
+
     /// Returns nil if file missing
     static func read(_ file: File) async -> Data? {
         let fullURL = singleton.destinationFolder(for: file).appendingPathComponent(file.rawValue)
@@ -107,6 +117,20 @@ final class Storage {
     static func url(for file: File, suffix: String? = nil) -> URL {
         let fileName = file.withSuffix(suffix)
         return singleton.destinationFolder(for: file).appendingPathComponent(fileName)
+    }
+    
+    static func listEncryptedFiles(matching file: File) throws -> [URL] {
+        let folder = singleton.destinationFolder(for: file)
+        let fileURLs = try singleton.fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+        
+        let pattern = file.rawValue.components(separatedBy: ".")
+        let result = fileURLs.filter {
+            $0.pathExtension == pattern.last
+            && !$0.deletingPathExtension().lastPathComponent.hasSuffix("-preview")
+            && $0.lastPathComponent.hasPrefix(pattern.first!)
+        }
+        
+        return result
     }
 }
 
@@ -158,26 +182,84 @@ extension Storage {
         guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("No private folder")
         }
-        return folder
+        return folder.appending(component: "v9")
     }
 
     private var appAndExtensionFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder
+        return sharedFolder.appending(component: "v9")
     }
 
     private var appGroupSharedFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder
+        return sharedFolder.appending(component: "v9")
     }
 }
 
 extension Data {
     var formattedSize: String {
         self.count.formatted(.byteCount(style: .file))
+    }
+}
+
+extension Storage {
+    // MARK: - Date (eg, for nights) -
+    //
+    static func suffix(for date: Date) -> String {
+        date.formatted(date: .numeric, time: .omitted)
+            .replacingOccurrences(of: "/", with: "-")
+    }
+
+    // Ex: sleepList-23-03-2025.fheencrypted
+    static func date(from fileName: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX") // Ensures consistent parsing
+        
+        let text = fileName
+            .replacingOccurrences(of: "sleepList-", with: "")
+            .replacingOccurrences(of: ".fheencrypted", with: "")
+        
+        return formatter.date(from: text)
+    }
+
+    // MARK: - DateInterval (eg, for weights) -
+
+    static func suffix(for interval: DateInterval) -> String {
+        let start = interval.start
+            .formatted(date: .numeric, time: .omitted)
+            .replacingOccurrences(of: "/", with: "-")
+
+        let end = interval.end
+            .formatted(date: .numeric, time: .omitted)
+            .replacingOccurrences(of: "/", with: "-")
+
+        return "\(start)_\(end)"
+    }
+
+    // Ex: weightList-25-09-2024_25-03-2025.fheencrypted
+    static func dateInterval(from fileName: String) -> DateInterval? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        formatter.locale = Locale(identifier: "en_US_POSIX") // Ensures consistent parsing
+        
+        let comps = fileName
+            .replacingOccurrences(of: "weightList-", with: "")
+            .replacingOccurrences(of: ".fheencrypted", with: "")
+            .components(separatedBy: "_")
+        
+        if comps.count == 2,
+           let a = comps.first,
+           let b = comps.last,
+           let start = formatter.date(from: a),
+           let end = formatter.date(from: b) {
+            return DateInterval(start: start, end: end)
+        }
+        
+        return nil
     }
 }

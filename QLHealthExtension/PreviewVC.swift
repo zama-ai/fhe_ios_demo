@@ -47,21 +47,43 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         }
 
         let fileName = url.lastPathComponent
-        guard let fileType = Storage.File(rawValue: fileName)?.decryptType else {
+        let fileNameForDeterminingType = fileName.replacingOccurrences(of: "-preview", with: "")
+        var fileType = Storage.File(rawValue: fileNameForDeterminingType)?.decryptType
+        
+        if fileType == nil {
+            if fileName.starts(with: "weightList") {
+                fileType = Storage.File.weightList.decryptType
+            } else if fileName.starts(with: "sleepList") {
+                fileType = Storage.File.sleepList.decryptType
+            }
+        }
+        
+        guard let fileType else {
             throw NSError(domain: "App", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unknown file type at \(url)!"])
         }
+        
+        let isForSmallPreview = fileName.contains("-preview")
         
         switch fileType {
         case .int8:
             let encrypted = try FHEUInt8(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
-            viewModel.data = .gauge(value: clearInt)
+            if isForSmallPreview {
+                viewModel.data = .previewSleepQuality(quality: SleepQuality(rawValue: clearInt)!)
+            } else {
+                viewModel.data = .gauge(value: clearInt)
+            }
             
         case .int16:
             let encrypted = try FHEUInt16(fromData: data)
             let clearInt = try encrypted.decrypt(clientKey: ck)
             let res: Double = Double(clearInt) / 10.0
-            viewModel.data = .text(value: res)
+            
+            if isForSmallPreview {
+                viewModel.data = .previewText(value: res)
+            } else {
+                viewModel.data = .text(value: res)
+            }
             
         case .array:
             let encrypted = try FHEUInt16Array(fromData: data)
@@ -71,7 +93,12 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         case .cipherTextList:
             let encrypted = try CompactCiphertextList(fromData: data)
             let clearNight = try encrypted.decrypt(clientKey: ck)
-            viewModel.data = .sleepChart(clearNight)
+            if isForSmallPreview {
+                let duration = (clearNight.last?.end ?? 0) * 60
+                viewModel.data = .previewSleepDuration(duration: TimeInterval(duration))
+            } else {
+                viewModel.data = .sleepChart(clearNight)
+            }
         }
     }
 }

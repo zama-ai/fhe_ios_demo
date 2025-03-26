@@ -3,13 +3,6 @@
 import SwiftUI
 import Charts
 
-#Preview {
-    let vm = PreviewContent.ViewModel(data: .gauge(value: 3))
-    PreviewContent(viewModel: vm)
-        .border(.red)
-        .border(.green)
-}
-
 struct PreviewContent: View {
     @ObservedObject var viewModel = ViewModel()
     
@@ -26,6 +19,10 @@ struct PreviewContent: View {
         case gauge(value: Int)
         case simpleChart([Double])
         case sleepChart([Sleep.Sample])
+        
+        case previewSleepQuality(quality: SleepQuality)
+        case previewSleepDuration(duration: TimeInterval)
+        case previewText(value: Double)
     }
     
     var body: some View {
@@ -44,9 +41,41 @@ struct PreviewContent: View {
             
         case .none:
             Color.red
+            
+        case .previewSleepQuality(let quality):
+            previewSleepQuality(quality)
+            
+        case .previewSleepDuration(let duration):
+            previewSleepDuration(duration)
+
+        case .previewText(let value):
+            previewText(value: value)
         }
     }
     
+    private func previewSleepDuration(_ duration: TimeInterval)  -> some View {
+        let totalMinutes = Int(duration) / 60
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+        return Text("**\(hours.formatted())** Hours **\(minutes.formatted())** Minutes")
+            .fontWeight(.regular)
+            .font(.custom("Telegraf-Bold", size: 22))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func previewSleepQuality(_ quality: SleepQuality)  -> some View {
+        Text("Sleep Quality: **\(quality.prettyTypeName)**")
+            .fontWeight(.regular)
+            .font(.custom("Telegraf-Bold", size: 22))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func previewText(value: Double)  -> some View {
+        Text("\(value.formatted(.number.precision(.fractionLength(1))))")
+            .font(.custom("Telegraf-Bold", size: 22))
+            .fontWeight(.bold)
+    }
+
     private func text(value: Double)  -> some View {
         Color.zamaYellow
             .aspectRatio(contentMode: .fit)
@@ -89,8 +118,8 @@ struct PreviewContent: View {
     private func simpleChart(_ values: [Double])  -> some View {
         let minValue = values.min()!
         let maxValue = values.max()!
-        let minY = roundDownToPowerOfTen(minValue - 10)
-        let maxY = roundUpToPowerOfTen(maxValue)
+        let minY = minValue - 3
+        let maxY = maxValue + 2
 
         return Chart {
             ForEach(Array(values.enumerated()), id: \.offset) { index, value in
@@ -114,15 +143,5 @@ struct PreviewContent: View {
         .chartXAxis(.hidden)
         .foregroundStyle(Color.yellow)
         .padding()
-    }
-    
-    private func roundDownToPowerOfTen(_ value: Double) -> Double {
-        let power = pow(10, floor(log10(value)))
-        return floor(value / power) * power
-    }
-
-    private func roundUpToPowerOfTen(_ value: Double) -> Double {
-        let power = pow(10, floor(log10(value)))
-        return ceil(value / power) * power
     }
 }

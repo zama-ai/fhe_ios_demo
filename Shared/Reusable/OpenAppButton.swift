@@ -4,13 +4,12 @@ import SwiftUI
 import StoreKit
 
 #Preview {
-    @Previewable @State var showAlert: Bool = false
-    let uber = AppInfo(name: "Uber", deeplink: "uber://", appStoreID: "123")
+    let app = AppInfo(name: "Uber", deeplink: "uber://", appStoreID: "123")
     
     Group {
-        OpenAppButton(uber)
+        OpenAppButton(app)
         
-        OpenAppButton(uber) {
+        OpenAppButton(app) {
             Label("Uber", systemImage: "car.side.fill")
         }
     }

@@ -8,22 +8,37 @@ import SwiftUI
 
 struct SleepTab: View {
     @StateObject private var vm = ViewModel()
+    @State private var selectedDate: Date?
+    @State private var path: [Destination] = []
 
+    enum Destination {
+        case calendar
+    }
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack(spacing: 16) {
-                if vm.samplesAvailable {
-                    AsyncButton("Select Encrypted Data") {
-                        await vm.selectSample()
+                if vm.allSamples.isEmpty {
+                    OpenAppButton(.zamaDataVault(tab: .sleep))
+                } else if let sample = vm.selectedSample {
+                    Button(action: {
+                        path.append(.calendar)
+                    }) {
+                        Text("\(sample.date.formatted(date: .numeric, time: .omitted))")
+                            .frame(maxWidth: .infinity)
+                            .overlay(alignment: .trailing) {
+                                Image(systemName: "chevron.down")
+                                    .padding()
+                            }
                     }
                 } else {
-                    OpenAppButton(.zamaDataVault(tab: .sleep)) {
-                        Text("Import Encrypted Data")
+                    Button("Select Encrypted Data") {
+                        path.append(.calendar)
                     }
                 }
 
                 CustomBox("Sleep Phase") {
-                    if let url = vm.selection?.url {
+                    if let url = vm.selectedSample?.url {
                         FilePreview(url: url)
                             .frame(height: 160)
                         
@@ -57,67 +72,112 @@ struct SleepTab: View {
                     }
                 }
             }
+            .navigationDestination(for: Destination.self) { value in
+                switch value {
+                case .calendar:
+                    VStack(spacing: 0) {
+                        Text("\(Image(systemName: "bed.double.fill")) Historical Data")
+                            .font(.largeTitle)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                        
+                        ZamaCalendar(covering: vm.samplesInterval ?? Calendar.current.dateInterval(of: .month, for: .now)!,
+                                     selection: $selectedDate,
+                                     canSelect: { item in vm.allSamples.contains { $0.date == item } })
+                    }
+                    .background(Color.zamaYellowLight)
+                    .onChange(of: selectedDate) {
+                        Task {
+                            try await Task.sleep(for: .seconds(0.1))
+                            path = []
+                            if let selectedDate {
+                                await vm.onDateSelected(date: selectedDate)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Sleep Analysis")
             .padding()
-            .navigationTitleView("Sleep Analysis", icon: "bed.double.fill")
             .buttonStyle(.zama)
             .background(Color.zamaYellowLight)
             .onAppearAgain {
                 vm.refreshFromDisk()
             }
         }
+        .tint(.black)
     }
 }
 
 extension SleepTab {
     @MainActor final class ViewModel: ObservableObject {
-        typealias Selection = (url: URL, data: Data)
+        typealias Selection = (date: Date, url: URL, data: Data)
+        typealias Sample = (date: Date, url: URL)
         private let input: Storage.File = .sleepList
         private let output: Storage.File = .sleepScore
         private let serverTask: Network.ServerTask = .sleep_quality
 
-        @Published var samplesAvailable: Bool
-        @Published var selection: Selection?
+        @Published var allSamples: [Sample] = []
+        @Published var selectedSample: Selection?
+        @Published var samplesInterval: DateInterval?
         @Published var result: URL?
         @Published var status: ActivityStatus?
 
-        init() {
-            self.samplesAvailable = false
-            self.selection = nil
-        }
-        
         func refreshFromDisk() {
             Task {
-                let foundSamples = await Storage.read(input)
-                self.samplesAvailable = foundSamples != nil
-                // TODO: ensure current selection is present in samplesAvailable
-                
-                let input = await loadSelection()
-                
-                if input != nil,
-                   let _ = await Storage.read(output)
-                {
-                    result = Storage.url(for: output)
-                }
-                
-                if input == nil {
-                    // Cleanup. Input == nil and Output != nil means corruption;
-                    // Input might have been deleted in DataVault.
-                    print("nil input, deleting output")
-                    try await Storage.deleteFromDisk(output)
-                    self.uploadedSampleMD5 = nil
-                    self.uploadedSampleTaskID = nil
-                    self.status = nil
-                    result = nil
+                do {
+                    try readSamplesFromDisk()
+                                        
+//                    if selectedSample != nil,
+//                       let _ = await Storage.read(output)
+//                    {
+//                        result = Storage.url(for: output)
+//                    }
+                    
+//                    if selectedSample == nil {
+//                        // Cleanup. Input == nil and Output != nil means corruption;
+//                        // Input might have been deleted in DataVault.
+//                        print("nil input, deleting output")
+//                        try await Storage.deleteFromDisk(output)
+//                        self.uploadedSampleHash = nil
+//                        self.uploadedSampleTaskID = nil
+//                        self.status = nil
+//                        result = nil
+//                    }
+                } catch {
+                    print(error)
                 }
             }
         }
         
-        func selectSample() async {
-            guard let data = await Storage.read(input) else {
+        private func readSamplesFromDisk() throws {
+            let nightURLs = try Storage.listEncryptedFiles(matching: .sleepList)
+            let samples = nightURLs.compactMap { url in
+                if let date = Storage.date(from: url.lastPathComponent) {
+                    return (date, url)
+                } else {
+                    print("Error parsing date from URL: \(url)")
+                    return nil
+                }
+            }
+            self.allSamples = samples
+            
+            let dates = samples.map(\.0)
+            if let min = dates.min(), let max = dates.max() {
+                self.samplesInterval = DateInterval(start: min, end: max)
+            }
+        }
+
+        func onDateSelected(date: Date) async {
+            guard let nightFileURL = allSamples.first(where: { $0.date == date })?.url,
+                  let data = await Storage.read(nightFileURL) else {
                 return
             }
             
-            self.selection = (Storage.url(for: input), data)
+            print("####", date, nightFileURL)
+            self.selectedSample = (date, nightFileURL, data)
+            self.result = nil
             
             do {
                 self.status = .progress("Uploading Server Key…")
@@ -142,29 +202,29 @@ extension SleepTab {
                 throw CustomError.missingServerKey
             }
             
-            let md5 = keyToUpload.md5Identifier
-            if md5 == self.uploadedKeyMD5, let uid = self.uploadedKeyUID {
+            let hash = keyToUpload.persistantHashValue
+            if hash == self.uploadedKeyHash, let uid = self.uploadedKeyUID {
                 return uid // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
 
             let newUID = try await Network.shared.uploadServerKey(keyToUpload, for: serverTask)
-            self.uploadedKeyMD5 = md5
+            self.uploadedKeyHash = hash
             self.uploadedKeyUID = newUID
             return newUID
         }
         
         private func uploadSample(_ sampleToUpload: Data, uid: Network.UID) async throws -> Network.TaskID {
-            let md5 = sampleToUpload.md5Identifier
-            if md5 == self.uploadedSampleMD5, let taskID = self.uploadedSampleTaskID {
+            let hash = sampleToUpload.persistantHashValue
+            if hash == self.uploadedSampleHash, let taskID = self.uploadedSampleTaskID {
                 return taskID // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
 
             let taskID = try await Network.shared.startTask(serverTask, uid: uid, encrypted_input: sampleToUpload)
-            self.uploadedSampleMD5 = md5
+            self.uploadedSampleHash = hash
             self.uploadedSampleTaskID = taskID
             return taskID
         }
@@ -172,30 +232,21 @@ extension SleepTab {
         private func getServerResult(uid: Network.UID, taskID: Network.TaskID) async throws -> URL {
             let result = try await Network.shared.getSleepResult(taskID: taskID, uid: uid)
             try await Storage.write(output, data: result)
+            try await Storage.write(output, data: result, suffix: "preview")
             return Storage.url(for: output)
         }
         
-        // Note: ServerKey md5 and uid are SHARED between Sleep and Weight Tabs
-        @UserDefaultsStorage(key: "SHARED.uploadedKeyMD5", defaultValue: nil)
-        private var uploadedKeyMD5: String?
+        // Note: ServerKey hash and uid are SHARED between Sleep and Weight Tabs
+        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyHash", defaultValue: nil)
+        private var uploadedKeyHash: String?
         
-        @UserDefaultsStorage(key: "SHARED.uploadedKeyUID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyUID", defaultValue: nil)
         private var uploadedKeyUID: Network.UID?
         
-        @UserDefaultsStorage(key: "SLEEP.uploadedSampleMD5", defaultValue: nil)
-        private var uploadedSampleMD5: String?
+        @UserDefaultsStorage(key: "v9_SLEEP.uploadedSampleHash", defaultValue: nil)
+        private var uploadedSampleHash: String?
 
-        @UserDefaultsStorage(key: "SLEEP.uploadedSampleTaskID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_SLEEP.uploadedSampleTaskID", defaultValue: nil)
         private var uploadedSampleTaskID: Network.TaskID?
-        
-        private func loadSelection() async -> Selection? {
-            let data = await Storage.read(input)
-            if let data {
-                self.selection = (url: Storage.url(for: input), data: data)
-            } else {
-                self.selection = nil
-            }
-            return self.selection
-        }
     }
 }

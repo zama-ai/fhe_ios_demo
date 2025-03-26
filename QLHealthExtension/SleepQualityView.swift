@@ -2,11 +2,6 @@
 
 import SwiftUI
 
-#Preview {
-    SleepQualityView(quality: .excellent)
-        .padding(50)
-}
-
 struct SleepQualityView: View {
     let quality: SleepQuality
     
@@ -39,7 +34,7 @@ struct SleepQualityView: View {
     }
 }
 
-enum SleepQuality: Int, CaseIterable {
+enum SleepQuality: Int, CaseIterable, PrettyTypeNamable {
     case excellent = 1
     case good = 2
     case moderate = 3

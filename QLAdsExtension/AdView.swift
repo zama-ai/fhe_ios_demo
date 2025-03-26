@@ -1,10 +1,6 @@
 
 import SwiftUI
 
-#Preview {
-    AdView(ad: .fake)
-}
-
 struct AdView: View {
     @State var ad: AdModel
     
@@ -47,6 +43,13 @@ struct AdView: View {
             Image(systemName: "photo.badge.exclamationmark")
                 .resizable()
                 .fontWeight(.thin)
+                .opacity(0.3)
+                .overlay {
+                    Text("Unzip AdImages.zip to view image")
+                        .font(.caption)
+                        .bold()
+                        .foregroundStyle(.red)
+                }
         }
     }
 }

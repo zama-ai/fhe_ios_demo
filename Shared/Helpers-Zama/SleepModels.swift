@@ -47,8 +47,7 @@ enum Sleep {
 }
 
 extension Sleep.Night {
-    static let fake: Sleep.Night = {
-        let slotInMinutes = 30
+    static func fakeRegular(date: Date) -> Sleep.Night {
         let values = [[0, 0, 210], [0, 240, 570], [2, 0, 30], [5, 30, 60], [3, 60, 90], [4, 90, 120], [3, 120, 150], [5, 150, 180], [2, 180, 240], [3, 240, 300], [5, 300, 330], [4, 330, 390], [2, 390, 420], [5, 420, 450], [4, 450, 510], [3, 510, 540], [5, 540, 570]]
         
         let samples: [Sleep.Sample] = values.map { row in
@@ -57,13 +56,10 @@ extension Sleep.Night {
                          level: Sleep.Level(rawValue: row[0])!)
         }
         
-        // Go to bed at 11pm
-        let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-1*3600)
-        
-        return Sleep.Night(date: start, samples: samples)
-    }()
+        return Sleep.Night(date: date, samples: samples)
+    }
 
-    static let fakeBad: Sleep.Night = {
+    static func fakeBad(date: Date) -> Sleep.Night {
         let values = [
             [0,   0, 120],
             [3, 120, 150],
@@ -78,13 +74,11 @@ extension Sleep.Night {
                          level: Sleep.Level(rawValue: row[0])!)
         }
         
-        let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-3600)
-        
-        return Sleep.Night(date: start, samples: samples)
-    }()
+        return Sleep.Night(date: date, samples: samples)
+    }
 
-    static let fakeLarge: Sleep.Night = {
-        // Helper function to create realistic sleep cycles
+    /// Helper function to create realistic sleep cycles
+    static func fakeLarge(date: Date) -> Sleep.Night {
         func generateSleepCycle(startMinute: Int, cycleLength: Int) -> [(Int, Int, Sleep.Level)] {
             var segments: [(Int, Int, Sleep.Level)] = []
             var currentMinute = startMinute
@@ -147,11 +141,7 @@ extension Sleep.Night {
                 level: segment.2
             )
         }
-        
-        // Set bedtime to 11 PM of current day
-        let start = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-1 * 3600)
-        
-        return Sleep.Night(date: start, samples: samples)
-    }()
-
+                
+        return Sleep.Night(date: date, samples: samples)
+    }
 }

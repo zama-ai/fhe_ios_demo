@@ -16,9 +16,7 @@ struct SocialTimeline: View {
                 .padding(.top, 8)
             
             if vm.dataVaultActionNeeded {
-                OpenAppButton(.zamaDataVault(tab: .profile)) {
-                    Text("Import Infos from Zama Data Vault")
-                }
+                OpenAppButton(.zamaDataVault(tab: .profile))
                 .buttonStyle(.zama)
                 .padding(.horizontal, 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

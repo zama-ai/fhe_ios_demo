@@ -12,13 +12,13 @@ extension SocialTimeline {
         static private let adFrequency = 2 // Show an ad every 3 posts
         static private let adsLimit = 5 // Show top 5 ads
         
-        @UserDefaultsStorage(key: "uid", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_uid", defaultValue: nil)
         private var uid: String?
 
-        @UserDefaultsStorage(key: "taskID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_taskID", defaultValue: nil)
         private var taskID: String?
 
-        @UserDefaultsStorage(key: "profileHash", defaultValue: nil)
+        @UserDefaultsStorage(key: "v9_profileHash", defaultValue: nil)
         static private var profileHash: String?
 
         init() {
@@ -27,15 +27,15 @@ extension SocialTimeline {
 
         func refreshFromDisk() {
             Task {
-            do {
+                do {
                     dataVaultActionNeeded = false
-                try await startServerKeyUpload()
-            } catch CustomError.missingServerKey, CustomError.missingProfile {
-                dataVaultActionNeeded = true
-            } catch {
-                print(error.localizedDescription)
+                    try await startServerKeyUpload()
+                } catch CustomError.missingServerKey, CustomError.missingProfile {
+                    dataVaultActionNeeded = true
+                } catch {
+                    print(error.localizedDescription)
+                }
             }
-        }
         }
         
         private func startServerKeyUpload() async throws {
@@ -60,7 +60,7 @@ extension SocialTimeline {
                 throw CustomError.missingServerKey
             }
             
-            let profileHash = profile.md5Identifier
+            let profileHash = profile.persistantHashValue
             guard profileHash != Self.profileHash else {
                 print("Profile unchanged, skipping upload")
                 return
