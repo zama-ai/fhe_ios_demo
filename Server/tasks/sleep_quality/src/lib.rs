@@ -91,26 +91,19 @@ pub fn encrypt_brut_data(
 pub fn generate_files(clear_data: Vec<(u8, u16, u16)>, uid: &str) -> PyResult<u8> {
 
     let current_dir = env::current_dir().unwrap();
-    println!("\n [TFHE-RS generate_files] Starting sleep quality test with rust... from directory: {}", current_dir.display());
 
     let sk_path = format!("{}/{}.serverKey", UPLOAD_FOLDER, uid);
     let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
     let input_path = format!("{}/{}.sleep_quality.input.fheencrypted", UPLOAD_FOLDER, uid);
-    
-    println!("[TFHE-RS generate_files] sk_path    : {}", sk_path);
-    println!("[TFHE-RS generate_files] ck_path    : {}", ck_path);
-    println!("[TFHE-RS generate_files] input_path : {}", input_path);
 
     let config = ConfigBuilder::default().build();
     let client_key = ClientKey::generate(config);
 
     let compressed_server_key = CompressedServerKey::new(&client_key);
     let compressed_size = bincode::serialize(&compressed_server_key).unwrap().len();
-    println!("[TFHE-RS generate_files] Server key generated (compressed size: {} bytes)", compressed_size);
 
     let sks = compressed_server_key.decompress();
     let decompressed_size = bincode::serialize(&sks).unwrap().len();
-    println!("[TFHE-RS generate_files] Server key (decompressed size: {} bytes)", decompressed_size);
 
     set_server_key(sks.clone());
 
@@ -152,22 +145,17 @@ pub fn run(uid: &str) -> PyResult<u8> {
 #[pyfunction]
 pub fn decrypt(uid: &str) -> PyResult<u8> { 
 
-    let ck_path = format!("./project/uploaded_files/{}.clientKey", uid);
-    let output_path = format!("./project/uploaded_files/{}.sleep_quality.output.fheencrypted", uid);
+    let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
+    let output_path = format!("{}/{}.sleep_quality.output.fheencrypted", UPLOAD_FOLDER, uid);
     
-    println!("[TFHE-RS decrypt] ck_path: {}", ck_path);
-    println!("[TFHE-RS decrypt] output_path: {}", output_path);
-
     let deserialize_ck = deserialize_client_key(&ck_path);
 
     // Retrive the encrypted result
     let encrypted_output = deserialize_fheuint8(&output_path);
     let file_size = fs::metadata(&output_path).unwrap().len();
-    println!("[TFHE-RS decrypt] Final score retieved at: {} (size: {})\n", output_path, file_size);
 
     // Decrypt the output
     let decrypted_response: u8 = encrypted_output.decrypt(&deserialize_ck);
-    println!("[TFHE-RS decrypt] Final score: {}", decrypted_response);
 
     // Return the result
     Ok(decrypted_response)

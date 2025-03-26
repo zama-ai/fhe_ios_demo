@@ -80,33 +80,23 @@ fn deserialize_fheuint16(path: &str) -> FheUint16 {
 pub fn generate_files(clear_data: Vec<f64>, uid: String) -> PyResult<u8> {
 
     let current_dir = env::current_dir().unwrap();
-    println!("\n[TFHE-RS generate_files] Starting weight stats test with rust... from directory: {}", current_dir.display());
 
     let sk_path = format!("{}/{}.serverKey", UPLOAD_FOLDER, uid);
     let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
     let input_path = format!("{}/{}.weight_stats.input.fheencrypted", UPLOAD_FOLDER, uid);
-
-    println!("[TFHE-RS generate_files] sk_path    : {}", sk_path);
-    println!("[TFHE-RS generate_files] ck_path    : {}", ck_path);
-    println!("[TFHE-RS generate_files] input_path : {}", input_path);
 
     let config = ConfigBuilder::default().build();
     let client_key = ClientKey::generate(config);
     let compressed_server_key = CompressedServerKey::new(&client_key);
 
     let compressed_size = bincode::serialize(&compressed_server_key).unwrap().len();
-    println!("[TFHE-RS generate_files] Server key generated (compressed size: {} bytes)", compressed_size);
 
     let sks = compressed_server_key.decompress();
     let decompressed_size = bincode::serialize(&sks).unwrap().len();
-    println!("[TFHE-RS generate_files] Server key (decompressed size: {} bytes)", decompressed_size);
 
     set_server_key(sks.clone());
 
-    println!("[TFHE-RS generate_files] Original weight : {:?}", clear_data);
-
     let clear_data: Vec<u16> = clear_data.into_iter().map(|w| (w * 10.0) as u16).collect();
-    println!("[TFHE-RS generate_files] Original weight * 10: {:?}", clear_data);
 
     let public_key = CompactPublicKey::new(&client_key);
     let mut builder = CompactCiphertextList::builder(&public_key);
@@ -149,32 +139,22 @@ pub fn decrypt(uid: String) -> PyResult<(u16, u16, u16)> {
     let output_min_path = format!("{}/{}.outputMin.weight_stats.fheencrypted", UPLOAD_FOLDER, uid);
     let output_max_path = format!("{}/{}.outputMax.weight_stats.fheencrypted", UPLOAD_FOLDER, uid);
 
-    println!("[TFHE-RS decrypt] output_avg_path: {}", output_avg_path);
-    println!("[TFHE-RS decrypt] output_min_path: {}", output_min_path);
-    println!("[TFHE-RS decrypt] output_max_path: {}", output_max_path);
-
     let deserialize_ck = deserialize_client_key(&ck_path);
 
     // Retrive the encrypted result
     let avg_encrypted_output = deserialize_fheuint16(&output_avg_path);
     let file_size = fs::metadata(&output_avg_path).unwrap().len();
-    println!("[TFHE-RS decrypt] Avg weight retieved at: {} (size: {})", output_avg_path, file_size);
 
     let min_encrypted_output = deserialize_fheuint16(&output_min_path);
     let file_size = fs::metadata(&output_min_path).unwrap().len();
-    println!("[TFHE-RS decrypt] Min weight retieved at: {} (size: {})", output_min_path, file_size);
 
     let max_encrypted_output = deserialize_fheuint16(&output_max_path);
     let file_size = fs::metadata(&output_max_path).unwrap().len();
-    println!("[TFHE-RS decrypt] Max weight retieved at: {} (size: {})", output_max_path, file_size);
 
     // Decrypt the output
     let decrypted_avg_weight: u16 = avg_encrypted_output.decrypt(&deserialize_ck);
-    println!("[TFHE-RS decrypt] Avg weight: {}", decrypted_avg_weight);
     let decrypted_min_weight: u16 = min_encrypted_output.decrypt(&deserialize_ck);
-    println!("[TFHE-RS decrypt] Min weight: {}", decrypted_min_weight);
     let decrypted_max_weight: u16 = max_encrypted_output.decrypt(&deserialize_ck);
-    println!("[TFHE-RS decrypt] Max weight: {}", decrypted_max_weight);
 
     Ok((decrypted_avg_weight, decrypted_min_weight, decrypted_max_weight))
 }
