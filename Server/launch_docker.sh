@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # Setup environment depending on the first argument
 source setup_env.sh
 
@@ -10,7 +12,8 @@ if [[ -f "secrets.env" ]]; then
     source secrets.env
     set +o allexport
 else
-    exit 1
+    echo "secrets.env not found"
+    export USE_TLS="false"
 fi
 
 if [ "$USE_TLS" = "true" ]; then
@@ -65,6 +68,10 @@ if [ "$USE_TLS" = "true" ]; then
         echo "Try running:"
         echo "sudo chmod -R 755 $HOST_CERTS_PATH"
     fi
+else 
+    echo "🚀 Skipping certs volume (HTTP mode)"
+    export HOST_CERTS_PATH="$(pwd)/dummy-certs"
+    mkdir -p "$HOST_CERTS_PATH"
 fi
 
 # Ensure necessary directories exist on the host before launching Docker
@@ -78,4 +85,10 @@ echo "🚀 [$COMPOSE_PROJECT_NAME]: launching Docker containers using '$DOCKER_C
 docker-compose -p "$COMPOSE_PROJECT_NAME" up -d --scale service_celery_usecases="$CELERY_WORKER_COUNT_USECASE_QUEUE"
     # --scale service_celery_ads="$CELERY_WORKER_COUNT_AD_QUEUE"
 
-docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f
+if [[ "$1" != "ci" ]]; then
+  echo "Following logs..."
+  docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f
+else
+  echo "Skipping logs - running in CI environment."
+  docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" ps
+fi

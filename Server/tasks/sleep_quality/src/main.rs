@@ -90,8 +90,8 @@ fn deserialize_list(path_string: &str) -> CompactCiphertextList {
 
 fn reshape_into_encrypted_records(expanded: &CompactCiphertextListExpander) -> Vec<EncryptedRecord> {
     let mut records = Vec::new();
-    let len = expanded.len();
-    assert!(len % 3 == 0, "Expanded list length is not a multiple of 3");
+    let len: usize = expanded.len();
+    assert!(len % 3 == 0, "Expanded list length is not a multiple of 3. Got '{}'", len % 3);
 
     let num_records = len / 3;
 

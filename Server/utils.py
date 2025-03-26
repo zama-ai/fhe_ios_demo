@@ -32,6 +32,7 @@ BACKUP_DIR = os.getenv("BACKUP_DIR")
 BACKUP_FOLDER = Path(__file__).parent / BACKUP_DIR
 BACKUP_FOLDER.mkdir(exist_ok=True)
 
+LOG_LEVEL = os.getenv("CELERY_LOGLEVEL").upper()
 LOG_FILE = Path(__file__).parent / "server.log"
 CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
 
@@ -135,7 +136,7 @@ def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
         HTTPException: Raised with status code 500 if the file cannot be read.
     """
     ensure_file_exists(
-        output_file_path, error_message=f"📁 Output file `{output_file_path.name}` not found."
+        output_file_path, error_message=f"📁 Output file `{output_file_path}` not found."
     )
     try:
         data = output_file_path.read_bytes()
@@ -143,7 +144,7 @@ def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
             f"📁 Successfully read output file `{output_file_path}` (Size: `{len(data)}` bytes)"
         )
     except Exception as e:
-        error_message=f"❌ Failed to read output file `{output_file_path.name}`: `{e}`."
+        error_message=f"❌ Failed to read output file `{output_file_path}`: `{e}`."
         logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
@@ -171,14 +172,13 @@ def get_id_prefix(_id: str) -> str:
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=LOG_LEVEL,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(LOG_FILE),
         logging.StreamHandler(),  # Also log to stderr for Docker logs
     ],
 )
-
 
 logger = logging.getLogger(__name__)
 

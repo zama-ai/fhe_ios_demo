@@ -22,9 +22,9 @@ def main():
     print(f"CLI Args: {uid}")
     print(f"Device: {device}")
 
-    sk_path = f"uploaded_files/{uid}.serverKey"
-    input_path = f"uploaded_files/{uid}.ad_targeting.input.fheencrypted"
-    output_path = f"uploaded_files/{uid}.ad_targeting.output.fheencrypted"
+    sk_path = f"/project/uploaded_files/{uid}.serverKey"
+    input_path = f"/project/uploaded_files/{uid}.ad_targeting.input.fheencrypted"
+    output_path = f"/project/uploaded_files/{uid}.ad_targeting.output.fheencrypted"
 
     print(f"Paths:\n" f"\tsk: {sk_path}\n" f"\tin: {input_path}\n" f"\tout: {output_path}")
 

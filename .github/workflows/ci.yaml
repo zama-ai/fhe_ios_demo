@@ -24,9 +24,14 @@ jobs:
         run: |
           ./setup_tfhe_xcframework.sh
 
-  build-server:
-    name: Build server docker
+  build-and-test-server:
+
+    name: Build Docker image and run tests
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: Server
+          
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -35,18 +40,101 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
-      - name: Setup docker build config
-        run: |
-          cd Server
-          source .common_env
 
+      - name: Setup docker build config
+        run: source .common_env
+
+      - name: Remove unnecessary folders
+        run: |
+          rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           push: false
+          load: true
           context: Server
           file: Server/Dockerfile.server
           tags: zama-ios-apps:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install docker-compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Create virtualenv + install dependancies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install maturin
+          pip install -r server_requirements.txt
+        
+      - name: Prepare test folders
+        run: |
+          mkdir -p project/uploaded_files
+
+      - name: Launch server with docker-compose
+        run: |
+          chmod +x ./launch_docker.sh
+          bash ./launch_docker.sh ci
+
+      - name: Docker diagnostic
+        run: |
+          echo "==> Docker containers:"
+          docker ps
+          echo "==> Docker images:"
+          docker images
+          
+      - name: Run Python test 'Ad Targeting'
+        run: |
+          source .venv/bin/activate
+          pytest -vvs tests/test_ad_targeting.py
+
+      - name: Run Rust-Python module test 'weight_stats'
+        if: always()
+        run: |
+          source .venv/bin/activate
+          maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml
+          pytest -vvs tests/test_weight_stats.py
+      
+      - name: Run Rust-Python module test 'sleep_quality'
+        if: always()
+        run: |
+          source .venv/bin/activate
+          maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml
+          pytest -vvs tests/test_sleep_analysis.py
+
+      - name: Run endpoint tests
+        run: |
+          source .venv/bin/activate
+          pytest -vvs tests/test_endpoints.py
+          
+      - name: List uploaded_files (host)
+        if: always()
+        run: |
+          ls -la project/uploaded_files/*
+
+      - name: List uploaded_files (container)
+        if: always()
+        run: docker exec dev_container_fastapi_app ls -alh /project/uploaded_files
+
+      - name: show FastAPI logs
+        if: always()
+        run: docker logs dev_container_fastapi_app
+        
+      - name: show Celery usecases worker 1 logs
+        if: always()
+        run: docker logs fhe_ios_demo_dev_service_celery_usecases_1 || echo "Celery usecases 1 logs unavailable"
+      
+      - name: show Celery usecases worker 2 logs
+        if: always()
+        run: docker logs fhe_ios_demo_dev_service_celery_usecases_2 || echo "Celery usecases 2 logs unavailable"
