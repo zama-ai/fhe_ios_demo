@@ -12,7 +12,7 @@ from utils import *
 
 # Unsigned integers [0, 2⁶⁴ - 1]
 CRYPTO_DTYPE = np.uint64
-BITS_RESERVED_FOR_COMPUTATION=11
+BITS_RESERVED_FOR_COMPUTATION = 11
 
 @pytest.fixture
 def generate_fhext_params():
@@ -30,10 +30,10 @@ def generate_fhext_keys(generate_fhext_params):
     return pkey, eval_key
 
 
-def encrypt(random_input, crypto_params, pkey):
-    random_input = random_input.astype(CRYPTO_DTYPE)
+def encrypt(clear_data, crypto_params, pkey):
+    clear_data = clear_data.astype(CRYPTO_DTYPE)
     encrypted_input = fhext.encrypt_matrix(
-        pkey=pkey, crypto_params=crypto_params, data=random_input
+        pkey=pkey, crypto_params=crypto_params, data=clear_data
     )
     return encrypted_input
 

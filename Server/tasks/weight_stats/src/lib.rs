@@ -10,10 +10,6 @@ use bincode;
 use tfhe::{set_server_key, CompressedServerKey, CompactCiphertextList, FheUint4, FheUint16, FheUint10, CompactPublicKey, ClientKey, ConfigBuilder};
 use tfhe::prelude::*;
 
-// Compiles and installs the Rust project as a Python module, using maturin
-// with release optimizations, and the manifest is located at tasks/weight_stats/Cargo.toml.
-// maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml
-
 const UPLOAD_FOLDER: &str = "./project/uploaded_files";
 
 #[derive(Serialize, Deserialize)]

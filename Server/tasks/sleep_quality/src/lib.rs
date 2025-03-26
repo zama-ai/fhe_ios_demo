@@ -12,10 +12,6 @@ use tfhe::prelude::*;
 
 pub mod sleep_analysis;
 
-// Compiles and installs the Rust project as a Python module, using maturin
-// with release optimizations, and the manifest is located at tasks/sleep_quality/Cargo.toml:
-// maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml
-
 const UPLOAD_FOLDER: &str = "./project/uploaded_files";
 
 #[derive(Serialize, Deserialize)]

@@ -26,7 +26,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let compressed_sk = deserialize_compressed_server_key(&sk_path);
     let decompressed_sk = compressed_sk.decompress();
     set_server_key(decompressed_sk);
-    let sk_size = fs::metadata(&sk_path).unwrap().len();
 
     // Deserialize input data
     let compact_list = deserialize_list(&input_path);
@@ -37,31 +36,18 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Reshape expanded list into EncryptedRecords
     let encrypted_data = reshape_into_encrypted_records(&expanded);
 
-    let input_size = fs::metadata(&input_path).unwrap().len();
-
     // Define stages
     let stages = vec![0u8, 1u8, 2u8, 3u8, 4u8, 5u8];
 
     // Perform sleep analysis computations
-    let start = Instant::now();
     let total_durations = compute_total_duration_per_stage(&encrypted_data, &stages);
-
-    let start = Instant::now();
     let (total_sleep_time, total_in_bed_time) = compute_sleep_time_from_durations(&total_durations);
-
-    let start = Instant::now();
     let sleep_onset_latency = compute_sleep_onset_latency(&encrypted_data);
 
-    let start = Instant::now();
     let sleep_efficiency_category = evaluate_sleep_efficiency(&total_sleep_time, &total_in_bed_time);
-
-    let start = Instant::now();
     let total_sleep_time_category = evaluate_total_sleep_time(&total_sleep_time);
-
-    let start: Instant = Instant::now();
     let sleep_onset_latency_category = evaluate_sleep_onset_latency(&sleep_onset_latency);
 
-    let start: Instant = Instant::now();
     let categories = vec![
         &sleep_onset_latency_category,
         &total_sleep_time_category,
@@ -76,14 +62,12 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
 
     // Normalize to 1-5 range
-    let start: Instant = Instant::now();
     let multiplier = FheUint8::encrypt_trivial(4u8);
     let max_possible = FheUint8::encrypt_trivial((num_categories * 3) as u8);
     let final_score = (&raw_score * &multiplier) / &max_possible + 1;
 
     // Simplified output - only serialize final score
     serialize_fheuint8(&final_score, &output_final_score_path);
-    let file_size = fs::metadata(&output_final_score_path).unwrap().len();
 
     Ok(())
 }

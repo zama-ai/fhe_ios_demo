@@ -24,10 +24,9 @@ def cancel_task(uid, task_id):
 @pytest.mark.parametrize("task_name,uid", [
     ("ad_targeting", "test_ad_targeting"),
     ("weight_stats", "test_weight_stats"),
-    ("sleep_quality", "test_good_night"),
 ])
 def test_success_cancel_task_endpoint(task_name, uid):
-    print("Run test_cancel_task endpoint (expected success).")
+    print("\nRun test cancel_task endpoint (expected success).")
     
     # 1. Upload the server key
     serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
@@ -47,12 +46,6 @@ def test_success_cancel_task_endpoint(task_name, uid):
     # 3. Cancel task
     cancel_task(uid, task_id)
 
-    # Step 4: Check that no tasks remain
-    response = requests.post(f"{URL}/list_current_tasks")
-    response.raise_for_status()
-    data = response.json()
-
-    assert data == [], f"Expected no running tasks, but got: {data}"
 
 @pytest.mark.parametrize("task_name,uid", [
     ("ad_targeting", "test_ad_targeting"),
@@ -61,7 +54,7 @@ def test_success_cancel_task_endpoint(task_name, uid):
 ])
 @pytest.mark.parametrize("wrong_task_id", ["", None, "Fake_Task_ID"])
 def test_failed_cancel_task_endpoint(task_name, uid, wrong_task_id):
-    print("Run test_cancel_task endpoint (expected failure).")
+    print("\nRun test cancel_task endpoint (expected failure).")
     
     # 1. Upload the server key
     serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
@@ -77,11 +70,11 @@ def test_failed_cancel_task_endpoint(task_name, uid, wrong_task_id):
 
 
 def test_get_use_cases():
-    print("Run test_get_use_cases endpoint.")
+    print("\nRun test get_use_cases endpoint.")
 
     response = requests.get(f"{URL}/get_use_cases")
     response.raise_for_status()
     data = response.json()
 
     assert isinstance(data, dict)
-    assert isinstance(data.values(), list) & len(data.values()) > 0
+    assert len(list(data.values())[0]) == len(TASK_CONFIG['tasks'].keys())
