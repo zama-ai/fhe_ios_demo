@@ -185,7 +185,6 @@ logger = logging.getLogger(__name__)
 # Replace the existing logger with our wrapped version
 task_logger = TaskLogger(logger)
 
-
 # Load task configuration
 try:
     with open(CONFIG_FILE, "r", encoding="utf-8") as file:

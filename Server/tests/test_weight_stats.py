@@ -14,7 +14,6 @@ def test_weight_stats():
     weights_list = [68.0, 65.0, 69.0, 70.0, 70.5]
     
     uid = "test_weight_stats"
-    
     ck_path = f"{UPLOAD_FOLDER}/{uid}.clientKey"
     serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
     input_path = f"{UPLOAD_FOLDER}/{uid}.weight_stats.input.fheencrypted"
@@ -27,9 +26,7 @@ def test_weight_stats():
     assert os.path.exists(serverkey_path), f"Missing file: {serverkey_path=}"
     assert os.path.exists(ck_path), f"Missing file: {ck_path=}"
     assert os.path.exists(input_path), f"Missing file: {input_path=}"
-    
-    # weight_stats.run(uid)
-    
+        
     run_task_on_server("weight_stats", serverkey_path, input_path, output_path)
     
     # Decrypt and check results

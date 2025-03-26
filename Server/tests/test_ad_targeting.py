@@ -60,44 +60,43 @@ def test_ad_targeting(generate_fhext_params, generate_fhext_keys):
     
     print("\nRun test_ad_targeting")
     
-    start_time = time.time()
+    random_input = np.random.randint(0, 2, (1, 62))
     
     uid = "test_ad_targeting"
-    serverkey_path = f"./project/uploaded_files/{uid}.serverKey"
-    input_path = f"./project/uploaded_files/{uid}.ad_targeting.input.fheencrypted"
-    output_path = f"./project/uploaded_files/{uid}.ad_targeting.output.fheencrypted"
+    serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
+    input_path = f"{UPLOAD_FOLDER}/{uid}.ad_targeting.input.fheencrypted"
+    output_path = f"{UPLOAD_FOLDER}/{uid}.ad_targeting.output.fheencrypted"
     data_path = "./tasks/ad_targeting/data/onehot_ads.pkl"
-    
-    crypto_params = generate_fhext_params
-    
-    pkey, ckey = generate_fhext_keys
-            
+
     with open(data_path, "rb") as f:
         clear_matrix = pkl.load(f)
         clear_matrix = clear_matrix.astype(CRYPTO_DTYPE)
 
-    random_input = np.random.randint(0, 2, (1, 62))
+    clear_output = np.dot(random_input, clear_matrix.T).reshape(1, clear_matrix.shape[0])
+
+    start_time = time.time()
+    
+    crypto_params = generate_fhext_params
+
+    pkey, ckey = generate_fhext_keys
 
     encrypted_input = encrypt(random_input, crypto_params, pkey)
-    
+
     with open(serverkey_path, "wb") as binary_file:
         binary_file.write(ckey.serialize())
                 
     with open(input_path, "wb") as binary_file:
         binary_file.write(encrypted_input.serialize())
     
-    # monkeypatch.setattr(sys, "argv", ["ad_targeting.py", str(uid)])
-    # ad_targeting.main()
-    
     run_task_on_server("ad_targeting", serverkey_path, input_path, output_path)
 
+    # Decrypt and check results
     decrypted_output = decrypt(output_path, pkey, crypto_params).reshape(1, clear_matrix.shape[0])
-    expected_output = np.dot(random_input, clear_matrix.T).reshape(1, clear_matrix.shape[0])
-    
-    print(f"Expected output  : {expected_output}")
-    print(f"Decrypted output : {decrypted_output}")
-    
-    assert np.array_equal(decrypted_output, expected_output)
     
     end_time = time.time() - start_time
+
+    print(f"Expected output  : {clear_output}")
+    print(f"Decrypted output : {decrypted_output}")
     print(f"Test execution time: {end_time:.2f} seconds")
+
+    assert np.array_equal(decrypted_output, clear_output), f"Mismatch: expected: {clear_output}, got: {decrypted_output}"

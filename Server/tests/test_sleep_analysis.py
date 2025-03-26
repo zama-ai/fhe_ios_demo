@@ -49,6 +49,7 @@ def test_bad_night():
     uid = "test_bad_night"
     score = run_sleep_quality(bad_night, uid)
     print("Bad night ===", score)
+    assert score == 5, f"Expected score for a bad night is 5, but got `{score}`"
 
 
 def test_good_night():
@@ -75,5 +76,4 @@ def test_good_night():
 ]   
     uid = "test_good_night"
     score = run_sleep_quality(good_night, uid)
-    print("Good night ===", score)
-    
+    assert score == 1, f"Expected score for a good night is 1, but got `{score}`"

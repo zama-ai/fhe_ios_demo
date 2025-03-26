@@ -11,6 +11,7 @@ with open("tasks.yaml", encoding="utf8", mode="r") as file:
 TIME_OUT = 3 * 60 * 60
 POLL_INTERVAL = 5
 UPLOAD_FOLDER = "./project/uploaded_files"
+URL = "http://localhost:82"
 
 def save_output_file(path, content, mode="wb"):
     with open(path, mode) as f:
@@ -18,10 +19,9 @@ def save_output_file(path, content, mode="wb"):
 
 def run_task_on_server(
     task_name: str,
-    sk_path: str,
+    serverkey_path: str,
     input_path: str,
-    output_path: str,
-    url: str="http://localhost:82"):
+    output_path: str):
 
     """Runs an FHE task on a server.
 
@@ -34,10 +34,9 @@ def run_task_on_server(
 
     Args:
         task_name (str): Name of the task to execute.
-        sk_path (str): Path of the serialized server key file.
+        serverkey_path (str): Path of the serialized server key file.
         input_path (str): Path of the encrypted input file.
         output_path (str): Path where the streamed output file will be saved.
-        url (str): URL of the task server, default is "http://localhost:82".
 
     Returns:
         (uid, task_id): tuple, representing the unique user identifier and task identifier.
@@ -50,15 +49,15 @@ def run_task_on_server(
     """
    
     # 1. Upload the server key
-    with open(sk_path, "rb") as f:
-        response = requests.post(f"{url}/add_key", files={"key": f}, data={"task_name": task_name})
+    with open(serverkey_path, "rb") as f:
+        response = requests.post(f"{URL}/add_key", files={"key": f}, data={"task_name": task_name})
         response.raise_for_status()
         uid = response.json()["uid"]
-        print(f"[run_task_on_server | UID={uid}] Uploading server key: {sk_path}")
+        print(f"[run_task_on_server | UID={uid}] Uploading server key: {serverkey_path}")
     
     # 2. Start task
     with open(input_path, "rb") as f:
-        response = requests.post(f"{url}/start_task", files={"encrypted_input": f}, data={"uid": uid, "task_name": task_name})
+        response = requests.post(f"{URL}/start_task", files={"encrypted_input": f}, data={"uid": uid, "task_name": task_name})
         response.raise_for_status()
         task_id = response.json()["task_id"]
         print(f"[run_task_on_server | TASK_ID={task_id}] Sending encrypted input: {input_path}")
@@ -66,7 +65,7 @@ def run_task_on_server(
     # 3. Poll for result   
     for attempt in range(TIME_OUT):
         time.sleep(POLL_INTERVAL)
-        response = requests.get(f"{url}/get_task_result", params={"task_name": task_name, "task_id": task_id, "uid": uid})
+        response = requests.get(f"{URL}/get_task_result", params={"task_name": task_name, "task_id": task_id, "uid": uid})
 
         if response.status_code == 200:
             config_output_files = TASK_CONFIG["tasks"][task_name]["output_files"]

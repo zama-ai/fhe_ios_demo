@@ -94,10 +94,6 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
             f.write(file_content)
         file_size = file_path.stat().st_size  # Get file size in bytes
         logger.info("🔐 Successfully received new key upload: `%s` (Size: `%s` bytes). Assigned UID: `%s`", file_path, file_size, uid)
-        logger.info(glob(f"./project/*/*"))
-
-        logger.info(glob(f"/project/*/*"))
-
     except Exception as e:
         error_message = f"❌ Failed to store the server key: `e`"
         task_logger.error(error_message)
@@ -150,7 +146,7 @@ async def start_task(
         config=use_cases[task_name], file_type="input", args={"uid": uid, "task_name": task_name}
     )
     input_file_path = FILES_FOLDER / input_filename
-    task_logger.info(f"📁 Input file path: `{input_file_path}`")
+    task_logger.debug(f"📁 Input file path: `{input_file_path}`")
 
     try:
         file_content = await encrypted_input.read()
@@ -164,13 +160,12 @@ async def start_task(
 
     # Start the Celery task
     try:
-        
         # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue.
         task = run_binary_task.delay(binary, uid, task_name)
         task_logger.info(
             f"🚀 Task started [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`"
         )
-        task_logger.info(
+        task_logger.debug(
             f"📁 Saved encrypted input file to `{input_file_path} `(Size: `{file_size}` bytes)"
         )
         return JSONResponse({"task_id": task.id})
@@ -560,7 +555,7 @@ async def get_task_result(
             key = output_file_config.get("key")
            
             if backup:
-                response_data['status'] = 'success'        
+                response_data['status'] = 'success'
                 output_filename = generate_filename(output_file_config, file_type="output", args={"uid": uid})
             else:
                 response_data['status'] = 'completed'
