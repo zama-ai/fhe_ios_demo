@@ -1,4 +1,3 @@
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -75,8 +74,6 @@ fn deserialize_fheuint16(path: &str) -> FheUint16 {
 #[pyfunction]
 pub fn generate_files(clear_data: Vec<f64>, uid: String) -> PyResult<u8> {
 
-    let current_dir = env::current_dir().unwrap();
-
     let sk_path = format!("{}/{}.serverKey", UPLOAD_FOLDER, uid);
     let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
     let input_path = format!("{}/{}.weight_stats.input.fheencrypted", UPLOAD_FOLDER, uid);
@@ -85,10 +82,7 @@ pub fn generate_files(clear_data: Vec<f64>, uid: String) -> PyResult<u8> {
     let client_key = ClientKey::generate(config);
     let compressed_server_key = CompressedServerKey::new(&client_key);
 
-    let compressed_size = bincode::serialize(&compressed_server_key).unwrap().len();
-
     let sks = compressed_server_key.decompress();
-    let decompressed_size = bincode::serialize(&sks).unwrap().len();
 
     set_server_key(sks.clone());
 
@@ -139,13 +133,8 @@ pub fn decrypt(uid: String) -> PyResult<(u16, u16, u16)> {
 
     // Retrive the encrypted result
     let avg_encrypted_output = deserialize_fheuint16(&output_avg_path);
-    let file_size = fs::metadata(&output_avg_path).unwrap().len();
-
     let min_encrypted_output = deserialize_fheuint16(&output_min_path);
-    let file_size = fs::metadata(&output_min_path).unwrap().len();
-
     let max_encrypted_output = deserialize_fheuint16(&output_max_path);
-    let file_size = fs::metadata(&output_max_path).unwrap().len();
 
     // Decrypt the output
     let decrypted_avg_weight: u16 = avg_encrypted_output.decrypt(&deserialize_ck);

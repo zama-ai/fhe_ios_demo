@@ -74,21 +74,14 @@ else
     mkdir -p "$HOST_CERTS_PATH"
 fi
 
-# Ensure necessary directories exist on the host before launching Docker
-for dir in "$SHARED_DIR" "$BACKUP_DIR"; do
-    mkdir -p "$dir"
-    chmod -R 777 "$dir"
-    echo "Set correct permissions to '$dir' directory."
-done
-
 echo "🚀 [$COMPOSE_PROJECT_NAME]: launching Docker containers using '$DOCKER_COMPOSE_NAME'..."
 docker-compose -p "$COMPOSE_PROJECT_NAME" up -d --scale service_celery_usecases="$CELERY_WORKER_COUNT_USECASE_QUEUE"
     # --scale service_celery_ads="$CELERY_WORKER_COUNT_AD_QUEUE"
 
 if [[ "$1" != "ci" ]]; then
-  echo "Following logs..."
+  echo "[MODE=$1] Following logs..."
   docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" logs -f
 else
-  echo "Skipping logs - running in CI environment."
+  echo "[MODE=$1] Skipping logs - running in CI environment."
   docker-compose --env-file "$ENV_FILE" -f "$DOCKER_COMPOSE_NAME" -p "$COMPOSE_PROJECT_NAME" ps
 fi
