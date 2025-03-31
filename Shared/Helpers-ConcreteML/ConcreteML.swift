@@ -17,7 +17,7 @@ enum ConcreteML {
             return nil
         }
     }()
-
+    
     static var cryptoParams: MatmulCryptoParameters? = {
         do {
             if let cryptoParamsString {
@@ -30,7 +30,7 @@ enum ConcreteML {
             return nil
         }
     }()
-
+    
     static func generateAndPersistKeys() async throws -> (PrivateKey, CpuCompressionKey) {
         try await Task.detached(priority: .high) {
             guard let cryptoParams = Self.cryptoParams else {
@@ -56,7 +56,7 @@ enum ConcreteML {
             try compressionKey.serialize() // 2.5 sec
         }.value
     }
-
+    
     static func deserializePrivateKey(from: Data) async -> PrivateKey {
         await Task.detached {
             privateKeyDeserialize(content: from)

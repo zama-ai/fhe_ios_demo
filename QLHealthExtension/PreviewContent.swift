@@ -47,7 +47,7 @@ struct PreviewContent: View {
             
         case .previewSleepDuration(let duration):
             previewSleepDuration(duration)
-
+            
         case .previewText(let value):
             previewText(value: value)
         }
@@ -75,7 +75,7 @@ struct PreviewContent: View {
             .font(.custom("Telegraf-Bold", size: 22))
             .fontWeight(.bold)
     }
-
+    
     private func text(value: Double)  -> some View {
         Color.zamaYellow
             .aspectRatio(contentMode: .fit)
@@ -120,7 +120,7 @@ struct PreviewContent: View {
         let maxValue = values.max()!
         let minY = minValue - 3
         let maxY = maxValue + 2
-
+        
         return Chart {
             ForEach(Array(values.enumerated()), id: \.offset) { index, value in
                 LineMark(
@@ -136,7 +136,7 @@ struct PreviewContent: View {
                     Rectangle()
                         .fill(.black)
                         .frame(width: 5, height: 5)
-                 }
+                }
             }
         }
         .chartYScale(domain: minY...maxY)

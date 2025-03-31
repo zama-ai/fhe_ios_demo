@@ -5,7 +5,7 @@ import SwiftUI
 struct OnAppearAgainModifier: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
     let action: () -> Void
-
+    
     func body(content: Content) -> some View {
         content
             .onChange(of: scenePhase) { _, newPhase in

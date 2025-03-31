@@ -14,17 +14,17 @@ extension SocialTimeline {
         
         @UserDefaultsStorage(key: "v9_uid", defaultValue: nil)
         private var uid: String?
-
+        
         @UserDefaultsStorage(key: "v9_taskID", defaultValue: nil)
         private var taskID: String?
-
+        
         @UserDefaultsStorage(key: "v9_profileHash", defaultValue: nil)
         static private var profileHash: String?
-
+        
         init() {
             self.items = Self.generateItems(profileHash: Self.profileHash)
         }
-
+        
         func refreshFromDisk() {
             Task {
                 do {
@@ -65,14 +65,14 @@ extension SocialTimeline {
                 print("Profile unchanged, skipping upload")
                 return
             }
-
+            
             try await reportActivity("Uploading Encrypted Profile") {
                 let newTaskID = try await Network.shared.startTask(.ad_targeting, uid: uid, encrypted_input: profile)
                 self.taskID = newTaskID
                 try await getServerResult(taskID: newTaskID, uid: uid, profileHash: profileHash)
             }
         }
-                
+        
         private func getServerResult(taskID: String, uid: String, profileHash: String) async throws {
             let result = try await Network.shared.getAdTargetingResult(taskID: taskID, uid: uid)
             for position in 0..<Self.adsLimit {
@@ -83,7 +83,7 @@ extension SocialTimeline {
             self.taskID = nil
             self.items = Self.generateItems(profileHash: profileHash)
         }
-                
+        
         private func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
             self.activityReport = .progress("\(name)…")
             do {
@@ -98,7 +98,7 @@ extension SocialTimeline {
         static private func generateItems(profileHash: String?) -> [TimelineItem] {
             var items: [TimelineItem] = []
             var adIndex = 0
-
+            
             for (index, post) in Post.samples.enumerated() {
                 items.append(.post(post))
                 

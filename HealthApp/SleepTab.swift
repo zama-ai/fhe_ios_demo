@@ -10,7 +10,7 @@ struct SleepTab: View {
     @StateObject private var vm = ViewModel()
     @State private var selectedDate: Date?
     @State private var path: [Destination] = []
-
+    
     enum Destination {
         case calendar
     }
@@ -36,7 +36,7 @@ struct SleepTab: View {
                         path.append(.calendar)
                     }
                 }
-
+                
                 CustomBox("Sleep Phase") {
                     if let url = vm.selectedSample?.url {
                         FilePreview(url: url)
@@ -117,34 +117,34 @@ extension SleepTab {
         private let input: Storage.File = .sleepList
         private let output: Storage.File = .sleepScore
         private let serverTask: Network.ServerTask = .sleep_quality
-
+        
         @Published var allSamples: [Sample] = []
         @Published var selectedSample: Selection?
         @Published var samplesInterval: DateInterval?
         @Published var result: URL?
         @Published var status: ActivityStatus?
-
+        
         func refreshFromDisk() {
             Task {
                 do {
                     try readSamplesFromDisk()
-                                        
-//                    if selectedSample != nil,
-//                       let _ = await Storage.read(output)
-//                    {
-//                        result = Storage.url(for: output)
-//                    }
                     
-//                    if selectedSample == nil {
-//                        // Cleanup. Input == nil and Output != nil means corruption;
-//                        // Input might have been deleted in DataVault.
-//                        print("nil input, deleting output")
-//                        try await Storage.deleteFromDisk(output)
-//                        self.uploadedSampleHash = nil
-//                        self.uploadedSampleTaskID = nil
-//                        self.status = nil
-//                        result = nil
-//                    }
+                    //                    if selectedSample != nil,
+                    //                       let _ = await Storage.read(output)
+                    //                    {
+                    //                        result = Storage.url(for: output)
+                    //                    }
+                    
+                    //                    if selectedSample == nil {
+                    //                        // Cleanup. Input == nil and Output != nil means corruption;
+                    //                        // Input might have been deleted in DataVault.
+                    //                        print("nil input, deleting output")
+                    //                        try await Storage.deleteFromDisk(output)
+                    //                        self.uploadedSampleHash = nil
+                    //                        self.uploadedSampleTaskID = nil
+                    //                        self.status = nil
+                    //                        result = nil
+                    //                    }
                 } catch {
                     print(error)
                 }
@@ -168,7 +168,7 @@ extension SleepTab {
                 self.samplesInterval = DateInterval(start: min, end: max)
             }
         }
-
+        
         func onDateSelected(date: Date) async {
             guard let nightFileURL = allSamples.first(where: { $0.date == date })?.url,
                   let data = await Storage.read(nightFileURL) else {
@@ -194,7 +194,7 @@ extension SleepTab {
                 self.status = .error(error.localizedDescription)
             }
         }
-
+        
         // MARK: - PRIVATE -
         
         private func uploadServerKey() async throws -> Network.UID {
@@ -208,7 +208,7 @@ extension SleepTab {
             }
             
             // TODO: prevent reentrancy, if already uploading
-
+            
             let newUID = try await Network.shared.uploadServerKey(keyToUpload, for: serverTask)
             self.uploadedKeyHash = hash
             self.uploadedKeyUID = newUID
@@ -222,7 +222,7 @@ extension SleepTab {
             }
             
             // TODO: prevent reentrancy, if already uploading
-
+            
             let taskID = try await Network.shared.startTask(serverTask, uid: uid, encrypted_input: sampleToUpload)
             self.uploadedSampleHash = hash
             self.uploadedSampleTaskID = taskID
@@ -245,7 +245,7 @@ extension SleepTab {
         
         @UserDefaultsStorage(key: "v9_SLEEP.uploadedSampleHash", defaultValue: nil)
         private var uploadedSampleHash: String?
-
+        
         @UserDefaultsStorage(key: "v9_SLEEP.uploadedSampleTaskID", defaultValue: nil)
         private var uploadedSampleTaskID: Network.TaskID?
     }

@@ -256,7 +256,7 @@ extension ProfileTab {
             
             self.consoleOutput += "Encrypted Profile: \(data.formattedSize)\n\n"
             self.consoleOutput += "Encrypted Profile hash: \(data.persistantHashValue)\n\n"
-
+            
             try await Storage.write(.concreteEncryptedProfile, data: data)
             profileOnDisk = true
             

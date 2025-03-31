@@ -40,12 +40,12 @@ final class PreviewVC: UIViewController, QLPreviewingController {
             print("QL: cannot read file at \(url)")
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read file at \(url)"])
         }
-
+        
         guard let ck = try await ClientKey.readFromDisk(.clientKey) else {
             print("QL: cannot read ClientKey")
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey"])
         }
-
+        
         let fileName = url.lastPathComponent
         let fileNameForDeterminingType = fileName.replacingOccurrences(of: "-preview", with: "")
         var fileType = Storage.File(rawValue: fileNameForDeterminingType)?.decryptType

@@ -5,7 +5,7 @@ import SwiftUI
 import QuickLook
 
 final class PreviewVC: UIViewController, QLPreviewingController {
-
+    
     @IBOutlet private var container: UIView!
     private var viewModel =  ViewModel()
     
@@ -31,7 +31,7 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         
         hostingController.didMove(toParent: self)
     }
-
+    
     // Add the supported content types to the QLSupportedContentTypes array in the Info.plist of the extension.
     // Perform any setup necessary in order to prepare the view.
     // Quick Look will display a loading spinner until this returns.
@@ -55,12 +55,12 @@ final class PreviewVC: UIViewController, QLPreviewingController {
                                                       privateKey: privateKey,
                                                       cryptoParams: cryptoParams,
                                                       numValidGlweValuesInLastCiphertext: 42) // Concrete ML hack
-
+        
         let clearResult: [Int64] = rawResult[0].compactMap {
             let raw = Int64(truncatingIfNeeded: $0)
             return raw <= 0 ? 0 : raw
         }
-
+        
         self.viewModel.adID = nthHighestScore(rank: position, in: clearResult)
         
         print(clearResult)

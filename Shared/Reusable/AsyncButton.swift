@@ -22,29 +22,29 @@ import SwiftUI
     
     Spacer()
     
-
+    
     /*
-    Group {
-        AsyncButton("Try me!") {}
-
-        AsyncButton(action: {}) {
-            Text("Text based button")
-        }
-
-        AsyncButton(action: {}) {
-            Image(systemName: "heart.text.clipboard")
-        }
-
-        AsyncButton(action: {}) {
-            Label("Import Health Information", systemImage: "heart.text.clipboard")
-                .symbolRenderingMode(.multicolor)
-        }
-        
-        AsyncButton("Try me! (error)") {
-            throw NSError(domain: "Test", code: 1, userInfo: [NSLocalizedDescriptionKey: "Something went wrong!"])
-        }
-    }
-    .buttonStyle(.bordered)*/
+     Group {
+     AsyncButton("Try me!") {}
+     
+     AsyncButton(action: {}) {
+     Text("Text based button")
+     }
+     
+     AsyncButton(action: {}) {
+     Image(systemName: "heart.text.clipboard")
+     }
+     
+     AsyncButton(action: {}) {
+     Label("Import Health Information", systemImage: "heart.text.clipboard")
+     .symbolRenderingMode(.multicolor)
+     }
+     
+     AsyncButton("Try me! (error)") {
+     throw NSError(domain: "Test", code: 1, userInfo: [NSLocalizedDescriptionKey: "Something went wrong!"])
+     }
+     }
+     .buttonStyle(.bordered)*/
 }
 
 struct AsyncButton<Label: View>: View {
@@ -53,7 +53,7 @@ struct AsyncButton<Label: View>: View {
     
     @State private var task: Task<Void, Never>?
     @State private var errorMessage: String?
-        
+    
     init(action: @escaping () async throws -> Void, @ViewBuilder label: @escaping () -> Label) {
         self.action = action
         self.label = label
@@ -63,7 +63,7 @@ struct AsyncButton<Label: View>: View {
         self.action = action
         self.label = { Text(title) }
     }
-
+    
     var body: some View {
         Button {
             guard task == nil else {

@@ -40,7 +40,7 @@ enum SleepQuality: Int, CaseIterable, PrettyTypeNamable {
     case moderate = 3
     case poor = 4
     case veryPoor = 5
-
+    
     var details: LocalizedStringKey {
         switch self {
         case .excellent:
@@ -48,18 +48,18 @@ enum SleepQuality: Int, CaseIterable, PrettyTypeNamable {
             
         case .good:
             "**Good Sleep**: Your sleep was solid, with adequate REM and Deep Sleep, though there’s room for slight improvement in overall recovery."
-        
+            
         case .moderate:
             "**Moderate Sleep**: Your sleep was somewhat fragmented, with either reduced Deep or REM sleep, impacting recovery and cognitive function."
-        
+            
         case .poor:
             "**Poor Sleep**: Your sleep lacked enough Deep or REM stages, affecting physical restoration and mental clarity."
-        
+            
         case .veryPoor:
             "**Very Poor Sleep**: Your sleep was highly disrupted, with insufficient restorative phases, leading to fatigue and impaired cognitive function."
         }
     }
-
+    
     var tip: LocalizedStringKey {
         switch self {
         case .excellent:

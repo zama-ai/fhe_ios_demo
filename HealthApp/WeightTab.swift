@@ -8,7 +8,7 @@ import SwiftUI
 
 struct WeightTab: View {
     @StateObject private var vm = ViewModel()
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -18,7 +18,7 @@ struct WeightTab: View {
                 } else {
                     OpenAppButton(.zamaDataVault(tab: .weight))
                 }
-
+                
                 CustomBox("Trend") {
                     Group {
                         if let url = vm.samples?.url {
@@ -56,7 +56,7 @@ struct WeightTab: View {
             }
         }
     }
-
+    
     private func statCell(url: URL?, name: String) -> some View {
         VStack(spacing: 12) {
             if let url {
@@ -78,11 +78,11 @@ extension WeightTab {
         typealias Samples = (url: URL, data: Data, interval: DateInterval)
         typealias Results = (min: URL, max: URL, avg: URL)
         private let serverTask: Network.ServerTask = .weight_stats
-
+        
         @Published var samples: Samples?
         @Published var results: Results?
         @Published var status: ActivityStatus?
-
+        
         func refreshFromDisk() {
             Task {
                 do {
@@ -112,8 +112,8 @@ extension WeightTab {
                let _ = await Storage.read(.weightAvg)
             {
                 results = (min: Storage.url(for: .weightMin),
-                          max: Storage.url(for: .weightMax),
-                          avg: Storage.url(for: .weightAvg))
+                           max: Storage.url(for: .weightMax),
+                           avg: Storage.url(for: .weightAvg))
             }
         }
         
@@ -131,7 +131,7 @@ extension WeightTab {
             self.status = nil
             self.results = nil
         }
-
+        
         
         private func startUploadProcess() async {
             guard let samples, results == nil else { return }
@@ -150,7 +150,7 @@ extension WeightTab {
                 self.status = .error(error.localizedDescription)
             }
         }
-
+        
         // MARK: - PRIVATE -
         
         private func uploadServerKey() async throws -> Network.UID {
@@ -164,7 +164,7 @@ extension WeightTab {
             }
             
             // TODO: prevent reentrancy, if already uploading
-
+            
             let newUID = try await Network.shared.uploadServerKey(keyToUpload, for: serverTask)
             self.uploadedKeyHash = hash
             self.uploadedKeyUID = newUID
@@ -178,7 +178,7 @@ extension WeightTab {
             }
             
             // TODO: prevent reentrancy, if already uploading
-
+            
             let taskID = try await Network.shared.startTask(serverTask, uid: uid, encrypted_input: sampleToUpload)
             self.uploadedSampleHash = hash
             self.uploadedSampleTaskID = taskID
@@ -190,11 +190,11 @@ extension WeightTab {
             try await Storage.write(.weightMin, data: result.min)
             try await Storage.write(.weightMax, data: result.max)
             try await Storage.write(.weightAvg, data: result.avg)
-
+            
             try await Storage.write(.weightMin, data: result.min, suffix: "preview")
             try await Storage.write(.weightMax, data: result.max, suffix: "preview")
             try await Storage.write(.weightAvg, data: result.avg, suffix: "preview")
-
+            
             return Results(min: Storage.url(for: .weightMin),
                            max: Storage.url(for: .weightMax),
                            avg: Storage.url(for: .weightAvg))
@@ -209,7 +209,7 @@ extension WeightTab {
         
         @UserDefaultsStorage(key: "v9_WEIGHT.uploadedSampleHash", defaultValue: nil)
         private var uploadedSampleHash: String?
-
+        
         @UserDefaultsStorage(key: "v9_WEIGHT.uploadedSampleTaskID", defaultValue: nil)
         private var uploadedSampleTaskID: Network.TaskID?
     }

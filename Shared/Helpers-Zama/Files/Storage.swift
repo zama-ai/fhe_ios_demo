@@ -7,12 +7,12 @@ final class Storage {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-
+        
         case concretePrivateKey = "concretePrivateKey"
         case concreteCPUCompressionKey = "concreteCPUCompressionKey"
         case concreteEncryptedProfile = "concreteProfile.fheencrypted"
         case concreteEncryptedResult = "concreteResult.fheencryptedAd"
-
+        
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
         case weightMax = "weightMax.fheencrypted"
@@ -20,7 +20,7 @@ final class Storage {
         
         case sleepList = "sleepList.fheencrypted"
         case sleepScore = "sleepScore.fheencrypted"
-
+        
         var decryptType: DecryptType? {
             switch self {
             case .sleepList: .cipherTextList
@@ -49,7 +49,7 @@ final class Storage {
             switch self {
             case .sleepList, .sleepScore: .groupShared
             case .weightList, .weightMin, .weightMax, .weightAvg: .groupShared
-            
+                
             case .clientKey : .groupShared // TODO: switch to .appPrivate once it includes QL extension too
             case .publicKey, .serverKey: .groupShared
                 
@@ -60,7 +60,7 @@ final class Storage {
         
         func withSuffix(_ suffix: String?) -> String {
             guard let suffix, !suffix.isEmpty else { return self.rawValue }
-
+            
             let components = rawValue.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
             if components.count == 2 {
                 return "\(components[0])-\(suffix).\(components[1])"
@@ -88,7 +88,7 @@ final class Storage {
     private static let singleton = Storage()
     private let fileManager = FileManager.default
     private let appGroupID = "group.ai.zama.fhedemo.shared"
-
+    
     /// Pass nil to delete file
     static func write(_ file: File, data: Data?, suffix: String? = nil) async throws {
         let fileName = file.withSuffix(suffix)
@@ -103,7 +103,7 @@ final class Storage {
     static func deleteFromDisk(_ file: Storage.File, suffix: String? = nil) async throws {
         try await Storage.write(file, data: nil, suffix: suffix)
     }
-
+    
     /// Returns nil if file missing
     static func read(_ file: File) async -> Data? {
         let fullURL = singleton.destinationFolder(for: file).appendingPathComponent(file.rawValue)
@@ -177,21 +177,21 @@ extension Storage {
         case .groupShared: return appGroupSharedFolder
         }
     }
-        
+    
     private var appPrivateFolder: URL {
         guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("No private folder")
         }
         return folder.appending(component: "v9")
     }
-
+    
     private var appAndExtensionFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
         return sharedFolder.appending(component: "v9")
     }
-
+    
     private var appGroupSharedFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
@@ -213,7 +213,7 @@ extension Storage {
         date.formatted(date: .numeric, time: .omitted)
             .replacingOccurrences(of: "/", with: "-")
     }
-
+    
     // Ex: sleepList-23-03-2025.fheencrypted
     static func date(from fileName: String) -> Date? {
         let formatter = DateFormatter()
@@ -226,21 +226,21 @@ extension Storage {
         
         return formatter.date(from: text)
     }
-
+    
     // MARK: - DateInterval (eg, for weights) -
-
+    
     static func suffix(for interval: DateInterval) -> String {
         let start = interval.start
             .formatted(date: .numeric, time: .omitted)
             .replacingOccurrences(of: "/", with: "-")
-
+        
         let end = interval.end
             .formatted(date: .numeric, time: .omitted)
             .replacingOccurrences(of: "/", with: "-")
-
+        
         return "\(start)_\(end)"
     }
-
+    
     // Ex: weightList-25-09-2024_25-03-2025.fheencrypted
     static func dateInterval(from fileName: String) -> DateInterval? {
         let formatter = DateFormatter()

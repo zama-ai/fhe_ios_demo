@@ -29,16 +29,16 @@ struct AppInfo {
 struct OpenAppButton<Label: View>: View {
     let app: AppInfo
     let label: () -> Label
-
+    
     @State private var showAlert = false
     @State private var showOverlay = false
     @Environment(\.openURL) private var openURL
-
+    
     init(_ app: AppInfo, @ViewBuilder label: @escaping () -> Label) {
         self.app = app
         self.label = label
     }
-
+    
     init(_ app: AppInfo) where Label == Text {
         self.app = app
         self.label = { Text("Open \(app.name)") }

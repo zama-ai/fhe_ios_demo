@@ -6,10 +6,10 @@ import SwiftUI
     VStack {
         Button("Foo") {}.buttonStyle(.zama)
         Button("Foo") {}.buttonStyle(.zama).disabled(true)
-
+        
         Button("Foo") {}.buttonStyle(.blackHighlight())
         Button("Foo") {}.buttonStyle(.blackHighlight()).disabled(true)
-
+        
         AsyncButton(action: {}) {
             Label("Import Health Information", systemImage: "heart.text.clipboard")
         }.buttonStyle(.zama)
@@ -22,7 +22,7 @@ import SwiftUI
 
 struct ZamaButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
-
+    
     func makeBody(configuration config: Configuration) -> some View {
         config.label
             .opacity(isEnabled ? 1 : 0.5)
@@ -39,7 +39,7 @@ struct ZamaButtonStyle: ButtonStyle {
 struct BlackHighlightButtonStyle: ButtonStyle {
     var disabled: Bool
     @Environment(\.isEnabled) private var isEnabled
-
+    
     func makeBody(configuration config: Configuration) -> some View {
         if disabled {
             config.label

@@ -8,10 +8,10 @@ import SwiftUI
 
 struct WeightTab: View {
     @ObservedObject var vm: HealthViewModel
-
+    
     private let tab: DataVaultTab = .weight
     private let openHealthAppTab: HealthTab = .weight
-
+    
     var body: some View {
         VStack(spacing: 0) {
             Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon)
@@ -44,7 +44,9 @@ struct WeightTab: View {
                         }
                     }
                     
-                    ConsoleSection(title: "FHE Encryption", output: vm.weightConsoleOutput)
+                    if !vm.weightConsoleOutput.isEmpty || vm.encryptedWeight == nil {
+                        ConsoleSection(title: "FHE Encryption", output: vm.weightConsoleOutput)
+                    }
                     Spacer()
                 }
                 .padding(.horizontal, 30)

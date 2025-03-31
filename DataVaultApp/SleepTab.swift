@@ -11,7 +11,7 @@ struct SleepTab: View {
     
     private let tab: DataVaultTab = .sleep
     private let openHealthAppTab: HealthTab = .sleep
-
+    
     var body: some View {
         VStack(spacing: 0) {
             Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon)
@@ -44,7 +44,10 @@ struct SleepTab: View {
                         }
                     }
                     
-                    ConsoleSection(title: "FHE Encryption", output: vm.sleepConsoleOutput)
+                    if !vm.sleepConsoleOutput.isEmpty || vm.encryptedSleep == nil {
+                        ConsoleSection(title: "FHE Encryption", output: vm.sleepConsoleOutput)
+                    }
+                    
                     Spacer()
                 }
                 .padding(.horizontal, 30)

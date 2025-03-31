@@ -40,13 +40,13 @@ extension CompactCiphertextList {
         try wrap { compact_ciphertext_list_expand(pointer, &expander) }
         var length: Int = 0
         try wrap { compact_ciphertext_list_expander_len(expander, &length) }
-
+        
         var array: [Sleep.Sample] = []
         for i in stride(from: 0, to: length, by: 3) {
             var level: OpaquePointer? // FheUint4
             var start: OpaquePointer? // FheUint10
             var end: OpaquePointer? // FheUint10
-
+            
             try wrap { compact_ciphertext_list_expander_get_fhe_uint4(expander, i, &level) }
             try wrap { compact_ciphertext_list_expander_get_fhe_uint10(expander, i+1, &start) }
             try wrap { compact_ciphertext_list_expander_get_fhe_uint10(expander, i+2, &end) }
@@ -64,7 +64,7 @@ extension CompactCiphertextList {
         compact_ciphertext_list_expander_destroy(expander)
         return array
     }
-
+    
     convenience init(encrypting samples: [[Int]], publicKey pk: PublicKeyCompact) throws {
         var builder: OpaquePointer? // CompactCiphertextListBuilder
         var compact_list: OpaquePointer? // CompactCiphertextList

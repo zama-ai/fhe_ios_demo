@@ -9,7 +9,7 @@ import CoreImage
  ✅ Deletes all other copies.
  ✅ Updates JSON with new image names (hash).
  ✅ Removes metadata from all JPEG images to reduce file size.
-*/
+ */
 
 let folderPath = "/Users/dim/Developer/Zama/deai-dot-products/TestConcretMLX/images"
 let textFilePath = "/Users/dim/Developer/Zama/deai-dot-products/TestConcretMLX/ads.json"
@@ -29,13 +29,13 @@ func removeMetadata(from imageURL: URL) {
         print("❌ Failed to process image: \(imageURL.lastPathComponent)")
         return
     }
-
+    
     let outputURL = imageURL
     guard let destination = CGImageDestinationCreateWithURL(outputURL as CFURL, imageType, 1, nil) else {
         print("❌ Failed to create image destination for \(imageURL.lastPathComponent)")
         return
     }
-
+    
     // Save the image without metadata
     CGImageDestinationAddImage(destination, image, nil)
     if CGImageDestinationFinalize(destination) {
@@ -59,14 +59,14 @@ do {
             hashDictionary[hash, default: []].append(file)
         }
     }
-
+    
     for (hash, fileList) in hashDictionary {
         guard fileList.count > 1 else { continue } // Ignorer les fichiers uniques
-
+        
         let firstFile = fileList[0]
         let newFileName = "\(hash)\(firstFile.pathExtension.isEmpty ? "" : ".\(firstFile.pathExtension)")"
         let newFilePath = folderURL.appendingPathComponent(newFileName)
-
+        
         // Vérifier si le fichier renommé existe déjà
         if !fileManager.fileExists(atPath: newFilePath.path) {
             do {
@@ -79,7 +79,7 @@ do {
         } else {
             print("⚠️ Le fichier \(newFileName) existe déjà, pas de renommage.")
         }
-
+        
         // Supprimer les autres copies
         for duplicateFile in fileList.dropFirst() {
             do {
@@ -91,22 +91,22 @@ do {
             }
         }
     }
-
+    
     // Modifier le fichier texte en remplaçant les anciens noms par les nouveaux
     var textContent = try String(contentsOfFile: textFilePath, encoding: .utf8)
-
+    
     for (oldName, newName) in renameMap {
         textContent = textContent.replacingOccurrences(of: oldName, with: newName)
     }
-
+    
     try textContent.write(toFile: textFilePath, atomically: true, encoding: .utf8)
     print("📝 Fichier texte mis à jour avec les nouveaux noms d'images.")
-
+    
     // Remove metadata from all JPEG files
     for file in files where file.pathExtension.lowercased() == "jpg" || file.pathExtension.lowercased() == "jpeg" {
         removeMetadata(from: file)
     }
-
+    
 } catch {
     print("❌ Erreur lors de l'exécution du script: \(error)")
 }

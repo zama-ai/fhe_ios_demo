@@ -9,7 +9,7 @@ import SwiftUI
 struct SocialTimeline: View {
     @StateObject private var vm = ViewModel()
     @Environment(\.openURL) private var openURL
-
+    
     var body: some View {
         VStack {
             titleBar
@@ -17,9 +17,9 @@ struct SocialTimeline: View {
             
             if vm.dataVaultActionNeeded {
                 OpenAppButton(.zamaDataVault(tab: .profile))
-                .buttonStyle(.zama)
-                .padding(.horizontal, 20)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .buttonStyle(.zama)
+                    .padding(.horizontal, 20)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
                     ForEach(vm.items) { item in

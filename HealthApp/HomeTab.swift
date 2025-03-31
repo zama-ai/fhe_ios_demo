@@ -11,12 +11,12 @@ struct HomeTab: View {
     @Binding var selectedTab: HealthTab
     @State private var sleepInput: URL?
     @State private var sleepResult: URL?
-
+    
     @State private var weightInterval: DateInterval?
     @State private var weightMin: URL?
     @State private var weightMax: URL?
     @State private var weightAvg: URL?
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -51,7 +51,7 @@ struct HomeTab: View {
                                     .foregroundStyle(Color.zamaYellow)
                                     .padding(.bottom, 8)
                             }
-
+                            
                             if let weightMin {
                                 HStack {
                                     Text("Min: ")
@@ -141,7 +141,7 @@ struct HomeTab: View {
             }
         }
     }
-        
+    
     private func customBox<Content: View>(goTo tab: HealthTab, @ViewBuilder content: @escaping () -> Content) -> some View {
         CustomBox(label: { Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon) },
                   onTap: { selectedTab = tab },
