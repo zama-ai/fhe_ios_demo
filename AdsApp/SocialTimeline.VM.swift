@@ -22,7 +22,7 @@ extension SocialTimeline {
         static private var profileHash: String?
         
         init() {
-            self.items = Self.generateItems(profileHash: Self.profileHash)
+            self.items = Self.generateItems(profileHash: Self.profileHash, resultsReadyOnDisk: false)
         }
         
         func refreshFromDisk() {
@@ -60,9 +60,10 @@ extension SocialTimeline {
                 throw CustomError.missingServerKey
             }
             
-            let profileHash = profile.persistantHashValue
+            let profileHash = profile.stableHashValue
             guard profileHash != Self.profileHash else {
                 print("Profile unchanged, skipping upload")
+                self.items = Self.generateItems(profileHash: profileHash, resultsReadyOnDisk: true)
                 return
             }
             
@@ -81,7 +82,7 @@ extension SocialTimeline {
                 Self.profileHash = profileHash
             }
             self.taskID = nil
-            self.items = Self.generateItems(profileHash: profileHash)
+            self.items = Self.generateItems(profileHash: profileHash, resultsReadyOnDisk: true)
         }
         
         private func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
@@ -95,7 +96,7 @@ extension SocialTimeline {
             }
         }
         
-        static private func generateItems(profileHash: String?) -> [TimelineItem] {
+        static private func generateItems(profileHash: String?, resultsReadyOnDisk: Bool) -> [TimelineItem] {
             var items: [TimelineItem] = []
             var adIndex = 0
             
@@ -103,7 +104,7 @@ extension SocialTimeline {
                 items.append(.post(post))
                 
                 // Insert an ad after every `adFrequency` posts
-                if let profileHash, (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
+                if let profileHash, resultsReadyOnDisk, (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
                     items.append(.ad(position: adIndex, profileHash: profileHash))
                     adIndex += 1
                 }

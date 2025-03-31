@@ -21,7 +21,7 @@ extension OneHotable {
     }
 }
 
-struct Profile {
+struct Profile: Equatable {
     let age: AgeGroup
     let gender: Gender
     let country: Country

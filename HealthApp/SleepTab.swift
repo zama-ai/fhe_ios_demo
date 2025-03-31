@@ -202,7 +202,7 @@ extension SleepTab {
                 throw CustomError.missingServerKey
             }
             
-            let hash = keyToUpload.persistantHashValue
+            let hash = keyToUpload.stableHashValue
             if hash == self.uploadedKeyHash, let uid = self.uploadedKeyUID {
                 return uid // Already uploaded
             }
@@ -216,7 +216,7 @@ extension SleepTab {
         }
         
         private func uploadSample(_ sampleToUpload: Data, uid: Network.UID) async throws -> Network.TaskID {
-            let hash = sampleToUpload.persistantHashValue
+            let hash = sampleToUpload.stableHashValue
             if hash == self.uploadedSampleHash, let taskID = self.uploadedSampleTaskID {
                 return taskID // Already uploaded
             }
