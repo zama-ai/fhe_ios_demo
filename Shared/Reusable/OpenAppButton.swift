@@ -24,7 +24,28 @@ struct AppInfo {
     let name: String
     let deeplink: String
     let appStoreID: String
+    
+    static var appName: String {
+        Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as! String
+    }
+    
+    static var bundleID: String {
+        Bundle.main.bundleIdentifier!
+    }
+    
+    static var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString" as String) as! String
+    }
+    
+    static var buildNumber: String {
+        Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as! String
+    }
+    
+    static var fullVersion: String {
+        "\(version) (\(buildNumber))"
+    }
 }
+
 
 struct OpenAppButton<Label: View>: View {
     let app: AppInfo

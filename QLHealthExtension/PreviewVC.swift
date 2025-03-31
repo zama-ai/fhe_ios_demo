@@ -12,7 +12,7 @@ final class PreviewVC: UIViewController, QLPreviewingController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let swiftUIView = PreviewContent(viewModel: viewModel)
+        let swiftUIView = PreviewContent(viewModel: viewModel).securelyDisplayed()
         let hostingController = UIHostingController(rootView: swiftUIView)
         addChild(hostingController)
         

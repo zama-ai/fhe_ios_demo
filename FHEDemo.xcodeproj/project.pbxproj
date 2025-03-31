@@ -121,7 +121,6 @@
 				"ZamaUI/CustomFont/Telegraf-UltraBold.ttf",
 				ZamaUI/SharedAssets.xcassets,
 				ZamaUI/ZamaButtons.swift,
-				ZamaUI/ZamaCalendar.swift,
 				ZamaUI/ZamaConfig.swift,
 				ZamaUI/ZamaLink.swift,
 			);

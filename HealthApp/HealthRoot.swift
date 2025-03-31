@@ -27,6 +27,9 @@ struct HealthRoot: View {
         .overlay(alignment: .topTrailing) {
             ZamaLink()
         }
+        .overlay(alignment: .topTrailing) {
+            ZamaInfoButton()
+        }
         .onOpenURL { url in
             selectedTab = HealthTab(url: url) ?? .home
         }

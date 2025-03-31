@@ -56,7 +56,7 @@ struct HomeTab: View {
                                 HStack {
                                     Text("Min: ")
                                     FilePreview(url: weightMin)
-                                        .frame(width: 90, height: 30, alignment: .trailing)
+                                        .frame(width: 60, height: 40, alignment: .trailing)
                                     Text(" kg")
                                 }
                             }
@@ -65,7 +65,7 @@ struct HomeTab: View {
                                 HStack {
                                     Text("Max: ")
                                     FilePreview(url: weightMax)
-                                        .frame(width: 80, height: 30, alignment: .trailing)
+                                        .frame(width: 60, height: 40, alignment: .trailing)
                                     Text(" kg")
                                 }
                             }
@@ -74,7 +74,7 @@ struct HomeTab: View {
                                 HStack {
                                     Text("Avg: ")
                                     FilePreview(url: weightAvg)
-                                        .frame(width: 70, height: 30, alignment: .trailing)
+                                        .frame(width: 60, height: 40, alignment: .trailing)
                                     Text(" kg")
                                 }
                             }

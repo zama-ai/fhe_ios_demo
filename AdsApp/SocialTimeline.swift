@@ -16,10 +16,18 @@ struct SocialTimeline: View {
                 .padding(.top, 8)
             
             if vm.dataVaultActionNeeded {
-                OpenAppButton(.zamaDataVault(tab: .profile))
-                    .buttonStyle(.zama)
-                    .padding(.horizontal, 20)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                VStack(spacing: 40) {
+                    let icon = Image(systemName: "exclamationmark.triangle.fill")
+                    Text("\(icon)\n\nNo Profile found")
+                        .customFont(.title3)
+                        .multilineTextAlignment(.center)
+                    
+                    OpenAppButton(.zamaDataVault(tab: .profile))
+                        .buttonStyle(.zama)
+                        .padding(.horizontal, 20)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
             } else {
                 ScrollView {
                     ForEach(vm.items) { item in
