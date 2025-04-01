@@ -14,7 +14,7 @@ case "$RUN_TYPE" in
 
             # Start FastAPI in HTTPS mode
             export PORT=$FASTAPI_CONTAINER_PORT_HTTPS
-            echo "🚀 [MODE=$MODE] Starting Uvicorn Python server in HTTPS mode... for $MODE environment with PORT:$PORT"
+            echo "🚀 [MODE=$MODE | USE_TLS=$USE_TLS] Starting Uvicorn Python server in HTTPS mode... for $MODE environment with PORT:$PORT"
             exec uvicorn server:app \
                 --host 0.0.0.0 \
                 --port "$PORT" \
@@ -24,7 +24,7 @@ case "$RUN_TYPE" in
             # Start FastAPI in HTTP mode
             export PORT=$FASTAPI_CONTAINER_PORT_HTTP
             echo "⚠️ Warning: Starting FastAPI in HTTP mode; this mode should only be used in a development environment."
-            echo "🚀 [MODE=$MODE] Starting Uvicorn Python server in HTTP mode... for $MODE environment with PORT:$PORT, with log-level=$FASTAPI_LOGLEVEL"
+            echo "🚀 [MODE=$MODE | USE_TLS=$USE_TLS] Starting Uvicorn Python server in HTTP mode... for $MODE environment with PORT:$PORT, with log-level=$FASTAPI_LOGLEVEL"
             exec uvicorn server:app --host 0.0.0.0 --port "$PORT" --log-level "$FASTAPI_LOGLEVEL"
         fi
         ;;

@@ -1,27 +1,14 @@
 #!/bin/bash
 
-if [ "$1" == "dev" ]; then
+if [[ "$1" == "dev" || "$1" == "ci" ]]; then
     echo "🚀 Testing in the development environment..."
     export ENV_FILE=".env_dev"
-    export MODE="dev"
-    export COMPOSE_PROJECT_NAME="fhe_ios_demo_dev"
-elif [ "$1" == "ci" ]; then
-    echo "🚀 Testing in the development environment..."
-    export ENV_FILE=".env_dev"
-    export MODE="ci"
-    export COMPOSE_PROJECT_NAME="fhe_ios_demo_dev"
-
 elif [ "$1" == "staging" ]; then
     echo "🚀 Testing in the staging environment..."
     export ENV_FILE=".env_staging"
-    export MODE="stagging"
-    export COMPOSE_PROJECT_NAME="fhe_ios_demo_staging"
-
 elif [ "$1" == "prod" ]; then
     echo "🚀 Testing in the production environment..."
     export ENV_FILE=".env_prod"
-    export MODE="prod"
-    export COMPOSE_PROJECT_NAME="fhe_ios_demo_prod"
 else
     echo "Usage: $0 [mode=dev/prod/staging]"
     exit 1
@@ -37,3 +24,10 @@ else
     echo "Environment config file $ENV_FILE not found!"
     exit 1
 fi
+
+# Ensure necessary directories exist on the host before launching Docker
+for dir in "$SHARED_DIR" "$BACKUP_DIR"; do
+    mkdir -p "$dir"
+    chmod -R 777 "$dir"
+    echo "Set correct permissions to '$dir' directory."
+done

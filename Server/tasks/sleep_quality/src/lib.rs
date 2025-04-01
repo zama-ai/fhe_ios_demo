@@ -1,4 +1,3 @@
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -86,8 +85,6 @@ pub fn encrypt_brut_data(
 #[pyfunction]
 pub fn generate_files(clear_data: Vec<(u8, u16, u16)>, uid: &str) -> PyResult<u8> {
 
-    let current_dir = env::current_dir().unwrap();
-
     let sk_path = format!("{}/{}.serverKey", UPLOAD_FOLDER, uid);
     let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
     let input_path = format!("{}/{}.sleep_quality.input.fheencrypted", UPLOAD_FOLDER, uid);
@@ -96,10 +93,8 @@ pub fn generate_files(clear_data: Vec<(u8, u16, u16)>, uid: &str) -> PyResult<u8
     let client_key = ClientKey::generate(config);
 
     let compressed_server_key = CompressedServerKey::new(&client_key);
-    let compressed_size = bincode::serialize(&compressed_server_key).unwrap().len();
 
     let sks = compressed_server_key.decompress();
-    let decompressed_size = bincode::serialize(&sks).unwrap().len();
 
     set_server_key(sks.clone());
 
@@ -148,7 +143,6 @@ pub fn decrypt(uid: &str) -> PyResult<u8> {
 
     // Retrive the encrypted result
     let encrypted_output = deserialize_fheuint8(&output_path);
-    let file_size = fs::metadata(&output_path).unwrap().len();
 
     // Decrypt the output
     let decrypted_response: u8 = encrypted_output.decrypt(&deserialize_ck);

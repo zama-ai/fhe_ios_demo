@@ -3,11 +3,14 @@
 # Deployment Script for fhe_ios_demo Server
 
 # Setup environment depending on the first argument
-source .common_env
+source setup_env.sh
 
 # Parse command line arguments
 REBUILD_RUST=false
 NO_CACHE=false
+
+# Shift to ignore the first argument (handled by setup_env.sh)
+shift
 
 for arg in "$@"; do
     case "$arg" in
@@ -16,6 +19,10 @@ for arg in "$@"; do
             ;;
         --no-cache)
             NO_CACHE=true
+            ;;
+        *)
+            echo "Usage : $0 [dev|staging|prod] [--no-cache] [--rebuild-rust]"
+            exit 1
             ;;
     esac
 done
