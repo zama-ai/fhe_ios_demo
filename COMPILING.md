@@ -2,7 +2,7 @@
 
 ## 1. Install Rust
 
-1. Install latest Rust release (currently 1.81.0):
+1. Install the latest Rust release (currently 1.81.0):
 ```shell
     curl https://sh.rustup.rs -sSf | sh
 ``` 
@@ -22,9 +22,9 @@ rustup toolchain install nightly
 rustup component add rust-src --toolchain nightly-aarch64-apple-darwin
 ```
 
-## 2. Compile TFHE-rs for use in Swift.
+## 2. Compile TFHE-rs for use in Swift
 
-1. Get TFHE-rs
+1. Get TFHE-rs:
 ```shell
 git clone --branch https://github.com/zama-ai/tfhe-rs.git
 ```
@@ -54,13 +54,13 @@ module TFHE {
 }
 ```
 
-5. Grab Static Librairies (.a):
+5. Grab static librairies (.a):
 The iOS simulator library needs to be FAT, even if it contains one slice (you can also add an x86-64 slice later on):
 ```shell
 lipo -create -output $(OUTPUT)/libtfhe-ios-sim.a $(TFHE_RS_PATH)/target/aarch64-apple-ios-sim/release/libtfhe.a
 ```
 
-The ios device library can be copied as is:
+The iOS device library can be copied this way:
 ```shell
 cp $(TFHE_RS_PATH)/target/aarch64-apple-ios/release/libtfhe.a $(OUTPUT)/libtfhe-ios.a
 ```
