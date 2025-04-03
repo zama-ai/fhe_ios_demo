@@ -55,6 +55,8 @@ final class PreviewVC: UIViewController, QLPreviewingController {
                 fileType = Storage.File.weightList.decryptType
             } else if fileName.starts(with: "sleepList") {
                 fileType = Storage.File.sleepList.decryptType
+            } else if fileName.starts(with: "sleepScore") {
+                fileType = Storage.File.sleepScore.decryptType
             }
         }
         

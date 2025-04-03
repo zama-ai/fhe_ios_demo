@@ -85,6 +85,7 @@
 				Reusable/AsyncButton.swift,
 				Reusable/CopyableText.swift,
 				"Reusable/Data+hash.swift",
+				"Reusable/Data+snippet.swift",
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				Reusable/PrettyTypeNamable.swift,
@@ -109,6 +110,7 @@
 				Reusable/AsyncButton.swift,
 				Reusable/CustomizableCalendar.swift,
 				"Reusable/Data+hash.swift",
+				"Reusable/Data+snippet.swift",
 				Reusable/FilePreview.swift,
 				Reusable/NavigationTitleView.swift,
 				Reusable/OnAppearAgain.swift,
@@ -197,6 +199,7 @@
 				"Helpers-Zama/Network.swift",
 				Reusable/AsyncButton.swift,
 				"Reusable/Data+hash.swift",
+				"Reusable/Data+snippet.swift",
 				Reusable/FilePreview.swift,
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
@@ -504,7 +507,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1630;
 				ORGANIZATIONNAME = Zama;
 				TargetAttributes = {
 					322658942D6E20AD004BB59A = {
@@ -647,7 +650,6 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = QLAdsExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QLAdsExtension/AppSupport/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
@@ -672,7 +674,6 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = QLAdsExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QLAdsExtension/AppSupport/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
@@ -697,7 +698,6 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = QLHealthExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QLHealthExtension/AppSupport/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
@@ -722,7 +722,6 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = QLHealthExtension/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QLHealthExtension/AppSupport/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(TARGET_NAME)";
@@ -749,7 +748,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AdsApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AdsApp/AppSupport/Info.plist;
@@ -781,7 +779,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = AdsApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AdsApp/AppSupport/Info.plist;
@@ -843,6 +840,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -908,6 +906,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -936,7 +935,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DataVaultApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
@@ -969,7 +967,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = DataVaultApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DataVaultApp/AppSupport/Info.plist;
@@ -1002,7 +999,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = HealthApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HealthApp/AppSupport/Info.plist;
@@ -1033,7 +1029,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = HealthApp/AppSupport/Entitlements.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HealthApp/AppSupport/Info.plist;

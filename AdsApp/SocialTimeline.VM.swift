@@ -12,13 +12,13 @@ extension SocialTimeline {
         static private let adFrequency = 2 // Show an ad every 3 posts
         static private let adsLimit = 5 // Show top 5 ads
         
-        @UserDefaultsStorage(key: "v9_uid", defaultValue: nil)
+        @UserDefaultsStorage(key: "v10.uid", defaultValue: nil)
         private var uid: String?
         
-        @UserDefaultsStorage(key: "v9_taskID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v10.taskID", defaultValue: nil)
         private var taskID: String?
         
-        @UserDefaultsStorage(key: "v9_profileHash", defaultValue: nil)
+        @UserDefaultsStorage(key: "v10.profileHash", defaultValue: nil)
         static private var profileHash: String?
         
         init() {

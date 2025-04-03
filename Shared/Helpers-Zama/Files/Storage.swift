@@ -182,21 +182,21 @@ extension Storage {
         guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("No private folder")
         }
-        return folder.appending(component: "v9")
+        return folder.appending(component: "v10")
     }
     
     private var appAndExtensionFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder.appending(component: "v9")
+        return sharedFolder.appending(component: "v10")
     }
     
     private var appGroupSharedFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder.appending(component: "v9")
+        return sharedFolder.appending(component: "v10")
     }
 }
 

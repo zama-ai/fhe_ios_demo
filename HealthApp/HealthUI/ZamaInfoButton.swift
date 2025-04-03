@@ -8,7 +8,7 @@ import SwiftUI
 }
 
 struct ZamaInfoButton: View {
-    @State private var showOverlay: Bool = false
+    @State private var isPresented: Bool = false
     
     private var infoText: String = {
         """
@@ -20,41 +20,46 @@ struct ZamaInfoButton: View {
     
     var body: some View {
         Button(action: {
-            showOverlay.toggle()
+            isPresented = true
         }, label: {
             Image(systemName: "info.circle")
+                .padding()
         })
-        .padding()
         .offset(x: -0, y: 40)
         .tint(.black)
-        .fullScreenCover(isPresented: $showOverlay) {
-            NavigationStack {
-                VStack {
-                    Text(infoText)
-                        .multilineTextAlignment(.center)
-                        .padding(50)
-                        .presentationBackground {
-                            Color.black.opacity(0.7)
-                        }
-                        .presentationBackground(.ultraThinMaterial)
-                    
-                    Button("OK") {
-                        showOverlay = false
-                    }.buttonStyle(.bordered)
-                }
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showOverlay = false
-                        } label: {
-                            Image(systemName: "xmark")
-                        }
+        .fullScreenCover(isPresented: $isPresented) {
+            content
+        }
+    }
+    
+    private var content: some View {
+        NavigationStack {
+            VStack {
+                Text(infoText)
+                    .multilineTextAlignment(.center)
+                    .padding(50)
+                    .presentationBackground {
+                        Color.black.opacity(0.7)
+                    }
+                    .presentationBackground(.ultraThinMaterial)
+                
+                Button("OK") {
+                    isPresented = false
+                }.buttonStyle(.bordered)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isPresented = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .padding()
                     }
                 }
             }
-            .environment(\.colorScheme, .dark)
-            .customFont(.body)
-            .tint(.zamaOrange)
         }
+        .environment(\.colorScheme, .dark)
+        .customFont(.body)
+        .tint(.zamaOrange)
     }
 }

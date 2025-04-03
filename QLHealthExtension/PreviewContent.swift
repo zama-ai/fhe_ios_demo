@@ -60,14 +60,12 @@ struct PreviewContent: View {
         return Text("**\(hours.formatted())** Hours **\(minutes.formatted())** Minutes")
             .fontWeight(.regular)
             .font(.custom("Telegraf-Bold", size: 22))
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func previewSleepQuality(_ quality: SleepQuality)  -> some View {
         Text("Sleep Quality: **\(quality.prettyTypeName)**")
             .fontWeight(.regular)
             .font(.custom("Telegraf-Bold", size: 22))
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func previewText(value: Double)  -> some View {

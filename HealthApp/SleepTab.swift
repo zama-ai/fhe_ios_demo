@@ -17,57 +17,68 @@ struct SleepTab: View {
     
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 16) {
-                if vm.allSamples.isEmpty {
-                    OpenAppButton(.zamaDataVault(tab: .sleep))
-                } else if let sample = vm.selectedSample {
-                    Button(action: {
-                        path.append(.calendar)
-                    }) {
-                        Text("\(sample.date.formatted(date: .numeric, time: .omitted))")
-                            .frame(maxWidth: .infinity)
-                            .overlay(alignment: .trailing) {
-                                Image(systemName: "chevron.down")
-                                    .padding()
-                            }
-                    }
-                } else {
-                    Button("Select Encrypted Data") {
-                        path.append(.calendar)
-                    }
-                }
-                
-                CustomBox("Sleep Phase") {
-                    if let url = vm.selectedSample?.url {
-                        FilePreview(url: url)
-                            .frame(height: 160)
+            ScrollView {
+                VStack(spacing: 16) {
+                    if vm.allSamples.isEmpty {
+                        OpenAppButton(.zamaDataVault(tab: .sleep))
+                    } else if let sample = vm.selectedSample {
                         
-                        Text("""
+                        let isProcessing = if case .progress = vm.status { true } else { false }
+                        
+                        Button(action: {
+                            path.append(.calendar)
+                        }) {
+                            Text("\(sample.date.formatted(date: .numeric, time: .omitted))")
+                                .frame(maxWidth: .infinity)
+                                .overlay(alignment: .trailing) {
+                                    Image(systemName: "chevron.down")
+                                        .padding()
+                                }
+                                .overlay(alignment: .leading) {
+                                    if isProcessing {
+                                        ProgressView()
+                                    }
+                                }
+                        }.disabled(isProcessing)
+                        
+                    } else {
+                        Button("Select Encrypted Data") {
+                            path.append(.calendar)
+                        }
+                    }
+                    
+                    CustomBox("Sleep Phase") {
+                        if let url = vm.selectedSample?.url {
+                            FilePreview(url: url)
+                                .frame(height: 170)
+                            
+                            Text("""
                             **Awake**: Often brief and unnoticed.
                             **REM**: Dreaming stage, crucial for memory and emotions.
                             **Core**: Light sleep, prepares the body for deeper stages.
                             **Deep**: Restorative sleep, vital for physical recovery and growth.
                             """)
-                        .fontWeight(.regular)
-                        .customFont(.caption2)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                    } else {
-                        NoDataBadge()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-                
-                CustomBox("Sleep Quality") {
-                    if let url = vm.result {
-                        FilePreview(url: url)
-                            .frame(height: 120)
-                    } else {
-                        if let status = vm.status {
-                            AsyncStatus(status)
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                        } else if vm.result == nil {
+                            .fontWeight(.regular)
+                            .customFont(.caption2)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        } else {
                             NoDataBadge()
-                                .frame(maxWidth: .infinity, minHeight: 120)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                    }
+                    
+                    CustomBox("Sleep Quality") {
+                        if let url = vm.resultURL {
+                            FilePreview(url: url)
+                                .frame(height: 130)
+                        } else {
+                            if let status = vm.status {
+                                AsyncStatus(status)
+                                    .frame(maxWidth: .infinity, minHeight: 120)
+                            } else if vm.resultURL == nil {
+                                NoDataBadge()
+                                    .frame(maxWidth: .infinity, minHeight: 120)
+                            }
                         }
                     }
                 }
@@ -115,36 +126,21 @@ extension SleepTab {
         typealias Selection = (date: Date, url: URL, data: Data)
         typealias Sample = (date: Date, url: URL)
         private let input: Storage.File = .sleepList
-        private let output: Storage.File = .sleepScore
         private let serverTask: Network.ServerTask = .sleep_quality
         
         @Published var allSamples: [Sample] = []
         @Published var selectedSample: Selection?
         @Published var samplesInterval: DateInterval?
-        @Published var result: URL?
+        @Published var resultURL: URL?
         @Published var status: ActivityStatus?
         
         func refreshFromDisk() {
             Task {
                 do {
                     try readSamplesFromDisk()
-                    
-                    //                    if selectedSample != nil,
-                    //                       let _ = await Storage.read(output)
-                    //                    {
-                    //                        result = Storage.url(for: output)
-                    //                    }
-                    
-                    //                    if selectedSample == nil {
-                    //                        // Cleanup. Input == nil and Output != nil means corruption;
-                    //                        // Input might have been deleted in DataVault.
-                    //                        print("nil input, deleting output")
-                    //                        try await Storage.deleteFromDisk(output)
-                    //                        self.uploadedSampleHash = nil
-                    //                        self.uploadedSampleTaskID = nil
-                    //                        self.status = nil
-                    //                        result = nil
-                    //                    }
+                    if let saved = Constants.selectedNight {
+                        await onDateSelected(date: saved)
+                    }
                 } catch {
                     print(error)
                 }
@@ -175,9 +171,27 @@ extension SleepTab {
                 return
             }
             
-            print("####", date, nightFileURL)
+            // Hack to force QL Preview to reload…
+            self.selectedSample = nil
+            Constants.selectedNightInputPreviewURL = nil
+            Constants.selectedNight = nil
+            self.resultURL = nil
+            try? await Task.sleep(for: .seconds(0.01))
+            
+            
             self.selectedSample = (date, nightFileURL, data)
-            self.result = nil
+            let suffix = Storage.suffix(for: date)
+            let inputPreviewURL = Storage.url(for: .sleepList, suffix: "\(suffix)-preview")
+            Constants.selectedNightInputPreviewURL = inputPreviewURL
+            Constants.selectedNight = date
+            Constants.selectedNightResultPreviewURL = nil
+            
+            // Bypass server upload if result is already on disk
+            if let existing = await existingResult(for: date) {
+                self.resultURL = existing.file
+                Constants.selectedNightResultPreviewURL = existing.preview
+                return
+            }
             
             do {
                 self.status = .progress("Uploading Server Key…")
@@ -187,12 +201,19 @@ extension SleepTab {
                 let taskID = try await uploadSample(data, uid: uid)
                 
                 self.status = .progress("Analyzing sleep quality…")
-                self.result = try await getServerResult(uid: uid, taskID: taskID)
-                
+                self.resultURL = try await getServerResult(uid: uid, taskID: taskID, for: date)
                 self.status = nil
             } catch {
                 self.status = .error(error.localizedDescription)
             }
+        }
+        
+        func existingResult(for date: Date) async -> (file: URL, preview: URL)? {
+            let suffix = Storage.suffix(for: date)
+            let resultURL = Storage.url(for: .sleepScore, suffix: suffix)
+            let previewURL = Storage.url(for: .sleepScore, suffix: "\(suffix)-preview")
+            let data = await Storage.read(resultURL)
+            return data == nil ? nil : (file: resultURL, preview: previewURL)
         }
         
         // MARK: - PRIVATE -
@@ -203,50 +224,50 @@ extension SleepTab {
             }
             
             let hash = keyToUpload.stableHashValue
-            if hash == self.uploadedKeyHash, let uid = self.uploadedKeyUID {
+            if hash == Constants.uploadedServerKeyHash, let uid = Constants.uploadedServerKeyUID {
                 return uid // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
             
             let newUID = try await Network.shared.uploadServerKey(keyToUpload, for: serverTask)
-            self.uploadedKeyHash = hash
-            self.uploadedKeyUID = newUID
+            Constants.uploadedServerKeyHash = hash
+            Constants.uploadedServerKeyUID = newUID
             return newUID
         }
         
         private func uploadSample(_ sampleToUpload: Data, uid: Network.UID) async throws -> Network.TaskID {
             let hash = sampleToUpload.stableHashValue
-            if hash == self.uploadedSampleHash, let taskID = self.uploadedSampleTaskID {
+            if hash == self.uploadedNightHash, let taskID = self.uploadedNightTaskID {
                 return taskID // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
             
             let taskID = try await Network.shared.startTask(serverTask, uid: uid, encrypted_input: sampleToUpload)
-            self.uploadedSampleHash = hash
-            self.uploadedSampleTaskID = taskID
+            self.uploadedNightHash = hash
+            self.uploadedNightTaskID = taskID
             return taskID
         }
         
-        private func getServerResult(uid: Network.UID, taskID: Network.TaskID) async throws -> URL {
+        private func getServerResult(uid: Network.UID, taskID: Network.TaskID, for date:Date) async throws -> URL {
             let result = try await Network.shared.getSleepResult(taskID: taskID, uid: uid)
-            try await Storage.write(output, data: result)
-            try await Storage.write(output, data: result, suffix: "preview")
-            return Storage.url(for: output)
+            
+            let suffix = Storage.suffix(for: date)
+            let resultURL = Storage.url(for: .sleepScore, suffix: suffix)
+            let resultPreviewURL = Storage.url(for: .sleepScore, suffix: "\(suffix)-preview")
+            
+            try await Storage.write(resultURL, data: result)
+            try await Storage.write(resultPreviewURL, data: result)
+            Constants.selectedNightResultPreviewURL = resultPreviewURL
+            
+            return Storage.url(for: .sleepScore, suffix: suffix)
         }
         
-        // Note: ServerKey hash and uid are SHARED between Sleep and Weight Tabs
-        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyHash", defaultValue: nil)
-        private var uploadedKeyHash: String?
+        @UserDefaultsStorage(key: "v10.uploadedNightHash", defaultValue: nil)
+        private var uploadedNightHash: String?
         
-        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyUID", defaultValue: nil)
-        private var uploadedKeyUID: Network.UID?
-        
-        @UserDefaultsStorage(key: "v9_SLEEP.uploadedSampleHash", defaultValue: nil)
-        private var uploadedSampleHash: String?
-        
-        @UserDefaultsStorage(key: "v9_SLEEP.uploadedSampleTaskID", defaultValue: nil)
-        private var uploadedSampleTaskID: Network.TaskID?
+        @UserDefaultsStorage(key: "v10.uploadedNightTaskID", defaultValue: nil)
+        private var uploadedNightTaskID: Network.TaskID?
     }
 }

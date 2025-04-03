@@ -5,26 +5,21 @@ import SwiftUI
 struct SecurelyDisplayedModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(.bottom, 15)
-            .overlay {
-                Rectangle()
-                    .stroke(lineWidth: 1/UIScreen.main.scale)
-            }
+            .padding(.bottom, 14)
             .overlay(alignment: .bottomLeading) {
                 let icon = Image(systemName: "lock.fill")
                 ViewThatFits {
-                    Text("\(icon) Data is securely decrypted and displayed")
+                    Text("\(icon) Data securely decrypted and displayed")
                     Text("\(icon) Data securely displayed")
                     Text("\(icon) Securely displayed")
                     Text("\(icon) Secure")
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .foregroundStyle(.secondary)
-                .customFont(.caption)
+                .customFont(.caption2)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
                 .fontWeight(.regular)
-                .padding(1)
             }
     }
 }

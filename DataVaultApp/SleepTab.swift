@@ -8,13 +8,10 @@ import SwiftUI
 
 struct SleepTab: View {
     @ObservedObject var vm: HealthViewModel
-    
-    private let tab: DataVaultTab = .sleep
-    private let openHealthAppTab: HealthTab = .sleep
-    
+        
     var body: some View {
         VStack(spacing: 0) {
-            Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon)
+            Label(DataVaultTab.sleep.displayInfo.name, systemImage: DataVaultTab.sleep.displayInfo.icon)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .customFont(.largeTitle)
                 .padding(.horizontal, 30)
@@ -22,29 +19,45 @@ struct SleepTab: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    if vm.encryptedSleep != nil {
-                        let icon2 = Image(systemName: "checkmark.circle.fill")
-                        Text("\(icon2)\nYour data was successfully encrypted")
-                            .customFont(.title3)
-                            .multilineTextAlignment(.center)
-                        
-                        OpenAppButton(.fheHealth(tab: openHealthAppTab))
-                    } else {
+                    if vm.hasSleepFilesOnDisk == false {
                         let icon = Image(systemName: "exclamationmark.triangle.fill")
                         Text("\(icon)\nNo data found")
                             .customFont(.title3)
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
-                            if !vm.sleepGranted {
+                            if vm.sleepGranted {
+                                AsyncButton("Refresh Apple Health", action: vm.requestSleepPermission)
+                            } else {
                                 AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
-                                Text("or")
                             }
+                            
+                            Text("or")
+                            
                             AsyncButton("Generate data sample", action: vm.generateFakeNights)
+                        }
+                    } else {
+                        let icon2 = Image(systemName: "checkmark.circle.fill")
+                        Text("\(icon2)\nYour data was successfully encrypted")
+                            .customFont(.title3)
+                            .multilineTextAlignment(.center)
+                        
+                        VStack(spacing: 10) {
+                            OpenAppButton(.fheHealth(tab: .sleep))
+                            
+                            Text("or")
+                            
+                            if vm.sleepGranted {
+                                AsyncButton("Refresh Apple Health", action: vm.requestSleepPermission)
+                                    .buttonStyle(.zamaSecondary)
+                            } else {
+                                AsyncButton("Use Apple Health", action: vm.requestSleepPermission)
+                                    .buttonStyle(.zamaSecondary)
+                            }
                         }
                     }
                     
-                    if !vm.sleepConsoleOutput.isEmpty || vm.encryptedSleep == nil {
+                    if !vm.sleepConsoleOutput.isEmpty || vm.hasSleepFilesOnDisk == false {
                         ConsoleSection(title: "FHE Encryption", output: vm.sleepConsoleOutput)
                     }
                     

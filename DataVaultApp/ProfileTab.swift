@@ -257,19 +257,14 @@ extension ProfileTab {
             
             self.consoleOutput += "Encrypted Profile: \(data.formattedSize)\n\n"
             self.consoleOutput += "Encrypted Profile hash: \(data.stableHashValue)\n\n"
-            
+            self.consoleOutput += "Encrypted Profile snippet (first 100 bytes): \(data.snippet(first: 100))\n\n"
+
             try await Storage.write(.concreteEncryptedProfile, data: data)
             profileOnDisk = true
             encryptedClearProfile = completedProfile
             hasPendingChanges = completedProfile != encryptedClearProfile
 
             self.consoleOutput += "Saved at \(Storage.url(for: .concreteEncryptedProfile))\n"
-        }
-        
-        func delete() async throws {
-            try await Storage.deleteFromDisk(.concreteEncryptedProfile)
-            profileOnDisk = false
-            completedProfile = nil
         }
     }
 }

@@ -8,13 +8,10 @@ import SwiftUI
 
 struct WeightTab: View {
     @ObservedObject var vm: HealthViewModel
-    
-    private let tab: DataVaultTab = .weight
-    private let openHealthAppTab: HealthTab = .weight
-    
+        
     var body: some View {
         VStack(spacing: 0) {
-            Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon)
+            Label(DataVaultTab.weight.displayInfo.name, systemImage: DataVaultTab.weight.displayInfo.icon)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .customFont(.largeTitle)
                 .padding(.horizontal, 30)
@@ -22,31 +19,48 @@ struct WeightTab: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    if vm.encryptedWeight != nil {
-                        let icon2 = Image(systemName: "checkmark.circle.fill")
-                        Text("\(icon2)\nYour data was successfully encrypted")
-                            .customFont(.title3)
-                            .multilineTextAlignment(.center)
-                        
-                        OpenAppButton(.fheHealth(tab: openHealthAppTab))
-                    } else {
+                    if vm.encryptedWeight == nil {
                         let icon = Image(systemName: "exclamationmark.triangle.fill")
                         Text("\(icon)\nNo data found")
                             .customFont(.title3)
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
-                            if !vm.weightGranted {
+                            if vm.weightGranted {
+                                AsyncButton("Refresh Apple Health", action: vm.requestWeightPermission)
+                            } else {
                                 AsyncButton("Allow Apple Health", action: vm.requestWeightPermission)
-                                Text("or")
                             }
+
+                            Text("or")
+                            
                             AsyncButton("Generate data sample", action: vm.generateFakeWeights)
+                        }
+                    } else {
+                        let icon2 = Image(systemName: "checkmark.circle.fill")
+                        Text("\(icon2)\nYour data was successfully encrypted")
+                            .customFont(.title3)
+                            .multilineTextAlignment(.center)
+                        
+                        VStack(spacing: 10) {
+                            OpenAppButton(.fheHealth(tab: .weight))
+
+                            Text("or")
+
+                            if vm.weightGranted {
+                                AsyncButton("Refresh Apple Health", action: vm.requestWeightPermission)
+                                    .buttonStyle(.zamaSecondary)
+                            } else {
+                                AsyncButton("Use Apple Health", action: vm.requestWeightPermission)
+                                    .buttonStyle(.zamaSecondary)
+                            }
                         }
                     }
                     
                     if !vm.weightConsoleOutput.isEmpty || vm.encryptedWeight == nil {
                         ConsoleSection(title: "FHE Encryption", output: vm.weightConsoleOutput)
                     }
+                    
                     Spacer()
                 }
                 .padding(.horizontal, 30)

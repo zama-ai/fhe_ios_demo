@@ -4,8 +4,14 @@ import SwiftUI
 
 #Preview {
     VStack {
+        Button("Foo") {}.buttonStyle(.bordered)
+        Button("Foo") {}.buttonStyle(.borderedProminent)
+        
         Button("Foo") {}.buttonStyle(.zama)
         Button("Foo") {}.buttonStyle(.zama).disabled(true)
+        
+        Button("Foo") {}.buttonStyle(.zamaSecondary)
+        Button("Foo") {}.buttonStyle(.zamaSecondary).disabled(true)
         
         Button("Foo") {}.buttonStyle(.blackHighlight())
         Button("Foo") {}.buttonStyle(.blackHighlight()).disabled(true)
@@ -36,6 +42,24 @@ struct ZamaButtonStyle: ButtonStyle {
     }
 }
 
+struct ZamaSecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    
+    func makeBody(configuration config: Configuration) -> some View {
+        config.label
+            .opacity(isEnabled ? 1 : 0.3)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .fontWeight(.bold)
+            .background(.zamaYellow.opacity(isEnabled ? 0.3 : 0.1))
+            .border(.zamaYellow.opacity(isEnabled ? 1 : 0.3), width: 2)
+            .border(config.isPressed ? .black : .clear, width: 1)
+            .animation(.none, value: config.isPressed)
+            .tint(.black)
+    }
+}
+
 struct BlackHighlightButtonStyle: ButtonStyle {
     var disabled: Bool
     @Environment(\.isEnabled) private var isEnabled
@@ -56,6 +80,10 @@ struct BlackHighlightButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == ZamaButtonStyle {
     static var zama: ZamaButtonStyle {
         ZamaButtonStyle()
+    }
+    
+    static var zamaSecondary: ZamaSecondaryButtonStyle {
+        ZamaSecondaryButtonStyle()
     }
     
     static func blackHighlight(disabled: Bool = false) -> BlackHighlightButtonStyle {

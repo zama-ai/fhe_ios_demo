@@ -27,7 +27,7 @@ import SwiftUI
 
 struct CustomBox<Label: View, Content: View>: View {
     let label: () -> Label
-    var onTap: (() -> Void)? = nil
+    let onTap: (() -> Void)?
     let content: () -> Content
     
     init(label: @escaping () -> Label, onTap: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) {
@@ -70,6 +70,9 @@ struct CustomBox<Label: View, Content: View>: View {
             .background(Color.white)
             .fontWeight(.medium)
             .contentShape(Rectangle())
+            .overlay {
+                Color.white.opacity(0.01) // Hack to make hit testing work over QL/FilePreview areas
+            }
         }
         .buttonStyle(.blackHighlight(disabled: onTap == nil))
     }
