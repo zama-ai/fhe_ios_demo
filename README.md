@@ -1,8 +1,8 @@
 <p align="center">
 <!-- product name logo -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://private-user-images.githubusercontent.com/157474013/429096066-74d7197d-ff76-4b1f-90d3-6840daa5f42c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM2NjYyODUsIm5iZiI6MTc0MzY2NTk4NSwicGF0aCI6Ii8xNTc0NzQwMTMvNDI5MDk2MDY2LTc0ZDcxOTdkLWZmNzYtNGIxZi05MGQzLTY4NDBkYWE1ZjQyYy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDAzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwM1QwNzM5NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yODJiMWE5M2QxMWUwYmZlZGQ4MjliYzk3YWNmOTRjZWRjOTVlZTgyZmMzMzFjMWFmZDNkZDg5NGE2ZDNlMzgxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.-3nYml0BGWzZt2FHqiF3dZfzP7FqgwuHJlzNC4B4C-k">
-  <source media="(prefers-color-scheme: light)" srcset="https://private-user-images.githubusercontent.com/157474013/429096062-58e09820-d52c-4095-b143-0ac9f9d0939f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM2NjYyODUsIm5iZiI6MTc0MzY2NTk4NSwicGF0aCI6Ii8xNTc0NzQwMTMvNDI5MDk2MDYyLTU4ZTA5ODIwLWQ1MmMtNDA5NS1iMTQzLTBhYzlmOWQwOTM5Zi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDAzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwM1QwNzM5NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT03MGJiM2JiMWVlODBjNGE1ZGRmZTA5YTFjOTQ5OWJlODk0NzI3ZDAwZjkxOWMwZDlkOWFlYzg3YzBiMDEwNzgxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.IyHCK8qC34ODHQqoXrMcq3psdnEws3v_mttfi3c3ZOA">
+  <source media="(prefers-color-scheme: dark)" srcset="Docs/logo_dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="Docs/logo_light.png">
   <img width=600 alt="Zama Concrete ML iOS Demos">
 </picture>
 </p>
@@ -28,7 +28,6 @@ data. The applications in this repository run on iPhones and connect to remote s
 
 **Concrete ML** is a Privacy-Preserving Machine Learning (PPML) open-source set of tools built by [Zama](https://github.com/zama-ai). It simplifies the use of Fully Homomorphic Encryption (FHE) for data scientists so that they can automatically turn machine learning models into their homomorphic equivalents, and use them without knowledge of cryptography.
 
-<br></br>
 
 ### Main features
 
