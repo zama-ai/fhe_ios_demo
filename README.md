@@ -1,8 +1,8 @@
 <p align="center">
 <!-- product name logo -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://private-user-images.githubusercontent.com/157474013/423544917-a87b457c-ecdb-4a2d-9579-0779065c7d4d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM1MTAyMTgsIm5iZiI6MTc0MzUwOTkxOCwicGF0aCI6Ii8xNTc0NzQwMTMvNDIzNTQ0OTE3LWE4N2I0NTdjLWVjZGItNGEyZC05NTc5LTA3NzkwNjVjN2Q0ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwMVQxMjE4MzhaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT02OTE2YzkzN2U1YWNjZWVjOWZjNzI4OThjMGJhYzdlODgwYzZkZTg1MDg4MTMxY2EyYzg5ZmEwNzdkMjcxOGJmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.NCOTx6WIZAhRt36BXXfn5N3b7tHG0lz1d0viZxckS9A">
-  <source media="(prefers-color-scheme: light)" srcset="https://private-user-images.githubusercontent.com/157474013/423470937-e0c82afa-97a2-414f-b219-52ea5d40c055.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM1MTAyMTgsIm5iZiI6MTc0MzUwOTkxOCwicGF0aCI6Ii8xNTc0NzQwMTMvNDIzNDcwOTM3LWUwYzgyYWZhLTk3YTItNDE0Zi1iMjE5LTUyZWE1ZDQwYzA1NS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwMVQxMjE4MzhaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1kOTgyYzllMmY3ZTUzOGU5OTYyNGJhNDgxYTFmY2IxODViZWIwYThkMDI3ODIwZGQ4MDBkZWRlZWNiYTA4NDk3JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.4rtWKDzofPWNvY6rOhrMc1UfXGc3UeXdEfZdqkaxkAE">
+  <source media="(prefers-color-scheme: dark)" srcset="https://private-user-images.githubusercontent.com/157474013/429096066-74d7197d-ff76-4b1f-90d3-6840daa5f42c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM2NjYyODUsIm5iZiI6MTc0MzY2NTk4NSwicGF0aCI6Ii8xNTc0NzQwMTMvNDI5MDk2MDY2LTc0ZDcxOTdkLWZmNzYtNGIxZi05MGQzLTY4NDBkYWE1ZjQyYy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDAzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwM1QwNzM5NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yODJiMWE5M2QxMWUwYmZlZGQ4MjliYzk3YWNmOTRjZWRjOTVlZTgyZmMzMzFjMWFmZDNkZDg5NGE2ZDNlMzgxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.-3nYml0BGWzZt2FHqiF3dZfzP7FqgwuHJlzNC4B4C-k">
+  <source media="(prefers-color-scheme: light)" srcset="https://private-user-images.githubusercontent.com/157474013/429096062-58e09820-d52c-4095-b143-0ac9f9d0939f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM2NjYyODUsIm5iZiI6MTc0MzY2NTk4NSwicGF0aCI6Ii8xNTc0NzQwMTMvNDI5MDk2MDYyLTU4ZTA5ODIwLWQ1MmMtNDA5NS1iMTQzLTBhYzlmOWQwOTM5Zi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDAzJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwM1QwNzM5NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT03MGJiM2JiMWVlODBjNGE1ZGRmZTA5YTFjOTQ5OWJlODk0NzI3ZDAwZjkxOWMwZDlkOWFlYzg3YzBiMDEwNzgxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.IyHCK8qC34ODHQqoXrMcq3psdnEws3v_mttfi3c3ZOA">
   <img width=600 alt="Zama Concrete ML iOS Demos">
 </picture>
 </p>
@@ -47,26 +47,15 @@ For these demo end-user applications, analysis and processing of the encrypted i
 
 The **Data Vault** uses [TFHE-rs](https://github.com/zama-ai/tfhe-rs) and  [Concrete ML Extensions](https://github.com/zama-ai/concrete-ml-extensions) to encrypt and decrypt data.
 
-## Installation steps
+## Setup
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-## Install Apple Tools
+### Install Apple Tools
 - macOS 15 Sequoia
 - Xcode 16.2 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
 - iOS 18.2 SDK (additional download from Xcode)
 
-## Install AdImages
+### Install AdImages
 - Simply unzip `QLAdsExtension/AdImages.zip' in place.
-=======
-## Apple Tool Prerequisites
-=======
-### Apple tool prerequisites
->>>>>>> f188baf (chore: indenting of readme sections)
-- macOS 15 Sequoia (or 14 Sonoma, whatever runs Xcode 16)
-- Xcode 16 [from AppStore](https://apps.apple.com/fr/app/xcode/id497799835) or [developer.apple.com](https://developer.apple.com/download/applications/)
-- iOS 18 SDK (additional download from Xcode)
->>>>>>> 50ccef1 (chore: update readme)
 
 ### Compiling app dependencies for iOS and Mac simulator
 
@@ -87,7 +76,7 @@ Instead of building the `TFHE.xcframework` from scratch, you can use a previousl
 - `ios-arm64`
 - `ios-arm64-simulator`
 
-## Compiling the Data Vault and end-user application
+## Data Vault and end-user application compilation
 
 Now you can open your Xcode IDE, open this directory and start building the apps.
 
@@ -139,4 +128,3 @@ This software is distributed under the **BSD-3-Clause-Clear** license. Read [thi
 </a>
 
 🌟 If you find this project helpful or interesting, please consider giving it a star on GitHub! Your support helps to grow the community and motivates further development.
-
