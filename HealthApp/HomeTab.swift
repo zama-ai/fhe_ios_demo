@@ -59,28 +59,31 @@ struct HomeTab: View {
                             }
                             
                             if let weightMin {
-                                HStack {
+                                HStack(alignment: .top) {
                                     Text("Min: ")
                                     FilePreview(url: weightMin)
                                         .frame(width: 60, height: 40)
+                                        .offset(y: -2)
                                     Text(" kg")
                                 }
                             }
                             
                             if let weightMax {
-                                HStack {
+                                HStack(alignment: .top) {
                                     Text("Max: ")
                                     FilePreview(url: weightMax)
                                         .frame(width: 60, height: 40)
+                                        .offset(y: -2)
                                     Text(" kg")
                                 }
                             }
                             
                             if let weightAvg {
-                                HStack {
+                                HStack(alignment: .top) {
                                     Text("Avg: ")
                                     FilePreview(url: weightAvg)
                                         .frame(width: 60, height: 40)
+                                        .offset(y: -2)
                                     Text(" kg")
                                 }
                             }

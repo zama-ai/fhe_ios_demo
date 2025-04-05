@@ -61,6 +61,7 @@ struct WeightTab: View {
         VStack(spacing: 12) {
             if let url {
                 FilePreview(url: url)
+                    .aspectRatio(contentMode: .fit)
             } else {
                 Color.clear
                     .aspectRatio(contentMode: .fit)

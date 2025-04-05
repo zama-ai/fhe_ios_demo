@@ -29,6 +29,7 @@ struct PreviewContent: View {
         switch viewModel.data {
         case let .gauge(value):
             SleepQualityView(quality: SleepQuality(rawValue: value)!)
+                .padding(.bottom, 8)
             
         case .text(let value):
             text(value: value)
@@ -38,6 +39,7 @@ struct PreviewContent: View {
             
         case .sleepChart(let samples):
             SleepChartView(samples: samples)
+                .padding(.bottom, 8)
             
         case .none:
             Color.red

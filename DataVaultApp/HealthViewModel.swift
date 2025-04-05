@@ -103,7 +103,7 @@ final class HealthViewModel: ObservableObject {
         
 
         for (index, night) in nights.enumerated() {
-            try await encrypt(night: night, reset: index == 0)
+            try await encrypt(night: night, shouldLog: index == 0)
         }
         
         try checkNightFilesOnDisk()
@@ -186,22 +186,22 @@ final class HealthViewModel: ObservableObject {
         let nightBefore = Calendar.current.date(byAdding: .day, value: -2, to: yesterdayNight)!
         let evenBefore = Calendar.current.date(byAdding: .day, value: -3, to: nightBefore)!
         
-        try await encrypt(night: .fakeRegular(date: yesterdayNight), reset: true)
-        try await encrypt(night: .fakeBad(date: nightBefore), reset: false)
-        try await encrypt(night: .fakeLarge(date: evenBefore), reset: false)
+        try await encrypt(night: .fakeRegular(date: yesterdayNight), shouldLog: true)
+        try await encrypt(night: .fakeBad(date: nightBefore), shouldLog: false)
+        try await encrypt(night: .fakeLarge(date: evenBefore), shouldLog: false)
         try checkNightFilesOnDisk()
     }
     
-    func encrypt(night: Sleep.Night, reset: Bool) async throws {
-        let nightLogged = String(describing: night)
+    func encrypt(night: Sleep.Night, shouldLog: Bool) async throws {
+        if shouldLog {
+            let nightLogged = String(describing: night)
             .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep.", with: "")
         
-        if reset {
             self.sleepConsoleOutput = ""
+            self.sleepConsoleOutput += "Encrypting night…\n\n"
+            self.sleepConsoleOutput += "\(nightLogged)\n\n"
+            self.sleepConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
         }
-        self.sleepConsoleOutput += "Encrypting night…\n\n"
-        self.sleepConsoleOutput += "\(nightLogged)\n\n"
-        self.sleepConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
         
         try await ensureKeysExist()
         
@@ -216,11 +216,12 @@ final class HealthViewModel: ObservableObject {
             let suffix = Storage.suffix(for: night.date)
             try await Storage.write(.sleepList, data: listData, suffix: suffix)
             try await Storage.write(.sleepList, data: listData, suffix: "\(suffix)-preview")
-            
-            self.sleepConsoleOutput += "Encrypted night: \(listData.formattedSize)\n\n"
-            self.sleepConsoleOutput += "Encrypted night snippet (first 100 bytes): \(listData.snippet(first: 100))\n\n"
 
-            self.sleepConsoleOutput += "Saved at \(Storage.url(for: .sleepList))\n"
+            if shouldLog {
+                self.sleepConsoleOutput += "Encrypted night: \(listData.formattedSize)\n\n"
+                self.sleepConsoleOutput += "Encrypted night snippet (first 100 bytes): \(listData.snippet(first: 100))\n\n"
+                self.sleepConsoleOutput += "Saved at \(Storage.url(for: .sleepList))\n"
+            }
         }
     }
         
