@@ -52,9 +52,9 @@ struct ZamaSecondaryButtonStyle: ButtonStyle {
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
             .fontWeight(.bold)
-            .background(.zamaYellow.opacity(isEnabled ? 0.3 : 0.1))
-            .border(.zamaYellow.opacity(isEnabled ? 1 : 0.3), width: 2)
-            .border(config.isPressed ? .black : .clear, width: 1)
+            .background(.black)
+            .foregroundStyle(.white)
+            .border(config.isPressed ? .red : .clear, width: 1.5)
             .animation(.none, value: config.isPressed)
             .tint(.black)
     }

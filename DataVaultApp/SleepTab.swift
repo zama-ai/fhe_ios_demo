@@ -8,7 +8,8 @@ import SwiftUI
 
 struct SleepTab: View {
     @ObservedObject var vm: HealthViewModel
-        
+    @State private var isSecondEncryptionInSession: Bool = false
+    
     var body: some View {
         VStack(spacing: 0) {
             Label(DataVaultTab.sleep.displayInfo.name, systemImage: DataVaultTab.sleep.displayInfo.icon)
@@ -26,9 +27,7 @@ struct SleepTab: View {
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
-                            if vm.sleepGranted {
-                                AsyncButton("Refresh Apple Health", action: vm.requestSleepPermission)
-                            } else {
+                            if !vm.sleepGranted {
                                 AsyncButton("Allow Apple Health", action: vm.requestSleepPermission)
                             }
                             
@@ -38,7 +37,9 @@ struct SleepTab: View {
                         }
                     } else {
                         let icon2 = Image(systemName: "checkmark.circle.fill")
-                        Text("\(icon2)\nYour data was successfully encrypted")
+                        let text = isSecondEncryptionInSession ? "Your data was successfully updated and reencrypted" : "Your data was successfully encrypted"
+                        
+                        Text("\(icon2)\n\(text)")
                             .customFont(.title3)
                             .multilineTextAlignment(.center)
                         
@@ -47,11 +48,17 @@ struct SleepTab: View {
                             
                             Text("or")
                             
-                            if vm.sleepGranted {
-                                AsyncButton("Refresh Apple Health", action: vm.requestSleepPermission)
+                            if vm.sleepEncryptedUsingFakeData == true {
+                                AsyncButton("Refresh Data Example", action: {
+                                    isSecondEncryptionInSession = true
+                                    try await vm.generateFakeNights()
+                                })
                                     .buttonStyle(.zamaSecondary)
                             } else {
-                                AsyncButton("Use Apple Health", action: vm.requestSleepPermission)
+                                AsyncButton("Refresh Encrypted Data", action: {
+                                    isSecondEncryptionInSession = true
+                                    try await vm.requestSleepPermission()
+                                })
                                     .buttonStyle(.zamaSecondary)
                             }
                         }

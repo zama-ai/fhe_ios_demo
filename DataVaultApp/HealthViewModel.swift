@@ -62,7 +62,6 @@ final class HealthViewModel: ObservableObject {
         try await healthStore.requestAuthorization(toShare: [], read: [weightType])
         try await refreshPermission()
         try await fetchWeightData()
-        try await encryptWeight()
     }
     
     func requestSleepPermission() async throws {
@@ -103,7 +102,7 @@ final class HealthViewModel: ObservableObject {
         
 
         for (index, night) in nights.enumerated() {
-            try await encrypt(night: night, shouldLog: index == 0)
+            try await encrypt(night: night, shouldLog: index == 0, isFake: false)
         }
         
         try checkNightFilesOnDisk()
@@ -122,7 +121,7 @@ final class HealthViewModel: ObservableObject {
         
         weight = cleanedWeight
         weightDateRange = dateInterval
-        try await encryptWeight()
+        try await encryptWeight(isFake: false)
     }
     
     private func process(sleepSamples: [HKCategorySample]) -> [Sleep.Night] {
@@ -162,20 +161,20 @@ final class HealthViewModel: ObservableObject {
     }
     
     private func printSample(_ sample: HKSample) {
-        switch sample {
-        case let weight as HKDiscreteQuantitySample where sample.sampleType == HKQuantityType(.bodyMass):
-            let double = weight.quantity.doubleValue(for: .gramUnit(with: .kilo))
-            let rounded = Int(double.rounded())
-            print("weight: ", sample.startDate.formatted(), weight.quantity, double, rounded)
-            
-        case let sleep as HKCategorySample where sample.sampleType == HKCategoryType(.sleepAnalysis):
-            let duration = sleep.endDate.timeIntervalSince(sample.startDate)
-            let value = sleep.value
-            print("sleep:\t\(sample.startDate.formatted())\t\(duration)\t\(value)")
-            
-        case _:
-            print("⚠️ Unrecognized type \(sample.sampleType) \(type(of: sample))")
-        }
+//        switch sample {
+//        case let weight as HKDiscreteQuantitySample where sample.sampleType == HKQuantityType(.bodyMass):
+//            let double = weight.quantity.doubleValue(for: .gramUnit(with: .kilo))
+//            let rounded = Int(double.rounded())
+//            print("weight: ", sample.startDate.formatted(), weight.quantity, double, rounded)
+//            
+//        case let sleep as HKCategorySample where sample.sampleType == HKCategoryType(.sleepAnalysis):
+//            let duration = sleep.endDate.timeIntervalSince(sample.startDate)
+//            let value = sleep.value
+//            print("sleep:\t\(sample.startDate.formatted())\t\(duration)\t\(value)")
+//            
+//        case _:
+//            print("⚠️ Unrecognized type \(sample.sampleType) \(type(of: sample))")
+//        }
     }
     
     // MARK: - ENCRYPTION -
@@ -186,13 +185,15 @@ final class HealthViewModel: ObservableObject {
         let nightBefore = Calendar.current.date(byAdding: .day, value: -2, to: yesterdayNight)!
         let evenBefore = Calendar.current.date(byAdding: .day, value: -3, to: nightBefore)!
         
-        try await encrypt(night: .fakeRegular(date: yesterdayNight), shouldLog: true)
-        try await encrypt(night: .fakeBad(date: nightBefore), shouldLog: false)
-        try await encrypt(night: .fakeLarge(date: evenBefore), shouldLog: false)
+        try await encrypt(night: .fakeRegular(date: yesterdayNight), shouldLog: true, isFake: true)
+        try await encrypt(night: .fakeBad(date: nightBefore), shouldLog: false, isFake: true)
+        try await encrypt(night: .fakeLarge(date: evenBefore), shouldLog: false, isFake: true)
         try checkNightFilesOnDisk()
     }
     
-    func encrypt(night: Sleep.Night, shouldLog: Bool) async throws {
+    func encrypt(night: Sleep.Night, shouldLog: Bool, isFake: Bool) async throws {
+        self.sleepEncryptedUsingFakeData = isFake
+
         if shouldLog {
             let nightLogged = String(describing: night)
             .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep.", with: "")
@@ -239,10 +240,12 @@ final class HealthViewModel: ObservableObject {
         
         weight = weightsRounded
         weightDateRange = DateInterval(start: Calendar.current.date(byAdding: .month, value: -6, to: .now)!, end: .now)
-        try await encryptWeight()
+        try await encryptWeight(isFake: true)
     }
     
-    func encryptWeight() async throws {
+    func encryptWeight(isFake: Bool) async throws {
+        self.weightEncryptedUsingFakeData = isFake
+        
         self.weightConsoleOutput = ""
         self.weightConsoleOutput += "Encrypting weights…\n\n"
         
@@ -313,4 +316,11 @@ final class HealthViewModel: ObservableObject {
             }
         }
     }
+    
+    // nil: no encryption occurred yet
+    @UserDefaultsStorage(key: "v11.sleepEncryptedUsingFakeData", defaultValue: nil)
+    var sleepEncryptedUsingFakeData: Bool?
+
+    @UserDefaultsStorage(key: "v11.sleepEncryptedUsingFakeData", defaultValue: nil)
+    var weightEncryptedUsingFakeData: Bool?
 }

@@ -8,7 +8,8 @@ import SwiftUI
 
 struct WeightTab: View {
     @ObservedObject var vm: HealthViewModel
-        
+    @State private var isSecondEncryptionInSession: Bool = false
+    
     var body: some View {
         VStack(spacing: 0) {
             Label(DataVaultTab.weight.displayInfo.name, systemImage: DataVaultTab.weight.displayInfo.icon)
@@ -26,33 +27,39 @@ struct WeightTab: View {
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
-                            if vm.weightGranted {
-                                AsyncButton("Refresh Apple Health", action: vm.requestWeightPermission)
-                            } else {
+                            if !vm.weightGranted {
                                 AsyncButton("Allow Apple Health", action: vm.requestWeightPermission)
                             }
-
+                            
                             Text("or")
                             
                             AsyncButton("Generate data sample", action: vm.generateFakeWeights)
                         }
                     } else {
                         let icon2 = Image(systemName: "checkmark.circle.fill")
-                        Text("\(icon2)\nYour data was successfully encrypted")
+                        let text = isSecondEncryptionInSession ? "Your data was successfully updated and reencrypted" : "Your data was successfully encrypted"
+                        
+                        Text("\(icon2)\n\(text)")
                             .customFont(.title3)
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: 10) {
                             OpenAppButton(.fheHealth(tab: .weight))
-
+                            
                             Text("or")
-
-                            if vm.weightGranted {
-                                AsyncButton("Refresh Apple Health", action: vm.requestWeightPermission)
-                                    .buttonStyle(.zamaSecondary)
+                            
+                            if vm.weightEncryptedUsingFakeData == true {
+                                AsyncButton("Refresh Data Example", action: {
+                                    isSecondEncryptionInSession = true
+                                    try await vm.generateFakeWeights()
+                                })
+                                .buttonStyle(.zamaSecondary)
                             } else {
-                                AsyncButton("Use Apple Health", action: vm.requestWeightPermission)
-                                    .buttonStyle(.zamaSecondary)
+                                AsyncButton("Refresh Encrypted Data", action: {
+                                    isSecondEncryptionInSession = true
+                                    try await vm.requestWeightPermission()
+                                })
+                                .buttonStyle(.zamaSecondary)
                             }
                         }
                     }

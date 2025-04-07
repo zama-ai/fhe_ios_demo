@@ -44,7 +44,6 @@ final class Storage {
             case groupShared, appPrivate
         }
         
-        // TODO:
         var confidentiality: Confidentiality {
             switch self {
             case .sleepList, .sleepScore: .groupShared
@@ -182,21 +181,21 @@ extension Storage {
         guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("No private folder")
         }
-        return folder.appending(component: "v10")
+        return folder.appending(component: "v11")
     }
     
     private var appAndExtensionFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder.appending(component: "v10")
+        return sharedFolder.appending(component: "v11")
     }
     
     private var appGroupSharedFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder.appending(component: "v10")
+        return sharedFolder.appending(component: "v11")
     }
 }
 

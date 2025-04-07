@@ -264,10 +264,10 @@ extension SleepTab {
             return Storage.url(for: .sleepScore, suffix: suffix)
         }
         
-        @UserDefaultsStorage(key: "v10.uploadedNightHash", defaultValue: nil)
+        @UserDefaultsStorage(key: "v11.uploadedNightHash", defaultValue: nil)
         private var uploadedNightHash: String?
         
-        @UserDefaultsStorage(key: "v10.uploadedNightTaskID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v11.uploadedNightTaskID", defaultValue: nil)
         private var uploadedNightTaskID: Network.TaskID?
     }
 }

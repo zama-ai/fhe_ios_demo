@@ -79,6 +79,8 @@
 				"Helpers-TFHE/Keys/ClientKey.swift",
 				"Helpers-TFHE/Keys/PublicKeyCompact.swift",
 				"Helpers-TFHE/Keys/ServerKeyCompressed.swift",
+				"Helpers-Zama/Files/CompressionHelper.swift",
+				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
@@ -89,6 +91,7 @@
 				Reusable/OnAppearAgain.swift,
 				Reusable/OpenAppButton.swift,
 				Reusable/PrettyTypeNamable.swift,
+				Reusable/UserDefaultsStorage.swift,
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
 				"ZamaUI/CustomFont/Telegraf-Regular.ttf",
@@ -103,6 +106,8 @@
 		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Helpers-Zama/Files/CompressionHelper.swift",
+				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
@@ -140,6 +145,8 @@
 				"Helpers-TFHE/Keys/ClientKey.swift",
 				"Helpers-TFHE/Keys/PublicKeyCompact.swift",
 				"Helpers-TFHE/Keys/ServerKeyCompressed.swift",
+				"Helpers-Zama/Files/CompressionHelper.swift",
+				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
@@ -169,6 +176,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Helpers-ConcreteML/ConcreteML.swift",
+				"Helpers-Zama/Files/CompressionHelper.swift",
+				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				ZamaUI/CustomFont/CustomFont.swift,
 				"ZamaUI/CustomFont/Telegraf-Bold.ttf",
@@ -194,6 +203,8 @@
 		328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Helpers-Zama/Files/CompressionHelper.swift",
+				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
