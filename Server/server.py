@@ -11,17 +11,14 @@ Routes:
     - /get_task_result
     - /cancel_task
 """
-import re
 import base64
 import datetime
 import io
-import os
 import time
 import uuid
 
 from glob import glob
 from typing import List
-from pprint import pformat
 
 from celery.result import AsyncResult
 from fastapi import (
@@ -33,15 +30,14 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import JSONResponse, StreamingResponse
-import redis
 import json
 
 from utils import * 
-from tasks import *
+from task_executor import *
 
 # Instanciate FastAPI app
 app = FastAPI(debug=False)
-logger.info(f"🚀 FastAPI server running at {URL}:{CONTAINER_PORT}")
+logger.info(f"🚀 FastAPI server running at {URL}:{PORT}")
 
 
 # Tasks that cannot be canceled
@@ -50,25 +46,79 @@ NON_CANCELLABLE_STATUSES: List = [
     "completed",
     "failure",
     "revoked",
-    "pending",
     "unknown",
     "error",
 ]
-   
-# Instanciate Redis data-base
-try:
-    redis_bd = redis.Redis(
-        host=PARSED_URL.hostname,
-        port=PARSED_URL.port,
-        db=int(PARSED_URL.path.lstrip('/')),
-        decode_responses=True,
-    )
-    redis_bd.ping()
-    logger.info("🔥 Successfully connected to Redis!")
 
-except redis.ConnectionError:
-    redis_bd = None
-    logger.error("❌ Failed to connect to Redis!")
+
+STATUS_TEMPLATES = {
+    "started": {
+        "status": "started",
+        "details": "Task is still in progress.",
+        "worker": None,
+        "logger_msg": "🔄 [task_id=`{}` - uid=`{}`] is still in progress. Please wait before attempting to retrieve the result.",
+    },
+    "success": {
+        "status": "success",
+        "details": "Task successfully completed.",
+        "worker": "not tracked",
+        "logger_msg": "🎉 [task_id=`{}` - uid=`{}`] successfully completed.",
+    },
+    "completed": {
+        "status": "completed",
+        "details": "The task is already marked as completed in the Redis backend bd.",
+        "worker": "not tracked",
+        "logger_msg": "🏁 [task_id=`{}` - uid=`{}`] was already completed.",
+    },
+    "failure": {
+        "status": "failure",
+        "details": "This task might be lost.",
+        "worker": None,
+        "logger_msg": "❌ [task_id=`{}` - uid=`{}`] failed. Consider restarting it.",
+
+    },
+    "reserved": {
+        "status": "reserved",
+        "details": "This task will start soon.",
+        "worker": "TBD",
+        "logger_msg": "📦 [task_id=`{}` - uid=`{}`] is reserved and will start soon.",
+    },
+    "unknown": {
+        "status": "unknown",
+        "details": "Task may not exist, you may need to restart it.",
+        "worker": None,
+        "logger_msg": "❓ [task_id=`{}` - uid=`{}`] has unknown status. Restart may be needed.",
+
+    },
+    "queued": {
+        "status": "queued",
+        "details": "Task is in the Redis broker queue, waiting to be picked up by a worker.",
+        "worker": "TBD",
+        "logger_msg": "📥 [task_id=`{}` - uid=`{}] is queued and waiting for a worker.",
+
+    },
+    "revoked": {
+        "status": "revoked",
+        "details": "The task has been cancelled by the user or system.",
+        "worker": None,
+        "logger_msg": (
+            "💀 [task_id=`{}` - uid=`{}`] is cancelled | Previous status: `{}` → New status: `{}`."
+        )
+    },
+    "invalid_uid": {
+        "status": "unknown",
+        "details": "UID is None or Empty.",
+        "worker": None,
+        "logger_msg": "❌ [uid=`%{}] is None or Empty. Please retry with a valid UID.",
+    },
+    "invalid_task_id": {
+        "status": "unknown",
+        "details": "Task ID is None or Empty.",
+        "worker": None,
+        "logger_msg": "❌ [task_id=`{}`] is None or Empty. Please retry with a valid task ID.",
+
+    },
+}
 
 
 @app.post("/add_key")
@@ -87,7 +137,6 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
 
     # Write uploaded ServerKey to disk
     try:
-        from glob import glob 
         file_content = await key.read()
         file_path = FILES_FOLDER / f"{uid}.serverKey"
         with open(file_path, "wb") as f:
@@ -224,9 +273,9 @@ def list_current_tasks() -> List[Dict]:
                     )
                 all_tasks.append(task_info)
 
-    # Retrieving pending tasks from the Redis queue
+    # Retrieving pending tasks from the Redis broker queue
     try:
-        pending_tasks = redis_bd.lrange("celery", 0, -1)
+        pending_tasks = redis_bd_broker.lrange("usecases", 0, -1)
         for task in pending_tasks:
             task_data = json.loads(task)
             task_info = {
@@ -237,12 +286,13 @@ def list_current_tasks() -> List[Dict]:
             }
             all_tasks.append(task_info)
     except Exception as e:
-        error_message =  f"❌ Failed to retrieve pending tasks from REDIS: {e}"
+        error_message =  f"❌ Failed to retrieve pending tasks from Redis broker: {e}"
         logger.error(error_message)
 
-    logger.info("📝 List of all tasks:\n%s", pformat(all_tasks))
+    logger.info("📝 List of all tasks:\n%s", all_tasks)
 
     return all_tasks
+
 
 @app.get("/get_task_status")
 def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)) -> Dict:
@@ -261,125 +311,92 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         HTTPException: Raised if an unexpected error occurs while retrieving the task status.
     """
 
+    ttl: int = None
     response: Dict = None
     worker_name: str = "unknown"
     
     if not task_id or task_id.strip() == "":
-        logger.error("❌ [task_id=`%s`] is None or Empty. Please retry with a valid task ID.", task_id)
+        logger.error(STATUS_TEMPLATES['invalid_task_id']['logger_msg'].format(task_id))
         logger.debug(list_current_tasks())
-        return {
-            "task_id": "none",
-            "status": "unknown",
-            "details": "Task ID is None or Empty.",
-            "worker": worker_name,
-        }
+        return STATUS_TEMPLATES['invalid_task_id']
     if not uid or uid.strip() == "":
-        logger.error("❌ [uid=`%s`] is None or Empty. Please retry with a valid UID.", uid)
+        logger.error(STATUS_TEMPLATES['invalid_uid']['logger_msg'].format(uid))
         logger.debug(list_current_tasks())
-        return {
-            "task_id": task_id,
-            "uid": "unknown",
-            "status": "unknown",
-            "details": "Key uid is None or Empty.",
-            "worker": worker_name,
-        }
+        return STATUS_TEMPLATES['invalid_uid']
+    task_info = {"task_id": task_id, "uid": uid}
+
+    # Check if the task is in the Redis broker queue
     try:
-        queued_tasks = redis_bd.lrange("celery", 0, -1)
-        queued_tasks_text = " ".join(queued_tasks)
-
-        if re.search(rf'"id"\s*:\s*"{re.escape(task_id)}"', queued_tasks_text):
-            response = {
-                "task_id": task_id,
-                "status": "queued",
-                "details": "The task is currently in the Redis queue, waiting to be picked up by a worker.",
-                "worker": "TBD"
-            }
+        queued_tasks = redis_bd_broker.lrange("usecases", 0, -1)
+        for task in queued_tasks:
+            task_data = json.loads(task)
+            if task_id == task_data["headers"]["id"]:
+                logger.info(STATUS_TEMPLATES['queued']['logger_msg'].format(task_id, uid))            
+                return {**task_info, **STATUS_TEMPLATES["queued"]}
     except Exception as e:
-        logger.error("❌ Failed to check REDIS queue: %s", str(e))
+        logger.error("❌ Failed to check Redis broker bd: %s", str(e))
 
-    result = AsyncResult(task_id, app=celery_app)
-    status = result.state.lower()
-    
-    logger.debug(f"------> Current status = {status}")
+    # Check if the task is marked as completed in the Redis backend queue
+    # Note: Redis only stores task statuses for a limited period of time (Time To Live)
+    try:
+        key = f"celery-task-meta-{task_id}"
+        if redis_bd_backend.exists(key):
+            raw = redis_bd_backend.get(key)
+            data = json.loads(raw)
+            status = data['status'].lower()
+            ttl = redis_bd_backend.ttl(key)
+            logger.info(f"🔍 [taks_id=`%s`] found in Redis with status=`{status}` and TTL remaining `%s` seconds", get_id_prefix(task_id), ttl)
+    except Exception as e:
+        logger.error("❌ Failed to check Redis backend bd: `%s`", str(e))
 
-    if status in ["started"]:
+    # Check other status
+    try:
+        result = AsyncResult(task_id, app=celery_app)
+        status = result.state.lower()
+    except Exception as e:
+        logger.error(f"❌ Failed to get task status for `%s`: `%s`", task_id, str(e))
+
+    # We have 2 options when status = "pending",
+    # either the task has been completed by Celery or the task is an undefined status
+    if status == "pending":
+        file_pattern = f"{BACKUP_FOLDER}/backup.{task_id}.{uid}.*output*.fheencrypted"
+        matching_files = glob(file_pattern)
+
+        # If the task is "PENDING" but a saved output file exists, treat it as "completed"
+        if matching_files:
+            file_path = Path(matching_files[0])
+            file_date = file_path.stat().st_mtime  # Get file's last modified time
+            date = datetime.datetime.fromtimestamp(file_date).strftime("%Y-%m-%d %H:%M:%S")
+            response = {**task_info, **STATUS_TEMPLATES["completed"]}
+            response['details'] = f"Task completed on `{date}`. The result is stored."
+            response['output_file_path'] = [str(file) for file in matching_files]
+        else:
+            return {**task_info, **STATUS_TEMPLATES["unknown"]}
+
+    elif status == 'started':
+        response = STATUS_TEMPLATES.get(status)
         task_meta = result.backend.get_task_meta(task_id) or {}
         worker_name = task_meta.get("result", {}).get("hostname", "unknown")
+        response['worker'] = worker_name
 
-    if not response or status == "success":
-        status_mapping = {
-            "started": {
+    # Case, where the status is neither 'completed', 'unknown' or 'queued'
+    else:
+        response = STATUS_TEMPLATES.get(
+            status,
+            {
                 "task_id": task_id,
                 "uid": uid,
-                "status": "started",
-                "details": "Task is still in progress.",
+                "status": status,
+                "details": str(result.info or "No additional details available."),
                 "worker": worker_name,
             },
-            "success": {
-                "task_id": task_id,
-                "uid": uid,
-                "status": "success",
-                "details": "Task successfully completed.",
-                "worker": "not tracked",
-            },
-            "failure": {
-                "task_id": task_id,
-                "uid": uid,
-                "status": "failure",
-                "details": str(result.info or "This task might be lost."),
-                "worker": worker_name,
-            },
-            "reserved": {
-                "task_id": task_id,
-                "uid": uid,
-                "status": "reserved",
-                "details": "This task will start soon.",
-                "worker": worker_name,
-            },
-            "unknown": {
-                "task_id": task_id,
-                "uid": uid,
-                "status": "unknown",
-                "details": "Task may not exist, you may need to restart it.",
-                "worker": worker_name or "unknown",
-            },
-            "completed": {
-                "task_id": task_id,
-                "uid": uid,
-                "status": "completed",
-                "worker": "not tracked",
-            },
-        }
+        )
 
-        if status in ["pending"]:
-            file_pattern = f"{BACKUP_FOLDER}/backup.{task_id}.{uid}.*output*.fheencrypted"
-            matching_files = glob(file_pattern)
-
-            # If the task is "PENDING" but a saved output file exists, treat it as "completed"
-            if matching_files:
-                file_path = Path(matching_files[0])
-                file_date = file_path.stat().st_mtime  # Get file's last modified time
-                date = datetime.datetime.fromtimestamp(file_date).strftime("%Y-%m-%d %H:%M:%S")
-
-                response = status_mapping.get("completed")
-                response['details'] = f"Task completed on `{date}`. The result is stored."
-                response['output_file_path'] = [str(file) for file in matching_files]
-            else:
-                response = status_mapping.get("unknown")
-        else:
-            response = status_mapping.get(
-                status,
-                {
-                    "task_id": task_id,
-                    "uid": uid,
-                    "status": status,
-                    "details": str(result.info or "No additional details available."),
-                    "worker": worker_name,
-                },
-            )
+    if status == "success" and ttl:
+        response['details'] = f"{response['details']}. TTL remaining {ttl} seconds."
 
     logger.info(
-        f"🔍 Status [task_id=`{get_id_prefix(response['task_id'])}` - uid=`{get_id_prefix(response['uid'])}` ]: {response['status'].upper()} | {response['details']} | {response['worker']}"
+        f"🔍 Status [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}` ]: {response['status'].upper()} | {response['details']} | {response['worker']}"
     )
 
     return response
@@ -406,14 +423,14 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
 
     if initial_status in NON_CANCELLABLE_STATUSES:
         logger.warning(
-            "⚠️ Cannot cancel task ID [task_id=`%s` - uid=`%s`] (already finished or unknown).", task_id, uid,
+            f"⚠️ Cannot cancel task ID [task_id=`%s` - uid=`%s`] status = `{initial_status}`.", task_id, uid,
         )
         return {
             "task_id": task_id,
             "uid": uid,
             "status": initial_status,
             "worker": (initial_overall_info or {}).get("worker"),
-            "details": f"Cannot cancel this task (already finished or unknown). Additional info: {initial_overall_info.get('details', '')}",
+            "details": f"Cannot cancel this task (status = `{initial_status}`). Additional info: {initial_overall_info.get('details', '')}",
 
         }
 
@@ -421,7 +438,7 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
     try:
         celery_app.control.revoke(task_id, terminate=True, signal="SIGKILL")
     except Exception as e:
-        error_message = f"❌ Failed to revoke TASK_ID `{task_id}` - uid `{uid}`: {e}."
+        error_message = f"❌ Failed to revoke TASK_ID `{task_id}` - uid `{uid}`: `{e}`."
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
@@ -429,17 +446,17 @@ def cancel_task(task_id: str = Depends(get_task_id), uid: str = Depends(get_uid)
     time.sleep(2)
 
     # Fetch the new state of the task
-    new_result = AsyncResult(task_id, app=celery_app)
-    new_status = new_result.state.lower()
-    
+    reponse = get_task_status(task_id, uid)
+    new_status = reponse["status"]
+
     updated_status = {
         "task_id": task_id,
         "uid": uid,
         "status": new_status,
-        "details": "Successfully cancelled the task.",
+        "details": f"Successfully cancelled the task, previous status=`{initial_status}` → new status=`{new_status}`",
     }
     
-    logger.info(f"🚫 Task Cancelled: [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] | Previous Status=`{initial_status}` → New Status=`{new_status}` | Details: {updated_status['details']}")
+    logger.info(STATUS_TEMPLATES['revoked']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid), initial_status, new_status))
 
     return updated_status
 
@@ -478,36 +495,27 @@ async def get_task_result(
     stderr_output = ""
 
     # Check task status
-    status = get_task_status(task_id, uid)
-
-    if status.get("status") == "started":
-        logger.info("📩 [task_id=`%s` - uid=`%s`] is still in progress. Please wait before attempting to retrieve the result.", get_id_prefix(task_id), get_id_prefix(uid))
+    response = get_task_status(task_id, uid)
+    status = response.get("status")
+    
+    if status in STATUS_TEMPLATES and status not in ["success", "completed"]:
+        logger.info(STATUS_TEMPLATES[status]['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
         return JSONResponse(
-            content=status,
+            content=status, # ?
             status_code=200,
-            headers={"status": status["status"], "job_id": task_id, "stderr": stderr_output, "worker": status["worker"]},
+            headers={"status": response["status"],
+                     "job_id": task_id,
+                     "uid": uid,
+                     "stderr": response["details"],
+                     "worker": response["worker"]},
         )
 
-    if status.get("status") in ["pending", "failure", "revoked", "unknown", "error", "queue", "queued"]:
-        logger.info("📩 [task_id=`%s` - uid=`%s`] not started.", get_id_prefix(task_id), get_id_prefix(uid))
-        return JSONResponse(
-            content=status,
-            status_code=200,
-            headers={
-                "status": status["status"],
-                "job_id": status["task_id"],
-                "uid": uid,
-                "stderr": status["details"],
-                 "worker": status["worker"],
-            },
-        )
-
-    if status.get("status") == "completed":
-        logger.info("🎉 [task_id=`%s` - uid=`%s`] already completed.", get_id_prefix(task_id), get_id_prefix(uid))
+    if status == "completed":
+        logger.info(STATUS_TEMPLATES[status]['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
         backup = False  # No need for a backup if already completed
 
-    elif status.get("status") == "success":
-        logger.info("🎉 [task_id=`%s` - uid=`%s`] successfully completed.", get_id_prefix(task_id), get_id_prefix(uid))
+    elif status == "success":
+        logger.info(STATUS_TEMPLATES[status]['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
         celery_result = AsyncResult(task_id, app=celery_app)
         outcome_celery = celery_result.result
         stderr_output = outcome_celery.get("stderr", "")
@@ -523,7 +531,7 @@ async def get_task_result(
         output_filename = (
             generate_filename(output_files[0], file_type="output", args={"uid": uid})
             if backup
-            else status["output_file_path"][0]
+            else response["output_file_path"][0]
         )
         output_file_path = FILES_FOLDER / output_filename
         data = fetch_file_content(output_file_path, task_id, backup=backup)
@@ -544,11 +552,11 @@ async def get_task_result(
                 "job_id": task_id,
                 "stderr": stderr_output,
                 "task_name": task_name,
-                 "worker": status["worker"],
+                 "worker": response["worker"],
             },
         )
     elif response_type == "json":
-        response_data = {"job_id": task_id, "stderr": stderr_output, "task_name": task_name, 'output_file_path': [],  "worker": status["worker"]}
+        response_data = {"job_id": task_id, "stderr": stderr_output, "task_name": task_name, 'output_file_path': [],  "worker": response["worker"]}
                  
         for i, output_file_config in enumerate(output_files):           
             response_format = output_file_config.get("response_type", "base64")
@@ -559,7 +567,7 @@ async def get_task_result(
                 output_filename = generate_filename(output_file_config, file_type="output", args={"uid": uid})
             else:
                 response_data['status'] = 'completed'
-                output_filename = [f for f in status["output_file_path"] if key in f.lower()][0]
+                output_filename = [f for f in response["output_file_path"] if key in f.lower()][0]
             
             response_data["output_file_path"].append(output_filename)
                 

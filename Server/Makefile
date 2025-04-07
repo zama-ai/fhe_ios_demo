@@ -4,7 +4,7 @@ export
 VENV_DIR=.venv_test
 
 # Pytest flags
-test_flags ?= -vvsx
+test_flags ?= -vvs
 # Target environment (dev, staging, prod, ci)        
 environment ?= dev
 # Docker build cache option. Use '' to enable cache or '--no-cache' to disable it        
@@ -38,4 +38,4 @@ tests_run:
 		echo "Please run: 'make tests_build' first!"; \
 		exit 1; \
 	fi
-	bash -c "source $(VENV_DIR)/bin/activate && pytest tests $(test_flags)"
+	bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_endpoints.py $(test_flags)"

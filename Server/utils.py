@@ -5,7 +5,6 @@ import logging
 import yaml 
 
 from pathlib import Path
-from urllib.parse import urlparse
 from contextlib import contextmanager
 from typing import Dict
 
@@ -21,8 +20,6 @@ env_values = dotenv_values(ENV_FILE)
 URL = os.getenv("URL")
 CONTAINER_PORT = os.getenv("FASTAPI_CONTAINER_PORT_HTTPS")
 PORT = os.getenv("PORT")
-BROKER_URL = os.getenv("BROKER_URL")
-PARSED_URL = urlparse(BROKER_URL)
 
 SHARED_DIR = os.getenv("SHARED_DIR")
 FILES_FOLDER = Path(__file__).parent / SHARED_DIR

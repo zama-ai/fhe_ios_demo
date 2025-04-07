@@ -11,7 +11,6 @@ def run_sleep_quality(night, uid):
     ck_path = f"{UPLOAD_FOLDER}/{uid}.clientKey"
     serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
     input_path = f"{UPLOAD_FOLDER}/{uid}.sleep_quality.input.fheencrypted"
-    output_path = f"{UPLOAD_FOLDER}/{uid}.sleep_quality.output.fheencrypted"
 
     start_time = time.time()
 
@@ -20,10 +19,10 @@ def run_sleep_quality(night, uid):
     assert os.path.exists(serverkey_path), f"Missing file: {serverkey_path=}"
     assert os.path.exists(ck_path), f"Missing file: {ck_path=}"
     assert os.path.exists(input_path), f"Missing file: {input_path=}"
-    
-    run_task_on_server("sleep_quality", serverkey_path, input_path, output_path)
-        
-    assert os.path.exists(output_path), f"Missing file: {output_path=}"
+
+    _, _, output_path = run_task_on_server("sleep_quality", serverkey_path, input_path, prefix=uid)
+
+    assert output_path[0].exists(), f"Missing file: {output_path=}"
 
     # Decrypt and check results
     score = sleep_quality.decrypt(uid)

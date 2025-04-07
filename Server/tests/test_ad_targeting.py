@@ -65,7 +65,6 @@ def test_ad_targeting(generate_fhext_params, generate_fhext_keys):
     uid = "test_ad_targeting"
     serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
     input_path = f"{UPLOAD_FOLDER}/{uid}.ad_targeting.input.fheencrypted"
-    output_path = f"{UPLOAD_FOLDER}/{uid}.ad_targeting.output.fheencrypted"
     data_path = "./tasks/ad_targeting/data/onehot_ads.pkl"
 
     with open(data_path, "rb") as f:
@@ -88,10 +87,15 @@ def test_ad_targeting(generate_fhext_params, generate_fhext_keys):
     with open(input_path, "wb") as binary_file:
         binary_file.write(encrypted_input.serialize())
     
-    run_task_on_server("ad_targeting", serverkey_path, input_path, output_path)
+        binary_file.write(encrypted_input.serialize())
+        binary_file.write(encrypted_input.serialize())
+
+    _, _, output_path = run_task_on_server("ad_targeting", serverkey_path, input_path, prefix=uid)
+
+    assert output_path[0].exists(), f"Missing file: {output_path=}"
 
     # Decrypt and check results
-    decrypted_output = decrypt(output_path, pkey, crypto_params).reshape(1, clear_matrix.shape[0])
+    decrypted_output = decrypt(output_path[0], pkey, crypto_params).reshape(1, clear_matrix.shape[0])
     
     end_time = time.time() - start_time
 
