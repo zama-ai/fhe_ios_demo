@@ -9,4 +9,5 @@ DOCKER_COMPOSE_LOCATION=.  # Location of the yaml configuration file
 
 # Set the image names
 RUST_IMAGE_NAME=rust_builder
-FINAL_IMAGE_NAME=zama-ios-apps
+FINAL_IMAGE_NAME=zama-ios-apps  # To change this tag, make sure to also update it manually
+                                # in Dockerfile

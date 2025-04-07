@@ -62,6 +62,12 @@ def run_task_on_server(
         task_id = response.json()["task_id"]
         print(f"[run_task_on_server | TASK_ID={task_id}] Sending encrypted input: {input_path}")
 
+    response = requests.get(f"{URL}/list_current_tasks")
+    response.raise_for_status()
+    data = response.json()
+
+    print(f"{len(data)} task (s) in progress")
+
     # 3. Poll for result   
     for attempt in range(TIME_OUT):
         time.sleep(POLL_INTERVAL)

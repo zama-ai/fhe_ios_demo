@@ -75,8 +75,10 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           python -m pip install --upgrade pip
-          pip install maturin
           pip install -r server_requirements.txt
+          pip install maturin
+          pip install pytest
+          pip install pytest-rerunfailures
         
       - name: Prepare test folders
         run: |
@@ -84,8 +86,8 @@ jobs:
 
       - name: Launch server with docker-compose
         run: |
-          chmod +x ./launch_docker.sh
-          bash ./launch_docker.sh ci
+          chmod +x ./scripts/docker_run.sh
+          bash ./scripts/docker_run.sh ci
 
       - name: Docker diagnostic
         run: |
@@ -94,7 +96,7 @@ jobs:
           echo "==> Docker images:"
           docker images
           
-      - name: Run Python test 'Ad Targeting'
+      - name: Run Python test 'ad_targeting'
         run: |
           source .venv/bin/activate
           pytest -vvs tests/test_ad_targeting.py
@@ -111,7 +113,7 @@ jobs:
         run: |
           source .venv/bin/activate
           maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml
-          pytest -vvs tests/test_sleep_analysis.py
+          pytest -vvs tests/test_sleep_quality.py
 
       - name: Run endpoint tests
         run: |
@@ -133,8 +135,8 @@ jobs:
         
       - name: show Celery usecases worker 1 logs
         if: always()
-        run: docker logs fhe_ios_demo_dev_service_celery_usecases_1 || echo "Celery usecases 1 logs unavailable"
+        run: docker logs dev_fhe_ios_demo_service_celery_usecases_1 || echo "Celery usecases 1 logs unavailable"
       
       - name: show Celery usecases worker 2 logs
         if: always()
-        run: docker logs fhe_ios_demo_dev_service_celery_usecases_2 || echo "Celery usecases 2 logs unavailable"
+        run: docker logs dev_fhe_ios_demo_service_celery_usecases_2 || echo "Celery usecases 2 logs unavailable"
