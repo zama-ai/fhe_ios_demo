@@ -41,7 +41,7 @@ final class PreviewVC: UIViewController, QLPreviewingController {
         print("Rendering ", url.lastPathComponent, suffix, position)
         
         guard let resultData = await Storage.read(url),
-              let savedPK = try KeychainHelper.readSharedData(.concretePrivateKey),
+              let savedPK = await Storage.read(.concretePrivateKey),
               let cryptoParams = ConcreteML.cryptoParams
         else {
             print("QL: cannot read ClientKey or file at \(url)")

@@ -41,7 +41,7 @@ final class PreviewVC: UIViewController, QLPreviewingController {
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read file at \(url)"])
         }
         
-        guard let ck = try ClientKey.readFromKeychain() else {
+        guard let ck = try await ClientKey.readFromDisk(.clientKey) else {
             print("QL: cannot read ClientKey")
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey"])
         }

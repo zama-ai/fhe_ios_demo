@@ -208,10 +208,10 @@ extension WeightTab {
                            avg: Storage.url(for: .weightAvg))
         }
         
-        @UserDefaultsStorage(key: "v11.uploadedWeightsHash", defaultValue: nil)
+        @UserDefaultsStorage(key: "v12.uploadedWeightsHash", defaultValue: nil)
         private var uploadedWeightsHash: String?
         
-        @UserDefaultsStorage(key: "v11.uploadedWeightsTaskID", defaultValue: nil)
+        @UserDefaultsStorage(key: "v12.uploadedWeightsTaskID", defaultValue: nil)
         private var uploadedWeightsTaskID: Network.TaskID?
     }
 }

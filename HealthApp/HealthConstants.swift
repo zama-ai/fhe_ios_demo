@@ -3,10 +3,10 @@
 import Foundation
 
 enum Constants {
-    @UserDefaultsStorage(key: "v11.selectedNight", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.selectedNight", defaultValue: nil)
     static var selectedNight: Date?
 
-    @UserDefaultsStorage(key: "v11.selectedNightInputPreviewString", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.selectedNightInputPreviewString", defaultValue: nil)
     private static var _selectedNightInputPreviewString: String?
     static var selectedNightInputPreviewURL: URL? {
         get {
@@ -16,7 +16,7 @@ enum Constants {
         }
     }
 
-    @UserDefaultsStorage(key: "v11.selectedNightResultPreviewString", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.selectedNightResultPreviewString", defaultValue: nil)
     private static var _selectedNightResultPreviewString: String?
     static var selectedNightResultPreviewURL: URL? {
         get {
@@ -26,9 +26,9 @@ enum Constants {
         }
     }
     
-    @UserDefaultsStorage(key: "v11.uploadedServerKeyHash", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.uploadedServerKeyHash", defaultValue: nil)
     static var uploadedServerKeyHash: String?
     
-    @UserDefaultsStorage(key: "v11.uploadedServerKeyHash", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.uploadedServerKeyHash", defaultValue: nil)
     static var uploadedServerKeyUID: Network.UID?
 }

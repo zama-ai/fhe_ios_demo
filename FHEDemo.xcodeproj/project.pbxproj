@@ -79,8 +79,6 @@
 				"Helpers-TFHE/Keys/ClientKey.swift",
 				"Helpers-TFHE/Keys/PublicKeyCompact.swift",
 				"Helpers-TFHE/Keys/ServerKeyCompressed.swift",
-				"Helpers-Zama/Files/CompressionHelper.swift",
-				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
@@ -106,8 +104,6 @@
 		320C391D2CAAEEA200528366 /* Exceptions for "Shared" folder in "Health" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"Helpers-Zama/Files/CompressionHelper.swift",
-				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
@@ -145,8 +141,6 @@
 				"Helpers-TFHE/Keys/ClientKey.swift",
 				"Helpers-TFHE/Keys/PublicKeyCompact.swift",
 				"Helpers-TFHE/Keys/ServerKeyCompressed.swift",
-				"Helpers-Zama/Files/CompressionHelper.swift",
-				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/SleepModels.swift",
@@ -177,8 +171,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Helpers-ConcreteML/ConcreteML.swift",
-				"Helpers-Zama/Files/CompressionHelper.swift",
-				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Reusable/Data+snippet.swift",
 				ZamaUI/CustomFont/CustomFont.swift,
@@ -205,8 +197,6 @@
 		328F5CC62D00A1AA00D7B219 /* Exceptions for "Shared" folder in "Ads" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"Helpers-Zama/Files/CompressionHelper.swift",
-				"Helpers-Zama/Files/KeychainHelper.swift",
 				"Helpers-Zama/Files/Persistable.swift",
 				"Helpers-Zama/Files/Storage.swift",
 				"Helpers-Zama/Network.swift",
@@ -851,7 +841,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -917,7 +907,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 2FFZB9H65L;
 				ENABLE_NS_ASSERTIONS = NO;

@@ -287,11 +287,11 @@ final class HealthViewModel: ObservableObject {
     
     private func ensureKeysExist() async throws {
         if ck == nil {
-            if let saved = try? ClientKey.readFromKeychain() {
+            if let saved = try? await ClientKey.readFromDisk(.clientKey) {
                 ck = saved
             } else {
                 let new = try ClientKey.generate()
-                try new.writeToKeychain()
+                try await new.writeToDisk(.clientKey)
                 ck = new
             }
         }
@@ -318,9 +318,9 @@ final class HealthViewModel: ObservableObject {
     }
     
     // nil: no encryption occurred yet
-    @UserDefaultsStorage(key: "v11.sleepEncryptedUsingFakeData", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.sleepEncryptedUsingFakeData", defaultValue: nil)
     var sleepEncryptedUsingFakeData: Bool?
 
-    @UserDefaultsStorage(key: "v11.sleepEncryptedUsingFakeData", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.sleepEncryptedUsingFakeData", defaultValue: nil)
     var weightEncryptedUsingFakeData: Bool?
 }

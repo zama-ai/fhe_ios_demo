@@ -199,7 +199,7 @@ extension ProfileTab {
         }
         
         private func loadKeys() async throws {
-            if let savedPK = try? KeychainHelper.readSharedData(.concretePrivateKey) {
+            if let savedPK = await Storage.read(.concretePrivateKey) {
                 self.pk = await ConcreteML.deserializePrivateKey(from: savedPK)
             } else {
                 let (newPK, _) = try await ConcreteML.generateAndPersistKeys()
