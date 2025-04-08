@@ -39,7 +39,10 @@ enum ConcreteML {
             let keys = cpuCreatePrivateKey(cryptoParams: cryptoParams) // 23 sec
             let pk = keys.privateKey()
             let ck = keys.cpuCompressionKey()
-            try await Storage.write(.concretePrivateKey, data: try await serializePrivateKey(pk)) // 33 KB, instant
+            
+            let pkData = try await serializePrivateKey(pk)
+            try KeychainHelper.storeSharedData(pkData, for: .concretePrivateKey)
+            
             try await Storage.write(.concreteCPUCompressionKey, data: try await serializeCompressionKey(ck)) // 67 MB, 2.5s
             return (pk, ck)
         }.value

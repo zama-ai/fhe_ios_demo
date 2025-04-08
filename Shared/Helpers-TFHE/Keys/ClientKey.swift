@@ -3,10 +3,9 @@
 import Foundation
 import TFHE
 
-final class ClientKey: Persistable {
-    let fileName: Storage.File = .clientKey
+final class ClientKey {
     var pointer: OpaquePointer? = nil
-    
+        
     init(pointer: OpaquePointer?) {
         self.pointer = pointer
     }
@@ -41,5 +40,18 @@ final class ClientKey: Persistable {
         try wrap { client_key_deserialize(bufferView, &result) }
         
         self.init(pointer: result)
+    }
+    
+    // MARK: Keychain support
+    static func readFromKeychain() throws -> ClientKey? {
+        if let data = try KeychainHelper.readSharedData(.tfheClientKey) {
+            return try ClientKey(fromData: data)
+        }
+        
+        return nil
+    }
+
+    func writeToKeychain() throws {
+        try KeychainHelper.storeSharedData(try toData(), for: .tfheClientKey)
     }
 }

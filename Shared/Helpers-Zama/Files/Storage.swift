@@ -4,11 +4,9 @@ import Foundation
 
 final class Storage {
     enum File: String, CaseIterable {
-        case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
         
-        case concretePrivateKey = "concretePrivateKey"
         case concreteCPUCompressionKey = "concreteCPUCompressionKey"
         case concreteEncryptedProfile = "concreteProfile.fheencrypted"
         case concreteEncryptedResult = "concreteResult.fheencryptedAd"
@@ -29,34 +27,15 @@ final class Storage {
             case .weightList: .array
             case .weightMin, .weightMax, .weightAvg:  .int16
                 
-            case .clientKey, .publicKey, .serverKey: nil
-            case .concretePrivateKey, .concreteCPUCompressionKey,
-                    .concreteEncryptedProfile, .concreteEncryptedResult: nil
+            case .publicKey, .serverKey: nil
+            case .concreteCPUCompressionKey, .concreteEncryptedProfile, .concreteEncryptedResult: nil
             }
         }
         
         enum DecryptType {
             case int8, int16, array, cipherTextList
         }
-        
-        // Whether this file should be shared with other apps via AppGroup, or stay private to current app
-        enum Confidentiality {
-            case groupShared, appPrivate
-        }
-        
-        var confidentiality: Confidentiality {
-            switch self {
-            case .sleepList, .sleepScore: .groupShared
-            case .weightList, .weightMin, .weightMax, .weightAvg: .groupShared
                 
-            case .clientKey : .groupShared // TODO: switch to .appPrivate once it includes QL extension too
-            case .publicKey, .serverKey: .groupShared
-                
-            case .concretePrivateKey: .groupShared // TODO: switch to .appPrivate once it includes QL extension too
-            case .concreteCPUCompressionKey, .concreteEncryptedProfile, .concreteEncryptedResult: .groupShared
-            }
-        }
-        
         func withSuffix(_ suffix: String?) -> String {
             guard let suffix, !suffix.isEmpty else { return self.rawValue }
             
@@ -74,7 +53,7 @@ final class Storage {
         print("🗂️ Shared Folder: \nopen \(appGroupSharedFolder)")
         
         do {
-            for folder in [appPrivateFolder, appAndExtensionFolder, appGroupSharedFolder] {
+            for folder in [appPrivateFolder, appGroupSharedFolder] {
                 if !fileManager.fileExists(atPath: folder.path) {
                     try fileManager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
                 }
@@ -171,10 +150,7 @@ extension Storage {
     }
     
     private func destinationFolder(for file: File) -> URL {
-        switch file.confidentiality {
-        case .appPrivate: return appPrivateFolder
-        case .groupShared: return appGroupSharedFolder
-        }
+        appGroupSharedFolder
     }
     
     private var appPrivateFolder: URL {
@@ -183,14 +159,7 @@ extension Storage {
         }
         return folder.appending(component: "v11")
     }
-    
-    private var appAndExtensionFolder: URL {
-        guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
-            fatalError("No shared folder - AppGroup misconfigured")
-        }
-        return sharedFolder.appending(component: "v11")
-    }
-    
+        
     private var appGroupSharedFolder: URL {
         guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             fatalError("No shared folder - AppGroup misconfigured")

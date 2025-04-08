@@ -190,12 +190,16 @@ extension ProfileTab {
             self.hasPendingChanges = false
             
             Task {
-                try await loadKeys()
+                do {
+                    try await loadKeys()
+                } catch {
+                    print(error)
+                }
             }
         }
         
         private func loadKeys() async throws {
-            if let savedPK = await Storage.read(.concretePrivateKey) {
+            if let savedPK = try? KeychainHelper.readSharedData(.concretePrivateKey) {
                 self.pk = await ConcreteML.deserializePrivateKey(from: savedPK)
             } else {
                 let (newPK, _) = try await ConcreteML.generateAndPersistKeys()

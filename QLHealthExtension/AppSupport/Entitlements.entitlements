@@ -6,5 +6,9 @@
 	<array>
 		<string>group.ai.zama.fhedemo.shared</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)ai.zama.fhedemo.sharedkeychain.health</string>
+	</array>
 </dict>
 </plist>

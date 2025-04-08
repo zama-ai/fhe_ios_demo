@@ -287,11 +287,11 @@ final class HealthViewModel: ObservableObject {
     
     private func ensureKeysExist() async throws {
         if ck == nil {
-            if let saved = try? await ClientKey.readFromDisk(.clientKey) {
+            if let saved = try? ClientKey.readFromKeychain() {
                 ck = saved
             } else {
                 let new = try ClientKey.generate()
-                try await new.writeToDisk(.clientKey)
+                try new.writeToKeychain()
                 ck = new
             }
         }
