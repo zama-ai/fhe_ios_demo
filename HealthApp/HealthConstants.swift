@@ -29,6 +29,6 @@ enum Constants {
     @UserDefaultsStorage(key: "v12.uploadedServerKeyHash", defaultValue: nil)
     static var uploadedServerKeyHash: String?
     
-    @UserDefaultsStorage(key: "v12.uploadedServerKeyHash", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.uploadedServerKeyUID", defaultValue: nil)
     static var uploadedServerKeyUID: Network.UID?
 }
