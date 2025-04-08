@@ -20,6 +20,16 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Set up Python
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry using snok/install-poetry
+        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a
+        with:
+          version: 1.8.4
+
       - name: Install Swift Rust targets
         run: |
           ./setup_tfhe_xcframework.sh
