@@ -8,8 +8,6 @@ import SwiftUI
 
 struct ProfileTab: View {
     @StateObject private var vm = ViewModel()
-    @State private var justSaved: Bool = false
-    private let tabType: DataVaultTab = .profile
     
     var body: some View {
         VStack(spacing: 0) {
@@ -45,7 +43,7 @@ struct ProfileTab: View {
     
     @ViewBuilder
     private func header() -> some View {
-        Label("Profile info", systemImage: tabType.displayInfo.icon)
+        Label("Profile info", systemImage: DataVaultTab.profile.displayInfo.icon)
             .frame(maxWidth: .infinity, alignment: .leading)
             .customFont(.largeTitle)
     }
@@ -143,22 +141,20 @@ struct ProfileTab: View {
     @ViewBuilder
     private func buttonsArea() -> some View {
         VStack {
-            AsyncButton("Encrypt data") {
-                justSaved = false
-                try await vm.encryptData()
-                justSaved = true
-            }
-            .disabled(vm.completedProfile == nil)
-            
-            
-            if vm.profileOnDisk {
-                if justSaved {
-                    let icon2 = Image(systemName: "checkmark.circle.fill")
-                    Text("\(icon2)\nYour data was successfully encrypted")
-                        .customFont(.title3)
-                        .multilineTextAlignment(.center)
+            // No data on disk, or stale data
+            let showEncryptButton = !vm.profileOnDisk || vm.hasPendingChanges
+            let encryptTitle = vm.encryptedClearProfile == nil ? "Encrypt data" : "Re-encrypt data"
+            if showEncryptButton {
+                AsyncButton(encryptTitle) {
+                    try await vm.encryptData()
                 }
-                
+                .disabled(vm.completedProfile == nil)
+            } else {
+                let icon2 = Image(systemName: "checkmark.circle.fill")
+                Text("\(icon2)\nYour data was successfully encrypted")
+                    .customFont(.title3)
+                    .multilineTextAlignment(.center)
+            
                 OpenAppButton(.fheAds)
             }
         }
@@ -173,9 +169,11 @@ extension ProfileTab {
         @Published var language: Language?
         @Published var interests: Set<Interest>
         @Published var completedProfile: Profile?
-        
+        @Published var encryptedClearProfile: Profile?
+        @Published var hasPendingChanges: Bool
+
         @Published var profileOnDisk: Bool
-        @Published var consoleOutput: String = "No data to encrypt."
+        @Published var consoleOutput: String = "Profile Encryption Details:"
         private var pk: PrivateKey?
         
         init() {
@@ -189,9 +187,14 @@ extension ProfileTab {
             self.interests = []
             self.completedProfile = nil
             self.profileOnDisk = false
+            self.hasPendingChanges = false
             
             Task {
-                try await loadKeys()
+                do {
+                    try await loadKeys()
+                } catch {
+                    print(error)
+                }
             }
         }
         
@@ -230,6 +233,8 @@ extension ProfileTab {
                                        country: self.country,
                                        language: self.language,
                                        interests: self.interests)
+            
+            hasPendingChanges = completedProfile != encryptedClearProfile
         }
         
         func encryptData() async throws {
@@ -255,18 +260,15 @@ extension ProfileTab {
             let data = try encryptedMatrix.serialize() // 8 Kb
             
             self.consoleOutput += "Encrypted Profile: \(data.formattedSize)\n\n"
-            self.consoleOutput += "Encrypted Profile hash: \(data.persistantHashValue)\n\n"
+            self.consoleOutput += "Encrypted Profile hash: \(data.stableHashValue)\n\n"
+            self.consoleOutput += "Encrypted Profile snippet (first 100 bytes): \(data.snippet(first: 100))\n\n"
 
             try await Storage.write(.concreteEncryptedProfile, data: data)
             profileOnDisk = true
-            
+            encryptedClearProfile = completedProfile
+            hasPendingChanges = completedProfile != encryptedClearProfile
+
             self.consoleOutput += "Saved at \(Storage.url(for: .concreteEncryptedProfile))\n"
-        }
-        
-        func delete() async throws {
-            try await Storage.deleteFromDisk(.concreteEncryptedProfile)
-            profileOnDisk = false
-            completedProfile = nil
         }
     }
 }

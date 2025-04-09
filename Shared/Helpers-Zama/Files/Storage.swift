@@ -7,12 +7,12 @@ final class Storage {
         case clientKey = "clientKey"
         case publicKey = "publicKeyCompact"
         case serverKey = "serverKeyCompressed"
-
+        
         case concretePrivateKey = "concretePrivateKey"
         case concreteCPUCompressionKey = "concreteCPUCompressionKey"
         case concreteEncryptedProfile = "concreteProfile.fheencrypted"
         case concreteEncryptedResult = "concreteResult.fheencryptedAd"
-
+        
         case weightList = "weightList.fheencrypted"
         case weightMin = "weightMin.fheencrypted"
         case weightMax = "weightMax.fheencrypted"
@@ -20,7 +20,7 @@ final class Storage {
         
         case sleepList = "sleepList.fheencrypted"
         case sleepScore = "sleepScore.fheencrypted"
-
+        
         var decryptType: DecryptType? {
             switch self {
             case .sleepList: .cipherTextList
@@ -38,29 +38,32 @@ final class Storage {
         enum DecryptType {
             case int8, int16, array, cipherTextList
         }
-        
-        // Whether this file should be shared with other apps via AppGroup, or stay private to current app
+
+        // Whether this file should be shared with other apps via AppGroup, or stay private to current app (+ extensions)
         enum Confidentiality {
-            case groupShared, appPrivate
+            case groupShared(groupID: String)
+            case privateToAppAndExtensions(groupID: String)
         }
         
-        // TODO:
         var confidentiality: Confidentiality {
             switch self {
-            case .sleepList, .sleepScore: .groupShared
-            case .weightList, .weightMin, .weightMax, .weightAvg: .groupShared
-            
-            case .clientKey : .groupShared // TODO: switch to .appPrivate once it includes QL extension too
-            case .publicKey, .serverKey: .groupShared
+            case .clientKey:
+                    .privateToAppAndExtensions(groupID: "group.ai.zama.fhedemo.healthPrivate")
                 
-            case .concretePrivateKey: .groupShared // TODO: switch to .appPrivate once it includes QL extension too
-            case .concreteCPUCompressionKey, .concreteEncryptedProfile, .concreteEncryptedResult: .groupShared
+            case .concretePrivateKey:
+                    .privateToAppAndExtensions(groupID: "group.ai.zama.fhedemo.adsPrivate")
+                
+            case .sleepList, .sleepScore,
+                    .weightList, .weightMin, .weightMax, .weightAvg,
+                    .publicKey, .serverKey,
+                    .concreteCPUCompressionKey, .concreteEncryptedProfile, .concreteEncryptedResult:
+                    .groupShared(groupID: "group.ai.zama.fhedemo.shared")
             }
         }
         
         func withSuffix(_ suffix: String?) -> String {
             guard let suffix, !suffix.isEmpty else { return self.rawValue }
-
+            
             let components = rawValue.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
             if components.count == 2 {
                 return "\(components[0])-\(suffix).\(components[1])"
@@ -71,13 +74,17 @@ final class Storage {
     }
     
     private init() {
-        print("🗂️ Private Folder: \nopen \(appPrivateFolder)")
-        print("🗂️ Shared Folder: \nopen \(appGroupSharedFolder)")
+        let folders = [
+            "Shared Folder": fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ai.zama.fhedemo.shared"),
+            "Private Folder (Health)": fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ai.zama.fhedemo.healthPrivate"),
+            "Private Folder (Ads)": fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.ai.zama.fhedemo.adsPrivate")
+        ].compactMapValues({ $0?.appending(component: "v12") })
         
         do {
-            for folder in [appPrivateFolder, appAndExtensionFolder, appGroupSharedFolder] {
-                if !fileManager.fileExists(atPath: folder.path) {
-                    try fileManager.createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
+            for folder in folders {
+                print("🗂️ \(folder.key): \nopen \(folder.value)")
+                if !fileManager.fileExists(atPath: folder.value.path) {
+                    try fileManager.createDirectory(at: folder.value, withIntermediateDirectories: true, attributes: nil)
                 }
             }
         } catch {
@@ -87,8 +94,7 @@ final class Storage {
     
     private static let singleton = Storage()
     private let fileManager = FileManager.default
-    private let appGroupID = "group.ai.zama.fhedemo.shared"
-
+    
     /// Pass nil to delete file
     static func write(_ file: File, data: Data?, suffix: String? = nil) async throws {
         let fileName = file.withSuffix(suffix)
@@ -103,7 +109,7 @@ final class Storage {
     static func deleteFromDisk(_ file: Storage.File, suffix: String? = nil) async throws {
         try await Storage.write(file, data: nil, suffix: suffix)
     }
-
+    
     /// Returns nil if file missing
     static func read(_ file: File) async -> Data? {
         let fullURL = singleton.destinationFolder(for: file).appendingPathComponent(file.rawValue)
@@ -173,30 +179,17 @@ extension Storage {
     
     private func destinationFolder(for file: File) -> URL {
         switch file.confidentiality {
-        case .appPrivate: return appPrivateFolder
-        case .groupShared: return appGroupSharedFolder
+        case .privateToAppAndExtensions(let groupID),
+                .groupShared(groupID: let groupID):
+            return scopedFolder(for: groupID)
         }
     }
-        
-    private var appPrivateFolder: URL {
-        guard let folder = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("No private folder")
-        }
-        return folder.appending(component: "v9")
-    }
-
-    private var appAndExtensionFolder: URL {
-        guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+    
+    private func scopedFolder(for groupID: String) -> URL {
+        guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: groupID) else {
             fatalError("No shared folder - AppGroup misconfigured")
         }
-        return sharedFolder.appending(component: "v9")
-    }
-
-    private var appGroupSharedFolder: URL {
-        guard let sharedFolder = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
-            fatalError("No shared folder - AppGroup misconfigured")
-        }
-        return sharedFolder.appending(component: "v9")
+        return sharedFolder.appending(component: "v12")
     }
 }
 
@@ -213,7 +206,7 @@ extension Storage {
         date.formatted(date: .numeric, time: .omitted)
             .replacingOccurrences(of: "/", with: "-")
     }
-
+    
     // Ex: sleepList-23-03-2025.fheencrypted
     static func date(from fileName: String) -> Date? {
         let formatter = DateFormatter()
@@ -226,21 +219,21 @@ extension Storage {
         
         return formatter.date(from: text)
     }
-
+    
     // MARK: - DateInterval (eg, for weights) -
-
+    
     static func suffix(for interval: DateInterval) -> String {
         let start = interval.start
             .formatted(date: .numeric, time: .omitted)
             .replacingOccurrences(of: "/", with: "-")
-
+        
         let end = interval.end
             .formatted(date: .numeric, time: .omitted)
             .replacingOccurrences(of: "/", with: "-")
-
+        
         return "\(start)_\(end)"
     }
-
+    
     // Ex: weightList-25-09-2024_25-03-2025.fheencrypted
     static func dateInterval(from fileName: String) -> DateInterval? {
         let formatter = DateFormatter()

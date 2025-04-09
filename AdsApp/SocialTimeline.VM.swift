@@ -12,19 +12,19 @@ extension SocialTimeline {
         static private let adFrequency = 2 // Show an ad every 3 posts
         static private let adsLimit = 5 // Show top 5 ads
         
-        @UserDefaultsStorage(key: "v9_uid", defaultValue: nil)
+        @UserDefaultsStorage(key: "v12.uid", defaultValue: nil)
         private var uid: String?
-
-        @UserDefaultsStorage(key: "v9_taskID", defaultValue: nil)
+        
+        @UserDefaultsStorage(key: "v12.taskID", defaultValue: nil)
         private var taskID: String?
-
-        @UserDefaultsStorage(key: "v9_profileHash", defaultValue: nil)
+        
+        @UserDefaultsStorage(key: "v12.profileHash", defaultValue: nil)
         static private var profileHash: String?
-
+        
         init() {
-            self.items = Self.generateItems(profileHash: Self.profileHash)
+            self.items = Self.generateItems(profileHash: Self.profileHash, resultsReadyOnDisk: false)
         }
-
+        
         func refreshFromDisk() {
             Task {
                 do {
@@ -60,19 +60,20 @@ extension SocialTimeline {
                 throw CustomError.missingServerKey
             }
             
-            let profileHash = profile.persistantHashValue
+            let profileHash = profile.stableHashValue
             guard profileHash != Self.profileHash else {
                 print("Profile unchanged, skipping upload")
+                self.items = Self.generateItems(profileHash: profileHash, resultsReadyOnDisk: true)
                 return
             }
-
+            
             try await reportActivity("Uploading Encrypted Profile") {
                 let newTaskID = try await Network.shared.startTask(.ad_targeting, uid: uid, encrypted_input: profile)
                 self.taskID = newTaskID
                 try await getServerResult(taskID: newTaskID, uid: uid, profileHash: profileHash)
             }
         }
-                
+        
         private func getServerResult(taskID: String, uid: String, profileHash: String) async throws {
             let result = try await Network.shared.getAdTargetingResult(taskID: taskID, uid: uid)
             for position in 0..<Self.adsLimit {
@@ -81,9 +82,9 @@ extension SocialTimeline {
                 Self.profileHash = profileHash
             }
             self.taskID = nil
-            self.items = Self.generateItems(profileHash: profileHash)
+            self.items = Self.generateItems(profileHash: profileHash, resultsReadyOnDisk: true)
         }
-                
+        
         private func reportActivity(_ name: String, block: () async throws -> Void) async rethrows {
             self.activityReport = .progress("\(name)…")
             do {
@@ -95,15 +96,15 @@ extension SocialTimeline {
             }
         }
         
-        static private func generateItems(profileHash: String?) -> [TimelineItem] {
+        static private func generateItems(profileHash: String?, resultsReadyOnDisk: Bool) -> [TimelineItem] {
             var items: [TimelineItem] = []
             var adIndex = 0
-
+            
             for (index, post) in Post.samples.enumerated() {
                 items.append(.post(post))
                 
                 // Insert an ad after every `adFrequency` posts
-                if let profileHash, (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
+                if let profileHash, resultsReadyOnDisk, (index + 1) % Self.adFrequency == 0, adIndex < Self.adsLimit {
                     items.append(.ad(position: adIndex, profileHash: profileHash))
                     adIndex += 1
                 }

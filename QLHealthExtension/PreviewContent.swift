@@ -29,6 +29,7 @@ struct PreviewContent: View {
         switch viewModel.data {
         case let .gauge(value):
             SleepQualityView(quality: SleepQuality(rawValue: value)!)
+                .padding(.bottom, 8)
             
         case .text(let value):
             text(value: value)
@@ -38,6 +39,7 @@ struct PreviewContent: View {
             
         case .sleepChart(let samples):
             SleepChartView(samples: samples)
+                .padding(.bottom, 8)
             
         case .none:
             Color.red
@@ -47,7 +49,7 @@ struct PreviewContent: View {
             
         case .previewSleepDuration(let duration):
             previewSleepDuration(duration)
-
+            
         case .previewText(let value):
             previewText(value: value)
         }
@@ -60,14 +62,12 @@ struct PreviewContent: View {
         return Text("**\(hours.formatted())** Hours **\(minutes.formatted())** Minutes")
             .fontWeight(.regular)
             .font(.custom("Telegraf-Bold", size: 22))
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func previewSleepQuality(_ quality: SleepQuality)  -> some View {
         Text("Sleep Quality: **\(quality.prettyTypeName)**")
             .fontWeight(.regular)
             .font(.custom("Telegraf-Bold", size: 22))
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private func previewText(value: Double)  -> some View {
@@ -75,7 +75,7 @@ struct PreviewContent: View {
             .font(.custom("Telegraf-Bold", size: 22))
             .fontWeight(.bold)
     }
-
+    
     private func text(value: Double)  -> some View {
         Color.zamaYellow
             .aspectRatio(contentMode: .fit)
@@ -120,7 +120,7 @@ struct PreviewContent: View {
         let maxValue = values.max()!
         let minY = minValue - 3
         let maxY = maxValue + 2
-
+        
         return Chart {
             ForEach(Array(values.enumerated()), id: \.offset) { index, value in
                 LineMark(
@@ -136,7 +136,7 @@ struct PreviewContent: View {
                     Rectangle()
                         .fill(.black)
                         .frame(width: 5, height: 5)
-                 }
+                }
             }
         }
         .chartYScale(domain: minY...maxY)

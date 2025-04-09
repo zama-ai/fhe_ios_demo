@@ -58,7 +58,7 @@ extension Sleep.Night {
         
         return Sleep.Night(date: date, samples: samples)
     }
-
+    
     static func fakeBad(date: Date) -> Sleep.Night {
         let values = [
             [0,   0, 120],
@@ -67,7 +67,7 @@ extension Sleep.Night {
             [4, 210, 240],
             [0, 240, 300]
         ]
-
+        
         let samples: [Sleep.Sample] = values.map { row in
             Sleep.Sample(start: row[1],
                          end: row[2],
@@ -76,7 +76,7 @@ extension Sleep.Night {
         
         return Sleep.Night(date: date, samples: samples)
     }
-
+    
     /// Helper function to create realistic sleep cycles
     static func fakeLarge(date: Date) -> Sleep.Night {
         func generateSleepCycle(startMinute: Int, cycleLength: Int) -> [(Int, Int, Sleep.Level)] {
@@ -141,7 +141,7 @@ extension Sleep.Night {
                 level: segment.2
             )
         }
-                
+        
         return Sleep.Night(date: date, samples: samples)
     }
 }

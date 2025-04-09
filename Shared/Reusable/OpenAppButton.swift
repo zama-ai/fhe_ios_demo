@@ -24,21 +24,42 @@ struct AppInfo {
     let name: String
     let deeplink: String
     let appStoreID: String
+    
+    static var appName: String {
+        Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as! String
+    }
+    
+    static var bundleID: String {
+        Bundle.main.bundleIdentifier!
+    }
+    
+    static var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString" as String) as! String
+    }
+    
+    static var buildNumber: String {
+        Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as! String
+    }
+    
+    static var fullVersion: String {
+        "\(version) (\(buildNumber))"
+    }
 }
+
 
 struct OpenAppButton<Label: View>: View {
     let app: AppInfo
     let label: () -> Label
-
+    
     @State private var showAlert = false
     @State private var showOverlay = false
     @Environment(\.openURL) private var openURL
-
+    
     init(_ app: AppInfo, @ViewBuilder label: @escaping () -> Label) {
         self.app = app
         self.label = label
     }
-
+    
     init(_ app: AppInfo) where Label == Text {
         self.app = app
         self.label = { Text("Open \(app.name)") }

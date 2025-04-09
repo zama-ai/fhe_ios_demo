@@ -20,7 +20,7 @@ struct Post: Identifiable {
     let handle: String
     let content: String
     let timestamp: String
-
+    
     static let samples: [Post] = [
         Post(username: "UserA", handle:"@dataprivacy", content: "Privacy should be the default, not an option users have to search for.", timestamp: "3m"),
         Post(username: "UserB", handle:"@cleanCoder", content: "Writing clean code is easy. Writing readable code that lasts? That’s the challenge.", timestamp: "10m"),

@@ -17,7 +17,7 @@ final class ViewModel: ObservableObject {
     static let allAds: [AdModel] = {
         do {
             print("Load JSON. This runs only once for all instances.")
-
+            
             if let url = Bundle.main.url(forResource: "allAds", withExtension: "json"),
                let data = FileManager.default.contents(atPath: url.path) {
                 return try AdModel.allAds(from: data)

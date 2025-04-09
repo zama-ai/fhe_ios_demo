@@ -8,7 +8,7 @@ import SwiftUI
 
 struct WeightTab: View {
     @StateObject private var vm = ViewModel()
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -18,7 +18,7 @@ struct WeightTab: View {
                 } else {
                     OpenAppButton(.zamaDataVault(tab: .weight))
                 }
-
+                
                 CustomBox("Trend") {
                     Group {
                         if let url = vm.samples?.url {
@@ -56,11 +56,12 @@ struct WeightTab: View {
             }
         }
     }
-
+    
     private func statCell(url: URL?, name: String) -> some View {
         VStack(spacing: 12) {
             if let url {
                 FilePreview(url: url)
+                    .aspectRatio(contentMode: .fit)
             } else {
                 Color.clear
                     .aspectRatio(contentMode: .fit)
@@ -78,11 +79,11 @@ extension WeightTab {
         typealias Samples = (url: URL, data: Data, interval: DateInterval)
         typealias Results = (min: URL, max: URL, avg: URL)
         private let serverTask: Network.ServerTask = .weight_stats
-
+        
         @Published var samples: Samples?
         @Published var results: Results?
         @Published var status: ActivityStatus?
-
+        
         func refreshFromDisk() {
             Task {
                 do {
@@ -99,8 +100,11 @@ extension WeightTab {
             if let fileURL = try Storage.listEncryptedFiles(matching: .weightList).first,
                let data = await Storage.read(fileURL),
                let interval = Storage.dateInterval(from: fileURL.lastPathComponent) {
-                samples = (fileURL, data, interval)
+                samples = nil
+                try await Task.sleep(for: .seconds(0.01)) // Hack to force QL Preview to reload…
+                samples = Samples(url: fileURL, data: data, interval: interval)
             } else {
+                try await Task.sleep(for: .seconds(0.01)) // Hack to force QL Preview to reload…
                 samples = nil
             }
         }
@@ -111,9 +115,13 @@ extension WeightTab {
                let _ = await Storage.read(.weightMax),
                let _ = await Storage.read(.weightAvg)
             {
+                results = nil
+                try await Task.sleep(for: .seconds(0.01)) // Hack to force QL Preview to reload…
                 results = (min: Storage.url(for: .weightMin),
-                          max: Storage.url(for: .weightMax),
-                          avg: Storage.url(for: .weightAvg))
+                           max: Storage.url(for: .weightMax),
+                           avg: Storage.url(for: .weightAvg))
+            } else {
+                results = nil
             }
         }
         
@@ -126,12 +134,12 @@ extension WeightTab {
             try await Storage.deleteFromDisk(.weightMax, suffix: "preview")
             try await Storage.deleteFromDisk(.weightAvg, suffix: "preview")
             
-            self.uploadedSampleHash = nil
-            self.uploadedSampleTaskID = nil
+            self.uploadedWeightsHash = nil
+            self.uploadedWeightsTaskID = nil
             self.status = nil
             self.results = nil
         }
-
+        
         
         private func startUploadProcess() async {
             guard let samples, results == nil else { return }
@@ -150,7 +158,7 @@ extension WeightTab {
                 self.status = .error(error.localizedDescription)
             }
         }
-
+        
         // MARK: - PRIVATE -
         
         private func uploadServerKey() async throws -> Network.UID {
@@ -158,30 +166,30 @@ extension WeightTab {
                 throw CustomError.missingServerKey
             }
             
-            let hash = keyToUpload.persistantHashValue
-            if hash == self.uploadedKeyHash, let uid = self.uploadedKeyUID {
+            let hash = keyToUpload.stableHashValue
+            if hash == Constants.uploadedServerKeyHash, let uid = Constants.uploadedServerKeyUID {
                 return uid // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
-
+            
             let newUID = try await Network.shared.uploadServerKey(keyToUpload, for: serverTask)
-            self.uploadedKeyHash = hash
-            self.uploadedKeyUID = newUID
+            Constants.uploadedServerKeyHash = hash
+            Constants.uploadedServerKeyUID = newUID
             return newUID
         }
         
         private func uploadSample(_ sampleToUpload: Data, uid: Network.UID) async throws -> Network.TaskID {
-            let hash = sampleToUpload.persistantHashValue
-            if hash == self.uploadedSampleHash, let taskID = self.uploadedSampleTaskID {
+            let hash = sampleToUpload.stableHashValue
+            if hash == self.uploadedWeightsHash, let taskID = self.uploadedWeightsTaskID {
                 return taskID // Already uploaded
             }
             
             // TODO: prevent reentrancy, if already uploading
-
+            
             let taskID = try await Network.shared.startTask(serverTask, uid: uid, encrypted_input: sampleToUpload)
-            self.uploadedSampleHash = hash
-            self.uploadedSampleTaskID = taskID
+            self.uploadedWeightsHash = hash
+            self.uploadedWeightsTaskID = taskID
             return taskID
         }
         
@@ -190,27 +198,21 @@ extension WeightTab {
             try await Storage.write(.weightMin, data: result.min)
             try await Storage.write(.weightMax, data: result.max)
             try await Storage.write(.weightAvg, data: result.avg)
-
+            
             try await Storage.write(.weightMin, data: result.min, suffix: "preview")
             try await Storage.write(.weightMax, data: result.max, suffix: "preview")
             try await Storage.write(.weightAvg, data: result.avg, suffix: "preview")
-
+            
             return Results(min: Storage.url(for: .weightMin),
                            max: Storage.url(for: .weightMax),
                            avg: Storage.url(for: .weightAvg))
         }
         
-        // Note: ServerKey hash and uid are SHARED between Sleep and Weight Tabs
-        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyHash", defaultValue: nil)
-        private var uploadedKeyHash: String?
+        @UserDefaultsStorage(key: "v12.uploadedWeightsHash", defaultValue: nil)
+        private var uploadedWeightsHash: String?
         
-        @UserDefaultsStorage(key: "v9_SHARED.uploadedKeyUID", defaultValue: nil)
-        private var uploadedKeyUID: Network.UID?
-        
-        @UserDefaultsStorage(key: "v9_WEIGHT.uploadedSampleHash", defaultValue: nil)
-        private var uploadedSampleHash: String?
-
-        @UserDefaultsStorage(key: "v9_WEIGHT.uploadedSampleTaskID", defaultValue: nil)
-        private var uploadedSampleTaskID: Network.TaskID?
+        @UserDefaultsStorage(key: "v12.uploadedWeightsTaskID", defaultValue: nil)
+        private var uploadedWeightsTaskID: Network.TaskID?
     }
 }
+

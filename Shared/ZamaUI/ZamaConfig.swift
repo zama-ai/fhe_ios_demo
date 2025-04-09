@@ -69,7 +69,7 @@ enum HealthTab: String {
         case .weight: (name: "Weight", icon: "scalemass.fill")
         }
     }
-
+    
     init?(url: URL) {
         guard let host = url.host(), let tab = HealthTab(rawValue: host) else {
             return nil

@@ -9,31 +9,38 @@ import SwiftUI
 
 struct HomeTab: View {
     @Binding var selectedTab: HealthTab
+    @State private var sleepDate: Date?
     @State private var sleepInput: URL?
     @State private var sleepResult: URL?
-
+    
     @State private var weightInterval: DateInterval?
     @State private var weightMin: URL?
     @State private var weightMax: URL?
     @State private var weightAvg: URL?
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
                 customBox(goTo: .sleep) {
-                    if sleepInput == nil && sleepResult == nil {
+                    if sleepInput == nil && sleepResult == nil && sleepDate == nil {
                         NoDataBadge()
                     } else {
-                        VStack(alignment: .leading, spacing: 0) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            if let sleepDate {
+                                Text("\(sleepDate.formatted(date: .numeric, time: .omitted))")
+                                    .customFont(.body)
+                                    .bold()
+                                    .foregroundStyle(Color.zamaYellow)
+                            }
                             
                             if let sleepInput {
                                 FilePreview(url: sleepInput)
-                                    .frame(height: 30)
+                                    .frame(height: 40, alignment: .leading)
                             }
                             
                             if let sleepResult {
                                 FilePreview(url: sleepResult)
-                                    .frame(height: 30)
+                                    .frame(height: 40, alignment: .leading)
                             }
                         }
                     }
@@ -43,43 +50,43 @@ struct HomeTab: View {
                     if weightAvg == nil && weightMax == nil && weightMin == nil && weightInterval == nil {
                         NoDataBadge()
                     } else {
-                        VStack(alignment: .leading, spacing: 0) {
+                        VStack(alignment: .leading, spacing: 20) {
                             if let weightInterval {
                                 Text("\(weightInterval.start.formatted(date: .numeric, time: .omitted)) - \(weightInterval.end.formatted(date: .numeric, time: .omitted))")
                                     .customFont(.body)
                                     .bold()
                                     .foregroundStyle(Color.zamaYellow)
-                                    .padding(.bottom, 8)
                             }
-
+                            
                             if let weightMin {
-                                HStack {
+                                HStack(alignment: .top) {
                                     Text("Min: ")
                                     FilePreview(url: weightMin)
-                                        .frame(width: 90, height: 30, alignment: .trailing)
+                                        .frame(width: 60, height: 40)
+                                        .offset(y: -2)
                                     Text(" kg")
                                 }
                             }
                             
                             if let weightMax {
-                                HStack {
+                                HStack(alignment: .top) {
                                     Text("Max: ")
                                     FilePreview(url: weightMax)
-                                        .frame(width: 80, height: 30, alignment: .trailing)
+                                        .frame(width: 60, height: 40)
+                                        .offset(y: -2)
                                     Text(" kg")
                                 }
                             }
                             
                             if let weightAvg {
-                                HStack {
+                                HStack(alignment: .top) {
                                     Text("Avg: ")
                                     FilePreview(url: weightAvg)
-                                        .frame(width: 70, height: 30, alignment: .trailing)
+                                        .frame(width: 60, height: 40)
+                                        .offset(y: -2)
                                     Text(" kg")
                                 }
                             }
-                        }.overlay {
-                            Color.white.opacity(0.01) // Hack to make hit testing work over QL/FilePreview areas
                         }
                     }
                 }
@@ -93,9 +100,17 @@ struct HomeTab: View {
             .background(Color.zamaYellowLight)
         }.onAppearAgain {
             Task {
-                let sleepInputURL = Storage.url(for: .sleepList, suffix: "preview")
-                let sleepResultURL = Storage.url(for: .sleepScore, suffix: "preview")
-                
+                // Hack to force QL Preview to reload…
+                self.sleepInput = nil
+                self.sleepResult = nil
+                try? await Task.sleep(for: .seconds(0.01))
+
+                // Sleep
+                sleepDate = Constants.selectedNight
+                sleepInput = Constants.selectedNightInputPreviewURL
+                sleepResult = Constants.selectedNightResultPreviewURL
+                                
+                // Weight
                 if let weightListURL = try Storage.listEncryptedFiles(matching: .weightList).first,
                    let interval = Storage.dateInterval(from: weightListURL.lastPathComponent) {
                     weightInterval = interval
@@ -106,19 +121,6 @@ struct HomeTab: View {
                 let weightMinURL = Storage.url(for: .weightMin, suffix: "preview")
                 let weightMaxURL = Storage.url(for: .weightMax, suffix: "preview")
                 let weightAvgURL = Storage.url(for: .weightAvg, suffix: "preview")
-                
-                // Sleep
-                if let _ = await Storage.read(sleepInputURL) {
-                    sleepInput = sleepInputURL
-                } else {
-                    sleepInput = nil
-                }
-                
-                if let _ = await Storage.read(sleepResultURL) {
-                    sleepResult = sleepResultURL
-                } else {
-                    sleepResult = nil
-                }
                 
                 // Weight
                 if let _ = await Storage.read(weightMinURL) {
@@ -141,7 +143,7 @@ struct HomeTab: View {
             }
         }
     }
-        
+    
     private func customBox<Content: View>(goTo tab: HealthTab, @ViewBuilder content: @escaping () -> Content) -> some View {
         CustomBox(label: { Label(tab.displayInfo.name, systemImage: tab.displayInfo.icon) },
                   onTap: { selectedTab = tab },

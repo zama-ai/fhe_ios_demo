@@ -12,7 +12,7 @@ final class PreviewVC: UIViewController, QLPreviewingController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let swiftUIView = PreviewContent(viewModel: viewModel)
+        let swiftUIView = PreviewContent(viewModel: viewModel).securelyDisplayed()
         let hostingController = UIHostingController(rootView: swiftUIView)
         addChild(hostingController)
         
@@ -40,12 +40,12 @@ final class PreviewVC: UIViewController, QLPreviewingController {
             print("QL: cannot read file at \(url)")
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read file at \(url)"])
         }
-
+        
         guard let ck = try await ClientKey.readFromDisk(.clientKey) else {
             print("QL: cannot read ClientKey")
             throw NSError(domain: "App", code: 1, userInfo: [NSLocalizedDescriptionKey: "QL: cannot read ClientKey"])
         }
-
+        
         let fileName = url.lastPathComponent
         let fileNameForDeterminingType = fileName.replacingOccurrences(of: "-preview", with: "")
         var fileType = Storage.File(rawValue: fileNameForDeterminingType)?.decryptType
@@ -55,6 +55,8 @@ final class PreviewVC: UIViewController, QLPreviewingController {
                 fileType = Storage.File.weightList.decryptType
             } else if fileName.starts(with: "sleepList") {
                 fileType = Storage.File.sleepList.decryptType
+            } else if fileName.starts(with: "sleepScore") {
+                fileType = Storage.File.sleepScore.decryptType
             }
         }
         

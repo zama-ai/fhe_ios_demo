@@ -13,12 +13,12 @@ import SwiftUI
         CustomBox("String") {
             Text("Content")
         }
-
+        
         CustomBox("String") {
             Text("Content A")
             Text("Content B")
         }
-
+        
         Spacer()
     }
     .padding()
@@ -27,21 +27,21 @@ import SwiftUI
 
 struct CustomBox<Label: View, Content: View>: View {
     let label: () -> Label
-    var onTap: (() -> Void)? = nil
+    let onTap: (() -> Void)?
     let content: () -> Content
-
+    
     init(label: @escaping () -> Label, onTap: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) {
         self.label = label
         self.onTap = onTap
         self.content = content
     }
-
+    
     init(_ title: String, onTap: (() -> Void)? = nil, @ViewBuilder content: @escaping () -> Content) where Label == Text {
         self.label = { Text(title) }
         self.onTap = onTap
         self.content = content
     }
-
+    
     var body: some View {
         Button {
             onTap?()
@@ -70,6 +70,9 @@ struct CustomBox<Label: View, Content: View>: View {
             .background(Color.white)
             .fontWeight(.medium)
             .contentShape(Rectangle())
+            .overlay {
+                Color.white.opacity(0.01) // Hack to make hit testing work over QL/FilePreview areas
+            }
         }
         .buttonStyle(.blackHighlight(disabled: onTap == nil))
     }

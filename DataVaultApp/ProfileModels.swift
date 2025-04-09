@@ -21,7 +21,7 @@ extension OneHotable {
     }
 }
 
-struct Profile {
+struct Profile: Equatable {
     let age: AgeGroup
     let gender: Gender
     let country: Country
@@ -31,7 +31,7 @@ struct Profile {
     var oneHot: [Bool] {
         let nonKidsInterests = interests.filter {$0 != .kids}
         let interestedInKids = interests.contains(.kids)
-                
+        
         return [
             gender.oneHot,
             age.oneHot,
@@ -71,7 +71,7 @@ extension Profile {
             oneHot.popFirst(Country.allCases.count),
             oneHot.popFirst(Interest.allCases.count - 1)
         )
-
+        
         let ageGroup = zip(ageHot, AgeGroup.allCases).first(where: { $0.0 == 1 })?.1
         let gender = zip(genderHot, Gender.allCases).first(where: { $0.0 == 1 })?.1
         let country = zip(countryHot, Country.allCases).first(where: { $0.0 == 1 })?.1
@@ -138,7 +138,7 @@ enum Language: String, PrettyTypeNamable, OneHotable {
     case spanish = "es"
     case tamazight = "ber"
     case tamil = "ta"
-
+    
     var names: (native: String, translated: String) {
         let native = Locale(identifier: rawValue).localizedString(forLanguageCode: rawValue)?.localizedCapitalized
         let clear = Locale.current.localizedString(forLanguageCode: rawValue)?.localizedCapitalized

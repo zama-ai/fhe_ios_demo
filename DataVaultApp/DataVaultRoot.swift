@@ -9,7 +9,7 @@ import SwiftUI
 struct DataVaultRoot: View {
     @State private var selectedTab: DataVaultTab = .home
     @StateObject private var healthVM = HealthViewModel()
-
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             tabItem(value: .home) {

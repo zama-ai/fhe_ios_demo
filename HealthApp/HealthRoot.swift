@@ -8,7 +8,7 @@ import SwiftUI
 
 struct HealthRoot: View {
     @State private var selectedTab: HealthTab = .home
-
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             tabItem(value: .home) {
@@ -26,6 +26,9 @@ struct HealthRoot: View {
         .tint(.zamaOrange)
         .overlay(alignment: .topTrailing) {
             ZamaLink()
+        }
+        .overlay(alignment: .topTrailing) {
+            ZamaInfoButton()
         }
         .onOpenURL { url in
             selectedTab = HealthTab(url: url) ?? .home

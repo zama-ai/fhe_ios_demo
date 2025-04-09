@@ -13,7 +13,7 @@ import SwiftUI
 
 struct HomeTab: View {
     @Binding var selectedTab: DataVaultTab
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {

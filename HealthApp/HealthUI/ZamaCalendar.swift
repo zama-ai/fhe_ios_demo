@@ -23,11 +23,11 @@ import SwiftUI
 struct ZamaCalendar: View {
     @Environment(\.calendar) private var calendar
     @Environment(\.locale) private var locale
-
+    
     @Binding private var selection: Date?
     private let canSelect: (Date) -> Bool
     private let interval: DateInterval
-
+    
     init(covering interval: DateInterval,
          selection: Binding<Date?>,
          canSelect: @escaping (Date) -> Bool
@@ -36,7 +36,7 @@ struct ZamaCalendar: View {
         self._selection = selection
         self.canSelect = canSelect
     }
-
+    
     var body: some View {
         CalendarView(covering: interval,
                      selection: $selection,
