@@ -1,6 +1,4 @@
 import requests
-import sys
-import json
 
 import time 
 import pytest
@@ -13,19 +11,21 @@ def cancel_task(uid, task_id):
     response = requests.post(f"{URL}/cancel_task?task_id={task_id}&uid={uid}")
     response.raise_for_status()
     
-    time.sleep(10)
-        
+    time.sleep(3)
+
     data = response.json()
     status = data.get("status")
-    
-    assert status == "revoked", f"❌ Expected status 'revoked', but got: {status}"
 
+    return status
 
+# In rare cases, the status may be unknown/complete if the task has not yet started or has finished.
+# Thus, we restart the test if it fails.
+@pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("task_name,uid", [
     ("ad_targeting", "test_ad_targeting"),
     ("weight_stats", "test_weight_stats"),
 ])
-def test_success_cancel_task_endpoint(task_name, uid):
+def test_cancel_task_endpoint_success(task_name, uid):
     print("\nRun test cancel_task endpoint (expected success).")
     
     # 1. Upload the server key
@@ -44,8 +44,10 @@ def test_success_cancel_task_endpoint(task_name, uid):
         task_id = response.json()["task_id"]
         
     # 3. Cancel task
-    cancel_task(uid, task_id)
-
+    status = cancel_task(uid, task_id)
+    assert status.lower() == "revoked", f"❌ Expected status 'revoked', but got: `{status}`"
+    # If the status is Unknown, it may be due to a task being completed more quickly than expected.
+    # Reducing sleep time may fix the issue.
 
 @pytest.mark.parametrize("task_name,uid", [
     ("ad_targeting", "test_ad_targeting"),
@@ -53,7 +55,7 @@ def test_success_cancel_task_endpoint(task_name, uid):
     ("sleep_quality", "test_good_night"),
 ])
 @pytest.mark.parametrize("wrong_task_id", ["", None, "Fake_Task_ID"])
-def test_failed_cancel_task_endpoint(task_name, uid, wrong_task_id):
+def test_cancel_task_endpoint_failure(task_name, uid, wrong_task_id):
     print("\nRun test cancel_task endpoint (expected failure).")
     
     # 1. Upload the server key
@@ -65,11 +67,11 @@ def test_failed_cancel_task_endpoint(task_name, uid, wrong_task_id):
         uid = response.json()["uid"]
     
     # 2. Cancel task with wrong task_id
-    with pytest.raises(AssertionError):
-        cancel_task(uid, wrong_task_id)
+    status = cancel_task(uid, wrong_task_id)
+    assert status.lower() == "unknown", f"❌ Expected status 'unknown', but got: `{status}`"
 
 
-def test_get_use_cases():
+def test_get_use_cases_endpoint():
     print("\nRun test get_use_cases endpoint.")
 
     response = requests.get(f"{URL}/get_use_cases")

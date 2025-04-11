@@ -2,6 +2,12 @@
 
 # Deployment Script for fhe_ios_demo Server
 
+# Change directory to the project root to ensure relative paths behave consistently
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(realpath "$SCRIPT_DIR/..")"
+echo "From '$SCRIPT_DIR' to '$PROJECT_ROOT'"
+cd "$PROJECT_ROOT"
+
 # Setup environment depending on the first argument
 source setup_env.sh
 
@@ -21,7 +27,7 @@ for arg in "$@"; do
             NO_CACHE=true
             ;;
         *)
-            echo "Usage : $0 [dev|staging|prod] [--no-cache] [--rebuild-rust]"
+            echo "Usage : $0 [dev|staging|prod|ci] [--no-cache] [--rebuild-rust]"
             exit 1
             ;;
     esac

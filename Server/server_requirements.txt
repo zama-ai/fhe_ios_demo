@@ -3,9 +3,8 @@ fastapi
 uvicorn
 PyYAML
 python-multipart
-concrete_ml_extensions==0.1.6
+concrete_ml_extensions
 celery[redis]
 redis
 python-dotenv
-pytest
 requests

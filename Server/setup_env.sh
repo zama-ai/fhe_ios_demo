@@ -10,7 +10,7 @@ elif [ "$1" == "prod" ]; then
     echo "🚀 Testing in the production environment..."
     export ENV_FILE=".env_prod"
 else
-    echo "Usage: $0 [mode=dev/prod/staging]"
+    echo "Usage: $0 [dev|staging|prod|ci]"
     exit 1
 fi 
 

@@ -2,6 +2,12 @@
 
 set -x
 
+# Change directory to the project root to ensure relative paths behave consistently
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(realpath "$SCRIPT_DIR/..")"
+echo "From '$SCRIPT_DIR' to '$PROJECT_ROOT'"
+cd "$PROJECT_ROOT"
+
 # Setup environment depending on the first argument
 source setup_env.sh
 
