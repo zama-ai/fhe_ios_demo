@@ -1,15 +1,21 @@
-import logging
 import os
 import subprocess
 import time
 
 from typing import Dict
+from urllib.parse import urlparse
+
+import redis
+
 from celery import Celery
 
 from utils import *
 
 BROKER_URL = os.getenv("BROKER_URL")
 BACKEND_URL = os.getenv("BACKEND_URL")
+
+PARSED_BROKER_URL = urlparse(BROKER_URL)
+PARSED_BACKEND_URL = urlparse(BACKEND_URL)
 
 # Instanciate Celery app
 try:
@@ -36,6 +42,8 @@ try:
         # `worker_prefetch_multiplier`: How many tasks a Celery worker prefetchs before starting it
         worker_prefetch_multiplier=1,
         task_reject_on_worker_lost=True,
+        # `task_ignore_result`: The result of each task will be stored in the Redis backend
+        task_ignore_result = False,
     )
     logger.info("🔥 Successfully connected to Celery!")
 
@@ -44,6 +52,35 @@ except Exception as e:
     error_message = f"❌ Failed to initialize Celery app: {e}"
     logger.error(error_message)
     raise RuntimeError(error_message)
+
+
+# Instanciate Redis broker data-base
+try:
+    redis_bd_broker = redis.Redis(
+                host=PARSED_BROKER_URL.hostname,
+                port=PARSED_BROKER_URL.port,
+                db=int(PARSED_BROKER_URL.path.lstrip('/')),  # 0
+                decode_responses=True,
+            )
+    redis_bd_broker.ping()
+    logger.info("🔥 Successfully connected to Redis broker!")
+except redis.ConnectionError:
+    redis_bd_broker = None
+    logger.error("❌ Failed to connect to Redis broker!")
+
+# Instanciate Redis backend data-base
+try:
+    redis_bd_backend = redis.Redis(
+        host=PARSED_BACKEND_URL.hostname,
+        port=PARSED_BACKEND_URL.port,
+        db=int(PARSED_BACKEND_URL.path.lstrip('/')),  # 1
+        decode_responses=True,
+    )
+    redis_bd_backend.ping()
+    logger.info("🔥 Successfully connected to Redis backend!")
+except redis.ConnectionError:
+    redis_bd_backend = None
+    logger.error("❌ Failed to connect to Redis backend!")
 
 
 def execute_binary(binary: str, uid: str, task_name: str) -> Dict:

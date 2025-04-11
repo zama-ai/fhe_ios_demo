@@ -27,12 +27,15 @@ RUN dnf -y groupinstall "Development Tools" --nobest && \
     dnf install -y gcc --nobest && \
     dnf clean all
 
+# Install Python-level packages
+RUN pip3 install --no-cache-dir python-dotenv
+
 # Set working directory
 WORKDIR /project
 RUN mkdir -p /project/data
 
 # Copy Python dependencies, configuration files and Python server
-COPY server_requirements.txt tasks.yaml server.py scripts/entrypoint.sh utils.py tasks.py ./
+COPY server_requirements.txt tasks.yaml server.py scripts/entrypoint.sh utils.py task_executor.py ./
 COPY tasks/ad_targeting/data/onehot_ads.pkl /project/data/onehot_ads.pkl
 
 # Install Python dependencies

@@ -17,7 +17,6 @@ def test_weight_stats():
     ck_path = f"{UPLOAD_FOLDER}/{uid}.clientKey"
     serverkey_path = f"{UPLOAD_FOLDER}/{uid}.serverKey"
     input_path = f"{UPLOAD_FOLDER}/{uid}.weight_stats.input.fheencrypted"
-    output_path = f"{UPLOAD_FOLDER}/{uid}.weightList.output.fheencrypted"
     
     start_time = time.time()
     
@@ -26,9 +25,11 @@ def test_weight_stats():
     assert os.path.exists(serverkey_path), f"Missing file: {serverkey_path=}"
     assert os.path.exists(ck_path), f"Missing file: {ck_path=}"
     assert os.path.exists(input_path), f"Missing file: {input_path=}"
-        
-    run_task_on_server("weight_stats", serverkey_path, input_path, output_path)
-    
+
+    _, _, output_paths = run_task_on_server("weight_stats", serverkey_path, input_path, prefix=uid)
+
+    assert all([os.path.exists(p) for p in output_paths]), f"Missing file: {ck_path=}"
+
     # Decrypt and check results
     decrypted_avg, decrypted_min, decrypted_max = weight_stats.decrypt(uid)
 

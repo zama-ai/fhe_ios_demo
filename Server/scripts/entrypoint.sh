@@ -32,7 +32,7 @@ case "$RUN_TYPE" in
     usecases)
         # Start Celery worker for usecases queue
         echo "🚀 Starting Celery Worker for tasks..."
-        exec celery -A tasks.celery_app worker \
+        exec celery -A task_executor.celery_app worker \
             --loglevel="$CELERY_LOGLEVEL" \
             --queues="usecases" \
             --concurrency="$CELERY_WORKER_CONCURRENCY_USECASE_QUEUE"
@@ -41,7 +41,7 @@ case "$RUN_TYPE" in
     ads)
         # Start Celery worker for ads queue
         echo "🚀 Starting Celery Worker for ads... with loglevel=$CELERY_LOGLEVEL"
-        exec celery -A tasks.celery_app worker \
+        exec celery -A task_executor.celery_app worker \
             --loglevel="$CELERY_LOGLEVEL" \
             --queues="ads" \
             --concurrency="$CELERY_WORKER_CONCURRENCY_AD_QUEUE"
