@@ -11,8 +11,18 @@ environment ?= dev
 cache ?=
 # Force Rust rebuild. Use '' to enable cache or '--rebuild_rust' to disable it      
 rebuild_rust ?=
+# Compute device used for execution (cpu or gpu)
+device ?= cpu
+# Output CSV file for benchmark results
+CSV_FILE := benchmark.csv
+# Current date
+DATE := $(shell date "+%Y-%m-%d")
+# List of benchmarked tasks
+TASKS := ad_targeting weight_stats sleep_quality
+# Instance type (e.g., c5.4xlarge or g4dn.8xlarge)
+machine ?= g4dn.8xlarge
 
-.PHONY: docker_build docker_run docker_build_run tests_build tests_run
+.PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files benchmark
 
 docker_build:
 	sudo bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
@@ -39,3 +49,40 @@ tests_run:
 		exit 1; \
 	fi
 	bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_endpoints.py $(test_flags)"
+
+	TESTS = ad_targeting weight_stats sleep_quality endpoints
+
+	@for test in $(TESTS); do \
+		echo "Running test: $$test"; \
+		bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_$$test.py $(test_flags)"; \
+	done
+
+clean_files:
+	find project/uploaded_files -mindepth 1 ! -name 'test_*' -exec rm -rf {} +
+	find uploaded_files -mindepth 1 ! -name 'test_*' -exec rm -rf {} +
+
+benchmark:
+	@echo "Benchmarking with device=$(device)..."
+	@if [ "$(device)" = "cuda" ]; then \
+		echo "⚠️  Make sure the image was built with RUNTIME=nvidia"; \
+	fi
+	@if [ ! -f $(CSV_FILE) ]; then echo "date;env;machine;task_name;server_execution_time(s);end_to_end_execution_time(s);device" > $(CSV_FILE); fi; \
+	for task in $(TASKS); do \
+		echo "Running $$task..."; \
+		start=$$(date +%s.%N); \
+		bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_$$task.py"; \
+		end=$$(date +%s.%N); \
+		end_to_end=$$(echo "$$end - $$start" | bc); \
+		echo "🔍 Docker logs for task=$$task | e2e_time=$$end_to_end (s):"; \
+		docker logs dev_fhe_ios_demo_service_celery_usecases_2 2>&1 | grep "🥕 ✅" | grep $$task | tail -n 1 ; \
+		server_time=$$(docker logs dev_fhe_ios_demo_service_celery_usecases_2 2>&1 \
+			| grep "🥕 ✅" \
+			| grep "$$task" \
+			| tail -n 1 \
+			| grep -oP '\`[0-9.]+\`' \
+			| tr -d '\`'); \
+		echo "$(DATE);$(environment);$(machine);$$task;$$server_time;$$end_to_end;$(device)" >> $(CSV_FILE); \
+	done
+
+	mkdir -p images
+	python update_benchmarks.py

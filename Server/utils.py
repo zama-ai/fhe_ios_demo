@@ -3,11 +3,11 @@
 import os
 import logging
 import yaml 
-
+import datetime
 from pathlib import Path
 from contextlib import contextmanager
 from typing import Dict
-
+from glob import glob
 from fastapi import Form, Query, Request, HTTPException
 from dotenv import load_dotenv, dotenv_values
 
@@ -84,21 +84,16 @@ async def get_uid(request: Request, uid: str = Query(None), uid_form: str = Form
     return uid or uid_form or form_data.get("uid")
 
 
-def generate_filename(config: Dict, file_type: str, args: Dict) -> str:
-    """Generates a filename based on a given configuration.
+def format_input_filename(uid: str, task_name: str) -> str:
+    return FILES_FOLDER / f"{uid}.{task_name}.input.fheencrypted"
 
-    Args:
-        config (dict): Configuration dictionary containing filename templates.
-        file_type (str): Type of file, either "output" or "input".
-        args (dict): Dictionary with formatting arguments (e.g., uid, task_name).
 
-    Returns:
-        str: The generated filename based on the template.
-    """
-    assert file_type in ["input", "output"], f"`{file_type}` not supported."
-    template = "{uid}" if file_type == "output" else "{uid}.{task_name}"
-    filename_template = config.get("filename", f"{template}.{file_type}.fheencrypted")
-    return filename_template.format(**args)
+def format_output_filename(template: str, uid: str) -> str:
+    return FILES_FOLDER / template.format(uid=uid)
+
+
+def format_backup_filename(template: str, uid: str, task_id: str) -> str:
+    return FILES_FOLDER / f"backup.{template.format(uid=f'{uid}.{task_id}')}"
 
 
 def ensure_file_exists(file_path: Path, error_message: str) -> None:
@@ -118,13 +113,36 @@ def ensure_file_exists(file_path: Path, error_message: str) -> None:
         logger.debug(f"📁 Output file path: `{file_path}` exists.")
 
 
-def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
-    """Reads a file, optionally saves a backup, and returns its content.
+def fetch_backup_files(task_id: str, uid: str):
+    """Retrieve backup files along with the last modification timestamp.
+
+    Args:
+        task_id (str): The unique identifier of the task.
+        uid (str): The unique user identifier.
+
+    Returns:
+        A list of matching backup file paths and the last modification timestamp or `None`
+        if no file was found.
+    """
+    pattern = FILES_FOLDER / f"backup.{uid}.{task_id}.*output*.fheencrypted"
+    matching_files = glob(str(pattern))
+
+    if not matching_files:
+        logger.debug(f"🔍 [task_id=`%s`, uid=`%s`] No backup files found.", get_id_prefix(task_id), get_id_prefix(uid))
+        return None
+
+    file = Path(matching_files[0])
+    last_mtime = file.stat().st_mtime  # Get file's last modified time
+    formatted_date = datetime.datetime.fromtimestamp(last_mtime).strftime("%Y-%m-%d %H:%M:%S")
+
+    return {'files': [str(file) for file in matching_files], 'timestamp': formatted_date}
+
+
+def fetch_file_content(output_file_path: Path):
+    """Reads a file and returns its content.
 
     Args:
         output_file_path (Path): The path of the file to read.
-        task_id (str): The task id used for backup naming.
-        backup (bool): Whether to save a backup of the file.
 
     Returns:
         bytes: The content of the file.
@@ -145,15 +163,24 @@ def fetch_file_content(output_file_path: Path, task_id: str, backup: bool):
         logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
-    if backup:
-        backup_path = BACKUP_FOLDER / f"backup.{task_id}.{output_file_path.name}"
-        try:
-            backup_path.write_bytes(data)
-            logger.debug(f"💾 Successfully saved backup file at `{backup_path}`.")
-        except Exception as e:
-            logger.warning(f"🚨 Failed to create backup `{backup_path}`: {e}.")
-
     return data
+
+
+def save_backup_file(backup_path, data) -> None:
+    """Save  data to a backup file.
+
+    Args:
+        backup_path (Path): The path where the backup file should be saved.
+        data (bytes): The binary data.
+
+    Returns:
+        None
+    """
+    try:
+        backup_path.write_bytes(data)
+        logger.debug(f"💾 Successfully saved backup file at `{backup_path}`.")
+    except Exception as e:
+        logger.warning(f"🚨 Failed to create backup `{backup_path}`: {e}.")
 
 
 def get_id_prefix(_id: str) -> str:
