@@ -20,7 +20,9 @@ def run_sleep_quality(night, uid):
     assert os.path.exists(ck_path), f"Missing file: {ck_path=}"
     assert os.path.exists(input_path), f"Missing file: {input_path=}"
 
-    _, _, output_path = run_task_on_server("sleep_quality", serverkey_path, input_path, prefix=uid)
+    uid1, task_id, output_path = run_task_on_server("sleep_quality", serverkey_path, input_path, prefix=uid)
+
+    print(uid1, task_id, output_path, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
 
     assert output_path[0].exists(), f"Missing file: {output_path=}"
 

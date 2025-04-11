@@ -26,7 +26,9 @@ def test_weight_stats():
     assert os.path.exists(ck_path), f"Missing file: {ck_path=}"
     assert os.path.exists(input_path), f"Missing file: {input_path=}"
 
-    _, _, output_paths = run_task_on_server("weight_stats", serverkey_path, input_path, prefix=uid)
+    uid1, task_id, output_paths = run_task_on_server("weight_stats", serverkey_path, input_path, prefix=uid)
+    
+    print(uid1, task_id, output_paths, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
 
     assert all([os.path.exists(p) for p in output_paths]), f"Missing file: {ck_path=}"
 

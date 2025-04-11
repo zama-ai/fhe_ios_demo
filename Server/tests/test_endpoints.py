@@ -32,12 +32,13 @@ def test_cancel_task_endpoint_success(expected_status, expected_msg, prefix, tas
     time.sleep(1)
 
     # Cancel task
-    for i in range(TIME_OUT):
+    for attempt in range(TIME_OUT):
         time.sleep(POLL_INTERVAL)
         status, details = cancel_task_api(uid, task_id)
-        if status != 'queued':
+        print(f"[via API ] polling attempt {attempt + 1}/{TIME_OUT} | Status: {status} | Details: {details}")
+        if status != "queued":
             break
-
+    
     # If the status is Unknown, it may be due to a task being completed more quickly than expected.
     # Reducing sleep time may fix the issue.
     assert expected_status == status.lower(), f"❌ Expected status 'revoked', but got: `{status}`"
@@ -62,9 +63,10 @@ def test_cancel_task_endpoint_failure(task_id, expected_status, expected_msg, pr
     # If "Completed_Task_ID", start a real task and wait for it to complete
     if task_id == "Completed_Task_ID":
         task_id = start_task_api(uid, task_name, input_test_path)
-        for _ in range(TIME_OUT):
+        for attempt in range(TIME_OUT):
             time.sleep(POLL_INTERVAL)
             status, details = get_status_api(uid, task_id)
+            print(f"[via API ] polling attempt {attempt + 1}/{TIME_OUT} | Status: {status} | Details: {details}")
             if status == "success":
                 break
 
@@ -143,7 +145,7 @@ def test_start_task_endpoint(task_name, expected_status, expected_msg, prefix):
 
 
 @pytest.mark.parametrize("task_name,prefix", [
-   # ("sleep_quality", "test_good_night"),
+    ("sleep_quality", "test_good_night"),
     ("ad_targeting", "test_ad_targeting"),
     ("weight_stats", "test_weight_stats"),
 ])
@@ -180,6 +182,13 @@ def test_status_task_endpoint(task_name, prefix):
     assert all(p.stat().st_size > 1 * 1024 for p in output_paths), f"❌ Too small files: `{output_paths}`"
 
     expected_msg, expected_status = r"Task successfully completed.", "success"
+    assert status == expected_status, f"❌ Expected status `{expected_status}`, but got: `{status}`"
+    assert re.search(expected_msg, details), f"❌ Expected details `{expected_msg}`, but got: `{details}`"
+    
+    time.sleep(5)
+    
+    status, details = get_status_api(uid, task_id)
+    expected_msg, expected_status = r"Task completed on *.", "completed"
     assert status == expected_status, f"❌ Expected status `{expected_status}`, but got: `{status}`"
     assert re.search(expected_msg, details), f"❌ Expected details `{expected_msg}`, but got: `{details}`"
 
