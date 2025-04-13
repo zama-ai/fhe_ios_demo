@@ -335,7 +335,7 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         for task in queued_tasks:
             task_data = json.loads(task)
             if task_id == task_data["headers"]["id"]:
-                logger.info(STATUS_TEMPLATES['queued']['logger_msg'].format(task_id, uid))            
+                logger.info(STATUS_TEMPLATES['queued']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
                 return {**STATUS_TEMPLATES["queued"].copy(), **task_info}
     except Exception as e:
         logger.error("❌ Failed to check Redis broker bd: %s", str(e))
@@ -348,7 +348,7 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
             raw = redis_bd_backend.get(key)
             data = json.loads(raw)
             ttl = redis_bd_backend.ttl(key)
-            logger.info(f"🔍 [taks_id=`%s`] found in Redis with status=`%s` and TTL remaining `%s` seconds", get_id_prefix(task_id), data['status'].lower(), ttl)
+            logger.debug(f"[taks_id=`%s`] found in Redis with status=`%s` and TTL remaining `%s` seconds", get_id_prefix(task_id), data['status'].lower(), ttl)
     except Exception as e:
         logger.error("❌ Failed to check Redis backend bd: `%s`", str(e))
 
@@ -367,7 +367,7 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
             **STATUS_TEMPLATES["completed"].copy(),
             **task_info,
             "details": f"Task completed on `{cached_output['timestamp']}`. The result is stored.",
-            "logger_msg": STATUS_TEMPLATES["completed"]["logger_msg"].format(task_id, uid) + f". Completed on `{cached_output['timestamp']}`.",
+            "logger_msg": STATUS_TEMPLATES["completed"]["logger_msg"].format(get_id_prefix(task_id), get_id_prefix(uid)) + f". Completed on `{cached_output['timestamp']}`.",
             "output_file_path": cached_output["files"],
         }
         logger.info(response['logger_msg'])
@@ -378,14 +378,15 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     if status == 'started':
         task_meta = result.backend.get_task_meta(task_id) or {}
         worker_name = task_meta.get("result", {}).get("hostname", "unknown")
-        response = {"worker": worker_name, **STATUS_TEMPLATES.get(status, {}).copy()}
-        logger.info(response['logger_msg'])
+        response = {"worker": worker_name, **STATUS_TEMPLATES[status]}
+        logger.info(response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
         return response
 
     # Case, where the status is neither 'completed', 'unknown' or 'queued'
     response = {**STATUS_TEMPLATES[status].copy(), **task_info}
-
-    logger.info(response['logger_msg'])
+    
+    if status != 'revoked':
+         logger.info(response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
 
     return response
 
@@ -464,7 +465,7 @@ def build_stream_response(task_id, uid, task_name, output_files_config, response
         StreamingResponse: The FastAPI streaming response.
     """
 
-    task_logger.info(f"Returning STREAM response for task `{task_name}`")
+    task_logger.debug(f"Returning STREAM response for task `{task_name}`")
 
     response.pop("logger_msg", None)
 
@@ -516,7 +517,7 @@ def build_json_response(task_id, uid, task_name, output_files_config, response, 
     Returns:
         JSONResponse: A FastAPI JSON response.
     """
-    task_logger.info(f"Returning JSON response for task `{task_name}`")
+    task_logger.debug(f"Returning JSON response for task `{task_name}`")
 
     json_data = {"stderr": stderr_output, "output_file_path": [], **response}
     json_data.pop("logger_msg", None)
@@ -615,7 +616,6 @@ async def get_task_result(
 
     elif status == "success":
         logger_msg = STATUS_TEMPLATES[status]['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))
-
         celery_result = AsyncResult(task_id, app=celery_app)
         outcome_celery = celery_result.result
         stderr_output = outcome_celery.get("stderr", "")
