@@ -171,7 +171,7 @@ def test_status_task_endpoint(task_name, prefix):
         if status == "success":
             break
 
-        if status != "started":
+        if status not in ["queued", "started"]:
             raise AssertionError(f"❌ Unexpected status: `{status}` — Details: {details}")
     else:
         raise AssertionError(f"❌ Task did not complete within timeout")
