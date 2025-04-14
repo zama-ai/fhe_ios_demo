@@ -3,8 +3,6 @@ import requests
 import time 
 import pytest
 
-import sleep_quality
-import weight_stats
 from utils import *
 
 
