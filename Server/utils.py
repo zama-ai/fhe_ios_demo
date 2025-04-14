@@ -83,14 +83,18 @@ async def get_uid(request: Request, uid: str = Query(None), uid_form: str = Form
     form_data = await request.form()
     return uid or uid_form or form_data.get("uid")
 
+
 def format_input_filename(uid: str, task_name: str) -> str:
     return FILES_FOLDER / f"{uid}.{task_name}.input.fheencrypted"
+
 
 def format_output_filename(template: str, uid: str) -> str:
     return FILES_FOLDER / template.format(uid=uid)
 
+
 def format_backup_filename(template: str, uid: str, task_id: str) -> str:
     return FILES_FOLDER / f"backup.{template.format(uid=f'{uid}.{task_id}')}"
+
 
 def ensure_file_exists(file_path: Path, error_message: str) -> None:
     """Ensures that the specified file exists; otherwise, logs an error and raises an exception.
@@ -134,7 +138,7 @@ def fetch_backup_files(task_id: str, uid: str):
     return {'files': [str(file) for file in matching_files], 'timestamp': formatted_date}
 
 
-def fetch_file_content(output_file_path: Path, task_id: str):
+def fetch_file_content(output_file_path: Path):
     """Reads a file and returns its content.
 
     Args:
@@ -177,7 +181,6 @@ def save_backup_file(backup_path, data) -> None:
         logger.debug(f"💾 Successfully saved backup file at `{backup_path}`.")
     except Exception as e:
         logger.warning(f"🚨 Failed to create backup `{backup_path}`: {e}.")
-
 
 
 def get_id_prefix(_id: str) -> str:

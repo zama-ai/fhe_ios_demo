@@ -320,13 +320,22 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     worker_name: str = "unknown"
     
     if not task_id or task_id.strip() == "":
-        logger.error(STATUS_TEMPLATES['invalid_task_id']['logger_msg'].format(task_id))
+        response = {
+            **STATUS_TEMPLATES['invalid_task_id'],
+            'logger_msg': STATUS_TEMPLATES['invalid_task_id']['logger_msg'].format(task_id)
+        }
+        logger.error(response['logger_msg'])
         logger.debug(list_current_tasks())
-        return STATUS_TEMPLATES['invalid_task_id']
+        return response
     if not uid or uid.strip() == "":
-        logger.error(STATUS_TEMPLATES['invalid_uid']['logger_msg'].format(uid))
+        response = {
+            **STATUS_TEMPLATES['invalid_uid'],
+            'logger_msg': STATUS_TEMPLATES['invalid_uid']['logger_msg'].format(uid)
+        }
+        logger.error(response['logger_msg'])
         logger.debug(list_current_tasks())
-        return STATUS_TEMPLATES['invalid_uid']
+        return response
+
     task_info = {"task_id": task_id, "uid": uid}
 
     # Check if the task is in the Redis broker queue
@@ -335,8 +344,13 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         for task in queued_tasks:
             task_data = json.loads(task)
             if task_id == task_data["headers"]["id"]:
-                logger.info(STATUS_TEMPLATES['queued']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
-                return {**STATUS_TEMPLATES["queued"].copy(), **task_info}
+                reponse = {
+                    **STATUS_TEMPLATES["queued"].copy(),
+                    **task_info,
+                    "logger_msg": STATUS_TEMPLATES['queued']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))
+                }
+                logger.info(reponse["logger_msg"])
+                return response
     except Exception as e:
         logger.error("❌ Failed to check Redis broker bd: %s", str(e))
 
@@ -368,7 +382,7 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
             **task_info,
             "details": f"Task completed on `{cached_output['timestamp']}`. The result is stored.",
             "logger_msg": STATUS_TEMPLATES["completed"]["logger_msg"].format(get_id_prefix(task_id), get_id_prefix(uid)) + f". Completed on `{cached_output['timestamp']}`.",
-            "output_file_path": cached_output["files"],
+            "output_file_path": str(cached_output["files"]),
         }
         logger.info(response['logger_msg'])
         return response
@@ -378,15 +392,20 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     if status == 'started':
         task_meta = result.backend.get_task_meta(task_id) or {}
         worker_name = task_meta.get("result", {}).get("hostname", "unknown")
-        response = {"worker": worker_name, **STATUS_TEMPLATES[status]}
-        logger.info(response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
+        response = {
+            **STATUS_TEMPLATES[status],
+            "worker": worker_name,
+            "logger_msg": STATUS_TEMPLATES[status]['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)),
+            }
+        logger.info(response['logger_msg'])
         return response
 
-    # Case, where the status is neither 'completed', 'unknown' or 'queued'
+    # Case, where the status is neither 'completed', 'started', 'unknown' or 'queued'
     response = {**STATUS_TEMPLATES[status].copy(), **task_info}
     
     if status != 'revoked':
-         logger.info(response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid)))
+        response['logger_msg'] = response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))
+        logger.info(response['logger_msg'])
 
     return response
 
@@ -472,7 +491,7 @@ def build_stream_response(task_id, uid, task_name, output_files_config, response
     if cached_output:
         output_file_path = Path(cached_output["files"][0])
         timestamp = cached_output["timestamp"]
-        data = fetch_file_content(output_file_path, task_id)
+        data = fetch_file_content(output_file_path)
         logger_msg = f"📁 [Cached] Output: `{output_file_path}`, size: `{len(data)}` bytes, last modified: `{timestamp}`"
     else:
         file_template = output_files_config[0]["filename"]
@@ -482,7 +501,7 @@ def build_stream_response(task_id, uid, task_name, output_files_config, response
         task_logger.debug("📁 Output path: `%s`", output_file_path)
         task_logger.debug("📁 Backup output path: `%s`", backup_file_path)
 
-        data = fetch_file_content(output_file_path, task_id)
+        data = fetch_file_content(output_file_path)
         save_backup_file(backup_file_path, data)
 
         logger_msg = f"📁 Output path: `{output_file_path}`, data size (`{len(data)}`)"
@@ -519,7 +538,7 @@ def build_json_response(task_id, uid, task_name, output_files_config, response, 
     """
     task_logger.debug(f"Returning JSON response for task `{task_name}`")
 
-    json_data = {"stderr": stderr_output, "output_file_path": [], **response}
+    json_data = {"stderr": stderr_output, **response, "output_file_path": [],}
     json_data.pop("logger_msg", None)
 
     for config in output_files_config:
@@ -528,9 +547,9 @@ def build_json_response(task_id, uid, task_name, output_files_config, response, 
         file_template = config["filename"]
         
         if cached_output is not None: 
-            output_file_path = cached_output['files']
+            output_file_path = Path([f for f in cached_output['files'] if key.capitalize() in f][0])
             timestamp = cached_output['timestamp']
-            data = fetch_file_content(output_file_path, task_id)
+            data = fetch_file_content(output_file_path)
             logger_msg = f"📁 [Cached] Output: `{output_file_path}`, size: `{len(data)}` bytes, last modified: `{timestamp}`"
         else:            
             output_file_path = format_output_filename(file_template, uid)
@@ -539,7 +558,7 @@ def build_json_response(task_id, uid, task_name, output_files_config, response, 
             task_logger.debug("📁 Output path: `%s`", output_file_path)
             task_logger.debug("📁 Backup output path: `%s`", backup_file_path)
 
-            data = fetch_file_content(output_file_path, task_id)
+            data = fetch_file_content(output_file_path)
             save_backup_file(backup_file_path, data)
 
             logger_msg = f"📁 Output path: `{output_file_path}`, data size (`{len(data)}`)" 
@@ -611,7 +630,7 @@ async def get_task_result(
         )
 
     if status == "completed":
-        cached_output = fetch_backup_files(task_id, uid, task_name, response_type)
+        cached_output = fetch_backup_files(task_id, uid)
         logger_msg = f"{STATUS_TEMPLATES[status]['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))}. Date: {cached_output['timestamp']}."
 
     elif status == "success":

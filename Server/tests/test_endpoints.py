@@ -3,6 +3,8 @@ import requests
 import time 
 import pytest
 
+import sleep_quality
+import weight_stats
 from utils import *
 
 
@@ -41,8 +43,7 @@ def test_cancel_task_endpoint_success(expected_status, expected_msg, prefix, tas
     
     # If the status is Unknown, it may be due to a task being completed more quickly than expected.
     # Reducing sleep time may fix the issue.
-    assert expected_status == status.lower(), f"❌ Expected status 'revoked', but got: `{status}`"
-    assert re.search(expected_msg, details), f"❌ Message mismatch:\nExpected pattern: `{expected_msg}`\nActual: `{details}`"
+    assert_status(status, details, expected_status, expected_msg)
 
 
 @pytest.mark.parametrize("task_id,expected_status,expected_msg,prefix,task_name", [
@@ -72,9 +73,7 @@ def test_cancel_task_endpoint_failure(task_id, expected_status, expected_msg, pr
 
     # Cancel task with non-compliant task_id
     status, details = cancel_task_api(uid, task_id)
-
-    assert status == expected_status, f"❌ Status mismatch: expected `{expected_status}`, got `{status}`"
-    assert re.search(expected_msg, details), f"❌ Message mismatch:\nExpected pattern: `{expected_msg}`\nActual: `{details}`"
+    assert_status(status, details, expected_status, expected_msg)
 
 
 def test_get_use_cases_endpoint():
@@ -137,8 +136,7 @@ def test_start_task_endpoint(task_name, expected_status, expected_msg, prefix):
     status, details = get_status_api(uid, task_id)
     print(f"[via API | {status=} | {details=}")
 
-    assert status in expected_status, f"❌ Expected status '{expected_status}', but got: `{status}`"
-    assert re.search(expected_msg, details), f"❌ Message mismatch:\nExpected pattern: `{expected_msg}`\nActual: `{details}`"
+    assert_status(status, details, expected_status, expected_msg)
     assert task_id in active_tasks_celery, f"❌ `{task_id=}` expected to be running on Celery queue, but wan't find in `{active_tasks_celery}`"
 
     cancel_task_api(uid, task_id)
@@ -162,6 +160,7 @@ def test_status_task_endpoint(task_name, prefix):
     # Start the task
     task_id = start_task_api(uid, task_name, input_path_test_path)
 
+    # status: 'queued' or 'started'
     # Continuously poll via the API to check whether the task has completed
     for attempt in range(TIME_OUT):
         time.sleep(POLL_INTERVAL)
@@ -181,16 +180,14 @@ def test_status_task_endpoint(task_name, prefix):
     assert all(p.exists() for p in output_paths), f"❌ Output files not found: `{output_paths}`"
     assert all(p.stat().st_size > 1 * 1024 for p in output_paths), f"❌ Too small files: `{output_paths}`"
 
-    expected_msg, expected_status = r"Task successfully completed.", "success"
-    assert status == expected_status, f"❌ Expected status `{expected_status}`, but got: `{status}`"
-    assert re.search(expected_msg, details), f"❌ Expected details `{expected_msg}`, but got: `{details}`"
-    
+    # status: 'success'
+    assert_status(status, details, "success", r"Task successfully completed.")
+
     time.sleep(5)
     
+    # status: 'completed'
     status, details = get_status_api(uid, task_id)
-    expected_msg, expected_status = r"Task completed on *.", "completed"
-    assert status == expected_status, f"❌ Expected status `{expected_status}`, but got: `{status}`"
-    assert re.search(expected_msg, details), f"❌ Expected details `{expected_msg}`, but got: `{details}`"
+    assert_status(status, details, "completed", r"Task completed on *.")
 
 
 @pytest.mark.parametrize("task_name,prefix,nb_tasks", [
@@ -248,9 +245,7 @@ def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     )
 
     status, details = get_status_api(uid, all_created_tasks[-1])
-    expected_msg, expected_status = r"Task is in the Redis broker queue", "queued"
-    assert status == expected_status, f"❌ Expected status `{expected_status}`, but got: `{status}`"
-    assert re.search(expected_msg, details), f"❌ Expected details `{expected_msg}`, but got: `{details}`"
+    assert_status(status, details, "queued", r"Task is in the Redis broker queue")
 
     # Cancel all created tasks
     for task_id in all_created_tasks:

@@ -26,8 +26,6 @@ else
 fi
 
 # Ensure necessary directories exist on the host before launching Docker
-for dir in "$SHARED_DIR" "$BACKUP_DIR"; do
-    mkdir -p "$dir"
-    chmod -R 777 "$dir"
-    echo "Set correct permissions to '$dir' directory."
-done
+mkdir -p "$SHARED_DIR"
+chmod -R 777 "$SHARED_DIR"
+echo "Set correct permissions to '$dir' directory."

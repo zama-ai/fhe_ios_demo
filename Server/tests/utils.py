@@ -132,7 +132,7 @@ def get_task_result_api(uid, task_id, task_name, prefix=None):
     return output_paths
 
 
-def poll_task_result_until_ready(uid: str, task_id: str, task_name: str, prefix):
+def poll_task_result_until_ready(uid: str, task_id: str, task_name: str, prefix=None):
     """Polls the task result until success or timeout, and saves the output file(s).
 
     Returns:
@@ -209,3 +209,9 @@ def run_task_on_server(
     output_paths = poll_task_result_until_ready(uid, task_id, task_name, prefix)
     
     return uid, task_id, output_paths
+
+def assert_status(actual_status, actual_details, expected_status, expected_msg_pattern):
+    if isinstance(expected_status, str):
+        expected_status = [expected_status]
+    assert actual_status in expected_status, f"❌ Expected status `{expected_status}`, but got: `{actual_status}`"
+    assert re.search(expected_msg_pattern, actual_details), f"❌ Message mismatch:\nExpected pattern: `{expected_msg_pattern}`\nActual: `{actual_details}`"

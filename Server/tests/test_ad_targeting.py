@@ -90,11 +90,8 @@ def test_ad_targeting(generate_fhext_params, generate_fhext_keys):
         binary_file.write(encrypted_input.serialize())
         binary_file.write(encrypted_input.serialize())
 
-    uid1, task_id, output_path = run_task_on_server("ad_targeting", serverkey_path, input_path, prefix=uid)
+    _, _, output_path = run_task_on_server("ad_targeting", serverkey_path, input_path, prefix=uid)
     
-    
-    print(uid1, task_id, output_path, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-
     assert output_path[0].exists(), f"Missing file: {output_path=}"
 
     # Decrypt and check results

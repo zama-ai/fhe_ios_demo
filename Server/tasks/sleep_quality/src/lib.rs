@@ -134,11 +134,8 @@ pub fn run(uid: &str) -> PyResult<u8> {
 
 
 #[pyfunction]
-pub fn decrypt(uid: &str) -> PyResult<u8> { 
+pub fn decrypt(ck_path: &str, output_path: &str) -> PyResult<u8> {
 
-    let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
-    let output_path = format!("{}/{}.sleep_quality.output.fheencrypted", UPLOAD_FOLDER, uid);
-    
     let deserialize_ck = deserialize_client_key(&ck_path);
 
     // Retrive the encrypted result
