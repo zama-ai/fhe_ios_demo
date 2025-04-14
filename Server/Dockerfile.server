@@ -54,7 +54,7 @@ RUN chmod +x ./* && chmod +x /project/entrypoint.sh
 
 # Add a non-root user and group
 # Ensure that the mounted volumes have the correct permissions
-# sudo chown -R 10000:10001 uploaded_files
+# sudo chown -R 10000:10001 backup_files uploaded_files
 RUN groupadd -g 10001 grp02 && \
     useradd -u 10000 -g grp02 usr01 && \
     chown -R usr01:grp02 /project

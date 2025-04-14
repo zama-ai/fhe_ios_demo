@@ -91,7 +91,7 @@ def test_ad_targeting(generate_fhext_params, generate_fhext_keys):
         binary_file.write(encrypted_input.serialize())
 
     _, _, output_path = run_task_on_server("ad_targeting", serverkey_path, input_path, prefix=uid)
-    
+
     assert output_path[0].exists(), f"Missing file: {output_path=}"
 
     # Decrypt and check results
@@ -104,6 +104,3 @@ def test_ad_targeting(generate_fhext_params, generate_fhext_keys):
     print(f"Test execution time: {end_time:.2f} seconds")
 
     assert np.array_equal(decrypted_output, clear_output), f"Mismatch: expected: {clear_output}, got: {decrypted_output}"
-    
-    # Test backup files
-    

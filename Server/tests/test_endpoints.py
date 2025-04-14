@@ -40,7 +40,7 @@ def test_cancel_task_endpoint_success(expected_status, expected_msg, prefix, tas
         print(f"[via API ] polling attempt {attempt + 1}/{TIME_OUT} | Status: {status} | Details: {details}")
         if status != "queued":
             break
-    
+
     # If the status is Unknown, it may be due to a task being completed more quickly than expected.
     # Reducing sleep time may fix the issue.
     assert_status(status, details, expected_status, expected_msg)
