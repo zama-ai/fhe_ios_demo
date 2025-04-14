@@ -337,23 +337,21 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         return response
 
     task_info = {"task_id": task_id, "uid": uid}
-
     # Check if the task is in the Redis broker queue
     try:
         queued_tasks = redis_bd_broker.lrange("usecases", 0, -1)
         for task in queued_tasks:
             task_data = json.loads(task)
             if task_id == task_data["headers"]["id"]:
-                reponse = {
+                response = {
                     **STATUS_TEMPLATES["queued"].copy(),
                     **task_info,
                     "logger_msg": STATUS_TEMPLATES['queued']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))
                 }
-                logger.info(reponse["logger_msg"])
+                logger.info(response["logger_msg"])
                 return response
     except Exception as e:
         logger.error("❌ Failed to check Redis broker bd: %s", str(e))
-
     # Check if the task is marked as completed in the Redis backend queue
     # Note: Redis only stores task statuses for a limited period of time (Time To Live)
     try:

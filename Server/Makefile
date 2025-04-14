@@ -12,7 +12,7 @@ cache ?=
 # Force Rust rebuild. Use '' to enable cache or '--rebuild_rust' to disable it      
 rebuild_rust ?=
 
-.PHONY: docker_build docker_run docker_build_run tests_build tests_run
+.PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files
 
 docker_build:
 	sudo bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
@@ -39,3 +39,7 @@ tests_run:
 		exit 1; \
 	fi
 	bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_endpoints.py $(test_flags)"
+
+clean_files:
+	find project/uploaded_files -mindepth 1 ! -name 'test_*' -exec rm -rf {} +
+	find uploaded_files -mindepth 1 ! -name 'test_*' -exec rm -rf {} +

@@ -128,6 +128,13 @@ def test_start_task_endpoint(task_name, expected_status, expected_msg, prefix):
     "❌ Encrypted input files differ in content."
     )
 
+    for attempt in range(TIME_OUT):
+        time.sleep(POLL_INTERVAL)
+        status, details = get_status_api(uid, task_id)
+        print(f"[via API ] polling attempt {attempt + 1}/{TIME_OUT} | Status: {status} | Details: {details}")
+        if status == "started":
+            break
+
     # Get task status via Celery inspect
     active_tasks_celery = inspect_celery(task="active")
     print(f"[via Celery inspect | active task list = {active_tasks_celery}]")
