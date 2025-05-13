@@ -109,27 +109,27 @@ jobs:
       - name: Run Python test 'ad_targeting'
         run: |
           source .venv/bin/activate
-          pytest -vvs tests/test_ad_targeting.py
+          python -m dotenv -f .env_dev run -- pytest -v tests/test_ad_targeting.py
 
       - name: Run Rust-Python module test 'weight_stats'
         if: always()
         run: |
           source .venv/bin/activate
           maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml
-          pytest -vvs tests/test_weight_stats.py
-      
+          python -m dotenv -f .env_dev run -- pytest -v tests/test_weight_stats.py
+
       - name: Run Rust-Python module test 'sleep_quality'
         if: always()
         run: |
           source .venv/bin/activate
           maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml
-          pytest -vvs tests/test_sleep_quality.py
+          python -m dotenv -f .env_dev run -- pytest -v tests/test_sleep_quality.py
 
       - name: Run endpoint tests
         run: |
           source .venv/bin/activate
-          pytest -vvs tests/test_endpoints.py
-          
+          python -m dotenv -f .env_dev run -- pytest -v tests/test_endpoints.py
+
       - name: List uploaded_files (host)
         if: always()
         run: |
