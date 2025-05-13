@@ -66,6 +66,7 @@ if [ "$USE_TLS" = "true" ]; then
         fi
     else
         echo "SSL Certificates for '$DOMAIN_NAME' already exist in '$HOST_CERTS_PATH'."
+        ls -ltra $HOST_CERTS_PATH
     fi
 
     # Check permissions on the directory

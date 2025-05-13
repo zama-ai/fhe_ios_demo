@@ -122,12 +122,7 @@ pub fn run(uid: String) -> PyResult<u8> {
 
 
 #[pyfunction]
-pub fn decrypt(uid: String) -> PyResult<(u16, u16, u16)> {
-
-    let ck_path = format!("{}/{}.clientKey", UPLOAD_FOLDER, uid);
-    let output_avg_path = format!("{}/{}.outputAvg.weight_stats.fheencrypted", UPLOAD_FOLDER, uid);
-    let output_min_path = format!("{}/{}.outputMin.weight_stats.fheencrypted", UPLOAD_FOLDER, uid);
-    let output_max_path = format!("{}/{}.outputMax.weight_stats.fheencrypted", UPLOAD_FOLDER, uid);
+pub fn decrypt(ck_path: &str, output_avg_path: &str, output_min_path: &str, output_max_path: &str) -> PyResult<(u16, u16, u16)> {
 
     let deserialize_ck = deserialize_client_key(&ck_path);
 

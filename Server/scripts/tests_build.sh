@@ -25,6 +25,8 @@ pip install -r server_requirements.txt
 pip install maturin
 pip install pytest
 pip install pytest-rerunfailures
+pip install pandas
+pip install matplotlib
 
 # Install C/C++ build tools
 sudo apt update

@@ -25,7 +25,7 @@ def run_sleep_quality(night, uid):
     assert output_path[0].exists(), f"Missing file: {output_path=}"
 
     # Decrypt and check results
-    score = sleep_quality.decrypt(uid)
+    score = sleep_quality.decrypt(str(ck_path), str(output_path[0]))
 
     end_time = time.time() - start_time
     print(f"Execution time: {end_time:.2f} seconds")
