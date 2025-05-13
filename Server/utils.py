@@ -14,12 +14,12 @@ from dotenv import load_dotenv, dotenv_values
 # Load environment variables from 'ENV_FILE' file
 ENV_FILE = os.getenv("ENV_FILE")
 load_dotenv(dotenv_path=ENV_FILE)
-
 env_values = dotenv_values(ENV_FILE)
 
 URL = os.getenv("URL")
 CONTAINER_PORT = os.getenv("FASTAPI_CONTAINER_PORT_HTTPS")
 PORT = os.getenv("PORT")
+FASTAPI_HOST_PORT_HTTPS = os.getenv("FASTAPI_HOST_PORT_HTTPS")
 
 SHARED_DIR = os.getenv("SHARED_DIR")
 FILES_FOLDER = Path(__file__).parent / SHARED_DIR
@@ -151,7 +151,7 @@ def fetch_file_content(output_file_path: Path):
         HTTPException: Raised with status code 500 if the file cannot be read.
     """
     ensure_file_exists(
-        output_file_path, error_message=f"📁 Output file `{output_file_path}` not found."
+        output_file_path, error_message=f"❌ Output file `{output_file_path}` not found."
     )
     try:
         data = output_file_path.read_bytes()

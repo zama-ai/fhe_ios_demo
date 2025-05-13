@@ -76,3 +76,6 @@ Server/tasks/weight_stats/Cargo.lock
 Server/tasks/sleep_quality/Cargo.lock
 
 **/__pycache__/
+
+.venv_test/
+Server/tasks/sleep_quality/target
