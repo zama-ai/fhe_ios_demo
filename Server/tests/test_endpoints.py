@@ -196,6 +196,10 @@ def test_status_task_endpoint(task_name, prefix):
     assert_status(status, details, "completed", r"Task completed on *.")
 
 
+# In rare cases, a task may be pending when querying fasapi,
+# By the time redis is queried, the task is already active.
+# Thus, we restart the test if it fails.
+@pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("task_name,prefix,nb_tasks", [
     ("sleep_quality", "test_good_night", 12),
 ])
