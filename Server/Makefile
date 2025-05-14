@@ -8,7 +8,7 @@ VENV_DIR=.venv_test
 # Pytest flags
 test_flags ?= -vvs
 # Target environment (dev, staging, prod, ci)        
-environment ?= prod
+environment ?= dev
 # Which environment variables to set
 file_env = $(if $(filter ci,$(environment)),.env_dev,.env_$(environment))
 # Defines the name prefix used by docker-compose for containers
