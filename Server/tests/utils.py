@@ -67,7 +67,7 @@ def clean_redis():
 def add_key_api(task_name: str, serverkey_path: str) -> str:
     """Upload the server key"""
     with open(serverkey_path, "rb") as f:
-        response = requests.post(f"{URL}/add_key", files={"key": f}, data={"task_name": task_name}, verify=False)
+        response = requests.post(f"{URL}/add_key", files={"key": f}, data={"task_name": task_name})
         response.raise_for_status()
         uid = response.json()["uid"]
         print(f"[Server side | UID={uid}] Uploading server key: `{serverkey_path}`")
@@ -81,7 +81,6 @@ def start_task_api(uid: str, task_name: str, input_path: str) -> str:
             f"{URL}/start_task",
             files={"encrypted_input": f},
             data={"uid": uid, "task_name": task_name}
-            , verify=False
         )
         task_id = response.json()["task_id"]
         response.raise_for_status()
@@ -92,7 +91,7 @@ def start_task_api(uid: str, task_name: str, input_path: str) -> str:
 
 def cancel_task_api(uid, task_id):
     """Cancel a task via the API."""
-    response = requests.post(f"{URL}/cancel_task?task_id={task_id}&uid={uid}", verify=False)
+    response = requests.post(f"{URL}/cancel_task?task_id={task_id}&uid={uid}")
     response.raise_for_status()
     time.sleep(3)
     data = response.json()
@@ -101,14 +100,14 @@ def cancel_task_api(uid, task_id):
 
 def get_status_api(uid, task_id):
     """Get task status via the API."""
-    response = requests.get(f"{URL}/get_task_status", params={"task_id": task_id, "uid": uid}, verify=False)
+    response = requests.get(f"{URL}/get_task_status", params={"task_id": task_id, "uid": uid})
     response.raise_for_status()
     return response.json()["status"], response.json()["details"]
 
 
 def get_task_result_api(uid, task_id, task_name, prefix=None):
     """Get task result via the API. and save the output."""
-    response = requests.get(f"{URL}/get_task_result", params={"task_name": task_name, "task_id": task_id, "uid": uid}, verify=False)
+    response = requests.get(f"{URL}/get_task_result", params={"task_name": task_name, "task_id": task_id, "uid": uid})
     response.raise_for_status()
 
     output_paths = []
@@ -159,7 +158,7 @@ def poll_task_result_until_ready(uid: str, task_id: str, task_name: str, prefix=
 
 def list_current_tasks_api():
     """Get tasks list via the API."""
-    response = requests.get(f"{URL}/list_current_tasks", verify=False)
+    response = requests.get(f"{URL}/list_current_tasks")
     response.raise_for_status()
     data = response.json()
     return data
