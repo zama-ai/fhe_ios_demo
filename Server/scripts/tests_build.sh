@@ -28,9 +28,7 @@ pip install pytest-rerunfailures
 pip install pandas
 pip install matplotlib
 
-# Install C/C++ build tools
-sudo apt update
-sudo apt install -y build-essential
+#TODO add check for cc and ask for install
 
 # Compile and install Rust Python extensions (via Maturin)
 maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml
