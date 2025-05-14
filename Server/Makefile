@@ -3,10 +3,14 @@ export
 
 VENV_DIR=.venv_test
 
+# make <cible> VAR1=valeur1 VAR2=valeur2 ...
+
 # Pytest flags
 test_flags ?= -vvs
 # Target environment (dev, staging, prod, ci)        
 environment ?= dev
+# Which environment variables to set
+file_env = $(if $(filter ci,$(environment)),.env_dev,.env_$(environment))
 # Docker build cache option. Use '' to enable cache or '--no-cache' to disable it        
 cache ?=
 # Force Rust rebuild. Use '' to enable cache or '--rebuild_rust' to disable it      
@@ -21,6 +25,8 @@ DATE := $(shell date "+%Y-%m-%d")
 TASKS := ad_targeting weight_stats sleep_quality
 # Instance type (e.g., c5.4xlarge or g4dn.8xlarge)
 machine ?= g4dn.8xlarge
+# Tests
+TESTS = ad_targeting weight_stats sleep_quality endpoints
 
 .PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files benchmark
 
@@ -40,7 +46,8 @@ docker_build_run:
 	sudo bash ./scripts/docker_run.sh $(environment)
 
 tests_build:
-	VENV_DIR=$(VENV_DIR) bash ./scripts/tests_build.sh
+	@echo "🔧 Building test environment for '$(environment)' using '$(file_env)' variables..."
+	@bash -c 'set -a && source $(file_env) && VENV_DIR=$(VENV_DIR) bash ./scripts/tests_build.sh'
 
 tests_run:
 	@if [ ! -d "$(VENV_DIR)" ]; then \
@@ -48,13 +55,10 @@ tests_run:
 		echo "Please run: 'make tests_build' first!"; \
 		exit 1; \
 	fi
-	bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_endpoints.py $(test_flags)"
-
-	TESTS = ad_targeting weight_stats sleep_quality endpoints
 
 	@for test in $(TESTS); do \
 		echo "Running test: $$test"; \
-		bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_$$test.py $(test_flags)"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(file_env) && pytest tests/test_$$test.py $(test_flags)"; \
 	done
 
 clean_files:

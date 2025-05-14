@@ -38,7 +38,7 @@ from task_executor import *
 
 # Instanciate FastAPI app
 app = FastAPI(debug=False)
-logger.info(f"🚀 FastAPI server running at {URL}:{PORT}")
+logger.info(f"🚀 FastAPI server running at {URL}:{FASTAPI_HOST_PORT_HTTPS}")
 
 
 # Tasks that cannot be canceled
@@ -152,7 +152,7 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
         file_size = file_path.stat().st_size  # Get file size in bytes
         logger.info("🔐 Successfully received new key upload: `%s` (Size: `%s` bytes). Assigned UID: `%s`", file_path, file_size, uid)
     except Exception as e:
-        error_message = f"❌ Failed to store the server key: `e`"
+        error_message = f"❌ Failed to store the server key: `{e}`"
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
@@ -195,6 +195,13 @@ async def start_task(
         error_message = f"❌ Invalid task name: `{task_name}`"
         task_logger.error(error_message)
         raise HTTPException(status_code=400, detail=error_message)
+
+    key_path = FILES_FOLDER / f"{uid}.serverKey"
+
+    if not key_path.is_file():
+        error_message = f"❌ The key file `{key_path}` was not found on the server, please re-upload it."
+        task_logger.error(error_message)
+        raise HTTPException(status_code=404, detail=error_message)
 
     binary = use_cases[task_name]["binary"]
 

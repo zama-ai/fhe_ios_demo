@@ -78,7 +78,7 @@ def test_cancel_task_endpoint_failure(task_id, expected_status, expected_msg, pr
 def test_get_use_cases_endpoint():
     print("\nRun test get_use_cases endpoint.")
 
-    response = requests.get(f"{URL}/get_use_cases")
+    response = requests.get(f"{URL}/get_use_cases", verify=False)
     response.raise_for_status()
     data = response.json()
 
@@ -131,7 +131,7 @@ def test_start_task_endpoint(task_name, expected_status, expected_msg, prefix):
         time.sleep(POLL_INTERVAL)
         status, details = get_status_api(uid, task_id)
         print(f"[via API ] polling attempt {attempt + 1}/{TIME_OUT} | Status: {status} | Details: {details}")
-        if status == "started":
+        if status in ["started", "success"]:
             break
 
     # Get task status via Celery inspect
@@ -197,7 +197,7 @@ def test_status_task_endpoint(task_name, prefix):
 
 
 @pytest.mark.parametrize("task_name,prefix,nb_tasks", [
-    ("sleep_quality", "test_good_night", 7),
+    ("sleep_quality", "test_good_night", 12),
 ])
 def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     print(f"\nRun test test_inspect_celery_redis, for `{task_name}`.")
@@ -215,7 +215,7 @@ def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     all_created_tasks = [start_task_api(uid, task_name, input_test_path) for _ in range(nb_tasks)]
 
     # Get task status via API
-    response = requests.get(f"{URL}/list_current_tasks")
+    response = requests.get(f"{URL}/list_current_tasks", verify=False)
     response.raise_for_status()
 
     # Get active tasks via Celery inspect
