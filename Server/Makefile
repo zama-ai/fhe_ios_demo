@@ -34,7 +34,7 @@ TESTS = ad_targeting weight_stats sleep_quality endpoints
 .PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files benchmark stress_test
 
 docker_build:
-	sudo bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
+	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 
 docker_run:
 	@if [ $$(docker images | grep $$FINAL_IMAGE_NAME | wc -l) -eq 0 ]; then \
@@ -42,11 +42,11 @@ docker_run:
 		echo "Please run: 'make docker_build' first!"; \
 		exit 1; \
 	fi
-	sudo bash ./scripts/docker_run.sh $(environment)
+	bash ./scripts/docker_run.sh $(environment)
 
 docker_build_run:
-	sudo bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
-	sudo bash ./scripts/docker_run.sh $(environment)
+	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
+	bash ./scripts/docker_run.sh $(environment)
 
 tests_build:
 	@echo "🔧 Building test environment for '$(environment)' using '$(file_env)' variables..."
