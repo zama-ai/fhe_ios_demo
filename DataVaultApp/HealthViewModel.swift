@@ -31,7 +31,12 @@ final class HealthViewModel: ObservableObject {
     
     private var weightType: HKQuantityType? { HKObjectType.quantityType(forIdentifier: .bodyMass) }
     private var sleepType: HKCategoryType? { HKObjectType.categoryType(forIdentifier: .sleepAnalysis) }
-    
+
+    // Keys used by FHEHealthApp for its UserDefaults. DataVaultApp needs to clear these.
+    private let fheHealthAppSelectedNightKey = "v12.selectedNight"
+    private let fheHealthAppSelectedNightInputPreviewKey = "v12.selectedNightInputPreviewString"
+    private let fheHealthAppSelectedNightResultPreviewKey = "v12.selectedNightResultPreviewString"
+
     func loadFromDisk() async throws {
         try await refreshPermission()
         
@@ -179,29 +184,95 @@ final class HealthViewModel: ObservableObject {
     
     // MARK: - ENCRYPTION -
     func generateFakeNights() async throws {
-        // Go to bed at 11pm
+        var consoleLog = "Preparing to generate new fake sleep data...\n\n"
+        self.sleepConsoleOutput = consoleLog
+
         let today = Calendar.current.startOfDay(for: Date())
         let yesterdayNight = Calendar.current.date(byAdding: .hour, value: -25, to: today)!
         let nightBefore = Calendar.current.date(byAdding: .day, value: -2, to: yesterdayNight)!
         let evenBefore = Calendar.current.date(byAdding: .day, value: -3, to: nightBefore)!
         
-        try await encrypt(night: .fakeRegular(date: yesterdayNight), shouldLog: true, isFake: true)
-        try await encrypt(night: .fakeBad(date: nightBefore), shouldLog: false, isFake: true)
-        try await encrypt(night: .fakeLarge(date: evenBefore), shouldLog: false, isFake: true)
+        let fakeNightsToGenerate: [(night: Sleep.Night, date: Date)] = [
+            (Sleep.Night.fakeRegular(date: yesterdayNight), yesterdayNight),
+            (Sleep.Night.fakeBad(date: nightBefore), nightBefore),
+            (Sleep.Night.fakeLarge(date: evenBefore), evenBefore)
+        ]
+
+        consoleLog += "Deleting old FHE Health app results for consistency...\n"
+        for (_, date) in fakeNightsToGenerate {
+            let suffix = Storage.suffix(for: date)
+            let resultFileBaseName = Storage.url(for: .sleepScore, suffix: suffix).lastPathComponent
+            let resultPreviewFileBaseName = Storage.url(for: .sleepScore, suffix: "\(suffix)-preview").lastPathComponent
+
+            do {
+                try await Storage.deleteFromDisk(.sleepScore, suffix: suffix)
+                consoleLog += "- Deleted \(resultFileBaseName)\n"
+            } catch {
+                consoleLog += "  Note: Could not delete \(resultFileBaseName) (may not exist).\n"
+            }
+            do {
+                try await Storage.deleteFromDisk(.sleepScore, suffix: "\(suffix)-preview")
+                consoleLog += "- Deleted \(resultPreviewFileBaseName)\n"
+            } catch {
+                consoleLog += "  Note: Could not delete \(resultPreviewFileBaseName) (may not exist).\n"
+            }
+        }
+        consoleLog += "\n"
+
+        var detailedEncryptionLogForFirstNight = ""
+
+        consoleLog += "Encrypting new fake sleep data using TFHE-rs...\n"
+        for (index, data) in fakeNightsToGenerate.enumerated() {
+            let shouldLogDetailsThisIteration = (index == 0)
+            
+            if shouldLogDetailsThisIteration {
+                try await encrypt(night: data.night, shouldLog: true, isFake: true)
+                detailedEncryptionLogForFirstNight = self.sleepConsoleOutput
+            } else {
+                try await encrypt(night: data.night, shouldLog: false, isFake: true)
+                guard let pkForSummary = self.pk else {
+                    consoleLog += "Error: Public key not available for summarizing encryption of night \(data.date.formatted(date: .numeric, time: .omitted))\n"
+                    continue
+                }
+                let exampleSummary: [[Int]] = data.night.samples.map { [$0.level.rawValue, $0.start, $0.end] }
+                let listDataSummary = try CompactCiphertextList(encrypting: exampleSummary, publicKey: pkForSummary).toData()
+                let nightDateFormatted = data.date.formatted(date: .numeric, time: .omitted)
+                let savedURLSummary = Storage.url(for: .sleepList, suffix: Storage.suffix(for: data.date))
+                consoleLog += "Encrypted fake night for \(nightDateFormatted): \(listDataSummary.formattedSize). Saved at \(savedURLSummary.lastPathComponent)\n"
+            }
+        }
+        
+        if !detailedEncryptionLogForFirstNight.isEmpty {
+            consoleLog = detailedEncryptionLogForFirstNight + "\n" + consoleLog
+        }
+        consoleLog += "\n"
+        self.sleepConsoleOutput = consoleLog
+
         try checkNightFilesOnDisk()
+        consoleLog += "Checked for sleep files on disk. Has files: \(hasSleepFilesOnDisk).\n"
+
+        UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightKey)
+        UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightInputPreviewKey)
+        UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightResultPreviewKey)
+        consoleLog += "\nCleared FHE Health app's selected night preferences from UserDefaults.\n"
+        
+        consoleLog += "\nFake sleep data generation complete. \nPlease open the 'FHE Health' app to observe the changes. You will need to re-select a night to trigger the re-analysis of the newly encrypted data.\n"
+        
+        self.sleepConsoleOutput = consoleLog
     }
     
     func encrypt(night: Sleep.Night, shouldLog: Bool, isFake: Bool) async throws {
         self.sleepEncryptedUsingFakeData = isFake
 
+        var localLogOutput = ""
+
         if shouldLog {
             let nightLogged = String(describing: night)
-            .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep.", with: "")
+                .replacingOccurrences(of: "ZAMA_Data_Vault.Sleep.", with: "")
         
-            self.sleepConsoleOutput = ""
-            self.sleepConsoleOutput += "Encrypting night…\n\n"
-            self.sleepConsoleOutput += "\(nightLogged)\n\n"
-            self.sleepConsoleOutput += "Crypto Params: using default TFHE-rs params\n\n"
+            localLogOutput += "Encrypting night for \(night.date.formatted(date: .numeric, time: .omitted))…\n\n"
+            localLogOutput += "\(nightLogged)\n\n"
+            localLogOutput += "Crypto Params: using default TFHE-rs params\n\n"
         }
         
         try await ensureKeysExist()
@@ -215,14 +286,22 @@ final class HealthViewModel: ObservableObject {
             let listData = try list.toData()
             
             let suffix = Storage.suffix(for: night.date)
+            let savedURL = Storage.url(for: .sleepList, suffix: suffix)
             try await Storage.write(.sleepList, data: listData, suffix: suffix)
             try await Storage.write(.sleepList, data: listData, suffix: "\(suffix)-preview")
 
             if shouldLog {
-                self.sleepConsoleOutput += "Encrypted night: \(listData.formattedSize)\n\n"
-                self.sleepConsoleOutput += "Encrypted night snippet (first 100 bytes): \(listData.snippet(first: 100))\n\n"
-                self.sleepConsoleOutput += "Saved at \(Storage.url(for: .sleepList))\n"
+                localLogOutput += "Encrypted night: \(listData.formattedSize)\n\n"
+                localLogOutput += "Encrypted night snippet (first 100 bytes): \(listData.snippet(first: 100))\n\n"
+                localLogOutput += "Saved at \(savedURL.lastPathComponent)\n"
             }
+        } else {
+            let errorMsg = "Error: Public key not available during encryption for night \(night.date.formatted(date: .numeric, time: .omitted)).\n"
+            if shouldLog { localLogOutput += errorMsg }
+        }
+
+        if shouldLog {
+            self.sleepConsoleOutput = localLogOutput
         }
     }
         
@@ -317,10 +396,97 @@ final class HealthViewModel: ObservableObject {
         }
     }
     
-    // nil: no encryption occurred yet
+    @MainActor
+    func resetTFHEKeysAndEncryptedData() async {
+        let resetMessagePrefix = "Resetting Health (TFHE) keys and encrypted data...\n"
+        weightConsoleOutput = resetMessagePrefix
+        sleepConsoleOutput = resetMessagePrefix
+
+        do {
+            try await Storage.deleteFromDisk(.clientKey)
+            try await Storage.deleteFromDisk(.publicKey)
+            try await Storage.deleteFromDisk(.serverKey)
+            self.ck = nil
+            self.pk = nil
+            self.sk = nil
+            let successMsg = "TFHE keys deleted from disk.\n"
+            weightConsoleOutput += successMsg
+            sleepConsoleOutput += successMsg
+        } catch {
+            let errorMsg = "Error deleting TFHE keys: \(error.localizedDescription)\n"
+            weightConsoleOutput += errorMsg
+            sleepConsoleOutput += errorMsg
+        }
+
+        self.sleepEncryptedUsingFakeData = nil
+        self.weightEncryptedUsingFakeData = nil
+
+        self.encryptedWeight = nil
+        self.weightDateRange = nil
+        self.hasSleepFilesOnDisk = false
+
+        do {
+            let weightFiles = try Storage.listEncryptedFiles(matching: .weightList)
+            for fileURL in weightFiles { try await Storage.write(fileURL, data: nil) }
+            weightConsoleOutput += "All encrypted weight files deleted.\n"
+
+            let sleepFiles = try Storage.listEncryptedFiles(matching: .sleepList)
+            for fileURL in sleepFiles { try await Storage.write(fileURL, data: nil) }
+            sleepConsoleOutput += "All encrypted sleep files deleted.\n"
+        } catch {
+            let errorMsg = "Error deleting encrypted health data files: \(error.localizedDescription)\n"
+            weightConsoleOutput += errorMsg
+            sleepConsoleOutput += errorMsg
+        }
+        
+        do {
+            // Delete sleep score files (and their previews)
+            let sleepResultFiles = try Storage.listEncryptedFiles(matching: .sleepScore)
+            for fileURL in sleepResultFiles {
+                try? await Storage.write(fileURL, data: nil)
+                let previewURL = fileURL.deletingPathExtension().appendingPathExtension("preview")
+                try? await Storage.write(previewURL, data: nil)
+            }
+            sleepConsoleOutput += "All encrypted sleep result files deleted.\n"
+
+            // Delete weight result files (and their previews)
+            let weightResultFilesMin = try Storage.listEncryptedFiles(matching: .weightMin)
+            for fileURL in weightResultFilesMin {
+                try? await Storage.write(fileURL, data: nil)
+                let previewURL = fileURL.deletingPathExtension().appendingPathExtension("preview")
+                try? await Storage.write(previewURL, data: nil)
+            }
+            let weightResultFilesMax = try Storage.listEncryptedFiles(matching: .weightMax)
+            for fileURL in weightResultFilesMax {
+                try? await Storage.write(fileURL, data: nil)
+                let previewURL = fileURL.deletingPathExtension().appendingPathExtension("preview")
+                try? await Storage.write(previewURL, data: nil)
+            }
+            let weightResultFilesAvg = try Storage.listEncryptedFiles(matching: .weightAvg)
+            for fileURL in weightResultFilesAvg {
+                try? await Storage.write(fileURL, data: nil)
+                let previewURL = fileURL.deletingPathExtension().appendingPathExtension("preview")
+                try? await Storage.write(previewURL, data: nil)
+            }
+            weightConsoleOutput += "All encrypted weight result files deleted.\n"
+        } catch {
+            let errorMsg = "Error deleting encrypted FHE Health result files: \(error.localizedDescription)\n"
+            weightConsoleOutput += errorMsg
+            sleepConsoleOutput += errorMsg
+        }
+
+        UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightKey)
+        UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightInputPreviewKey)
+        UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightResultPreviewKey)
+        sleepConsoleOutput += "Cleared FHE Health App's UserDefaults for selected night.\n"
+
+        weightConsoleOutput += "Health keys and data reset complete. Re-encrypt data in relevant sections.\n"
+        sleepConsoleOutput += "Health keys and data reset complete. Re-encrypt data in relevant sections.\n"
+    }
+
     @UserDefaultsStorage(key: "v12.sleepEncryptedUsingFakeData", defaultValue: nil)
     var sleepEncryptedUsingFakeData: Bool?
 
-    @UserDefaultsStorage(key: "v12.sleepEncryptedUsingFakeData", defaultValue: nil)
+    @UserDefaultsStorage(key: "v12.weightEncryptedUsingFakeData", defaultValue: nil)
     var weightEncryptedUsingFakeData: Bool?
 }
