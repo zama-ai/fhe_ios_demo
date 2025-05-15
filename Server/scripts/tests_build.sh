@@ -28,7 +28,13 @@ pip install pytest-rerunfailures
 pip install pandas
 pip install matplotlib
 
-#TODO add check for cc and ask for install
+# Check for C compiler (cc)
+if ! command -v cc >/dev/null 2>&1; then
+    echo "No C compiler (cc) found on this system."
+    echo "Please install it manually using:"
+    echo "'sudo apt update && sudo apt install -y build-essential'"
+    exit 1
+fi
 
 # Compile and install Rust Python extensions (via Maturin)
 maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml
