@@ -691,8 +691,8 @@ def get_logs(lines: int = 10) -> Response:
         # Get Celery queue information
         try:
             usecases_queue_length = redis_bd_broker.llen("usecases")
-            ads_queue_length = redis_bd_broker.llen("ads")
-            queue_info = f"Celery Queue Status:\nusecases queue: {usecases_queue_length} tasks\nads queue: {ads_queue_length} tasks"
+            completed_tasks = len(redis_bd_backend.keys("celery-task-meta-*"))
+            queue_info = f"Queue Status:\nQueued tasks: {usecases_queue_length}\nCompleted in last hour: {completed_tasks}"
         except Exception as e:
             queue_info = f"Failed to get queue information: {str(e)}"
 
@@ -739,6 +739,20 @@ def get_logs(lines: int = 10) -> Response:
                         padding: 15px;
                         margin-bottom: 15px;
                         font-weight: bold;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }}
+                    .queue-stats {{
+                        display: flex;
+                        gap: 20px;
+                    }}
+                    .stat-item {{
+                        text-align: center;
+                    }}
+                    .stat-value {{
+                        font-size: 1.2em;
+                        color: #007bff;
                     }}
                     pre {{
                         margin: 0;
@@ -819,7 +833,16 @@ def get_logs(lines: int = 10) -> Response:
                         </label>
                     </div>
                     <div class="queue-info">
-                        <pre>{escaped_queue_info}</pre>
+                        <div class="queue-stats">
+                            <div class="stat-item">
+                                <div>Queued Tasks</div>
+                                <div class="stat-value">{usecases_queue_length}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Completed (Last Hour)</div>
+                                <div class="stat-value">{completed_tasks}</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="log-container">
                         <pre>{escaped_logs}</pre>
