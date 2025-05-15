@@ -29,12 +29,20 @@ pip install pandas
 pip install matplotlib
 
 # Install C/C++ build tools
-sudo apt update
-sudo apt install -y build-essential
-
-# Compile and install Rust Python extensions (via Maturin)
-maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml
-maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml
+if [[ "$(uname)" == "Linux" ]]; then
+  sudo apt update
+  sudo apt install -y build-essential
+elif [[ "$(uname)" == "Darwin" ]]; then
+  # On macOS, Xcode Command Line Tools usually provide build essentials.
+  if ! command -v cc >/dev/null 2>&1; then
+    echo "C compiler (cc) not found. Please install Xcode Command Line Tools:"
+    echo "xcode-select --install"
+    exit 1
+  fi
+  echo "Assuming build essentials are present via Xcode Command Line Tools on macOS."
+else
+  echo "Unsupported OS for build-essential installation. Please install C/C++ build tools manually."
+fi
 
 # Print installed versions
 echo "✔️ cargo --version: $(cargo --version)"

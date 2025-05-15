@@ -6,15 +6,24 @@ import uuid
 import shutil
 from pathlib import Path
 import sys
+from dotenv import load_dotenv
 
 # Ensure the tests directory is in the Python path to find utils
 sys.path.insert(0, str(Path(__file__).parent.resolve()))
 
-import utils as test_utils # This will load .env_dev, TASK_CONFIG etc.
+# Load environment configuration
+environment = os.getenv('environment', 'dev')
+env_file = f".env_{environment}"
+if not os.path.exists(env_file):
+    print(f"❌ Environment file {env_file} not found!")
+    sys.exit(1)
+load_dotenv(env_file)
+
+import utils as test_utils # This will load TASK_CONFIG etc.
 
 # Configuration
-NUM_CONCURRENT_USERS = 10     # Number of simulated concurrent user workflows
-TEST_DURATION_SECONDS = 90    # How long the main test loop should run
+NUM_CONCURRENT_USERS = 100     # Number of simulated concurrent user workflows
+TEST_DURATION_SECONDS = 10000    # How long the main test loop should run
 TASK_TYPES = ["ad_targeting", "sleep_quality", "weight_stats"]
 
 # Directory where generate_stress_data.py places the unique key/input pairs
@@ -155,6 +164,15 @@ def run_single_user_workflow(user_id_num):
 
 
 def main():
+    # Print environment information
+    print("\n--- Environment Configuration ---")
+    print(f"Environment: {environment}")
+    print(f"Mode: {os.getenv('MODE', 'unknown')}")
+    print(f"URL: {test_utils.URL}")
+    print(f"Port: {os.getenv('FASTAPI_HOST_PORT_HTTP') if os.getenv('MODE') == 'dev' else os.getenv('FASTAPI_HOST_PORT_HTTPS')}")
+    print(f"Use TLS: {os.getenv('USE_TLS', 'false')}")
+    print("--------------------------------\n")
+
     load_data_pool()
     print(f"Starting stress test with {NUM_CONCURRENT_USERS} concurrent users for {TEST_DURATION_SECONDS} seconds.")
     print(f"Targeting server: {test_utils.URL}")
