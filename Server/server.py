@@ -252,22 +252,26 @@ def list_current_tasks() -> List[Dict]:
     """
     all_tasks: List[Dict] = []
 
-    inspector = celery_app.control.inspect()
+    try:
+        inspector = celery_app.control.inspect(timeout=5)
 
-    if not inspector:
-        task_logger.error(
-            "❌ Failed to inspect Celery. Inspector returned `None`. No workers may be available."
-        )
+        if not inspector:
+            task_logger.error(
+                "❌ Failed to inspect Celery. Inspector returned `None`. No workers may be available."
+            )
+            return []
+
+        task_states = {
+            # Show the tasks that are currently active
+            "active": inspector.active() or {},
+            # Show the tasks that have been claimed by `workers`
+            "reserved": inspector.reserved() or {},
+            # Show tasks that have an ETA or are scheduled for later processing
+            "scheduled": inspector.scheduled() or {},
+        }
+    except Exception as e:
+        task_logger.error(f"❌ Failed to inspect Celery tasks: {str(e)}")
         return []
-
-    task_states = {
-        # Show the tasks that are currently active
-        "active": inspector.active() or {},
-        # Show the tasks that have been claimed by `workers`
-        "reserved": inspector.reserved() or {},
-        # Show tasks that have an ETA or are scheduled for later processing
-        "scheduled": inspector.scheduled() or {},
-    }
 
     for state, tasks_data in task_states.items():
         for worker_name, tasks_list in tasks_data.items():
