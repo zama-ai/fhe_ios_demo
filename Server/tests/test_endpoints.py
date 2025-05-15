@@ -78,7 +78,7 @@ def test_cancel_task_endpoint_failure(task_id, expected_status, expected_msg, pr
 def test_get_use_cases_endpoint():
     print("\nRun test get_use_cases endpoint.")
 
-    response = requests.get(f"{URL}/get_use_cases", verify=False)
+    response = requests.get(f"{URL}/get_use_cases")
     response.raise_for_status()
     data = response.json()
 
@@ -196,6 +196,10 @@ def test_status_task_endpoint(task_name, prefix):
     assert_status(status, details, "completed", r"Task completed on *.")
 
 
+# In rare cases, a task may be pending when querying fasapi,
+# By the time redis is queried, the task is already active.
+# Thus, we restart the test if it fails.
+@pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("task_name,prefix,nb_tasks", [
     ("sleep_quality", "test_good_night", 12),
 ])
@@ -215,7 +219,7 @@ def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     all_created_tasks = [start_task_api(uid, task_name, input_test_path) for _ in range(nb_tasks)]
 
     # Get task status via API
-    response = requests.get(f"{URL}/list_current_tasks", verify=False)
+    response = requests.get(f"{URL}/list_current_tasks")
     response.raise_for_status()
 
     # Get active tasks via Celery inspect

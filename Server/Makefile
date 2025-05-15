@@ -11,6 +11,9 @@ test_flags ?= -vvs
 environment ?= dev
 # Which environment variables to set
 file_env = $(if $(filter ci,$(environment)),.env_dev,.env_$(environment))
+# Defines the name prefix used by docker-compose for containers
+# depending on the current environment (e.g., dev, staging, prod, ci)
+prefix = $(if $(filter ci,$(environment)),dev_fhe_ios_demo,$(environment)_fhe_ios_demo)
 # Docker build cache option. Use '' to enable cache or '--no-cache' to disable it        
 cache ?=
 # Force Rust rebuild. Use '' to enable cache or '--rebuild_rust' to disable it      
@@ -24,7 +27,7 @@ DATE := $(shell date "+%Y-%m-%d")
 # List of benchmarked tasks
 TASKS := ad_targeting weight_stats sleep_quality
 # Instance type (e.g., c5.4xlarge or g4dn.8xlarge)
-machine ?= g4dn.8xlarge
+machine ?= c5.4xlarge
 # Tests
 TESTS = ad_targeting weight_stats sleep_quality endpoints
 
@@ -66,20 +69,27 @@ clean_files:
 	find uploaded_files -mindepth 1 ! -name 'test_*' -exec rm -rf {} +
 
 benchmark:
-	@echo "Benchmarking with device=$(device)..."
+	@echo "Benchmarking with device=$(device), on machine=$(machine) in environment=$(environment)..."
+	@if [ "$(environment)" != "dev" ]; then \
+		echo "⚠️  This target should be run only on 'dev' environment"; \
+		exit 1; \
+	fi
 	@if [ "$(device)" = "cuda" ]; then \
 		echo "⚠️  Make sure the image was built with RUNTIME=nvidia"; \
 	fi
-	@if [ ! -f $(CSV_FILE) ]; then echo "date;env;machine;task_name;server_execution_time(s);end_to_end_execution_time(s);device" > $(CSV_FILE); fi; \
-	for task in $(TASKS); do \
+	@if [ ! -f $(CSV_FILE) ]; then \
+		echo "date;env;machine;task_name;server_execution_time(s);end_to_end_execution_time(s);device" > $(CSV_FILE); \
+	fi
+
+	@for task in $(TASKS); do \
 		echo "Running $$task..."; \
 		start=$$(date +%s.%N); \
-		bash -c "source $(VENV_DIR)/bin/activate && pytest tests/test_$$task.py"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(file_env) && pytest tests/test_$$task.py"; \
 		end=$$(date +%s.%N); \
 		end_to_end=$$(echo "$$end - $$start" | bc); \
 		echo "🔍 Docker logs for task=$$task | e2e_time=$$end_to_end (s):"; \
-		docker logs dev_fhe_ios_demo_service_celery_usecases_2 2>&1 | grep "🥕 ✅" | grep $$task | tail -n 1 ; \
-		server_time=$$(docker logs dev_fhe_ios_demo_service_celery_usecases_2 2>&1 \
+		docker logs $(prefix)_service_celery_usecases_2 2>&1 | grep "🥕 ✅" | grep $$task | tail -n 1; \
+		server_time=$$(docker logs $(prefix)_service_celery_usecases_2 2>&1 \
 			| grep "🥕 ✅" \
 			| grep "$$task" \
 			| tail -n 1 \
