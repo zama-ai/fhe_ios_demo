@@ -688,8 +688,17 @@ def get_logs(lines: int = 10) -> Response:
                     last_lines.append(line)
             logs = "".join(last_lines)
 
+        # Get Celery queue information
+        try:
+            usecases_queue_length = redis_bd_broker.llen("usecases")
+            ads_queue_length = redis_bd_broker.llen("ads")
+            queue_info = f"Celery Queue Status:\nusecases queue: {usecases_queue_length} tasks\nads queue: {ads_queue_length} tasks"
+        except Exception as e:
+            queue_info = f"Failed to get queue information: {str(e)}"
+
         # Escape HTML characters to prevent XSS
         escaped_logs = logs.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        escaped_queue_info = queue_info.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
         html = f"""
         <html>
@@ -722,6 +731,14 @@ def get_logs(lines: int = 10) -> Response:
                         border-radius: 4px;
                         padding: 15px;
                         overflow-x: auto;
+                    }}
+                    .queue-info {{
+                        background-color: #e9ecef;
+                        border: 1px solid #dee2e6;
+                        border-radius: 4px;
+                        padding: 15px;
+                        margin-bottom: 15px;
+                        font-weight: bold;
                     }}
                     pre {{
                         margin: 0;
@@ -772,6 +789,8 @@ def get_logs(lines: int = 10) -> Response:
                                 const doc = parser.parseFromString(html, 'text/html');
                                 document.querySelector('.log-container').innerHTML = 
                                     doc.querySelector('.log-container').innerHTML;
+                                document.querySelector('.queue-info').innerHTML = 
+                                    doc.querySelector('.queue-info').innerHTML;
                             }});
                     }}
 
@@ -798,6 +817,9 @@ def get_logs(lines: int = 10) -> Response:
                         <label id="autoRefresh">
                             <input type="checkbox" onchange="toggleAutoRefresh()"> Auto-refresh
                         </label>
+                    </div>
+                    <div class="queue-info">
+                        <pre>{escaped_queue_info}</pre>
                     </div>
                     <div class="log-container">
                         <pre>{escaped_logs}</pre>
