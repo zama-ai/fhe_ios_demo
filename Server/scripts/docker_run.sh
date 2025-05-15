@@ -41,16 +41,18 @@ if [ "$USE_TLS" = "true" ]; then
     fi
 
     # Handle certificates
+    # Ensure the script is run as root before checking if the certificats and attempting to
+    # regenerate the certificates
+    if [ "$EUID" -ne 0 ]; then
+        echo "Error: Root privileges required to check SSL certificates in '$HOST_CERTS_PATH'."
+        echo "Please re-run this script as root: 'sudo bash $0'"
+        echo "Or use: 'sudo make docker_build_run' or 'sudo make docker_build'"
+        exit 1
+    fi
+
     if [ ! -d "$HOST_CERTS_PATH" ]; then
         echo "SSL Certificates for '$DOMAIN_NAME' not found in '$HOST_CERTS_PATH'. Running certbot..."
 
-        # Ensure the script is run as root before attempting to regenerate certificates
-        if [ "$EUID" -ne 0 ]; then
-            echo "Error: Root privileges required to generate SSL certificates."
-            echo "Please re-run this script as root: 'sudo bash $0'"
-            exit 1
-        fi
-        
         certbot certonly --standalone \
             --non-interactive \
             --agree-tos \
@@ -74,6 +76,7 @@ if [ "$USE_TLS" = "true" ]; then
         echo "Error: Insufficient permissions on '$HOST_CERTS_PATH'."
         echo "Try running:"
         echo "sudo chmod -R 755 $HOST_CERTS_PATH"
+        exit 1
     fi
 else 
     echo "🚀 Skipping certs volume (HTTP mode)"
