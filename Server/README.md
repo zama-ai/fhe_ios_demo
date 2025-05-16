@@ -172,8 +172,6 @@ sleep_quality | cpu | 43.51 ± 11.81 s | 73.18 ± 0.80 s | 19.53 - 49.02 | 72.78
 weight_stats | cpu | 3.63 ± 0.07 s | 6.75 ± 0.05 s | 3.52 - 3.74 | 6.71 - 6.88
 <!-- BENCHMARK_TABLE_END -->
 
-![fhe_performance](images/fhe_performance.png)
-
 Notes:
 
 - Server time corresponds to the pure FHE compute time on the server, excluding any network or client-side operations.
