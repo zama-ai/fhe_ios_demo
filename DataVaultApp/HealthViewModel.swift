@@ -18,6 +18,7 @@ final class HealthViewModel: ObservableObject {
     
     @Published var weightConsoleOutput: String = ""
     @Published var sleepConsoleOutput: String = ""
+    @Published var keyManagementConsoleOutput: String = ""
     
     private var ck: ClientKey?
     private var pk: PublicKeyCompact?
@@ -401,6 +402,7 @@ final class HealthViewModel: ObservableObject {
         let resetMessagePrefix = "Resetting Health (TFHE) keys and encrypted data...\n"
         weightConsoleOutput = resetMessagePrefix
         sleepConsoleOutput = resetMessagePrefix
+        keyManagementConsoleOutput = resetMessagePrefix + "TFHE Keys are being reset. Key refresh log will be cleared.\n"
 
         do {
             try await Storage.deleteFromDisk(.clientKey)
@@ -412,10 +414,12 @@ final class HealthViewModel: ObservableObject {
             let successMsg = "TFHE keys deleted from disk.\n"
             weightConsoleOutput += successMsg
             sleepConsoleOutput += successMsg
+            keyManagementConsoleOutput += successMsg
         } catch {
             let errorMsg = "Error deleting TFHE keys: \(error.localizedDescription)\n"
             weightConsoleOutput += errorMsg
             sleepConsoleOutput += errorMsg
+            keyManagementConsoleOutput += errorMsg
         }
 
         self.sleepEncryptedUsingFakeData = nil
@@ -437,6 +441,7 @@ final class HealthViewModel: ObservableObject {
             let errorMsg = "Error deleting encrypted health data files: \(error.localizedDescription)\n"
             weightConsoleOutput += errorMsg
             sleepConsoleOutput += errorMsg
+            keyManagementConsoleOutput += errorMsg
         }
         
         do {
@@ -473,6 +478,7 @@ final class HealthViewModel: ObservableObject {
             let errorMsg = "Error deleting encrypted FHE Health result files: \(error.localizedDescription)\n"
             weightConsoleOutput += errorMsg
             sleepConsoleOutput += errorMsg
+            keyManagementConsoleOutput += errorMsg
         }
 
         UserDefaults.standard.removeObject(forKey: fheHealthAppSelectedNightKey)
@@ -482,6 +488,7 @@ final class HealthViewModel: ObservableObject {
 
         weightConsoleOutput += "Health keys and data reset complete. Re-encrypt data in relevant sections.\n"
         sleepConsoleOutput += "Health keys and data reset complete. Re-encrypt data in relevant sections.\n"
+        keyManagementConsoleOutput += "Health keys and data reset complete. Key refresh log also reflects this reset.\n"
     }
 
     @UserDefaultsStorage(key: "v12.sleepEncryptedUsingFakeData", defaultValue: nil)
@@ -489,4 +496,74 @@ final class HealthViewModel: ObservableObject {
 
     @UserDefaultsStorage(key: "v12.weightEncryptedUsingFakeData", defaultValue: nil)
     var weightEncryptedUsingFakeData: Bool?
+
+    @MainActor
+    func refreshFHEServerKey() async {
+        var refreshLog = "Attempting to refresh FHE server key...\n\n"
+        self.keyManagementConsoleOutput = refreshLog
+        var isNewClientKeyGenerated = false
+
+        do {
+            refreshLog += "Current ClientKey state: \(self.ck == nil ? "Not loaded/found locally" : "Loaded in memory")\n"
+            
+            if self.ck == nil {
+                if let savedCk = try? await ClientKey.readFromDisk(.clientKey) {
+                    self.ck = savedCk
+                    refreshLog += "✅ Loaded existing ClientKey from disk.\n"
+                } else {
+                    isNewClientKeyGenerated = true
+                    refreshLog += "ℹ️ ClientKey not found on disk. Generating new set of keys.\n"
+                    let newCk = try ClientKey.generate()
+                    try await newCk.writeToDisk(.clientKey)
+                    self.ck = newCk
+                    refreshLog += "✅ Generated and saved new ClientKey.\n"
+
+                    self.pk = nil
+                    self.sk = nil
+                    try? await Storage.deleteFromDisk(.publicKey)
+                    try? await Storage.deleteFromDisk(.serverKey)
+                    refreshLog += "🗑️ Cleared any old PublicKey and ServerKey from disk to ensure regeneration.\n"
+                }
+            } else {
+                refreshLog += "ℹ️ Using existing ClientKey already in memory.\n"
+            }
+
+            guard let currentCk = self.ck else {
+                refreshLog += "❌ Error: ClientKey is still nil after attempting to load/generate.\n"
+                self.keyManagementConsoleOutput = refreshLog
+                return
+            }
+
+            refreshLog += "\n🔄 Regenerating ServerKey from current ClientKey...\n"
+            let newSk = try ServerKeyCompressed(clientKey: currentCk)
+            try await newSk.writeToDisk(.serverKey)
+            self.sk = newSk
+            refreshLog += "✅ Successfully regenerated and saved ServerKey to disk.\n"
+            refreshLog += "   - ServerKey file: \(Storage.url(for: .serverKey).lastPathComponent)\n"
+            
+            refreshLog += "\n🔄 Regenerating PublicKey from current ClientKey...\n"
+            let newPk = try PublicKeyCompact(clientKey: currentCk)
+            try await newPk.writeToDisk(.publicKey)
+            self.pk = newPk
+            refreshLog += "✅ Successfully regenerated and saved PublicKey to disk.\n"
+            refreshLog += "   - PublicKey file: \(Storage.url(for: .publicKey).lastPathComponent)\n"
+
+            if isNewClientKeyGenerated {
+                refreshLog += "\n⚠️ IMPORTANT: A new ClientKey has been generated because the old one was not found. This means:\n"
+                refreshLog += "  - A new ServerKey and PublicKey have also been generated from this new ClientKey.\n"
+                refreshLog += "  - Any previously encrypted health data (Sleep, Weight) using the old keys will no longer be processable by the FHE Health app with these new keys.\n"
+                refreshLog += "  - You should re-encrypt your health data in the Sleep and Weight tabs after this key refresh (e.g., using 'Refresh Encrypted Data' or 'Generate data sample').\n"
+            }
+
+            refreshLog += "\n🎉 FHE key refresh complete.\n"
+            refreshLog += "The FHE Health app (or other consuming apps) should now be able to use these keys from the shared storage.\n"
+            refreshLog += "If the server reported a missing key, try the operation in that app again.\n"
+            
+            self.keyManagementConsoleOutput = refreshLog
+
+        } catch {
+            refreshLog += "\n❌ Error during FHE key refresh: \(error.localizedDescription)\n"
+            self.keyManagementConsoleOutput = refreshLog
+        }
+    }
 }

@@ -68,6 +68,37 @@ struct SleepTab: View {
                         ConsoleSection(title: "FHE Encryption", output: vm.sleepConsoleOutput)
                     }
                     
+                    Divider()
+                        .padding(.vertical)
+
+                    VStack(spacing: 10) {
+                        Text("FHE Key Management")
+                            .customFont(.title3)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        AsyncButton("Refresh FHE Keys") {
+                             await vm.refreshFHEServerKey()
+                        }
+                        .buttonStyle(.zamaSecondary)
+
+                        Text("If a FHE friendly app (like FHE Health) reports issues, use this to ensure your local FHE keys (Client, Server, Public) are correctly generated and saved.")
+                            .customFont(.caption)
+                            .foregroundStyle(.gray)
+                            .multilineTextAlignment(.leading)
+                        
+                        if !vm.keyManagementConsoleOutput.isEmpty {
+                            Button("Clear Key Refresh Log") {
+                                vm.keyManagementConsoleOutput = ""
+                            }
+                            .customFont(.caption)
+                            .tint(.gray)
+                        }
+                    }
+                    
+                    if !vm.keyManagementConsoleOutput.isEmpty {
+                        ConsoleSection(title: "Key Refresh Log", output: vm.keyManagementConsoleOutput)
+                    }
+                    
                     Spacer()
                 }
                 .padding(.horizontal, 30)

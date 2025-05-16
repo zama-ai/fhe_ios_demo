@@ -22,6 +22,7 @@ struct ProfileTab: View {
                     interestsGrid()
                     buttonsArea()
                     ConsoleSection(title: "FHE Encryption", output: vm.consoleOutput)
+                    concreteKeyManagementSection()
                     Spacer()
                 }
                 .padding(.horizontal, 30)
@@ -158,7 +159,35 @@ struct ProfileTab: View {
                 OpenAppButton(.fheAds)
             }
         }
-    }    
+    }
+    
+    @ViewBuilder
+    private func concreteKeyManagementSection() -> some View {
+        VStack(spacing: 10) {
+            Text("Concrete ML Key Management")
+                .customFont(.title3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            AsyncButton("Refresh Concrete ML Keys") {
+                await vm.refreshConcreteMLKeys()
+            }
+            .buttonStyle(.zama)
+            
+            Text("If a FHE friendly app (like FHE Ads) reports issues, use this to ensure your local FHE keys (PrivateKey, PublicKey) are correctly generated and saved.")
+                .customFont(.caption)
+                .foregroundStyle(.gray)
+                .multilineTextAlignment(.leading)
+            
+            if !vm.concreteKeyRefreshConsoleOutput.isEmpty {
+                Button("Clear Key Refresh Log") {
+                    vm.concreteKeyRefreshConsoleOutput = ""
+                }
+                .customFont(.caption)
+                .tint(.gray)
+                ConsoleSection(title: "Concrete ML Key Refresh Log", output: vm.concreteKeyRefreshConsoleOutput)
+            }
+        }
+    }
 }
 
 extension ProfileTab {
@@ -174,6 +203,8 @@ extension ProfileTab {
 
         @Published var profileOnDisk: Bool
         @Published var consoleOutput: String = "Profile Encryption Details:"
+        @Published var concreteKeyRefreshConsoleOutput: String = ""
+        
         private var pk: PrivateKey?
         
         init() {
@@ -204,6 +235,38 @@ extension ProfileTab {
             } else {
                 let (newPK, _) = try await ConcreteML.generateAndPersistKeys()
                 self.pk = newPK
+            }
+        }
+        
+        func refreshConcreteMLKeys() async {
+            var log = "Attempting to refresh Concrete ML keys...\n\n"
+            concreteKeyRefreshConsoleOutput = log
+            do {
+                do {
+                    try await Storage.deleteFromDisk(.concretePrivateKey)
+                    log += "Deleted existing Concrete ML PrivateKey from disk.\n"
+                } catch {
+                    log += "Could not delete old PrivateKey: \(error.localizedDescription).\n"
+                }
+                
+                let (newPK, _) = try await ConcreteML.generateAndPersistKeys()
+                self.pk = newPK
+                log += "Successfully regenerated new Concrete ML PrivateKey.\n"
+                
+                profileOnDisk = false
+                encryptedClearProfile = nil
+                validateProfile()
+                
+                if completedProfile != nil {
+                    try? await Storage.deleteFromDisk(.concreteEncryptedProfile)
+                    log += "Deleted previously encrypted profile data from disk.\n"
+                }
+                
+                log += "Concrete ML key refresh complete.\n"
+                concreteKeyRefreshConsoleOutput = log
+            } catch {
+                log += "Error during Concrete ML key refresh: \(error.localizedDescription)\n"
+                concreteKeyRefreshConsoleOutput = log
             }
         }
         
