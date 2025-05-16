@@ -22,8 +22,8 @@ load_dotenv(env_file)
 import utils as test_utils # This will load TASK_CONFIG etc.
 
 # Configuration
-NUM_CONCURRENT_USERS = 100     # Number of simulated concurrent user workflows
-TEST_DURATION_SECONDS = 10000    # How long the main test loop should run
+NUM_CONCURRENT_USERS = 100          # Number of simulated concurrent user workflows
+TEST_DURATION_SECONDS = 60 * 60     # How long the main test loop should run
 TASK_TYPES = ["ad_targeting", "sleep_quality", "weight_stats"]
 
 # Directory where generate_stress_data.py places the unique key/input pairs
