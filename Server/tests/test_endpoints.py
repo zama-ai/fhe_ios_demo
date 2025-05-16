@@ -217,8 +217,7 @@ def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     all_created_tasks = [start_task_api(uid, task_name, input_test_path) for _ in range(nb_tasks)]
 
     # Get task status via API
-    response = requests.get(f"{URL}/list_current_tasks")
-    response.raise_for_status()
+    response = list_current_tasks_api()
 
     # Get active tasks via Celery inspect
     active_tasks_celery = inspect_celery(task="active")
@@ -226,13 +225,14 @@ def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     # Get pending tasks via Redis
     pending_tasks_redis = inspect_redis(queue="usecases")
 
-    all_tasks_api = [(t['task_id'], t['status']) for t in response.json()]
+    all_tasks_api = [(t['task_id'], t['status']) for t in response]
+    pending_tasks_api = [t_id for t_id, s in all_tasks_api if s == "queued"]
     pending_tasks_api = [t_id for t_id, s in all_tasks_api if s == "queued"]
     active_tasks_api = [t_id for t_id, s in all_tasks_api if s == "active"]
 
     print(f"List of created tasks:\n{all_created_tasks}")
-    print(f"[via Celery inspect | active task list = {active_tasks_celery}]")
-    print(f"[via Redis] List of pending tasks: {pending_tasks_redis}")
+    print(f"[via Celery inspect] List of active tasks:\n{active_tasks_celery}]")
+    print(f"[via Redis] List of pending tasks:\n{pending_tasks_redis}")
     print(f"[via API] List of current tasks:\n{all_tasks_api}")
     print(f"[via API] List of pending tasks:\n{pending_tasks_api}")
     print(f"[via API] List of active tasks :\n{active_tasks_api}")
@@ -255,9 +255,4 @@ def test_inspect_celery_redis(task_name, prefix, nb_tasks):
     status, details = get_status_api(uid, all_created_tasks[-1])
     assert_status(status, details, "queued", r"Task is in the Redis broker queue")
 
-    # Cancel all created tasks
-    for task_id in all_created_tasks:
-        cancel_task_api(uid, task_id)
-
-    # Clean all Redis dababases (broker and backend)
-    clean_redis()
+    cancel_tasks_and_clear_redis(uid, all_created_tasks)
