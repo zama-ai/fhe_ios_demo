@@ -31,9 +31,21 @@ pip install matplotlib
 # Check for C compiler (cc)
 if ! command -v cc >/dev/null 2>&1; then
     echo "No C compiler (cc) found on this system."
-    echo "Please install it manually using:"
-    echo "'sudo apt update && sudo apt install -y build-essential'"
-    exit 1
+
+  case "$(uname)" in
+    Linux)
+      echo "You can install it with:"
+      echo "    sudo apt update && sudo apt install -y build-essential"
+      ;;
+    Darwin)
+      echo "You can install it with:"
+      echo "    xcode-select --install"
+      ;;
+    *)
+      echo "Please install C/C++ build tools manually for your OS."
+      ;;
+  esac
+  exit 1
 fi
 
 # Compile and install Rust Python extensions (via Maturin)
