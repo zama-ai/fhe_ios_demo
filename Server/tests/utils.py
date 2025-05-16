@@ -7,6 +7,7 @@ import base64
 import yaml
 import subprocess
 
+from typing import List
 from pathlib import Path
 
 ID_PATTERN = re.compile(r"^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$")
@@ -98,6 +99,17 @@ def cancel_task_api(uid, task_id):
     time.sleep(3)
     data = response.json()
     return data.get("status"), data.get("details")
+
+
+def cancel_tasks_and_clear_redis(tasks_list: List, uid: str) -> None:
+    """Cancel all tasks in the list and clean Redis data-base."""
+
+    # Cancel all created tasks
+    for task_id in tasks_list:
+        cancel_task_api(uid, task_id)
+
+    # Clean all Redis dababases (broker and backend)
+    clean_redis()
 
 
 def get_status_api(uid, task_id):
@@ -210,6 +222,7 @@ def run_task_on_server(
     output_paths = poll_task_result_until_ready(uid, task_id, task_name, prefix)
     
     return uid, task_id, output_paths
+
 
 def assert_status(actual_status, actual_details, expected_status, expected_msg_pattern):
     if isinstance(expected_status, str):
