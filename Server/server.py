@@ -53,6 +53,12 @@ NON_CANCELLABLE_STATUSES: List = [
 
 
 STATUS_TEMPLATES = {
+    "active": {
+        "status": "started",
+        "details": "Task is still in progress.",
+        "worker": None,
+        "logger_msg": "🔄 [task_id=`{}` - uid=`{}`] is still in progress. Please wait before attempting to retrieve the result.",
+    },
     "started": {
         "status": "started",
         "details": "Task is still in progress.",
@@ -278,8 +284,9 @@ def list_current_tasks() -> List[Dict]:
             for t in tasks_list:
                 task_info = {
                     "task_id": t.get("id"),
-                    "status": state,
+                    "status": STATUS_TEMPLATES[state]['status'],
                     "worker": worker_name,
+                    "details": STATUS_TEMPLATES[state]['details'],
                 }
                 if state == "scheduled":
                     request_info = t.get("request", {})
@@ -294,15 +301,14 @@ def list_current_tasks() -> List[Dict]:
     try:
         pending_tasks = redis_bd_broker.lrange("usecases", 0, -1)
         total_tasks = len(pending_tasks)
-        task_logger.info(f"Pending tasks in Redis broker: {total_tasks}, {type(pending_tasks)}")
-        task_logger.info(f"\n\n\n{pending_tasks}\n\n\n")
+        task_logger.info(f"Pending tasks in Redis broker: {total_tasks}.")
         for position, task in enumerate(pending_tasks):
             task_data = json.loads(task)
             task_info = {
                 "task_id": task_data["headers"]["id"],
                 "status": "queued",
                 "worker": "unknown",
-            "details": f"The task is currently in the Redis queue, waiting to be picked up by a worker. Position in queue: `{position + 1} / {total_tasks}`",
+                "details": f"{STATUS_TEMPLATES['queued']['details']} Position in queue: `{position + 1} / {total_tasks}`",
             }
             all_tasks.append(task_info)
     except Exception as e:
@@ -624,7 +630,7 @@ async def get_task_result(
     # Output name file as specified in the yaml task file
     output_files_template = task_config.get("output_files", [])
     stderr_output: str = ""
-    cached_output: Dict = None
+    cached_output: Optional[Dict] = None
 
     # Check task status
     response = get_task_status(task_id, uid)

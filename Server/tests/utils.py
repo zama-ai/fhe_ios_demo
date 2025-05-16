@@ -101,7 +101,7 @@ def cancel_task_api(uid, task_id):
     return data.get("status"), data.get("details")
 
 
-def cancel_tasks_and_clear_redis(tasks_list: List, uid: str) -> None:
+def cancel_tasks_and_clear_redis(uid: str, tasks_list: List) -> None:
     """Cancel all tasks in the list and clean Redis data-base."""
 
     # Cancel all created tasks

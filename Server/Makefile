@@ -112,7 +112,7 @@ benchmark:
 
 stress_test:
 	@echo "🔧 Loading environment configuration for $(environment)..."
-	@if [ ! -f ".env_$(environment)" ]; then \
+	@if [ ! -f "$(file_env)" ]; then \
 		echo "❌ Environment file .env_$(environment) not found!"; \
 		exit 1; \
 	fi
