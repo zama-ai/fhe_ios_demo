@@ -37,7 +37,7 @@ from utils import *
 from task_executor import *
 
 # Instanciate FastAPI app
-app = FastAPI(debug=False)
+app = FastAPI()
 logger.info(f"🚀 FastAPI server running at {URL}:{FASTAPI_HOST_PORT_HTTPS}")
 
 
@@ -142,17 +142,21 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
             - uid: a unique identifier.
     """
     uid = str(uuid.uuid4())
+    task_logger.debug(f"ADD_KEY: Entered for task_name={task_name}. Assigned potential UID: {uid}")
 
-    # Write uploaded ServerKey to disk
     try:
+        task_logger.debug(f"ADD_KEY: Attempting to read key for UID {uid} from upload.")
         file_content = await key.read()
+        task_logger.debug(f"ADD_KEY: Successfully read key data (size: {len(file_content)}) for UID {uid}.")
         file_path = FILES_FOLDER / f"{uid}.serverKey"
+        task_logger.debug(f"ADD_KEY: Attempting to write key to {file_path} for UID {uid}.")
         with open(file_path, "wb") as f:
             f.write(file_content)
-        file_size = file_path.stat().st_size  # Get file size in bytes
+        file_size = file_path.stat().st_size
         logger.info("🔐 Successfully received new key upload: `%s` (Size: `%s` bytes). Assigned UID: `%s`", file_path, file_size, uid)
+        task_logger.debug(f"ADD_KEY: Completed for UID {uid}.")
     except Exception as e:
-        error_message = f"❌ Failed to store the server key: `{e}`"
+        error_message = f"❌ ADD_KEY: Failed to store the server key for UID {uid}: `{e}`"
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
@@ -191,48 +195,45 @@ async def start_task(
         HTTPException: Raised with status code 400 if the `task_name` is invalid.
         HTTPException: Raised with status code 500 if saving the file or starting the task fails.
     """
+    task_logger.debug(f"START_TASK: Entered for UID={get_id_prefix(uid)}, task_name={task_name}")
     if task_name not in use_cases:
-        error_message = f"❌ Invalid task name: `{task_name}`"
+        error_message = f"❌ START_TASK: Invalid task name: `{task_name}` for UID={get_id_prefix(uid)}"
         task_logger.error(error_message)
         raise HTTPException(status_code=400, detail=error_message)
 
     key_path = FILES_FOLDER / f"{uid}.serverKey"
-
     if not key_path.is_file():
-        error_message = f"❌ The key file `{key_path}` was not found on the server, please re-upload it."
+        error_message = f"❌ START_TASK: Key file `{key_path}` not found for UID={get_id_prefix(uid)}"
         task_logger.error(error_message)
         raise HTTPException(status_code=404, detail=error_message)
 
     binary = use_cases[task_name]["binary"]
-
-    # Get the `input_filename` as specified in the yaml configuration
     input_file_path = format_input_filename(uid, task_name)
-    task_logger.debug(f"📁 Input file path: `{input_file_path}`")
+    task_logger.debug(f"START_TASK: Input file path for UID={get_id_prefix(uid)}, task_name={task_name}: `{input_file_path}`")
 
     try:
+        task_logger.debug(f"START_TASK: Attempting to read encrypted_input for UID={get_id_prefix(uid)}, task_name={task_name}.")
         file_content = await encrypted_input.read()
+        task_logger.debug(f"START_TASK: Successfully read encrypted_input (size: {len(file_content)}) for UID={get_id_prefix(uid)}, task_name={task_name}.")
         with open(input_file_path, "wb") as f:
             f.write(file_content)
-        file_size = input_file_path.stat().st_size  # Get file size in bytes
+        file_size = input_file_path.stat().st_size
+        task_logger.debug(f"START_TASK: Saved encrypted input to `{input_file_path}` (Size: `{file_size}` bytes) for UID={get_id_prefix(uid)}, task_name={task_name}.")
     except Exception as e:
-        error_message = f"❌ Failed to save the input file `{input_file_path}`: {e}."
+        error_message = f"❌ START_TASK: Failed to save input file `{input_file_path}` for UID={get_id_prefix(uid)}: {e}."
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
-    # Start the Celery task
     try:
-        # The .delay() function is a shortcut for .apply_async(), which sends the task to the queue.
+        task_logger.debug(f"START_TASK: Attempting to submit Celery task for UID={get_id_prefix(uid)}, task_name={task_name}, Binary={binary}.")
         task = run_binary_task.delay(binary, uid, task_name)
         task_logger.info(
-            f"🚀 Task started [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`"
+            f"🚀 Task submitted [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`. Celery task ID: {task.id}"
         )
-        task_logger.debug(
-            f"📁 Saved encrypted input file to `{input_file_path} `(Size: `{file_size}` bytes)"
-        )
+        task_logger.debug(f"START_TASK: Completed for UID={get_id_prefix(uid)}, task_name={task_name}. Celery Task ID: {task.id}")
         return JSONResponse({"task_id": task.id})
-
     except Exception as e:
-        error_message = f"❌ Failed to start task `{task_name}` with UID `{uid}`: {e}"
+        error_message = f"❌ START_TASK: Failed to start Celery task `{task_name}` for UID={get_id_prefix(uid)}: {e}"
         task_logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
 
@@ -251,22 +252,26 @@ def list_current_tasks() -> List[Dict]:
     """
     all_tasks: List[Dict] = []
 
-    inspector = celery_app.control.inspect()
+    try:
+        inspector = celery_app.control.inspect(timeout=5)
 
-    if not inspector:
-        task_logger.error(
-            "❌ Failed to inspect Celery. Inspector returned `None`. No workers may be available."
-        )
+        if not inspector:
+            task_logger.error(
+                "❌ Failed to inspect Celery. Inspector returned `None`. No workers may be available."
+            )
+            return []
+
+        task_states = {
+            # Show the tasks that are currently active
+            "active": inspector.active() or {},
+            # Show the tasks that have been claimed by `workers`
+            "reserved": inspector.reserved() or {},
+            # Show tasks that have an ETA or are scheduled for later processing
+            "scheduled": inspector.scheduled() or {},
+        }
+    except Exception as e:
+        task_logger.error(f"❌ Failed to inspect Celery tasks: {str(e)}")
         return []
-
-    task_states = {
-        # Show the tasks that are currently active
-        "active": inspector.active() or {},
-        # Show the tasks that have been claimed by `workers`
-        "reserved": inspector.reserved() or {},
-        # Show tasks that have an ETA or are scheduled for later processing
-        "scheduled": inspector.scheduled() or {},
-    }
 
     for state, tasks_data in task_states.items():
         for worker_name, tasks_list in tasks_data.items():
@@ -678,11 +683,22 @@ def get_logs(lines: int = 10) -> Response:
 
             last_lines = deque(maxlen=lines)
             for line in log_file:
-                last_lines.append(line)
+                # Skip debug logs
+                if "DEBUG" not in line and "task_logger.debug" not in line and "logger.debug" not in line:
+                    last_lines.append(line)
             logs = "".join(last_lines)
+
+        # Get Celery queue information
+        try:
+            usecases_queue_length = redis_bd_broker.llen("usecases")
+            completed_tasks = len(redis_bd_backend.keys("celery-task-meta-*"))
+            queue_info = f"Queue Status:\nQueued tasks: {usecases_queue_length}\nCompleted in last hour: {completed_tasks}"
+        except Exception as e:
+            queue_info = f"Failed to get queue information: {str(e)}"
 
         # Escape HTML characters to prevent XSS
         escaped_logs = logs.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        escaped_queue_info = queue_info.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
         html = f"""
         <html>
@@ -715,6 +731,28 @@ def get_logs(lines: int = 10) -> Response:
                         border-radius: 4px;
                         padding: 15px;
                         overflow-x: auto;
+                    }}
+                    .queue-info {{
+                        background-color: #e9ecef;
+                        border: 1px solid #dee2e6;
+                        border-radius: 4px;
+                        padding: 15px;
+                        margin-bottom: 15px;
+                        font-weight: bold;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }}
+                    .queue-stats {{
+                        display: flex;
+                        gap: 20px;
+                    }}
+                    .stat-item {{
+                        text-align: center;
+                    }}
+                    .stat-value {{
+                        font-size: 1.2em;
+                        color: #007bff;
                     }}
                     pre {{
                         margin: 0;
@@ -765,6 +803,8 @@ def get_logs(lines: int = 10) -> Response:
                                 const doc = parser.parseFromString(html, 'text/html');
                                 document.querySelector('.log-container').innerHTML = 
                                     doc.querySelector('.log-container').innerHTML;
+                                document.querySelector('.queue-info').innerHTML = 
+                                    doc.querySelector('.queue-info').innerHTML;
                             }});
                     }}
 
@@ -791,6 +831,18 @@ def get_logs(lines: int = 10) -> Response:
                         <label id="autoRefresh">
                             <input type="checkbox" onchange="toggleAutoRefresh()"> Auto-refresh
                         </label>
+                    </div>
+                    <div class="queue-info">
+                        <div class="queue-stats">
+                            <div class="stat-item">
+                                <div>Queued Tasks</div>
+                                <div class="stat-value">{usecases_queue_length}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Completed (Last Hour)</div>
+                                <div class="stat-value">{completed_tasks}</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="log-container">
                         <pre>{escaped_logs}</pre>

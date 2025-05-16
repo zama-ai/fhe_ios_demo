@@ -110,7 +110,7 @@ pub fn run(uid: String) -> PyResult<u8> {
     // Call main.rs
     let _status = Command::new("cargo")
         .args(&[
-            "run", "--bin", "weight_stats", "--manifest-path", "tasks/weight_stats/Cargo.toml", "--", &uid
+            "run", "--release", "--bin", "weight_stats", "--manifest-path", "tasks/weight_stats/Cargo.toml", "--", &uid
         ])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())

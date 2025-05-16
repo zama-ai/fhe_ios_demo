@@ -98,30 +98,46 @@ def execute_binary(binary: str, uid: str, task_name: str) -> Dict:
         subprocess.CalledProcessError: Raised if the binary execution fails.
     """
     commandline = [f"./{binary}", uid]
-
+    current_task_id = celery_app.current_task.request.id if celery_app.current_task else "UnknownCeleryID"
+    task_logger.info(f"EXECUTE_BINARY: Task {task_name} (UID {get_id_prefix(uid)}, CeleryID {get_id_prefix(current_task_id)}): Preparing to run command: {' '.join(commandline)}")
+    
+    start_time = time.time()
     try:
-        # Result is a subprocess.CompletedProcess object, and Celery can't store that in Redis.
-        start_time = time.time()
         result = subprocess.run(commandline, capture_output=True, check=True, text=True)
         execution_time = time.time() - start_time
-        task_logger.info(f"🥕 ✅ [task_name=`{task_name}`]: completed in `{execution_time:.2f}`s")
+        task_logger.info(f"🥕 ✅ [task_name=`{task_name}`, UID=`{get_id_prefix(uid)}`, CeleryID=`{get_id_prefix(current_task_id)}`]: completed in `{execution_time:.2f}`s. Subprocess stdout (first 200 chars): {result.stdout[:200]}, stderr (first 200 chars): {result.stderr[:200]}")
+        return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode, "execution_time_seconds": execution_time}
 
     except subprocess.CalledProcessError as e:
-        error_message = f"🥕 ❌ Failed to execute: `{binary}`: `{e.stderr}`"
+        execution_time = time.time() - start_time
+        error_message = f"🥕 ❌ CalledProcessError for `{binary}` (UID=`{get_id_prefix(uid)}`, CeleryID=`{get_id_prefix(current_task_id)}`) after {execution_time:.2f}s: `{e.stderr}`. Stdout: `{e.stdout}`. Return code: {e.returncode}"
         task_logger.error(error_message)
-        return {"status": "error", "detail": error_message}
-
-    # Celry cannot serialize a <class 'subprocess.CompletedProcess'> object in JSON
-    return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
+        return {"status": "error", "detail": error_message, "stderr": e.stderr, "stdout": e.stdout, "returncode": e.returncode, "execution_time_seconds": execution_time}
+    except subprocess.TimeoutExpired as e:
+        execution_time = time.time() - start_time
+        error_message = f"🥕 ❌ TimeoutExpired for `{binary}` (UID=`{get_id_prefix(uid)}`, CeleryID=`{get_id_prefix(current_task_id)}`) after {execution_time:.2f}s (timeout was {e.timeout}s). Stdout: {e.stdout.decode(errors='ignore') if e.stdout else ''}, Stderr: {e.stderr.decode(errors='ignore') if e.stderr else ''}"
+        task_logger.error(error_message)
+        return {"status": "error", "detail": error_message, "execution_time_seconds": execution_time}
+    except Exception as e:
+        execution_time = time.time() - start_time
+        error_message = f"🥕 ❌ Generic Exception for `{binary}` (UID=`{get_id_prefix(uid)}`, CeleryID=`{get_id_prefix(current_task_id)}`) after {execution_time:.2f}s: {str(e)}"
+        task_logger.error(error_message)
+        return {"status": "error", "detail": error_message, "execution_time_seconds": execution_time}
 
 
 # Queue 1: `use-cases`
-@celery_app.task(name="tasks.run_binary_task", queue="usecases")
-def run_binary_task(binary: str, uid: str, task_name: str) -> Dict:
-    return execute_binary(binary, uid, task_name)
+@celery_app.task(name="tasks.run_binary_task", bind=True, queue="usecases")
+def run_binary_task(self, binary: str, uid: str, task_name: str) -> Dict:
+    task_logger.info(f"CELERY_TASK run_binary_task: Received. Binary: {binary}, UID: {get_id_prefix(uid)}, Task Name: {task_name}, Celery Task ID: {get_id_prefix(self.request.id)}")
+    result = execute_binary(binary, uid, task_name)
+    task_logger.info(f"CELERY_TASK run_binary_task: Completed execution for UID {get_id_prefix(uid)}, Task Name: {task_name}, Celery Task ID: {get_id_prefix(self.request.id)}. Result status: {result.get('status', 'success') if isinstance(result, dict) else 'unknown'}")
+    return result
 
 
 # Queue 2: `ads`
-@celery_app.task(name="tasks.fetch_ad", queue="ads")
-def fetch_ad(binary: str, uid: str) -> Dict:
-    return execute_binary(binary, uid, "fetch_ad")
+@celery_app.task(name="tasks.fetch_ad", bind=True, queue="ads")
+def fetch_ad(self, binary: str, uid: str) -> Dict:
+    task_logger.info(f"CELERY_TASK fetch_ad: Received. Binary: {binary}, UID: {get_id_prefix(uid)}, Celery Task ID: {get_id_prefix(self.request.id)}")
+    result = execute_binary(binary, uid, "fetch_ad")
+    task_logger.info(f"CELERY_TASK fetch_ad: Completed execution for UID {get_id_prefix(uid)}, Celery Task ID: {get_id_prefix(self.request.id)}. Result status: {result.get('status', 'success') if isinstance(result, dict) else 'unknown'}")
+    return result

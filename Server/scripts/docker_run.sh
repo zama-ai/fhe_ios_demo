@@ -83,7 +83,7 @@ fi
 
 echo "🚀 [$COMPOSE_PROJECT_NAME]: launching Docker containers using '$DOCKER_COMPOSE_NAME'..."
 docker-compose -p "$COMPOSE_PROJECT_NAME" up -d --scale service_celery_usecases="$CELERY_WORKER_COUNT_USECASE_QUEUE"
-    # --scale service_celery_ads="$CELERY_WORKER_COUNT_AD_QUEUE"
+    --scale service_celery_ads="$CELERY_WORKER_COUNT_AD_QUEUE"
 
 if [[ "$1" != "ci" ]]; then
   echo "[MODE=$1] Following logs..."

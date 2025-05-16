@@ -124,18 +124,20 @@ def fetch_backup_files(task_id: str, uid: str):
         A list of matching backup file paths and the last modification timestamp or `None`
         if no file was found.
     """
-    pattern = FILES_FOLDER / f"backup.{uid}.{task_id}.*output*.fheencrypted"
-    matching_files = glob(str(pattern))
+    pattern_str = str(FILES_FOLDER / f"backup.{uid}.{task_id}.*output*.fheencrypted")
+    logger.debug(f"FETCH_BACKUP_FILES: Searching for pattern '{pattern_str}' for task_id={get_id_prefix(task_id)}, uid={get_id_prefix(uid)}")
+    matching_files = glob(pattern_str)
+    logger.debug(f"FETCH_BACKUP_FILES: Glob found {len(matching_files)} files: {matching_files} for task_id={get_id_prefix(task_id)}")
 
     if not matching_files:
-        logger.debug(f"🔍 [task_id=`%s`, uid=`%s`] No backup files found.", get_id_prefix(task_id), get_id_prefix(uid))
+        logger.debug(f"🔍 [task_id=`%s`, uid=`%s`] No backup files found with pattern '{pattern_str}'.", get_id_prefix(task_id), get_id_prefix(uid))
         return None
 
     file = Path(matching_files[0])
-    last_mtime = file.stat().st_mtime  # Get file's last modified time
+    last_mtime = file.stat().st_mtime
     formatted_date = datetime.datetime.fromtimestamp(last_mtime).strftime("%Y-%m-%d %H:%M:%S")
-
-    return {'files': [str(file) for file in matching_files], 'timestamp': formatted_date}
+    logger.debug(f"FETCH_BACKUP_FILES: Returning backup info for task_id={get_id_prefix(task_id)}. Files: {[str(f) for f in matching_files]}, Timestamp: {formatted_date}")
+    return {'files': [str(f) for f in matching_files], 'timestamp': formatted_date}
 
 
 def fetch_file_content(output_file_path: Path):
@@ -150,19 +152,19 @@ def fetch_file_content(output_file_path: Path):
     Raises:
         HTTPException: Raised with status code 500 if the file cannot be read.
     """
+    logger.debug(f"FETCH_FILE_CONTENT: Attempting to read {output_file_path}")
     ensure_file_exists(
-        output_file_path, error_message=f"❌ Output file `{output_file_path}` not found."
+        output_file_path, error_message=f"❌ FETCH_FILE_CONTENT: Output file `{output_file_path}` not found."
     )
     try:
         data = output_file_path.read_bytes()
         logger.info(
-            f"📁 Successfully read output file `{output_file_path}` (Size: `{len(data)}` bytes)"
+            f"📁 FETCH_FILE_CONTENT: Successfully read output file `{output_file_path}` (Size: `{len(data)}` bytes)"
         )
     except Exception as e:
-        error_message=f"❌ Failed to read output file `{output_file_path}`: `{e}`."
+        error_message=f"❌ FETCH_FILE_CONTENT: Failed to read output file `{output_file_path}`: `{e}`."
         logger.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
-
     return data
 
 
@@ -176,11 +178,12 @@ def save_backup_file(backup_path, data) -> None:
     Returns:
         None
     """
+    logger.debug(f"SAVE_BACKUP_FILE: Attempting to write backup to {backup_path} (Size: {len(data)} bytes)")
     try:
         backup_path.write_bytes(data)
-        logger.debug(f"💾 Successfully saved backup file at `{backup_path}`.")
+        logger.debug(f"💾 SAVE_BACKUP_FILE: Successfully saved backup file at `{backup_path}`.")
     except Exception as e:
-        logger.warning(f"🚨 Failed to create backup `{backup_path}`: {e}.")
+        logger.warning(f"🚨 SAVE_BACKUP_FILE: Failed to create backup `{backup_path}`: {e}.")
 
 
 def get_id_prefix(_id: str) -> str:

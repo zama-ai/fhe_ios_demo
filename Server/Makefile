@@ -31,7 +31,7 @@ machine ?= c5.4xlarge
 # Tests
 TESTS = ad_targeting weight_stats sleep_quality endpoints
 
-.PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files benchmark
+.PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files benchmark stress_test
 
 docker_build:
 	sudo bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
@@ -51,6 +51,15 @@ docker_build_run:
 tests_build:
 	@echo "🔧 Building test environment for '$(environment)' using '$(file_env)' variables..."
 	@bash -c 'set -a && source $(file_env) && VENV_DIR=$(VENV_DIR) bash ./scripts/tests_build.sh'
+	@echo "🔨 Building Rust components in Docker..."
+	@docker run --platform linux/amd64 \
+		-v $(PWD):/app \
+		-w /app \
+		--rm \
+		rust:1.84 \
+		bash -c 'cd tasks/weight_stats && RUSTFLAGS="-C target-feature=+aes,+rdseed" cargo build --release && cd ../sleep_quality && RUSTFLAGS="-C target-feature=+aes,+rdseed" cargo build --release'
+	@echo "📦 Installing Python packages..."
+	@bash -c 'source $(VENV_DIR)/bin/activate && maturin develop --release --manifest-path tasks/weight_stats/Cargo.toml && maturin develop --release --manifest-path tasks/sleep_quality/Cargo.toml'
 
 tests_run:
 	@if [ ! -d "$(VENV_DIR)" ]; then \
@@ -100,3 +109,16 @@ benchmark:
 
 	mkdir -p images
 	python update_benchmarks.py
+
+stress_test:
+	@echo "🔧 Loading environment configuration for $(environment)..."
+	@if [ ! -f ".env_$(environment)" ]; then \
+		echo "❌ Environment file .env_$(environment) not found!"; \
+		exit 1; \
+	fi
+	@echo "🔧 Building test environment..."
+	@make tests_build environment=$(environment)
+	@echo "🔧 Generating stress test data..."
+	@bash -c 'set -a && source .env_$(environment) && source $(VENV_DIR)/bin/activate && python tests/generate_stress_data.py'
+	@echo "🚀 Running stress test against $(environment) server..."
+	@bash -c 'set -a && source .env_$(environment) && source $(VENV_DIR)/bin/activate && python tests/stress_runner.py'
