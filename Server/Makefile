@@ -6,9 +6,9 @@ VENV_DIR=.venv_test
 # make <cible> VAR1=valeur1 VAR2=valeur2 ...
 
 # Pytest flags
-test_flags ?= -vvs
+test_flags ?= -v
 # Target environment (dev, staging, prod, ci)        
-environment ?= staging
+environment ?= dev
 # Which environment variables to set
 ENV_FILE = $(if $(filter ci,$(environment)),.env_dev,.env_$(environment))
 # Defines the name prefix used by docker-compose for containers
@@ -31,29 +31,22 @@ machine ?= c5.4xlarge
 # Tests
 TESTS = ad_targeting weight_stats sleep_quality endpoints
 
-.PHONY: clean_certificates check_certifcates certificates
+.PHONY: check_certificates certificates
 .PHONY: docker_build docker_run docker_build_run
 .PHONY: tests_build tests_run
 .PHONY: clean_files benchmark
 
-clean_certificates:
-	@if [ "$$(id -u)" -ne 0 ]; then \
-		echo "This step requires sudo. Please run: sudo make clear_certificates"; \
-		exit 1; \
-	fi
+check_certificates:
 	@bash -c ' \
-		set -a && source $(ENV_FILE) && \
-		rm -f /tmp/certificates.done; \
-	'
+		set -a && source $(ENV_FILE) && set +a; \
+		if [ ! -f "$$HOST_CERTS_PATH/$$CERT_FILE_NAME" ] || [ ! -f "$$HOST_CERTS_PATH/$$PRIVKEY_FILE_NAME" ]; then \
+			echo "❌ Certificate files are missing in $$HOST_CERTS_PATH."; \
+			echo "Please run: sudo make certificates"; \
+			exit 1; \
+		else \
+			echo "✅ Certificate files are present in $$HOST_CERTS_PATH."; \
+		fi'
 
-check_certifcates:
-	@if [ ! -f /tmp/certificates.done ]; then \
-		echo "❌ Certificates may not be not generated properly."; \
-		echo "Please run: sudo make certificates first"; \
-		exit 1; \
-	else \
-		echo "✅ Certificates already generated."; \
-	fi
 certificates:
 	@if [ "$(environment)" = "dev" ]; then \
 		echo "⚠️  This target should not be run in the 'dev' environment."; \
@@ -70,23 +63,7 @@ certificates:
 		bash ./scripts/generate_certificates.sh && \
 		touch /tmp/certificates.done; \
 	'
-
-copy_certificates:
-	@if [ "$$(id -u)" -ne 0 ]; then \
-		echo "This step requires sudo. Please run: 'sudo make copy_certificates'"; \
-		exit 1; \
-	fi
-	@bash -c ' \
-		set -a && source $(ENV_FILE) && \
-		mkdir -p $$CERT_DEST && \
-		cp $$CERT_SRC/$$CERT_FILE_NAME $$CERT_DEST/$$CERT_FILE_NAME && \
-		cp $$CERT_SRC/$$PRIVKEY_FILE_NAME $$CERT_DEST/$$PRIVKEY_FILE_NAME && \
-		chown $$(logname):$$(logname) $$CERT_DEST/$$CERT_FILE_NAME $$CERT_DEST/$$PRIVKEY_FILE_NAME && \
-		chmod 600 $$CERT_DEST/$$CERT_FILE_NAME $$CERT_DEST/$$PRIVKEY_FILE_NAME && \
-		echo "✅ Certificates copied to $$CERT_DEST/ with correct ownership." && \
-		ls -ltra certs/ \
-	'
-docker_build: check_certifcates
+docker_build: check_certificates
 	@if [  $ssl_required == 'true' &&  check_certifcats == 'false' ] ; then \
 		echo "On '$environment' environment, the certificates are required."; \
 		echo "To check the existence of certificates or generate them, you need sudo privaledges."; \
@@ -104,7 +81,7 @@ docker_run:
 	bash ./scripts/docker_run.sh $(environment)
 
 
-docker_build_run: check_certifcates
+docker_build_run: check_certificates
 	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 	bash ./scripts/docker_run.sh $(environment)
 

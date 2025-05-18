@@ -46,22 +46,22 @@ if [ "$USE_TLS" = "true" ]; then
     # Check if the ceriticqate already exists and delete it to avoir suffixes
     if certbot certificates | grep -q "Certificate Name: $DOMAIN_NAME"; then
         echo "Existing certificate '$DOMAIN_NAME' found. Deleting to avoid suffixes..."
-        yes | certbot delete --cert-name "$DOMAIN_NAME"
+        # yes | certbot delete --cert-name "$DOMAIN_NAME"
     else
         echo "No existing certificate '$DOMAIN_NAME' found."
     fi
 
-    certbot certonly --standalone \
-        --non-interactive \
-        --agree-tos \
-        --email "$CERTBOT_EMAIL" \
-        -d "$DOMAIN_NAME" \
-        --cert-name "$DOMAIN_NAME"
+    # certbot -v certonly --standalone \
+    #     --non-interactive \
+    #     --agree-tos \
+    #     --email "$CERTBOT_EMAIL" \
+    #     -d "$DOMAIN_NAME" \
+    #     --cert-name "$DOMAIN_NAME"
 
-    # Check permissions on the directory
-    if [ ! -r "$HOST_CERTS_PATH" ] || [ ! -x "$HOST_CERTS_PATH" ]; then
-        echo "Error: Insufficient permissions on '$HOST_CERTS_PATH'."
-        echo "Try running:"
-        echo "sudo chmod -R 755 $HOST_CERTS_PATH"
-    fi
+    ls -altr /etc/letsencrypt/live/api.zama.ai/
+    mkdir -p $HOST_CERTS_PATH
+    cp $CERT_NAME/$CERT_FILE_NAME $HOST_CERTS_PATH/$CERT_FILE_NAME
+    cp $CERT_NAME/$PRIVKEY_FILE_NAME $HOST_CERTS_PATH/$PRIVKEY_FILE_NAME
+    chown $(logname):$(logname) $HOST_CERTS_PATH/*.pem
+    chmod 644 $HOST_CERTS_PATH/*.pem
 fi

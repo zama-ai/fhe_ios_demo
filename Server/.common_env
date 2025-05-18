@@ -11,3 +11,11 @@ DOCKER_COMPOSE_LOCATION=.  # Location of the yaml configuration file
 RUST_IMAGE_NAME=rust_builder
 FINAL_IMAGE_NAME=zama-ios-apps  # To change this tag, make sure to also update it manually
                                 # in Dockerfile
+
+# SSL Certificates Configuration
+HOST_CERTS_PATH=./cert  # SSL Certificates Path on the host machine
+CERT_NAME=/etc/letsencrypt/live/api.zama.ai  # SSL Certificates Path for certbot
+CONTAINER_CERTS_PATH=/project/certs
+
+CERT_FILE_NAME=fullchain.pem
+PRIVKEY_FILE_NAME=privkey.pem
