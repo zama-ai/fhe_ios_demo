@@ -8,12 +8,12 @@ VENV_DIR=.venv_test
 # Pytest flags
 test_flags ?= -vvs
 # Target environment (dev, staging, prod, ci)        
-environment ?= dev
+environment ?= staging
 # Which environment variables to set
-file_env = $(if $(filter ci,$(environment)),.env_dev,.env_$(environment))
+ENV_FILE = $(if $(filter ci,$(environment)),.env_dev,.env_$(environment))
 # Defines the name prefix used by docker-compose for containers
 # depending on the current environment (e.g., dev, staging, prod, ci)
-prefix = $(if $(filter ci,$(environment)),dev_fhe_ios_demo,$(environment)_fhe_ios_demo)
+PREFIX = $(if $(filter ci,$(environment)),dev_fhe_ios_demo,$(environment)_fhe_ios_demo)
 # Docker build cache option. Use '' to enable cache or '--no-cache' to disable it        
 cache ?=
 # Force Rust rebuild. Use '' to enable cache or '--rebuild_rust' to disable it      
@@ -31,9 +31,68 @@ machine ?= c5.4xlarge
 # Tests
 TESTS = ad_targeting weight_stats sleep_quality endpoints
 
-.PHONY: docker_build docker_run docker_build_run tests_build tests_run clean_files benchmark stress_test
+.PHONY: clean_certificates check_certifcates certificates
+.PHONY: docker_build docker_run docker_build_run
+.PHONY: tests_build tests_run
+.PHONY: clean_files benchmark
 
-docker_build:
+clean_certificates:
+	@if [ "$$(id -u)" -ne 0 ]; then \
+		echo "This step requires sudo. Please run: sudo make clear_certificates"; \
+		exit 1; \
+	fi
+	@bash -c ' \
+		set -a && source $(ENV_FILE) && \
+		rm -f /tmp/certificates.done; \
+	'
+
+check_certifcates:
+	@if [ ! -f /tmp/certificates.done ]; then \
+		echo "❌ Certificates may not be not generated properly."; \
+		echo "Please run: sudo make certificates first"; \
+		exit 1; \
+	else \
+		echo "✅ Certificates already generated."; \
+	fi
+certificates:
+	@if [ "$(environment)" = "dev" ]; then \
+		echo "⚠️  This target should not be run in the 'dev' environment."; \
+		echo "Development uses the HTTP protocol without secure connection."; \
+		exit 1; \
+	fi
+	@echo "Building certificates for '$(environment)' using '$(ENV_FILE)' variables using 'sudo' privileges..."
+	@if [ "$$(id -u)" -ne 0 ]; then \
+		echo "This step requires sudo. Please run: 'sudo make certificates'"; \
+		exit 1; \
+	fi
+	@bash -c ' \
+		set -a && source $(ENV_FILE) && \
+		bash ./scripts/generate_certificates.sh && \
+		touch /tmp/certificates.done; \
+	'
+
+copy_certificates:
+	@if [ "$$(id -u)" -ne 0 ]; then \
+		echo "This step requires sudo. Please run: 'sudo make copy_certificates'"; \
+		exit 1; \
+	fi
+	@bash -c ' \
+		set -a && source $(ENV_FILE) && \
+		mkdir -p $$CERT_DEST && \
+		cp $$CERT_SRC/$$CERT_FILE_NAME $$CERT_DEST/$$CERT_FILE_NAME && \
+		cp $$CERT_SRC/$$PRIVKEY_FILE_NAME $$CERT_DEST/$$PRIVKEY_FILE_NAME && \
+		chown $$(logname):$$(logname) $$CERT_DEST/$$CERT_FILE_NAME $$CERT_DEST/$$PRIVKEY_FILE_NAME && \
+		chmod 600 $$CERT_DEST/$$CERT_FILE_NAME $$CERT_DEST/$$PRIVKEY_FILE_NAME && \
+		echo "✅ Certificates copied to $$CERT_DEST/ with correct ownership." && \
+		ls -ltra certs/ \
+	'
+docker_build: check_certifcates
+	@if [  $ssl_required == 'true' &&  check_certifcats == 'false' ] ; then \
+		echo "On '$environment' environment, the certificates are required."; \
+		echo "To check the existence of certificates or generate them, you need sudo privaledges."; \
+		echo "Please run: 'sudo make certificates' first!"; \
+		exit 1; \
+	fi
 	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 
 docker_run:
@@ -44,13 +103,14 @@ docker_run:
 	fi
 	bash ./scripts/docker_run.sh $(environment)
 
-docker_build_run:
+
+docker_build_run: check_certifcates
 	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 	bash ./scripts/docker_run.sh $(environment)
 
 tests_build:
-	@echo "🔧 Building test environment for '$(environment)' using '$(file_env)' variables..."
-	@bash -c 'set -a && source $(file_env) && VENV_DIR=$(VENV_DIR) bash ./scripts/tests_build.sh'
+	@echo "🔧 Building test environment for '$(environment)' using '$(ENV_FILE)' variables..."
+	@bash -c 'set -a && source $(ENV_FILE) && VENV_DIR=$(VENV_DIR) && set +a && bash ./scripts/tests_build.sh'
 	@echo "🔨 Building Rust components in Docker..."
 	@docker run --platform linux/amd64 \
 		-v $(PWD):/app \
@@ -70,7 +130,7 @@ tests_run:
 
 	@for test in $(TESTS); do \
 		echo "Running test: $$test"; \
-		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(file_env) && pytest tests/test_$$test.py $(test_flags)"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE) && pytest tests/test_$$test.py $(test_flags)"; \
 	done
 
 clean_files:
@@ -93,12 +153,12 @@ benchmark:
 	@for task in $(TASKS); do \
 		echo "Running $$task..."; \
 		start=$$(date +%s.%N); \
-		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(file_env) && pytest tests/test_$$task.py"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE) && pytest tests/test_$$task.py"; \
 		end=$$(date +%s.%N); \
 		end_to_end=$$(echo "$$end - $$start" | bc); \
 		echo "🔍 Docker logs for task=$$task | e2e_time=$$end_to_end (s):"; \
-		docker logs $(prefix)_service_celery_usecases_2 2>&1 | grep "🥕 ✅" | grep $$task | tail -n 1; \
-		server_time=$$(docker logs $(prefix)_service_celery_usecases_2 2>&1 \
+		docker logs $(PREFIX)_service_celery_usecases_2 2>&1 | grep "🥕 ✅" | grep $$task | tail -n 1; \
+		server_time=$$(docker logs $(PREFIX)_service_celery_usecases_2 2>&1 \
 			| grep "🥕 ✅" \
 			| grep "$$task" \
 			| tail -n 1 \
