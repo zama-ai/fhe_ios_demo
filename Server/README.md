@@ -166,9 +166,9 @@ docker exec -it dev_fhe_ios_demo_service_celery_usecases_1 /bin/bash
 <!-- BENCHMARK_TABLE_START -->
 Task | Device | Server time (avg ± std) | E2E time (avg ± std) | Server time range (s) | E2E time range (s)
 -----|--------|-------------------------|----------------------|-----------------------|----------------------
-ad_targeting | cpu | 4.09 ± 0.05 s | 20.15 ± 0.10 s | 4.02 - 4.13 | 20.02 - 20.29
+ad_targeting | cpu | 4.31 ± 0.58 s | 20.19 ± 0.14 s | 4.02 - 5.63 | 20.02 - 20.42
 ad_targeting | cuda | 1.13 ± 0.02 s | 11.63 ± 0.06 s | 1.12 - 1.16 | 11.53 - 11.76
-sleep_quality | cpu | 45.01 ± 20.95 s | 82.70 ± 2.36 s | 20.82 - 57.11 | 81.29 - 85.43
+sleep_quality | cpu | 48.04 ± 18.14 s | 87.47 ± 9.73 s | 20.82 - 57.11 | 81.29 - 101.77
 sleep_quality | cuda | 44.54 ± 11.77 s | 74.40 ± 0.68 s | 19.81 - 50.43 | 72.60 - 74.69
 weight_stats | cpu | 3.61 ± 0.01 s | 19.01 ± 0.05 s | 3.60 - 3.62 | 18.95 - 19.05
 weight_stats | cuda | 3.33 ± 0.04 s | 6.67 ± 0.02 s | 3.27 - 3.40 | 6.64 - 6.70
