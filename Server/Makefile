@@ -43,9 +43,11 @@ docker_run:
 		exit 1; \
 	fi
 	bash ./scripts/docker_run.sh $(environment)
+
 docker_build_run: check_certificates
 	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 	bash ./scripts/docker_run.sh $(environment)
+
 tests_build:
 	@echo "🔧 Building test environment for '$(environment)' using '$(ENV_FILE)' variables..."
 	@bash -c 'set -a && source $(ENV_FILE) && VENV_DIR=$(VENV_DIR) && set +a && bash ./scripts/tests_build.sh'
@@ -91,7 +93,7 @@ benchmark:
 	@for task in $(TASKS); do \
 		echo "Running $$task..."; \
 		start=$$(date +%s.%N); \
-		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE)&& set +a && pytest tests/test_$$task.py"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE) && set +a && pytest tests/test_$$task.py -vvs"; \
 		end=$$(date +%s.%N); \
 		end_to_end=$$(echo "$$end - $$start" | bc); \
 		echo "🔍 Docker logs for task=$$task | e2e_time=$$end_to_end (s):"; \
