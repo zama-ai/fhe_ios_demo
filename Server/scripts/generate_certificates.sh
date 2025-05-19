@@ -43,20 +43,20 @@ if [ "$USE_TLS" = "true" ]; then
         read -p "Enter your CERTBOT_EMAIL: " CERTBOT_EMAIL
     fi
 
-    # Check if the ceriticqate already exists and delete it to avoir suffixes
+    # Check if the ceriticqate already exists and delete it to avoid suffixes
     if certbot certificates | grep -q "Certificate Name: $DOMAIN_NAME"; then
         echo "Existing certificate '$DOMAIN_NAME' found. Deleting to avoid suffixes..."
-        # yes | certbot delete --cert-name "$DOMAIN_NAME"
+        yes | certbot delete --cert-name "$DOMAIN_NAME"
     else
         echo "No existing certificate '$DOMAIN_NAME' found."
     fi
 
-    # certbot -v certonly --standalone \
-    #     --non-interactive \
-    #     --agree-tos \
-    #     --email "$CERTBOT_EMAIL" \
-    #     -d "$DOMAIN_NAME" \
-    #     --cert-name "$DOMAIN_NAME"
+    certbot -v certonly --standalone \
+        --non-interactive \
+        --agree-tos \
+        --email "$CERTBOT_EMAIL" \
+        -d "$DOMAIN_NAME" \
+        --cert-name "$DOMAIN_NAME"
 
     ls -altr /etc/letsencrypt/live/api.zama.ai/
     mkdir -p $HOST_CERTS_PATH

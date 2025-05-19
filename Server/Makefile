@@ -1,12 +1,9 @@
-include .common_env
-export
-
 VENV_DIR=.venv_test
 
 # make <cible> VAR1=valeur1 VAR2=valeur2 ...
 
 # Pytest flags
-test_flags ?= -v
+test_flags ?= -vvs
 # Target environment (dev, staging, prod, ci)        
 environment ?= dev
 # Which environment variables to set
@@ -36,40 +33,7 @@ TESTS = ad_targeting weight_stats sleep_quality endpoints
 .PHONY: tests_build tests_run
 .PHONY: clean_files benchmark
 
-check_certificates:
-	@bash -c ' \
-		set -a && source $(ENV_FILE) && set +a; \
-		if [ ! -f "$$HOST_CERTS_PATH/$$CERT_FILE_NAME" ] || [ ! -f "$$HOST_CERTS_PATH/$$PRIVKEY_FILE_NAME" ]; then \
-			echo "❌ Certificate files are missing in $$HOST_CERTS_PATH."; \
-			echo "Please run: sudo make certificates"; \
-			exit 1; \
-		else \
-			echo "✅ Certificate files are present in $$HOST_CERTS_PATH."; \
-		fi'
-
-certificates:
-	@if [ "$(environment)" = "dev" ]; then \
-		echo "⚠️  This target should not be run in the 'dev' environment."; \
-		echo "Development uses the HTTP protocol without secure connection."; \
-		exit 1; \
-	fi
-	@echo "Building certificates for '$(environment)' using '$(ENV_FILE)' variables using 'sudo' privileges..."
-	@if [ "$$(id -u)" -ne 0 ]; then \
-		echo "This step requires sudo. Please run: 'sudo make certificates'"; \
-		exit 1; \
-	fi
-	@bash -c ' \
-		set -a && source $(ENV_FILE) && \
-		bash ./scripts/generate_certificates.sh && \
-		touch /tmp/certificates.done; \
-	'
 docker_build: check_certificates
-	@if [  $ssl_required == 'true' &&  check_certifcats == 'false' ] ; then \
-		echo "On '$environment' environment, the certificates are required."; \
-		echo "To check the existence of certificates or generate them, you need sudo privaledges."; \
-		echo "Please run: 'sudo make certificates' first!"; \
-		exit 1; \
-	fi
 	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 
 docker_run:
@@ -79,12 +43,9 @@ docker_run:
 		exit 1; \
 	fi
 	bash ./scripts/docker_run.sh $(environment)
-
-
 docker_build_run: check_certificates
 	bash ./scripts/docker_build.sh $(environment) $(cache) $(rebuild_rust)
 	bash ./scripts/docker_run.sh $(environment)
-
 tests_build:
 	@echo "🔧 Building test environment for '$(environment)' using '$(ENV_FILE)' variables..."
 	@bash -c 'set -a && source $(ENV_FILE) && VENV_DIR=$(VENV_DIR) && set +a && bash ./scripts/tests_build.sh'
@@ -107,7 +68,7 @@ tests_run:
 
 	@for test in $(TESTS); do \
 		echo "Running test: $$test"; \
-		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE) && pytest tests/test_$$test.py $(test_flags)"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE) && set +a && pytest tests/test_$$test.py $(test_flags)"; \
 	done
 
 clean_files:
@@ -130,7 +91,7 @@ benchmark:
 	@for task in $(TASKS); do \
 		echo "Running $$task..."; \
 		start=$$(date +%s.%N); \
-		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE) && pytest tests/test_$$task.py"; \
+		bash -c "source $(VENV_DIR)/bin/activate && set -a && source $(ENV_FILE)&& set +a && pytest tests/test_$$task.py"; \
 		end=$$(date +%s.%N); \
 		end_to_end=$$(echo "$$end - $$start" | bc); \
 		echo "🔍 Docker logs for task=$$task | e2e_time=$$end_to_end (s):"; \
@@ -159,3 +120,31 @@ stress_test:
 	@bash -c 'set -a && source .env_$(environment) && source $(VENV_DIR)/bin/activate && python tests/generate_stress_data.py'
 	@echo "🚀 Running stress test against $(environment) server..."
 	@bash -c 'set -a && source .env_$(environment) && source $(VENV_DIR)/bin/activate && python tests/stress_runner.py'
+
+certificates:
+	@if [ "$(environment)" = "dev" ]; then \
+		echo "⚠️  This target should not be run in the 'dev' environment."; \
+		echo "Development uses the HTTP protocol without secure connection."; \
+		exit 1; \
+	fi
+	@echo "Building certificates for '$(environment)' using '$(ENV_FILE)' variables using 'sudo' privileges..."
+	@if [ "$$(id -u)" -ne 0 ]; then \
+		echo "This step requires sudo. Please run: 'sudo make certificates'"; \
+		exit 1; \
+	fi
+	@bash -c ' \
+		set -a && source $(ENV_FILE) && source .common_env && set +a && \
+		bash ./scripts/generate_certificates.sh && \
+		touch /tmp/certificates.done; \
+	'
+
+check_certificates:
+	@bash -c ' \
+		set -a && source $(ENV_FILE) && source .common_env && set +a; \
+		if [ ! -f "$$HOST_CERTS_PATH/$$CERT_FILE_NAME" ] || [ ! -f "$$HOST_CERTS_PATH/$$PRIVKEY_FILE_NAME" ]; then \
+			echo "❌ Certificate files are missing in $$HOST_CERTS_PATH."; \
+			echo "Please run: sudo make certificates"; \
+			exit 1; \
+		else \
+			echo "✅ Certificate files are present in $$HOST_CERTS_PATH."; \
+		fi'
