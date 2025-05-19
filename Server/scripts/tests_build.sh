@@ -42,7 +42,7 @@ if ! command -v cc >/dev/null 2>&1; then
       echo "    xcode-select --install"
       ;;
     *)
-      echo "Please install C/C++ build tools manually for your OS."
+      echo "Unsupported OS for build-essential installation. Please install C/C++ build tools manually."
       ;;
   esac
   exit 1
