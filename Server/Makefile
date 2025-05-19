@@ -1,3 +1,6 @@
+include .common_env
+export
+
 VENV_DIR=.venv_test
 
 # make <cible> VAR1=valeur1 VAR2=valeur2 ...
