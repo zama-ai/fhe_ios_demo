@@ -6,7 +6,7 @@ import yaml
 import datetime
 from pathlib import Path
 from contextlib import contextmanager
-from typing import Dict
+from typing import Union
 from glob import glob
 from fastapi import Form, Query, Request, HTTPException
 from dotenv import load_dotenv, dotenv_values
@@ -22,14 +22,16 @@ PORT = os.getenv("PORT")
 FASTAPI_HOST_PORT_HTTPS = os.getenv("FASTAPI_HOST_PORT_HTTPS")
 
 SHARED_DIR = os.getenv("SHARED_DIR")
+assert SHARED_DIR, "SHARED_DIR must be set in the environment variables."
 FILES_FOLDER = Path(__file__).parent / SHARED_DIR
 FILES_FOLDER.mkdir(exist_ok=True)
 
 BACKUP_DIR = os.getenv("BACKUP_DIR")
+assert BACKUP_DIR, "BACKUP_DIR must be set in the environment variables."
 BACKUP_FOLDER = Path(__file__).parent / BACKUP_DIR
 BACKUP_FOLDER.mkdir(exist_ok=True)
 
-LOG_LEVEL = os.getenv("CELERY_LOGLEVEL").upper()
+LOG_LEVEL = os.getenv("CELERY_LOGLEVEL", "info").upper()
 LOG_FILE = Path(__file__).parent / "server.log"
 CONFIG_FILE = Path(__file__).parent / "tasks.yaml"
 
@@ -84,15 +86,15 @@ async def get_uid(request: Request, uid: str = Query(None), uid_form: str = Form
     return uid or uid_form or form_data.get("uid")
 
 
-def format_input_filename(uid: str, task_name: str) -> str:
+def format_input_filename(uid: str, task_name: str) -> Path:
     return FILES_FOLDER / f"{uid}.{task_name}.input.fheencrypted"
 
 
-def format_output_filename(template: str, uid: str) -> str:
+def format_output_filename(template: str, uid: str) -> Path:
     return FILES_FOLDER / template.format(uid=uid)
 
 
-def format_backup_filename(template: str, uid: str, task_id: str) -> str:
+def format_backup_filename(template: str, uid: str, task_id: str) -> Path:
     return FILES_FOLDER / f"backup.{template.format(uid=f'{uid}.{task_id}')}"
 
 
@@ -186,7 +188,7 @@ def save_backup_file(backup_path, data) -> None:
         logger.warning(f"🚨 SAVE_BACKUP_FILE: Failed to create backup `{backup_path}`: {e}.")
 
 
-def get_id_prefix(_id: str) -> str:
+def get_id_prefix(_id: str) -> Union[str, None]:
     """Returns the first part of an identifier.
 
     Args:
