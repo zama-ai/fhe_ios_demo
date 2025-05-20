@@ -4,8 +4,19 @@ import matplotlib.pyplot as plt
 README_PATH = "README.md"
 BENCHMARK_PATH = "benchmark.csv"
 
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", 0)
+
 # Load data
+# Columns are: date;env;machine;task_name;server_execution_time(s);end_to_end_execution_time(s);device
 df = pd.read_csv(BENCHMARK_PATH, sep=";")
+
+df["env"] = df["env"].str.lower()
+df["machine"] = df["machine"].str.lower()
+df["device"] = df["device"].str.lower()
+df["task_name"] = df["task_name"].str.lower()
+
 print(f"{df.shape=}")
 print(f"DF:\n{df.head(-3)}\n")
 
@@ -94,7 +105,6 @@ with open(README_PATH, "r") as f:
 
 start, end = "<!-- BENCHMARK_TABLE_START -->", "<!-- BENCHMARK_TABLE_END -->"
 text_before = content.split(start)[0]
-
 
 text_after  = content.split(end)[1]
 new_content = f"{text_before}{start}\n{markdown}\n{end}{text_after}"

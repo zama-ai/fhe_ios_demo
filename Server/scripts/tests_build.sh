@@ -28,20 +28,24 @@ pip install pytest-rerunfailures
 pip install pandas
 pip install matplotlib
 
-# Install C/C++ build tools
-if [[ "$(uname)" == "Linux" ]]; then
-  sudo apt update
-  sudo apt install -y build-essential
-elif [[ "$(uname)" == "Darwin" ]]; then
-  # On macOS, Xcode Command Line Tools usually provide build essentials.
-  if ! command -v cc >/dev/null 2>&1; then
-    echo "C compiler (cc) not found. Please install Xcode Command Line Tools:"
-    echo "xcode-select --install"
-    exit 1
-  fi
-  echo "Assuming build essentials are present via Xcode Command Line Tools on macOS."
-else
-  echo "Unsupported OS for build-essential installation. Please install C/C++ build tools manually."
+# Check for C compiler (cc)
+if ! command -v cc >/dev/null 2>&1; then
+    echo "No C compiler (cc) found on this system."
+
+  case "$(uname)" in
+    Linux)
+      echo "You can install it with:"
+      echo "    sudo apt update && sudo apt install -y build-essential"
+      ;;
+    Darwin)
+      echo "You can install it with:"
+      echo "    xcode-select --install"
+      ;;
+    *)
+      echo "Unsupported OS for build-essential installation. Please install C/C++ build tools manually."
+      ;;
+  esac
+  exit 1
 fi
 
 # Print installed versions
