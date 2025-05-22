@@ -150,15 +150,18 @@ def fetch_backup_files(task_id: str, uid: str):
         A list of matching backup file paths and the last modification timestamp or `None`
         if no file was found.
     """
-    # Validate inputs
-    if not re.match(r'^[a-zA-Z0-9\-_.]+$', task_id) or not re.match(r'^[a-zA-Z0-9\-_.]+$', uid):
+    # Sanitize inputs
+    try:
+        sanitized_task_id = secure_path(FILES_FOLDER, task_id).name
+        sanitized_uid = secure_path(FILES_FOLDER, uid).name
+    except HTTPException:
         raise HTTPException(status_code=400, detail="Invalid characters in task_id or uid")
         
-    pattern_str = str(FILES_FOLDER / f"backup.{uid}.{task_id}.*output*.fheencrypted")
+    pattern_str = str(FILES_FOLDER / f"backup.{sanitized_uid}.{sanitized_task_id}.*output*.fheencrypted")
     logger.debug(f"FETCH_BACKUP_FILES: Searching for pattern '{pattern_str}' for task_id={get_id_prefix(task_id)}, uid={get_id_prefix(uid)}")
     
-    # Use glob with absolute path to prevent directory traversal
-    matching_files = glob(str(FILES_FOLDER.resolve() / f"backup.{uid}.{task_id}.*output*.fheencrypted"))
+    # Use glob with sanitized inputs
+    matching_files = glob(pattern_str)
     logger.debug(f"FETCH_BACKUP_FILES: Glob found {len(matching_files)} files: {matching_files} for task_id={get_id_prefix(task_id)}")
 
     if not matching_files:
