@@ -10,6 +10,7 @@ from typing import Union
 from glob import glob
 from fastapi import Form, Query, Request, HTTPException
 from dotenv import load_dotenv, dotenv_values
+from werkzeug.utils import safe_join
 
 # Load environment variables from 'ENV_FILE' file
 ENV_FILE = os.getenv("ENV_FILE")
@@ -86,16 +87,39 @@ async def get_uid(request: Request, uid: str = Query(None), uid_form: str = Form
     return uid or uid_form or form_data.get("uid")
 
 
+def secure_path(base_path: Path, user_input: str) -> Path:
+    """Securely handle file paths by validating user input and ensuring it stays within the base directory.
+    
+    Args:
+        base_path (Path): The base directory path that should contain all files
+        user_input (str): The user-provided input to be used in the path
+        
+    Returns:
+        Path: A secure path object that is guaranteed to be within the base directory
+        
+    Raises:
+        HTTPException: If the path would escape the base directory or contains invalid characters
+    """
+    try:
+        # Handles traversal attempts and null bytes automatically
+        safe_path = safe_join(base_path, user_input)
+        if safe_path is None:
+            raise ValueError
+        return Path(safe_path).resolve()
+    except ValueError:
+        raise HTTPException(400, "Invalid path")
+
+
 def format_input_filename(uid: str, task_name: str) -> Path:
-    return FILES_FOLDER / f"{uid}.{task_name}.input.fheencrypted"
+    return secure_path(FILES_FOLDER, f"{uid}.{task_name}.input.fheencrypted")
 
 
 def format_output_filename(template: str, uid: str) -> Path:
-    return FILES_FOLDER / template.format(uid=uid)
+    return secure_path(FILES_FOLDER, template.format(uid=uid))
 
 
 def format_backup_filename(template: str, uid: str, task_id: str) -> Path:
-    return FILES_FOLDER / f"backup.{template.format(uid=f'{uid}.{task_id}')}"
+    return secure_path(FILES_FOLDER, f"backup.{template.format(uid=f'{uid}.{task_id}')}")
 
 
 def ensure_file_exists(file_path: Path, error_message: str) -> None:
@@ -126,9 +150,15 @@ def fetch_backup_files(task_id: str, uid: str):
         A list of matching backup file paths and the last modification timestamp or `None`
         if no file was found.
     """
+    # Validate inputs
+    if not re.match(r'^[a-zA-Z0-9\-_.]+$', task_id) or not re.match(r'^[a-zA-Z0-9\-_.]+$', uid):
+        raise HTTPException(status_code=400, detail="Invalid characters in task_id or uid")
+        
     pattern_str = str(FILES_FOLDER / f"backup.{uid}.{task_id}.*output*.fheencrypted")
     logger.debug(f"FETCH_BACKUP_FILES: Searching for pattern '{pattern_str}' for task_id={get_id_prefix(task_id)}, uid={get_id_prefix(uid)}")
-    matching_files = glob(pattern_str)
+    
+    # Use glob with absolute path to prevent directory traversal
+    matching_files = glob(str(FILES_FOLDER.resolve() / f"backup.{uid}.{task_id}.*output*.fheencrypted"))
     logger.debug(f"FETCH_BACKUP_FILES: Glob found {len(matching_files)} files: {matching_files} for task_id={get_id_prefix(task_id)}")
 
     if not matching_files:
@@ -136,6 +166,12 @@ def fetch_backup_files(task_id: str, uid: str):
         return None
 
     file = Path(matching_files[0])
+    # Verify the file is within FILES_FOLDER
+    try:
+        file.resolve().relative_to(FILES_FOLDER.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid file path detected")
+        
     last_mtime = file.stat().st_mtime
     formatted_date = datetime.datetime.fromtimestamp(last_mtime).strftime("%Y-%m-%d %H:%M:%S")
     logger.debug(f"FETCH_BACKUP_FILES: Returning backup info for task_id={get_id_prefix(task_id)}. Files: {[str(f) for f in matching_files]}, Timestamp: {formatted_date}")
