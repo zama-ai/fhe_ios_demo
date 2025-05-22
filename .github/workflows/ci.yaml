@@ -2,6 +2,9 @@ name: iOS App tests
 
 on: [pull_request]
 
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -13,6 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          persist-credentials: 'false'
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Install latest stable
@@ -41,12 +45,13 @@ jobs:
     defaults:
       run:
         working-directory: Server
-          
+
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.event.inputs.git-ref }}
+          persist-credentials: 'false'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -58,7 +63,7 @@ jobs:
         run: |
           rm -rf /opt/hostedtoolcache
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -89,7 +94,7 @@ jobs:
           pip install maturin
           pip install pytest
           pip install pytest-rerunfailures
-        
+
       - name: Prepare test folders
         run: |
           mkdir -p project/uploaded_files
@@ -105,7 +110,7 @@ jobs:
           docker ps
           echo "==> Docker images:"
           docker images
-          
+
       - name: Run Python test 'ad_targeting'
         run: |
           source .venv/bin/activate
@@ -142,11 +147,11 @@ jobs:
       - name: show FastAPI logs
         if: always()
         run: docker logs dev_container_fastapi_app
-        
+
       - name: show Celery usecases worker 1 logs
         if: always()
         run: docker logs dev_fhe_ios_demo_service_celery_usecases_1 || echo "Celery usecases 1 logs unavailable"
-      
+
       - name: show Celery usecases worker 2 logs
         if: always()
         run: docker logs dev_fhe_ios_demo_service_celery_usecases_2 || echo "Celery usecases 2 logs unavailable"
