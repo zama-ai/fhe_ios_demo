@@ -154,7 +154,7 @@ async def add_key(key: UploadFile = Form(...), task_name=Depends(get_task_name))
         task_logger.debug(f"ADD_KEY: Attempting to read key for UID {uid} from upload.")
         file_content = await key.read()
         task_logger.debug(f"ADD_KEY: Successfully read key data (size: {len(file_content)}) for UID {uid}.")
-        file_path = FILES_FOLDER / f"{uid}.serverKey"
+        file_path = secure_path(FILES_FOLDER, f"{uid}.serverKey")
         task_logger.debug(f"ADD_KEY: Attempting to write key to {file_path} for UID {uid}.")
         with open(file_path, "wb") as f:
             f.write(file_content)
@@ -207,11 +207,18 @@ async def start_task(
         task_logger.error(error_message)
         raise HTTPException(status_code=400, detail=error_message)
 
-    key_path = FILES_FOLDER / f"{uid}.serverKey"
-    if not key_path.is_file():
-        error_message = f"❌ START_TASK: Key file `{key_path}` not found for UID={get_id_prefix(uid)}"
+    try:
+        key_path = secure_path(FILES_FOLDER, f"{uid}.serverKey")
+        if not key_path.is_file():
+            error_message = f"❌ START_TASK: Key file `{key_path}` not found for UID={get_id_prefix(uid)}"
+            task_logger.error(error_message)
+            raise HTTPException(status_code=404, detail=error_message)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        error_message = f"❌ START_TASK: Invalid path for UID={get_id_prefix(uid)}: {e}"
         task_logger.error(error_message)
-        raise HTTPException(status_code=404, detail=error_message)
+        raise HTTPException(status_code=400, detail=error_message)
 
     binary = use_cases[task_name]["binary"]
     input_file_path = format_input_filename(uid, task_name)
