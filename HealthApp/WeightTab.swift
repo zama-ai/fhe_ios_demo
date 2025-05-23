@@ -149,11 +149,32 @@ extension WeightTab {
                 
                 self.status = .progress("Uploading Encrypted Data…")
                 let taskID = try await uploadSample(samples.data, uid: uid)
-                
-                self.status = .progress("Analyzing weight statistics…")
-                self.results = try await getServerResult(uid: uid, taskID: taskID)
-                
-                self.status = nil
+
+                self.status = .progress("Task submitted to server…")
+                var lastStatus: String?
+
+                while true {
+                    let statusResponse = try await Network.shared.getStatus(for: serverTask, id: taskID, uid: uid)
+                    
+                    if statusResponse.status != lastStatus {
+                        lastStatus = statusResponse.status
+                        switch statusResponse.status {
+                        case "started":
+                            self.status = .progress("Analyzing weight statistics…")
+                        case "reserved", "queued":
+                            self.status = .progress("Task is in queue")
+                        case "pending", "failure", "revoked", "unknown", "error":
+                            throw TaskError.needToRetry
+                        case "completed", "success":
+                            self.results = try await getServerResult(uid: uid, taskID: taskID)
+                            self.status = nil
+                            break
+                        default: break
+                        }
+                    }
+                    
+                    try await Task.sleep(for: .seconds(statusResponse.status == "queued" || statusResponse.status == "started" ? 5 : 10))
+                }
             } catch {
                 self.status = .error(error.localizedDescription)
             }

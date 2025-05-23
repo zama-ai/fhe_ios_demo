@@ -200,9 +200,31 @@ extension SleepTab {
                 self.status = .progress("Uploading Encrypted Data…")
                 let taskID = try await uploadSample(data, uid: uid)
                 
-                self.status = .progress("Analyzing sleep quality…")
-                self.resultURL = try await getServerResult(uid: uid, taskID: taskID, for: date)
-                self.status = nil
+                self.status = .progress("Task submitted to server…")
+                var lastStatus: String?
+                
+                while true {
+                    let statusResponse = try await Network.shared.getStatus(for: serverTask, id: taskID, uid: uid)
+                    
+                    if statusResponse.status != lastStatus {
+                        lastStatus = statusResponse.status
+                        switch statusResponse.status {
+                        case "started":
+                            self.status = .progress("Analyzing sleep quality…")
+                        case "reserved", "queued":
+                            self.status = .progress("Task is in queue")
+                        case "pending", "failure", "revoked", "unknown", "error":
+                            throw TaskError.needToRetry
+                        case "completed", "success":
+                            self.resultURL = try await getServerResult(uid: uid, taskID: taskID, for: date)
+                            self.status = nil
+                            break
+                        default: break
+                        }
+                    }
+                    
+                    try await Task.sleep(for: .seconds(statusResponse.status == "queued" || statusResponse.status == "started" ? 5 : 10))
+                }
             } catch {
                 self.status = .error(error.localizedDescription)
             }
