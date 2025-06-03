@@ -31,6 +31,7 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 import json
 
 from utils import * 
@@ -38,6 +39,22 @@ from task_executor import *
 
 # Instanciate FastAPI app
 app = FastAPI()
+
+# Configure CORS
+origins = [
+    "https://zama-fhe-private-synthid.static.hf.space",
+    "http://localhost",
+    "http://localhost:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 logger.info(f"🚀 FastAPI server running at {URL}:{FASTAPI_HOST_PORT_HTTPS}")
 
 
