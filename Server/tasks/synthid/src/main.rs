@@ -1,8 +1,10 @@
 use std::env;
 use std::fs;
 use std::path::Path;
-use tfhe::{CompressedServerKey, FheUint64, set_server_key};
+use std::io::Cursor;
+use tfhe::{ServerKey, FheUint64, set_server_key};
 use tfhe::prelude::*;
+use tfhe::safe_serialization::safe_deserialize;
 
 mod synthid_logic;
 use synthid_logic::fhe_detect;
@@ -34,11 +36,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     })?;
     eprintln!("[synthid_task] Read {} bytes for server key.", serialized_sk.len());
 
-    let compressed_sk: CompressedServerKey = bincode::deserialize(&serialized_sk).map_err(|e| {
-        eprintln!("[synthid_task] Failed to deserialize CompressedServerKey: {}", e);
-        e
+    let mut cursor = Cursor::new(serialized_sk);
+    let server_key: ServerKey = safe_deserialize(&mut cursor).map_err(|e| {
+        eprintln!("[synthid_task] Failed to deserialize ServerKey: {}", e);
+        Box::<dyn std::error::Error>::from(format!("Failed to deserialize ServerKey: {}", e))
     })?;
-    let server_key = compressed_sk.decompress();
     set_server_key(server_key);
     eprintln!("[synthid_task] Server key deserialized and set.");
 

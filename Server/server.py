@@ -401,8 +401,8 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
                 return response
     except Exception as e:
         logger.error("❌ Failed to check Redis broker bd: %s", str(e))
+
     # Check if the task is marked as completed in the Redis backend queue
-    # Note: Redis only stores task statuses for a limited period of time (Time To Live)
     try:
         key = f"celery-task-meta-{task_id}"
         if redis_bd_backend.exists(key):
@@ -417,6 +417,21 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     try:
         result = AsyncResult(task_id, app=celery_app)
         status = result.state.lower()
+
+        # Check content of result if Celery task is SUCCESS
+        if status == 'success':
+            task_outcome = result.result
+            if isinstance(task_outcome, dict) and task_outcome.get('status') == 'error':
+                logger.error(
+                    f"❌ [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] Celery task succeeded, but binary execution failed. Detail: {task_outcome.get('detail')}"
+                )
+                response_template = STATUS_TEMPLATES["failure"].copy()
+                response_template["details"] = f"Binary execution failed: {task_outcome.get('detail', 'Unknown error in binary.')}"
+                response_template["logger_msg"] = f"❌ [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] binary execution failed. Detail: {task_outcome.get('detail')}"
+                response = {**response_template, **task_info}
+                logger.info(response['logger_msg'])
+                return response
+
     except Exception as e:
         logger.error(f"❌ Failed to get task status for `%s`: `%s`", task_id, str(e))
 
@@ -448,11 +463,15 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         return response
 
     # Case, where the status is neither 'completed', 'started', 'unknown' or 'queued'
-    response = {**STATUS_TEMPLATES[status].copy(), **task_info}
+    response = {**STATUS_TEMPLATES.get(status, STATUS_TEMPLATES["unknown"]).copy(), **task_info}
     
-    if status != 'revoked':
+    if status != 'revoked' and 'logger_msg' in response and "{}" in response['logger_msg']:
         response['logger_msg'] = response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))
+    
+    if 'logger_msg' in response:
         logger.info(response['logger_msg'])
+    else:
+        logger.info(f"ℹ️ Task status for [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`]: {response.get('status')}, Details: {response.get('details')}")
 
     return response
 
