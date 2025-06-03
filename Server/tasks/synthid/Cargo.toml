@@ -9,18 +9,21 @@ serde = { version = "1.0", features = ["derive"] }
 
 # For x86_64 (e.g., Linux servers, Docker builds targeting amd64)
 [target.'cfg(target_arch = "x86_64")'.dependencies.tfhe]
-version = "0.7.4"
-features = ["integer", "x86_64-unix"]
+git = "https://github.com/zama-ai/tfhe-rs.git"
+rev = "1ec21a5e0b7c12165aa7e556c01e730c3117765a"
+features = ["integer", "x86_64-unix", "serde"]
 
 # For aarch64 macOS (e.g., Apple Silicon Macs)
 [target.'cfg(all(target_arch = "aarch64", target_os = "macos"))'.dependencies.tfhe]
-version = "0.7.4"
-features = ["integer", "aarch64-unix"]
+git = "https://github.com/zama-ai/tfhe-rs.git"
+rev = "1ec21a5e0b7c12165aa7e556c01e730c3117765a"
+features = ["integer", "aarch64-unix", "serde"]
 
 # For aarch64 Linux (e.g., ARM-based Linux servers/dev environments)
 [target.'cfg(all(target_arch = "aarch64", target_os = "linux"))'.dependencies.tfhe]
-version = "0.7.4"
-features = ["integer", "aarch64-unix"]
+git = "https://github.com/zama-ai/tfhe-rs.git"
+rev = "1ec21a5e0b7c12165aa7e556c01e730c3117765a"
+features = ["integer", "aarch64-unix", "serde"]
 
 [profile.release]
 opt-level = 3
