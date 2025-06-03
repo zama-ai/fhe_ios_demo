@@ -51,14 +51,14 @@ final class Network {
         return obj.task_id
     }
     
-    func getStatus(for task: ServerTask, id taskID: TaskID, uid: UID) async throws -> String {
+    func getStatus(for task: ServerTask, id taskID: TaskID, uid: UID) async throws -> StatusResponse {
         let res = try await sendRequest(.GET(root: rootURL,
                                              path: "/get_task_status",
                                              json: ["task_name": task.rawValue,
                                                     "task_id": taskID,
                                                     "uid": uid]))
         let obj = try JSONDecoder().decode(StatusResponse.self, from: res)
-        return obj.status
+        return obj
     }
     
     /// Returns:
