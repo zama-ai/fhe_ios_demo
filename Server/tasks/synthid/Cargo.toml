@@ -19,12 +19,6 @@ git = "https://github.com/zama-ai/tfhe-rs.git"
 rev = "1ec21a5e0b7c12165aa7e556c01e730c3117765a"
 features = ["integer", "aarch64-unix", "serde"]
 
-# For aarch64 Linux (e.g., ARM-based Linux servers/dev environments)
-[target.'cfg(all(target_arch = "aarch64", target_os = "linux"))'.dependencies.tfhe]
-git = "https://github.com/zama-ai/tfhe-rs.git"
-rev = "1ec21a5e0b7c12165aa7e556c01e730c3117765a"
-features = ["integer", "aarch64-unix", "serde"]
-
 [profile.release]
 opt-level = 3
 lto = "thin"
