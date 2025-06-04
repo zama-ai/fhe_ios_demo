@@ -3,11 +3,12 @@ use std::fs;
 use std::path::Path;
 use std::io::Cursor;
 use tfhe::{ServerKey, FheUint64, set_server_key};
-use tfhe::prelude::*;
 use tfhe::safe_serialization::safe_deserialize;
 
 mod synthid_logic;
 use synthid_logic::fhe_detect;
+
+const SIZE_LIMIT: u64 = 1_000_000_000;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
@@ -37,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     eprintln!("[synthid_task] Read {} bytes for server key.", serialized_sk.len());
 
     let mut cursor = Cursor::new(serialized_sk);
-    let server_key: ServerKey = safe_deserialize(&mut cursor).map_err(|e| {
+    let server_key: ServerKey = safe_deserialize(&mut cursor, SIZE_LIMIT).map_err(|e| {
         eprintln!("[synthid_task] Failed to deserialize ServerKey: {}", e);
         Box::<dyn std::error::Error>::from(format!("Failed to deserialize ServerKey: {}", e))
     })?;
