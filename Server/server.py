@@ -256,9 +256,15 @@ async def start_task(
 
     try:
         task_logger.debug(f"START_TASK: Attempting to submit Celery task for UID={get_id_prefix(uid)}, task_name={task_name}, Binary={binary}.")
-        task = run_binary_task.delay(binary, uid, task_name)
+        
+        # Determine the queue for the task
+        task_config = use_cases.get(task_name, {})
+        queue_name = task_config.get("queue", "usecases")  # Default to 'usecases' if not specified
+
+        task = run_binary_task.apply_async(args=[binary, uid, task_name], queue=queue_name)
+        
         task_logger.info(
-            f"🚀 Task submitted [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`. Celery task ID: {task.id}"
+            f"🚀 Task submitted to queue '{queue_name}' [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`. Celery task ID: {task.id}"
         )
         task_logger.debug(f"START_TASK: Completed for UID={get_id_prefix(uid)}, task_name={task_name}. Celery Task ID: {task.id}")
         return JSONResponse({"task_id": task.id})
