@@ -37,6 +37,9 @@ import json
 from utils import * 
 from task_executor import *
 
+# Known Celery queues in the system
+KNOWN_CELERY_QUEUES = ["usecases", "ads", "synthid_queue"]
+
 # Instanciate FastAPI app
 app = FastAPI()
 
@@ -390,23 +393,28 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         return response
 
     task_info = {"task_id": task_id, "uid": uid}
-    # Check if the task is in the Redis broker queue
-    try:
-        queued_tasks = redis_bd_broker.lrange("usecases", 0, -1)
-        total_tasks = len(queued_tasks)
-        task_logger.debug(f"Pending tasks in Redis broker: {total_tasks}")
-        for position, task in enumerate(queued_tasks):
-            task_data = json.loads(task)
-            if task_id == task_data["headers"]["id"]:
-                response = {
-                    **STATUS_TEMPLATES["queued"].copy(),
-                    **task_info,
-                    "logger_msg": STATUS_TEMPLATES['queued']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid), position + 1, total_tasks),
-                }
-                logger.info(response["logger_msg"])
-                return response
-    except Exception as e:
-        logger.error("❌ Failed to check Redis broker bd: %s", str(e))
+
+    # Check if the task is in any of the known Redis broker queues
+    is_task_queued = False
+    for queue_name in KNOWN_CELERY_QUEUES:
+        try:
+            queued_tasks_in_current_queue = redis_bd_broker.lrange(queue_name, 0, -1)
+            total_tasks_in_queue = len(queued_tasks_in_current_queue)
+            task_logger.debug(f"Pending tasks in Redis broker (queue: {queue_name}): {total_tasks_in_queue}")
+            for position, task_str in enumerate(queued_tasks_in_current_queue):
+                task_data = json.loads(task_str)
+                if task_id == task_data["headers"]["id"]:
+                    response = {
+                        **STATUS_TEMPLATES["queued"].copy(),
+                        **task_info,
+                        "details": f"Task is in the Redis broker queue '{queue_name}', waiting to be picked up. Position: {position + 1}/{total_tasks_in_queue}",
+                        "logger_msg": f"📥 [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] is queued in '{queue_name}' and waiting. Position: `{position + 1} / {total_tasks_in_queue}`",
+                    }
+                    logger.info(response["logger_msg"])
+                    return response # Task found in this queue
+        except Exception as e:
+            logger.error(f"❌ Failed to check Redis broker for queue '{queue_name}': {str(e)}")
+            # Continue to check other queues
 
     # Check if the task is marked as completed in the Redis backend queue
     try:
