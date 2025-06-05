@@ -759,9 +759,14 @@ def get_logs(lines: int = 10) -> Response:
 
         # Get Celery queue information
         try:
-            usecases_queue_length = redis_bd_broker.llen("usecases")
+            # Check all known queues for total queued tasks
+            total_queued_tasks = 0
+            for queue_name in KNOWN_CELERY_QUEUES:
+                queue_length = redis_bd_broker.llen(queue_name)
+                total_queued_tasks += queue_length
+            
             completed_tasks = len(redis_bd_backend.keys("celery-task-meta-*"))
-            queue_info = f"Queue Status:\nQueued tasks: {usecases_queue_length}\nCompleted in last hour: {completed_tasks}"
+            queue_info = f"Queue Status:\nQueued tasks: {total_queued_tasks}\nCompleted in last hour: {completed_tasks}"
         except Exception as e:
             queue_info = f"Failed to get queue information: {str(e)}"
 
@@ -905,7 +910,7 @@ def get_logs(lines: int = 10) -> Response:
                         <div class="queue-stats">
                             <div class="stat-item">
                                 <div>Queued Tasks</div>
-                                <div class="stat-value">{usecases_queue_length}</div>
+                                <div class="stat-value">{total_queued_tasks}</div>
                             </div>
                             <div class="stat-item">
                                 <div>Completed (Last Hour)</div>
