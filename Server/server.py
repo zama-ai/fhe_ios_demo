@@ -590,7 +590,6 @@ def build_stream_response(task_id, uid, task_name, output_files_config, response
 
     stream_headers = {
         "Content-Disposition": f"attachment; filename={output_file_path.name}",
-        "stderr": stderr_output,
         **response
     }
  
