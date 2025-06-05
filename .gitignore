@@ -79,4 +79,6 @@ Server/tasks/sleep_quality/Cargo.lock
 
 .venv_test/
 Server/tasks/sleep_quality/target
+Server/tasks/synthid/target
 Server/cert/
+

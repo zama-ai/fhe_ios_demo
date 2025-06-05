@@ -32,7 +32,7 @@ machine ?= c5.4xlarge
 TESTS = ad_targeting weight_stats sleep_quality endpoints
 
 .PHONY: check_certificates certificates
-.PHONY: docker_build docker_run docker_build_run
+.PHONY: docker_build docker_run docker_build_run clean_restart shutdown restart
 .PHONY: tests_build tests_run
 .PHONY: clean_files benchmark
 
@@ -153,3 +153,22 @@ check_certificates:
 		else \
 			echo "✅ Certificate files are present in $$HOST_CERTS_PATH."; \
 		fi'
+
+clean_restart:
+	@echo "🧹 Stopping celery workers and clearing queues for environment '$(environment)' with prefix '$(PREFIX)'..."
+	@bash -c 'set -a && source $(ENV_FILE) && set +a && docker-compose -p $(PREFIX) stop service_celery_usecases service_celery_usecases_2 2>/dev/null || true'
+	@echo "🗑️ Clearing Redis queues..."
+	@bash -c 'set -a && source $(ENV_FILE) && set +a && docker-compose -p $(PREFIX) exec -T service_redis redis-cli FLUSHALL 2>/dev/null || true'
+	@echo "🚀 Restarting celery workers..."
+	@bash -c 'set -a && source $(ENV_FILE) && set +a && docker-compose -p $(PREFIX) up -d service_celery_usecases service_celery_usecases_2'
+
+shutdown:
+	@echo "🛑 Shutting down all services for environment '$(environment)' with prefix '$(PREFIX)'..."
+	@bash -c 'set -a && source $(ENV_FILE) && set +a && docker-compose -p $(PREFIX) down'
+	@echo "✅ Environment '$(environment)' has been shut down successfully."
+
+restart:
+	@echo "🔄 Restarting all services for environment '$(environment)' without rebuilding..."
+	$(MAKE) shutdown environment=$(environment)
+	$(MAKE) docker_run environment=$(environment)
+	@echo "✅ Environment '$(environment)' has been restarted successfully."

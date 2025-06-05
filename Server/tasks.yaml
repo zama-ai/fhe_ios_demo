@@ -38,3 +38,10 @@ tasks:
     output_files:
       - filename: "{uid}.fetch_ad.output.fheencrypted"
     response_type: stream
+
+  synthid:
+    binary: synthid
+    output_files:
+      - filename: "{uid}.synthid.output.fheencrypted"
+    response_type: stream
+    queue: synthid_queue

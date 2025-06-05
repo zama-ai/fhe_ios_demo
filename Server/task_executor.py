@@ -35,10 +35,14 @@ try:
         result_expires=60 * 60 * 24 * 30,
         # `task_acks_late`: Redispatch unfinished tasks
         task_acks_late=True,
-        # `task_acks_on_failure_or_timeout`: Avoid marking a task as “acknowledged” if it crashes
+        # `task_acks_on_failure_or_timeout`: Avoid marking a task as "acknowledged" if it crashes
         task_acks_on_failure_or_timeout=False,
         # `broker_transport_options`: X seconds before an abandoned task becomes available again
-        broker_transport_options={"visibility_timeout": 60 * 1},
+        broker_transport_options={
+            "visibility_timeout": 600,  # Increased to 10 minutes (from 60 seconds)
+            "fanout_patterns": True,    # Recommended for Redis
+            "fanout_prefix": True,      # Recommended for Redis
+        },
         # `worker_prefetch_multiplier`: How many tasks a Celery worker prefetchs before starting it
         worker_prefetch_multiplier=1,
         task_reject_on_worker_lost=True,
