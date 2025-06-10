@@ -764,7 +764,25 @@ def get_logs(lines: int = 10) -> Response:
                 queue_length = redis_bd_broker.llen(queue_name)
                 total_queued_tasks += queue_length
             
-            completed_tasks = len(redis_bd_backend.keys("celery-task-meta-*"))
+            # Count tasks completed in the last hour
+            completed_tasks = 0
+            one_hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
+            for key in redis_bd_backend.keys("celery-task-meta-*"):
+                try:
+                    raw = redis_bd_backend.get(key)
+                    data = json.loads(raw)
+                    if data.get('status') == 'SUCCESS':
+                        # Get the date_done from the task result
+                        date_done = data.get('date_done')
+                        if date_done:
+                            # Parse the ISO format timestamp
+                            completion_time = datetime.datetime.fromisoformat(date_done.replace('Z', '+00:00'))
+                            if completion_time > one_hour_ago:
+                                completed_tasks += 1
+                except Exception as e:
+                    logger.error(f"Error processing task metadata: {str(e)}")
+                    continue
+
             queue_info = f"Queue Status:\nQueued tasks: {total_queued_tasks}\nCompleted in last hour: {completed_tasks}"
         except Exception as e:
             queue_info = f"Failed to get queue information: {str(e)}"
