@@ -47,6 +47,15 @@ case "$RUN_TYPE" in
             --concurrency="$CELERY_WORKER_CONCURRENCY_AD_QUEUE"
         ;;
 
+    synthid_worker)
+        # Start Celery worker for synthid queue with concurrency 1
+        echo "🚀 Starting Celery Worker for synthid tasks..."
+        exec celery -A task_executor.celery_app worker \
+            --loglevel="$CELERY_LOGLEVEL" \
+            --queues="synthid_queue" \
+            --concurrency="$CELERY_WORKER_CONCURRENCY_SYNTHID_QUEUE"
+        ;;
+
     *)
         # Invalid RUN_TYPE
         echo "RUN_TYPE='$RUN_TYPE' is not valid!"

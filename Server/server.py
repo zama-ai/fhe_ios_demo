@@ -31,13 +31,33 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 import json
 
 from utils import * 
 from task_executor import *
 
+# Known Celery queues in the system
+KNOWN_CELERY_QUEUES = ["usecases", "ads", "synthid_queue"]
+
 # Instanciate FastAPI app
 app = FastAPI()
+
+# Configure CORS
+origins = [
+    "https://zama-fhe-private-synthid.static.hf.space",
+    "http://localhost",
+    "http://localhost:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 logger.info(f"🚀 FastAPI server running at {URL}:{FASTAPI_HOST_PORT_HTTPS}")
 
 
@@ -239,9 +259,15 @@ async def start_task(
 
     try:
         task_logger.debug(f"START_TASK: Attempting to submit Celery task for UID={get_id_prefix(uid)}, task_name={task_name}, Binary={binary}.")
-        task = run_binary_task.delay(binary, uid, task_name)
+        
+        # Determine the queue for the task
+        task_config = use_cases.get(task_name, {})
+        queue_name = task_config.get("queue", "usecases")  # Default to 'usecases' if not specified
+
+        task = run_binary_task.apply_async(args=[binary, uid, task_name], queue=queue_name)
+        
         task_logger.info(
-            f"🚀 Task submitted [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`. Celery task ID: {task.id}"
+            f"🚀 Task submitted to queue '{queue_name}' [task_id=`{get_id_prefix(task.id)}` - UID=`{get_id_prefix(uid)}`] for task_name=`{task_name}`. Celery task ID: {task.id}"
         )
         task_logger.debug(f"START_TASK: Completed for UID={get_id_prefix(uid)}, task_name={task_name}. Celery Task ID: {task.id}")
         return JSONResponse({"task_id": task.id})
@@ -367,25 +393,30 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         return response
 
     task_info = {"task_id": task_id, "uid": uid}
-    # Check if the task is in the Redis broker queue
-    try:
-        queued_tasks = redis_bd_broker.lrange("usecases", 0, -1)
-        total_tasks = len(queued_tasks)
-        task_logger.debug(f"Pending tasks in Redis broker: {total_tasks}")
-        for position, task in enumerate(queued_tasks):
-            task_data = json.loads(task)
-            if task_id == task_data["headers"]["id"]:
-                response = {
-                    **STATUS_TEMPLATES["queued"].copy(),
-                    **task_info,
-                    "logger_msg": STATUS_TEMPLATES['queued']['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid), position + 1, total_tasks),
-                }
-                logger.info(response["logger_msg"])
-                return response
-    except Exception as e:
-        logger.error("❌ Failed to check Redis broker bd: %s", str(e))
+
+    # Check if the task is in any of the known Redis broker queues
+    is_task_queued = False
+    for queue_name in KNOWN_CELERY_QUEUES:
+        try:
+            queued_tasks_in_current_queue = redis_bd_broker.lrange(queue_name, 0, -1)
+            total_tasks_in_queue = len(queued_tasks_in_current_queue)
+            task_logger.debug(f"Pending tasks in Redis broker (queue: {queue_name}): {total_tasks_in_queue}")
+            for position, task_str in enumerate(queued_tasks_in_current_queue):
+                task_data = json.loads(task_str)
+                if task_id == task_data["headers"]["id"]:
+                    response = {
+                        **STATUS_TEMPLATES["queued"].copy(),
+                        **task_info,
+                        "details": f"Task is in the Redis broker queue '{queue_name}', waiting to be picked up. Position: {position + 1}/{total_tasks_in_queue}",
+                        "logger_msg": f"📥 [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] is queued in '{queue_name}' and waiting. Position: `{position + 1} / {total_tasks_in_queue}`",
+                    }
+                    logger.info(response["logger_msg"])
+                    return response # Task found in this queue
+        except Exception as e:
+            logger.error(f"❌ Failed to check Redis broker for queue '{queue_name}': {str(e)}")
+            # Continue to check other queues
+
     # Check if the task is marked as completed in the Redis backend queue
-    # Note: Redis only stores task statuses for a limited period of time (Time To Live)
     try:
         key = f"celery-task-meta-{task_id}"
         if redis_bd_backend.exists(key):
@@ -400,6 +431,21 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
     try:
         result = AsyncResult(task_id, app=celery_app)
         status = result.state.lower()
+
+        # Check content of result if Celery task is SUCCESS
+        if status == 'success':
+            task_outcome = result.result
+            if isinstance(task_outcome, dict) and task_outcome.get('status') == 'error':
+                logger.error(
+                    f"❌ [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] Celery task succeeded, but binary execution failed. Detail: {task_outcome.get('detail')}"
+                )
+                response_template = STATUS_TEMPLATES["failure"].copy()
+                response_template["details"] = f"Binary execution failed: {task_outcome.get('detail', 'Unknown error in binary.')}"
+                response_template["logger_msg"] = f"❌ [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`] binary execution failed. Detail: {task_outcome.get('detail')}"
+                response = {**response_template, **task_info}
+                logger.info(response['logger_msg'])
+                return response
+
     except Exception as e:
         logger.error(f"❌ Failed to get task status for `%s`: `%s`", task_id, str(e))
 
@@ -431,11 +477,15 @@ def get_task_status(task_id: str = Depends(get_task_id), uid: str = Depends(get_
         return response
 
     # Case, where the status is neither 'completed', 'started', 'unknown' or 'queued'
-    response = {**STATUS_TEMPLATES[status].copy(), **task_info}
+    response = {**STATUS_TEMPLATES.get(status, STATUS_TEMPLATES["unknown"]).copy(), **task_info}
     
-    if status != 'revoked':
+    if status != 'revoked' and 'logger_msg' in response and "{}" in response['logger_msg']:
         response['logger_msg'] = response['logger_msg'].format(get_id_prefix(task_id), get_id_prefix(uid))
+    
+    if 'logger_msg' in response:
         logger.info(response['logger_msg'])
+    else:
+        logger.info(f"ℹ️ Task status for [task_id=`{get_id_prefix(task_id)}` - uid=`{get_id_prefix(uid)}`]: {response.get('status')}, Details: {response.get('details')}")
 
     return response
 
@@ -540,7 +590,6 @@ def build_stream_response(task_id, uid, task_name, output_files_config, response
 
     stream_headers = {
         "Content-Disposition": f"attachment; filename={output_file_path.name}",
-        "stderr": stderr_output,
         **response
     }
  
@@ -709,9 +758,32 @@ def get_logs(lines: int = 10) -> Response:
 
         # Get Celery queue information
         try:
-            usecases_queue_length = redis_bd_broker.llen("usecases")
-            completed_tasks = len(redis_bd_backend.keys("celery-task-meta-*"))
-            queue_info = f"Queue Status:\nQueued tasks: {usecases_queue_length}\nCompleted in last hour: {completed_tasks}"
+            # Check all known queues for total queued tasks
+            total_queued_tasks = 0
+            for queue_name in KNOWN_CELERY_QUEUES:
+                queue_length = redis_bd_broker.llen(queue_name)
+                total_queued_tasks += queue_length
+            
+            # Count tasks completed in the last hour
+            completed_tasks = 0
+            one_hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
+            for key in redis_bd_backend.keys("celery-task-meta-*"):
+                try:
+                    raw = redis_bd_backend.get(key)
+                    data = json.loads(raw)
+                    if data.get('status') == 'SUCCESS':
+                        # Get the date_done from the task result
+                        date_done = data.get('date_done')
+                        if date_done:
+                            # Parse the ISO format timestamp
+                            completion_time = datetime.datetime.fromisoformat(date_done.replace('Z', '+00:00'))
+                            if completion_time > one_hour_ago:
+                                completed_tasks += 1
+                except Exception as e:
+                    logger.error(f"Error processing task metadata: {str(e)}")
+                    continue
+
+            queue_info = f"Queue Status:\nQueued tasks: {total_queued_tasks}\nCompleted in last hour: {completed_tasks}"
         except Exception as e:
             queue_info = f"Failed to get queue information: {str(e)}"
 
@@ -855,7 +927,7 @@ def get_logs(lines: int = 10) -> Response:
                         <div class="queue-stats">
                             <div class="stat-item">
                                 <div>Queued Tasks</div>
-                                <div class="stat-value">{usecases_queue_length}</div>
+                                <div class="stat-value">{total_queued_tasks}</div>
                             </div>
                             <div class="stat-item">
                                 <div>Completed (Last Hour)</div>

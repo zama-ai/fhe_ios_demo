@@ -93,3 +93,23 @@ services:
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
     restart: $RESTART_POLICY
 
+  service_celery_synthid:
+    env_file:
+      - $ENV_FILE # Load the environment variables
+    image: $FINAL_IMAGE_NAME:latest
+    volumes:
+      - $HOST_CERTS_PATH:/project/certs:ro
+      - ./$SHARED_DIR:/project/$SHARED_DIR
+    depends_on:
+      - service_redis
+      - service_fastapi
+    runtime: $DOCKER_RUNTIME
+    environment:
+      RUN_TYPE: "synthid_worker"
+      DOMAIN_NAME: $DOMAIN_NAME
+      CELERY_BROKER_URL: $BROKER_URL
+      CELERY_RESULT_BACKEND: $BACKEND_URL
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    restart: $RESTART_POLICY
+
